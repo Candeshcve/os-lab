@@ -1,5 +1,7 @@
 # BGT207 Vize Projesi - GüvenTek Bilişim A.Ş. Ağ Planlaması
 
+> Contributed by G*** Ş*** ([@GvnTech-cmd](https://github.com/GvnTech-cmd)) - BGT207 Güvenlik Duvarı Çözümleri - 2026-2027 Güz midterm project.
+
 Bu proje, GüvenTek Bilişim A.Ş.'nin 3 farklı lokasyonundaki (İstanbul, Ankara, İzmir) ağ altyapısının güvenliğini, VLAN segmentasyonunu ve bant genişliği ihtiyaçlarını planlamak amacıyla hazırlanmıştır. **Proje KVKK (Kişisel Verilerin Korunması Kanunu) ve gizlilik standartlarına tam uyumlu olarak tasarlanmıştır.**
 
 ## 1. Senaryo: GüvenTek Bilişim A.Ş.
@@ -50,10 +52,10 @@ Hız hesaplamaları şu formüle göre yapılmıştır: `Toplam Hız = (Kullanı
 
 Ağ güvenliği "Default Deny" mantığı ile kurulmuştur. 3 şubenin de kural listesinin en altında, diğer kurallara uymayan her şeyi otomatik düşüren **Any-Any-Drop (Catch-all Deny)** kuralı açıkça yazılıdır.
 
-* **Temel Servisler:** Tüm şubelerde IP dağıtımı ve çözümlemesi için **DHCP (UDP 67/68), DNS (TCP/UDP 53) ve NTP (UDP 123)** erişimlerine açıkça izin veren kurallar tanımlanmıştır.
-* **İnternet Çıkışları (Ar-Ge Kısıtlaması):** İzmir Ar-Ge (VLAN 10) ağının internete doğrudan çıkış (direct internet) kuralı yoktur; dışarıya sadece güvenli bir Proxy üzerinden çıkabilirler. Misafir ağı (VLAN 99) ise şirket içine erişemez, sadece internete çıkabilir.
-* **Operasyon ve Bakım Rutinleri (Operations):**
-    * **Yedekleme (Backup/DR):** Tüm Firewall konfigürasyonları ve kural setleri **haftalık** olarak otomatik dışa aktarılır (config-export) ve yedeklenir.
-    * **Güncelleme (Patching/Firmware):** Sistem yamaları ve Firewall firmware güncellemeleri **aylık** rutin olarak test edilip uygulanır.
-    * **CVE Takibi:** Ortak güvenlik açıkları (CVE) aylık olarak Nessus vb. araçlarla taranır ve güncel zafiyet izleme listesi (cveWatch) tutulur.
-    * **İzleme ve Log Retention:** Loglar merkezdeki FortiAnalyzer (SIEM) sunucusuna gönderilir ve yasal uyumluluk gereği (Log retention) geriye dönük en az **6 ay** boyunca arşivlenir.
+- **Temel Servisler:** Tüm şubelerde IP dağıtımı ve çözümlemesi için **DHCP (UDP 67/68), DNS (TCP/UDP 53) ve NTP (UDP 123)** erişimlerine açıkça izin veren kurallar tanımlanmıştır.
+- **İnternet Çıkışları (Ar-Ge Kısıtlaması):** İzmir Ar-Ge (VLAN 10) ağının internete doğrudan çıkış (direct internet) kuralı yoktur; dışarıya sadece güvenli bir Proxy üzerinden çıkabilirler. Misafir ağı (VLAN 99) ise şirket içine erişemez, sadece internete çıkabilir.
+- **Operasyon ve Bakım Rutinleri (Operations):**
+  * **Yedekleme (Backup/DR):** Tüm Firewall konfigürasyonları ve kural setleri **haftalık** olarak otomatik dışa aktarılır (config-export) ve yedeklenir.
+  * **Güncelleme (Patching/Firmware):** Sistem yamaları ve Firewall firmware güncellemeleri **aylık** rutin olarak test edilip uygulanır.
+  * **CVE Takibi:** Ortak güvenlik açıkları (CVE) aylık olarak Nessus vb. araçlarla taranır ve güncel zafiyet izleme listesi (cveWatch) tutulur.
+  * **İzleme ve Log Retention:** Loglar merkezdeki FortiAnalyzer (SIEM) sunucusuna gönderilir ve yasal uyumluluk gereği (Log retention) geriye dönük en az **6 ay** boyunca arşivlenir.
