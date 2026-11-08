@@ -34,7 +34,7 @@ export function LegalDocPage({ slug, html }: { slug: LegalSlug; html: string }) 
         <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6">
           <Tabs active={slug} />
           {/* Our own Markdown from docs/legal, compiled at build time */}
-          <article className="legal-doc" dangerouslySetInnerHTML={{ __html: html }} />
+          <article className="legal-doc" lang="en" translate="no" dangerouslySetInnerHTML={{ __html: html }} />
           <p className="border-t border-(--iux-border) pt-4 text-xs text-(--iux-muted-foreground)">
             Source:{" "}
             <a className="underline" href={`${REPO_BLOB}/docs/legal/${doc.file}`} target="_blank" rel="noreferrer">

@@ -14,6 +14,7 @@ import {
 } from "@phosphor-icons/react";
 import { androidLogsStore, api, message, useApk, usePoll, formatBytes } from "../../lib/api";
 import { Field, Status } from "../../components/ui";
+import { localeFromPath, localePath } from "../../i18n/paths";
 
 /** Runnable workbench actions; ids match POST /api/run in web_ui.py. */
 export const ACTIONS: Record<string, { label: string; desc: string; group: string; icon: ReactNode; primary?: boolean }> = {
@@ -37,7 +38,7 @@ export function useRun() {
     try {
       await api.run(action, apk);
       await androidLogsStore.refresh();
-      if (openConsole) window.location.assign("/android/console/");
+      if (openConsole) window.location.assign(localePath("/android/console/", localeFromPath(window.location.pathname)));
     } catch (e) {
       setError(message(e));
     }

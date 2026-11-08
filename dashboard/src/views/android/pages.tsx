@@ -27,6 +27,7 @@ import {
 } from "@phosphor-icons/react";
 import { AppShell, LAB_ICON, labHref } from "../../shell/app-shell";
 import { TopBar } from "../../shell/top-bar";
+import { localeFromPath, localePath } from "../../i18n/paths";
 import {
   CodeShowcaseSwitcher,
   MinimalistHero,
@@ -62,6 +63,9 @@ function Frame({ id, title, back = true, children }: { id: string; title: string
 export function OverviewPage() {
   const { data: logs } = androidLogsStore.use();
   const { data: hostData } = hostStore.use();
+  const hostOs = hostData?.host.os;
+  // The ADB tab needs adb; while the host report is still loading keep it
+  const adbFound = !hostData || hostData.host.tools.some((tool) => tool.id === "adb" && tool.found);
   const devices = useDevices();
   const reports = usePoll(api.reports, 0, []);
   const jobs = useMemo(() => parseJobs(logs?.logs ?? [], Boolean(logs?.running)), [logs]);
@@ -99,10 +103,10 @@ export function OverviewPage() {
         <ShellSnippet
           prefix="$"
           tabs={[
-            { id: "linux", label: "Linux (native)", command: "./labctl android doctor && ./labctl android start --wait", explanation: "Checks KVM, the container runtime, ports and disk, then starts the stack and waits for the emulator." },
-            { id: "static", label: "No KVM (static)", command: "./labctl android profile use lightweight && ./labctl android start", explanation: "Runs only MobSF, mitmproxy and the tools container: everything WF1 needs, without an emulator." },
-            { id: "windows", label: "Windows", command: "./lab.ps1 setup; ./lab.ps1 start", explanation: "Zero-admin Windows runtime; see README-WINDOWS.md for the VirtualBox and WSL2 options." },
-            { id: "adb", label: "ADB Control", command: "adb connect 127.0.0.1:5555 && adb devices", explanation: "Attach to the emulator over TCP for instrumentation and Frida injection." }
+            ...(hostOs === "linux" || !hostOs ? [{ id: "linux", label: "Linux (native)", command: "./labctl android doctor && ./labctl android start --wait", explanation: "Checks KVM, the container runtime, ports and disk, then starts the stack and waits for the emulator." }] : []),
+            { id: "static", label: hostOs === "macos" ? "Static analysis" : "No KVM (static)", command: "./labctl android profile use lightweight && ./labctl android start", explanation: "Runs only MobSF, mitmproxy and the tools container: everything WF1 needs, without an emulator." },
+            ...(hostOs === "windows" || !hostOs ? [{ id: "windows", label: "Windows", command: "./lab.ps1 setup; ./lab.ps1 start", explanation: "Zero-admin Windows runtime; see README-WINDOWS.md for the VirtualBox and WSL2 options." }] : []),
+            ...(adbFound ? [{ id: "adb", label: "ADB Control", command: "adb connect 127.0.0.1:5555 && adb devices", explanation: "Attach to the emulator over TCP for instrumentation and Frida injection." }] : [])
           ]}
         />
       </section>
@@ -128,7 +132,7 @@ export function OverviewPage() {
         headline="End-to-End Mobile Pentest Pipeline"
         subtitle="From static bytecode decompilation to runtime hooking and live telemetry interception."
         ctaText="View Execution Workflows"
-        onCtaClick={() => window.location.assign("/android/workflows/")}
+        onCtaClick={() => window.location.assign(localePath("/android/workflows/", localeFromPath(window.location.pathname)))}
       />
 
       <TipsNotesCard

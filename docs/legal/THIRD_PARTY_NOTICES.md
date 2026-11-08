@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-_Last updated: November 3, 2026_
+_Last updated: November 8, 2026_
 
 os-lab is licensed under the [Apache License 2.0](../../LICENSE). It
 orchestrates, downloads or bundles software from other projects, which remains
@@ -38,6 +38,8 @@ IP address through ipinfo.io. The image honours the opt-out variable
 
 | Component | Licence |
 |-----------|---------|
+| [Docker Desktop](https://docs.docker.com/desktop/) | Downloaded only when requested on macOS or Windows; subject to the [Docker Subscription Service Agreement](https://www.docker.com/legal/docker-subscription-service-agreement/) |
+| [uv](https://github.com/astral-sh/uv) and the CPython builds it downloads from [python-build-standalone](https://github.com/astral-sh/python-build-standalone) | Apache-2.0 or MIT for uv; CPython and included libraries retain their own licences |
 | [JADX](https://github.com/skylot/jadx) | Apache-2.0 |
 | [Apktool](https://github.com/iBotPeaches/Apktool) | Apache-2.0 |
 | [Frida](https://github.com/frida/frida) and frida-tools | wxWindows Library Licence 3.1 |
@@ -49,6 +51,9 @@ IP address through ipinfo.io. The image honours the opt-out variable
 
 ## Bundled in this repository
 
+- Release installers include a pinned uv executable for their host architecture.
+  The app uses it only when the user chooses **Get Python**; CPython is downloaded
+  into the app's data folder rather than redistributed in the installer.
 - Nothing from Google: os-lab does **not** redistribute Android SDK
   Platform-Tools. When `adb` is missing, `android-lab/lab/scripts/get_platform_tools.py`
   (run by preflight or `make platform-tools`), or `lab.ps1 setup` on Windows,

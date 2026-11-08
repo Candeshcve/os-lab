@@ -3,6 +3,8 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
+![os-lab security workbench](docs/media/os-lab-promo.png)
+
 Four research-backed, runnable operating-system security labs in one repository,
 each a reproducible, isolated guest driven by `make` and a shared management CLI.
 
@@ -58,6 +60,27 @@ changing anything.
 what each still needs, one page per lab to install dependencies and start,
 stop or inspect it (every action is previewed before it runs), a jobs log,
 and the Android Lab workbench.
+
+The dashboard and desktop app offer **English (default), Turkish, German,
+French, Spanish, Italian, Persian and Arabic**. Choose a language from the top
+bar; the desktop app starts in the system language. Each dashboard route keeps
+its locale when you move between labs. Persian and Arabic use right-to-left
+layout. See [translation review notes](dashboard/TRANSLATION_TODO.md) for
+content that still needs a native-speaker review.
+
+### Dashboard gallery
+
+| Android security workbench | Firewall company network |
+|:---:|:---:|
+| ![Android Lab overview](docs/media/screenshots/android-overview.png) | ![Firewall company network](docs/media/screenshots/firewall-company.png) |
+
+| Workflow view | Firewall audit |
+|:---:|:---:|
+| ![Android workflows](docs/media/screenshots/android-workflows.png) | ![Firewall gap audit](docs/media/screenshots/firewall-audit.png) |
+
+The [Persian dashboard preview](docs/media/screenshots/firewall-persian.png)
+shows the right-to-left layout. Regenerate the images from a running local
+console with `scripts/capture-dashboard-screenshots.sh`.
 
 ## Legal
 

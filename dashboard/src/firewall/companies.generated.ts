@@ -672,6 +672,995 @@ export const COMPANIES: Company[] = [
   },
   {
     "schemaVersion": 1,
+    "slug": "aegisai-global",
+    "name": "AegisAI & CyberSystems Global",
+    "sector": "Technology / Education",
+    "author": {
+      "name": "S***",
+      "course": "BGT207",
+      "github": "Winslowe"
+    },
+    "summary": "Yapay zeka altyapısı, SaaS yazılım ve siber güvenlik akademisi sunan bir grup: İstanbul HQ (veri merkezi, DMZ'de WAF arkasında web sitesi, mobil uygulama API'si, VPN hub, SOC), New York, Amsterdam (GDPR) ve 12.500 öğrencili Antalya kampüsü, toplam 14.280 kişi. Her şubede HA FortiGate, VLAN segmentasyonu, rol tabanlı VPN, NOC/SOC ayrımı ve en sonda varsayılan deny kuralı vardır.",
+    "branches": [
+      {
+        "id": "istanbul-hq",
+        "name": "Istanbul Office (HQ)",
+        "role": "headquarters",
+        "location": "İstanbul, TR",
+        "population": {
+          "staff": 335,
+          "software": 85,
+          "rnd": 30
+        },
+        "network": {
+          "cidr": "10.10.0.0/16",
+          "dmz": true,
+          "vlans": [
+            {
+              "id": 10,
+              "name": "management",
+              "cidr": "10.10.10.0/24",
+              "note": "Ağ cihazı yönetimi (mgmt), yalnızca VPN + bastion"
+            },
+            {
+              "id": 20,
+              "name": "staff",
+              "cidr": "10.10.20.0/23",
+              "note": "Admin staff + technical"
+            },
+            {
+              "id": 30,
+              "name": "software",
+              "cidr": "10.10.30.0/24",
+              "note": "Yazılım geliştirme, Git ve CI/CD"
+            },
+            {
+              "id": 40,
+              "name": "rnd",
+              "cidr": "10.10.40.0/24",
+              "note": "Yapay zeka Ar-Ge (R&D)"
+            },
+            {
+              "id": 50,
+              "name": "security",
+              "cidr": "10.10.50.0/24",
+              "note": "SOC ve siber güvenlik ekibi"
+            },
+            {
+              "id": 60,
+              "name": "servers",
+              "cidr": "10.10.60.0/24",
+              "note": "ERP, Active Directory, Git, SIEM; DHCP/DNS/NTP"
+            },
+            {
+              "id": 70,
+              "name": "dmz",
+              "cidr": "10.10.70.0/24",
+              "note": "Web, API ve mail gateway; iç ağdan izole"
+            },
+            {
+              "id": 99,
+              "name": "guest",
+              "cidr": "10.10.99.0/24",
+              "note": "Misafir: yalnızca internet"
+            }
+          ]
+        },
+        "bandwidth": {
+          "downMbps": 5000,
+          "upMbps": 5000,
+          "drivers": [
+            "ERP",
+            "Git, CI/CD",
+            "AI veri setleri",
+            "Zoom ve IP telefon",
+            "veri merkezi ve VPN hub",
+            "web ve API (DMZ)"
+          ]
+        },
+        "firewalls": [
+          {
+            "segment": "perimeter",
+            "chosen": {
+              "product": "FortiGate 600F (HA)",
+              "vendor": "Fortinet",
+              "throughputGbps": 10.5,
+              "priceUsd": 38000,
+              "reason": "5+5 Gbps hat ve merkez VPN hub rolü için en iyi fiyat/performans; IPS açıkken 10.5 Gbps. HA çifti fiyatı."
+            },
+            "alternatives": [
+              {
+                "product": "PA-3430 (HA)",
+                "vendor": "Palo Alto Networks",
+                "throughputGbps": 9.5,
+                "priceUsd": 62000,
+                "reason": "Güçlü App-ID ama maliyet çok yüksek."
+              },
+              {
+                "product": "Quantum 6900 (HA)",
+                "vendor": "Check Point",
+                "throughputGbps": 9.2,
+                "priceUsd": 54000,
+                "reason": "İyi merkezi yönetim, daha pahalı ve daha düşük throughput."
+              },
+              {
+                "product": "Secure Firewall 3130 (HA)",
+                "vendor": "Cisco",
+                "throughputGbps": 10.2,
+                "priceUsd": 58000,
+                "reason": "Omurga uyumu iyi, fiyatı yüksek ve ayrı FMC gerekir."
+              },
+              {
+                "product": "FortiGate 400F (HA)",
+                "vendor": "Fortinet",
+                "throughputGbps": 9.0,
+                "priceUsd": 26000,
+                "reason": "5 Gbps sınırında çalışır, büyüme payı yok."
+              }
+            ],
+            "rules": [
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "private-source-from-internet",
+                "to": "any-site",
+                "note": "Spoof koruması: internetten gelen özel (RFC1918) kaynak adresler sahtedir."
+              },
+              {
+                "action": "limit",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 443,
+                "from": "Internet",
+                "to": "dmz-web",
+                "note": "DDoS / brute-force: yeni TLS bağlantılarına hız sınırı uygulanır (rate-limit)."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 443,
+                "from": "Internet",
+                "to": "dmz-web",
+                "note": "Genel HTTPS: DMZ'deki WAF arkasındaki web sitesi ve mobil uygulama API'si; tek giriş yolu."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 80,
+                "from": "Internet",
+                "to": "dmz-web",
+                "note": "HTTP yalnızca 443'e yönlendirme içindir; DMZ reverse proxy yönlendirir."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 25,
+                "from": "Internet",
+                "to": "dmz-mail",
+                "note": "SMTP: DMZ'deki mail gateway dış e-posta alır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 8443,
+                "from": "dmz",
+                "to": "servers",
+                "note": "Reverse proxy yalnızca tek arka uç portuna (8443) erişir; DMZ'den iç ağa başka yol yok."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "dmz",
+                "to": "internal-lan",
+                "note": "DMZ ele geçirilirse iç ağa sızma engellenir; kalan tüm DMZ→iç trafik reddedilir."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "staff",
+                "to": "dhcp-server",
+                "note": "DHCP: istemciler IP alabilsin; kapatılırsa şube ağı çöker."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": 53,
+                "from": "internal",
+                "to": "dns-forwarder",
+                "note": "DNS: yalnızca iç çözümleyiciye izin verilir, dışarıya doğrudan DNS yok."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": 123,
+                "from": "internal",
+                "to": "ntp-pool",
+                "note": "NTP: saat senkronu; sertifika ve log zamanları için gerekli."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "22,443",
+                "from": "management",
+                "to": "network-devices",
+                "note": "Yalnızca yönetim VLAN'ı ağ cihazlarına SSH ve HTTPS ile erişir; admin erişimi VPN + bastion üzerindendir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "8443,636,993",
+                "from": "staff",
+                "to": "servers",
+                "note": "İdari personel yalnızca ERP, LDAPS ve IMAPS sunucularına erişir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "22,443",
+                "from": "software",
+                "to": "servers",
+                "note": "Yazılım ekibi Git ve CI/CD sunucularına erişir; idari VLAN'a erişemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "3128",
+                "from": "rnd",
+                "to": "proxy",
+                "note": "Ar-Ge yalnızca proxy üzerinden internete çıkar (proxy filtresi, doğrudan internet yok)."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "443,6514",
+                "from": "security",
+                "to": "all-firewalls",
+                "note": "SOC ekibi tüm şube güvenlik duvarlarını ve SIEM'i izler (syslog TLS)."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "500,4500",
+                "from": "branch-vpn-peers",
+                "to": "firewall",
+                "note": "Şubelerden gelen IPsec tünelleri (UDP 500/4500) kabul edilir; hub-and-spoke yapısı."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "500,4500",
+                "from": "Internet",
+                "to": "vpn-gateway",
+                "note": "Rol tabanlı uzaktan erişim VPN'i (IKEv2 + MFA) için istemci girişi."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "staff",
+                "to": "Internet",
+                "note": "İç VLAN'lar ve misafir ağı web filtresi arkasında internete çıkar."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "guest",
+                "to": "internal-lan",
+                "note": "Misafir ağı iç ağlara erişemez; yalnızca internet çıkışı vardır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "guest",
+                "to": "Internet",
+                "note": "Misafir yalnızca web çıkışı alır, 5/2 Mbps sınırı ve captive portal ile."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "Varsayılan kural: izin verilmeyen her şey engellenir ve loglanır (implicit deny)."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "new-york",
+        "name": "New York Office",
+        "role": "branch",
+        "location": "New York, US",
+        "population": {
+          "staff": 195,
+          "software": 40,
+          "rnd": 15,
+          "students": 0
+        },
+        "network": {
+          "cidr": "10.20.0.0/16",
+          "vlans": [
+            {
+              "id": 10,
+              "name": "management",
+              "cidr": "10.20.10.0/24",
+              "note": "Şube cihaz yönetimi (mgmt)"
+            },
+            {
+              "id": 20,
+              "name": "staff",
+              "cidr": "10.20.20.0/24",
+              "note": "Admin staff + technical"
+            },
+            {
+              "id": 30,
+              "name": "software",
+              "cidr": "10.20.30.0/24",
+              "note": "Yazılım geliştirme"
+            },
+            {
+              "id": 40,
+              "name": "rnd",
+              "cidr": "10.20.40.0/24",
+              "note": "Ar-Ge (R&D)"
+            },
+            {
+              "id": 50,
+              "name": "security",
+              "cidr": "10.20.50.0/24",
+              "note": "ABD gece vardiyası SOC"
+            },
+            {
+              "id": 99,
+              "name": "guest",
+              "cidr": "10.20.99.0/24",
+              "note": "Misafir: yalnızca internet"
+            }
+          ]
+        },
+        "bandwidth": {
+          "downMbps": 2000,
+          "upMbps": 2000,
+          "drivers": [
+            "Zoom ve IP telefon",
+            "Git, CI/CD",
+            "ERP",
+            "e-posta",
+            "VPN (SOC)"
+          ]
+        },
+        "firewalls": [
+          {
+            "segment": "perimeter",
+            "chosen": {
+              "product": "FortiGate 200F (HA)",
+              "vendor": "Fortinet",
+              "throughputGbps": 3.0,
+              "priceUsd": 14500,
+              "reason": "2+1 Gbps hat için yeterli threat protection, SD-WAN ve İstanbul ile tam uyum. HA çifti."
+            },
+            "alternatives": [
+              {
+                "product": "PA-1410 (HA)",
+                "vendor": "Palo Alto Networks",
+                "throughputGbps": 3.2,
+                "priceUsd": 24000,
+                "reason": "Güçlü ama lisans maliyeti yüksek."
+              },
+              {
+                "product": "Quantum 3800 (HA)",
+                "vendor": "Check Point",
+                "throughputGbps": 3.0,
+                "priceUsd": 21000,
+                "reason": "Güvenilir, daha pahalı."
+              },
+              {
+                "product": "XGS 3300 (HA)",
+                "vendor": "Sophos",
+                "throughputGbps": 3.1,
+                "priceUsd": 13000,
+                "reason": "Kolay yönetim, merkezi çok şubeli yönetimi zayıf."
+              },
+              {
+                "product": "Secure Firewall 1220 (HA)",
+                "vendor": "Cisco",
+                "throughputGbps": 3.3,
+                "priceUsd": 19500,
+                "reason": "Kurumsal alternatif, maliyet yüksek."
+              }
+            ],
+            "rules": [
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "staff",
+                "to": "dhcp-server",
+                "note": "DHCP: istemciler IP alabilsin; kapatılırsa şube ağı çöker."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": 53,
+                "from": "internal",
+                "to": "dns-forwarder",
+                "note": "DNS: yalnızca iç çözümleyiciye izin verilir, dışarıya doğrudan DNS yok."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": 123,
+                "from": "internal",
+                "to": "ntp-pool",
+                "note": "NTP: saat senkronu; sertifika ve log zamanları için gerekli."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "8443,443,22",
+                "from": "staff",
+                "to": "hq-servers",
+                "note": "Şube personeli ve yazılım/Ar-Ge İstanbul sunucularına IPsec VPN üzerinden ERP ve Git için erişir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "22,443",
+                "from": "security",
+                "to": "hq-siem",
+                "note": "SOC ekibi İstanbul SIEM ve güvenlik duvarlarını izler."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "500,4500",
+                "from": "hq-vpn",
+                "to": "firewall",
+                "note": "Şube–merkez IPsec tüneli (IKEv2, NAT-T) kurulumu."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "3128",
+                "from": "rnd",
+                "to": "proxy",
+                "note": "Ar-Ge yalnızca proxy üzerinden internete çıkar; doğrudan internet yoktur."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "staff",
+                "to": "Internet",
+                "note": "İç VLAN'lar web filtresi ve QoS arkasında internete çıkar."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "guest",
+                "to": "internal-lan",
+                "note": "Misafir ağı kurumsal ağa erişemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "guest",
+                "to": "Internet",
+                "note": "Misafir yalnızca web çıkışı alır; hız sınırı ve captive portal uygulanır."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "Varsayılan kural: izin verilmeyen her şey engellenir ve loglanır (implicit deny)."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "amsterdam",
+        "name": "Amsterdam Office",
+        "role": "branch",
+        "location": "Amsterdam, NL",
+        "population": {
+          "staff": 155,
+          "software": 35,
+          "rnd": 20,
+          "students": 0
+        },
+        "network": {
+          "cidr": "10.30.0.0/16",
+          "vlans": [
+            {
+              "id": 10,
+              "name": "management",
+              "cidr": "10.30.10.0/24",
+              "note": "Şube cihaz yönetimi (mgmt)"
+            },
+            {
+              "id": 20,
+              "name": "staff",
+              "cidr": "10.30.20.0/24",
+              "note": "Admin staff + technical (GDPR korumalı)"
+            },
+            {
+              "id": 30,
+              "name": "software",
+              "cidr": "10.30.30.0/24",
+              "note": "Yazılım geliştirme"
+            },
+            {
+              "id": 40,
+              "name": "rnd",
+              "cidr": "10.30.40.0/24",
+              "note": "Ar-Ge (R&D), GDPR izole veri"
+            },
+            {
+              "id": 99,
+              "name": "guest",
+              "cidr": "10.30.99.0/24",
+              "note": "Misafir: yalnızca internet"
+            }
+          ]
+        },
+        "bandwidth": {
+          "downMbps": 2000,
+          "upMbps": 2000,
+          "drivers": [
+            "Zoom",
+            "e-posta",
+            "Git",
+            "ERP",
+            "bulut yedekleme"
+          ]
+        },
+        "firewalls": [
+          {
+            "segment": "perimeter",
+            "chosen": {
+              "product": "FortiGate 200F (HA)",
+              "vendor": "Fortinet",
+              "throughputGbps": 3.0,
+              "priceUsd": 14500,
+              "reason": "2+1 Gbps hat için ideal, DLP ve GDPR raporlama desteği. HA çifti."
+            },
+            "alternatives": [
+              {
+                "product": "PA-1410 (HA)",
+                "vendor": "Palo Alto Networks",
+                "throughputGbps": 3.2,
+                "priceUsd": 24000,
+                "reason": "Güçlü uygulama kontrolü, pahalı."
+              },
+              {
+                "product": "Quantum 3600 (HA)",
+                "vendor": "Check Point",
+                "throughputGbps": 2.6,
+                "priceUsd": 18500,
+                "reason": "AB uyumluluk raporu iyi, throughput düşük."
+              },
+              {
+                "product": "XGS 3300 (HA)",
+                "vendor": "Sophos",
+                "throughputGbps": 3.1,
+                "priceUsd": 13000,
+                "reason": "EDR senkronu iyi, merkezi yönetimi zayıf."
+              },
+              {
+                "product": "Firebox M590 (HA)",
+                "vendor": "WatchGuard",
+                "throughputGbps": 2.9,
+                "priceUsd": 12500,
+                "reason": "Ekonomik, büyüme payı az."
+              }
+            ],
+            "rules": [
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "staff",
+                "to": "dhcp-server",
+                "note": "DHCP: istemciler IP alabilsin; kapatılırsa şube ağı çöker."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": 53,
+                "from": "internal",
+                "to": "dns-forwarder",
+                "note": "DNS: yalnızca iç çözümleyiciye izin verilir, dışarıya doğrudan DNS yok."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": 123,
+                "from": "internal",
+                "to": "ntp-pool",
+                "note": "NTP: saat senkronu; sertifika ve log zamanları için gerekli."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "8443,443,22",
+                "from": "staff",
+                "to": "hq-servers",
+                "note": "Şube personeli ve yazılım/Ar-Ge İstanbul sunucularına IPsec VPN üzerinden ERP ve Git için erişir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "22,443",
+                "from": "security",
+                "to": "hq-siem",
+                "note": "SOC ekibi İstanbul SIEM ve güvenlik duvarlarını izler."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "500,4500",
+                "from": "hq-vpn",
+                "to": "firewall",
+                "note": "Şube–merkez IPsec tüneli (IKEv2, NAT-T) kurulumu."
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "any",
+                "from": "Internet",
+                "to": "internal-lan",
+                "note": "GDPR: internet ve diğer şubelerden Amsterdam iç ağına doğrudan erişim yasaktır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "3128",
+                "from": "rnd",
+                "to": "proxy",
+                "note": "Ar-Ge yalnızca proxy üzerinden internete çıkar; doğrudan internet yoktur."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "staff",
+                "to": "Internet",
+                "note": "İç VLAN'lar web filtresi ve QoS arkasında internete çıkar."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "guest",
+                "to": "internal-lan",
+                "note": "Misafir ağı kurumsal ağa erişemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "guest",
+                "to": "Internet",
+                "note": "Misafir yalnızca web çıkışı alır; hız sınırı ve captive portal uygulanır."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "Varsayılan kural: izin verilmeyen her şey engellenir ve loglanır (implicit deny)."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "academic-antalya",
+        "name": "Academic Branch (Antalya Campus)",
+        "role": "campus",
+        "location": "Antalya, TR",
+        "population": {
+          "staff": 785,
+          "students": 12500,
+          "software": 40,
+          "rnd": 45
+        },
+        "network": {
+          "cidr": "10.40.0.0/16",
+          "vlans": [
+            {
+              "id": 100,
+              "name": "students-wifi",
+              "cidr": "10.40.0.0/17",
+              "note": "12.500 öğrenci × ~2 cihaz için /17 (student)"
+            },
+            {
+              "id": 110,
+              "name": "faculty",
+              "cidr": "10.40.128.0/22",
+              "note": "450 akademisyen"
+            },
+            {
+              "id": 120,
+              "name": "staff",
+              "cidr": "10.40.132.0/23",
+              "note": "Admin + technical + security"
+            },
+            {
+              "id": 130,
+              "name": "rnd-lab",
+              "cidr": "10.40.136.0/22",
+              "note": "Software + R&D + siber lab (research lab)"
+            },
+            {
+              "id": 140,
+              "name": "lms-exam",
+              "cidr": "10.40.140.0/24",
+              "note": "LMS ve online sınav sunucuları"
+            },
+            {
+              "id": 10,
+              "name": "management",
+              "cidr": "10.40.141.0/24",
+              "note": "Kampüs ağ yönetimi (mgmt)"
+            },
+            {
+              "id": 99,
+              "name": "guest",
+              "cidr": "10.40.142.0/24",
+              "note": "Misafir: yalnızca internet"
+            }
+          ]
+        },
+        "bandwidth": {
+          "downMbps": 40000,
+          "upMbps": 40000,
+          "drivers": [
+            "LMS video",
+            "online sınav",
+            "Zoom",
+            "bulut",
+            "yazılım güncellemeleri",
+            "araştırma veri setleri"
+          ]
+        },
+        "firewalls": [
+          {
+            "segment": "perimeter",
+            "chosen": {
+              "product": "FortiGate 3500F (HA)",
+              "vendor": "Fortinet",
+              "throughputGbps": 63.0,
+              "priceUsd": 165000,
+              "reason": "40+10 Gbps kampüs hattını IPS + SSL inceleme açıkken bile taşır; HA çifti fiyatı."
+            },
+            "alternatives": [
+              {
+                "product": "PA-5440 (HA)",
+                "vendor": "Palo Alto Networks",
+                "throughputGbps": 54.0,
+                "priceUsd": 240000,
+                "reason": "Çok güçlü ama maliyet çok yüksek."
+              },
+              {
+                "product": "Quantum 16600 (HA)",
+                "vendor": "Check Point",
+                "throughputGbps": 52.0,
+                "priceUsd": 195000,
+                "reason": "Büyük kampüs alternatifi, daha pahalı."
+              },
+              {
+                "product": "Secure Firewall 4245 (HA)",
+                "vendor": "Cisco",
+                "throughputGbps": 60.0,
+                "priceUsd": 210000,
+                "reason": "Yüksek port yoğunluğu, fiyat yüksek."
+              },
+              {
+                "product": "SRX5400 (HA)",
+                "vendor": "Juniper",
+                "throughputGbps": 50.0,
+                "priceUsd": 180000,
+                "reason": "İyi yönlendirme, güvenlik profilleri daha zayıf."
+              }
+            ],
+            "rules": [
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "students-wifi",
+                "to": "dhcp-server",
+                "note": "DHCP: istemciler IP alabilsin; kapatılırsa şube ağı çöker."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": 53,
+                "from": "internal",
+                "to": "dns-forwarder",
+                "note": "DNS: yalnızca iç çözümleyiciye izin verilir, dışarıya doğrudan DNS yok."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": 123,
+                "from": "internal",
+                "to": "ntp-pool",
+                "note": "NTP: saat senkronu; sertifika ve log zamanları için gerekli."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "students",
+                "to": "lms-exam",
+                "note": "Sınav günü öğrenci ve lab ağı LMS'e HTTPS ile erişir; QoS sınav saatlerinde %50 garanti verir."
+              },
+              {
+                "action": "limit",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "students",
+                "to": "Internet",
+                "note": "Öğrenci internet çıkışı kişi başı 15/5 Mbps ile sınırlandırılır, P2P/Torrent engelli."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "students",
+                "to": "internal-lan",
+                "note": "Öğrenciler akademisyen, idari ve VPN ağlarına erişemez (tam izolasyon)."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "443",
+                "from": "faculty",
+                "to": "lms-exam",
+                "note": "Akademisyenler LMS ve İstanbul sunucularına not girişi için erişir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 445,
+                "from": "faculty",
+                "to": "hq-servers",
+                "note": "Akademik veri paylaşımı İstanbul dosya sunucusuna VPN ile SMB; yalnızca akademisyen VLAN'ından."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "8443,443",
+                "from": "staff",
+                "to": "hq-servers",
+                "note": "Kampüs idari ve teknik personel İstanbul ERP'ye erişir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "3128",
+                "from": "rnd",
+                "to": "proxy",
+                "note": "Ar-Ge ve siber lab yalnızca proxy üzerinden internete çıkar; sınav saatinde kapatılır."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "500,4500",
+                "from": "hq-vpn",
+                "to": "firewall",
+                "note": "Kampüs–merkez IPsec tüneli kurulumu."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "faculty",
+                "to": "Internet",
+                "note": "Akademisyen ve idari personel web filtresi arkasında internete çıkar."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "guest",
+                "to": "internal-lan",
+                "note": "Misafir ağı kurumsal ağlara erişemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "guest",
+                "to": "Internet",
+                "note": "Misafir yalnızca web çıkışı alır, 5/2 Mbps ve captive portal."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "Varsayılan kural: izin verilmeyen her şey engellenir ve loglanır (implicit deny)."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "remoteAccess": {
+      "type": "role-based-vpn",
+      "note": "IKEv2 VPN + MFA ve Active Directory grupları: yöneticiler yönetim VLAN'ına bastion ile, geliştiriciler Git/CI'ya, personel ERP'ye erişir. İnternete açık SSH yoktur. Şubeler ayrıca IPsec ile İstanbul hub'ına bağlanır; hat kopunca yedek ISP / SD-WAN failover devreye girer."
+    },
+    "monitoring": {
+      "siem": "FortiAnalyzer + Wazuh SIEM ile log ve korelasyon, Zabbix + Grafana ile sağlık ve bant genişliği. Loglar 90 gün sıcak, 2 yıl arşivde (5651/KVKK, Amsterdam için GDPR); config backup: firewall yapılandırmaları FortiManager ile haftalık yedeklenir ve restore testi yapılır; DR planı İstanbul–Antalya arasında.",
+      "owner": "NOC ekibi (hat, HA, VPN) ve SOC ekibi (İstanbul + New York, 7/24 vardiya); SOC Tier-1/Tier-2 güvenlik alarmlarından, ağ mühendisleri kural değişikliklerinden sorumludur. FortiOS ve sunucular aylık patch penceresinde (firmware update), aktif sömürülen açıklarda 72 saat içinde güncellenir.",
+      "alertSink": "SIEM panosu + SOC ticket sistemi; kritik engelleme alarmları Telegram kanalına, uptime alarmları ayrı ops kanalına gider.",
+      "appVsSecurity": "Uygulama sağlığı (ERP, LMS, web up/down) NOC/ops kanalına; güvenlik olayları (engeller, kimlik doğrulama hataları, IPS ve WAF) SOC'a gider. İkisi karışmaz."
+    },
+    "cveWatch": [
+      {
+        "id": "CVE-2024-4577",
+        "product": "PHP-CGI (Windows)",
+        "status": "not-affected",
+        "note": "Web portal Linux üzerinde PHP-FPM ile çalışır, CGI yolu kullanılmaz. Geçici önlem: ModSecurity + Cloudflare WAF kuralı; kalıcı çözüm: PHP sürümü yamalı ve aylık güncelleme."
+      }
+    ]
+  },
+  {
+    "schemaVersion": 1,
     "name": "AnadoluNet Technology Holding",
     "sector": "Technology / Education",
     "author": {
@@ -1347,6 +2336,4027 @@ export const COMPANIES: Company[] = [
       "appVsSecurity": "NOC watches availability (VPN down 1 min, line >80% for 15 min); SOC watches attacks (failed admin logins, IPS hits, OT-to-internet attempts)."
     },
     "slug": "anadolunet-holding"
+  },
+  {
+    "schemaVersion": 1,
+    "slug": "atlas-holding",
+    "name": "Atlas Holding",
+    "sector": "Education",
+    "author": {
+      "name": "İ*** Y***",
+      "course": "BGT207",
+      "github": "iremysv"
+    },
+    "summary": "Atlas Holding hayali bir şirkettir: kurumlar için iş yazılımları geliştirir, Avrupa'da satış yapar ve Ankara'da 10.000 öğrencili bir yükseköğretim kampüsü işletir. İstanbul genel merkez, İzmir Ar-Ge, Amsterdam satış ofisidir. staff alanı personel, hoca ve teknik ekibin toplamıdır. Roller ayrı VLAN'lardadır ve her kural seti default deny ile biter. Her şubede aktif-pasif HA FortiGate çifti, ana ve yedek hat (backup link) ile SD-WAN failover vardır. Kurumsal web sitesi, LMS web sitesi, LMS mobil uygulaması (mobile app) ve API, DMZ'deki ModSecurity WAF üzerinden yayınlanır; WAF kapasitesi henüz ölçülmemiştir; DDoS için operatör temizleme hizmeti ve rate limit kullanılır. Yapılandırma yedeği (config backup) her gece alınır ve restore altı ayda bir test edilir; firmware ve patch için aylık bakım penceresi vardır. Türkiye şubeleri KVKK ve 5651, Amsterdam GDPR kapsamındadır.",
+    "branches": [
+      {
+        "id": "istanbul",
+        "name": "İstanbul Genel Merkez",
+        "role": "headquarters",
+        "location": "İstanbul, TR",
+        "population": {
+          "staff": 275,
+          "students": 0,
+          "rnd": 15,
+          "software": 60
+        },
+        "network": {
+          "cidr": "10.1.0.0/16",
+          "dmz": true,
+          "vlans": [
+            {
+              "id": 10,
+              "name": "Yönetim",
+              "cidr": "10.1.10.0/26",
+              "note": "Ağ cihazlarının yönetimi, yalnızca VPN ve bastion ile."
+            },
+            {
+              "id": 20,
+              "name": "Personel",
+              "cidr": "10.1.20.0/22",
+              "note": "250 × 2 cihaz × 1,3 büyüme = 650 adres."
+            },
+            {
+              "id": 30,
+              "name": "Yazılım",
+              "cidr": "10.1.30.0/24",
+              "note": "60 × 2 × 1,3 = 156 adres; Git ve CI erişimi."
+            },
+            {
+              "id": 40,
+              "name": "Ar-Ge",
+              "cidr": "10.1.40.0/26",
+              "note": "15 × 2 × 1,3 = 39 adres; internete yalnızca proxy ile çıkar."
+            },
+            {
+              "id": 50,
+              "name": "Teknik",
+              "cidr": "10.1.50.0/25",
+              "note": "25 × 2 × 1,3 = 65 adres; altyapı yetkisi olan ekip."
+            },
+            {
+              "id": 60,
+              "name": "Sunucu",
+              "cidr": "10.1.60.0/24",
+              "note": "Altyapı ve uygulama: DNS, AD, ERP, Git. Aynı VLAN içi akışlar sunucu güvenlik duvarıyla sınırlanır."
+            },
+            {
+              "id": 61,
+              "name": "Yönetim araçları",
+              "cidr": "10.1.61.0/27",
+              "note": "Bastion, FortiManager, Wazuh, Zabbix, GLPI, Grafana. Uygulama sunucusu ele geçirilse de izleme ve yönetim ayrı kalır."
+            },
+            {
+              "id": 63,
+              "name": "Veri",
+              "cidr": "10.1.63.0/26",
+              "note": "Veritabanları. Yalnızca kendi uygulamasından ve bastion'dan erişilir."
+            },
+            {
+              "id": 64,
+              "name": "Sınır servisleri",
+              "cidr": "10.1.64.0/26",
+              "note": "Proxy ve kamera kayıt. İnternete veya kameralara değdiği için iç sunuculardan ayrıdır."
+            },
+            {
+              "id": 70,
+              "name": "DMZ",
+              "cidr": "10.1.70.0/27",
+              "note": "WAF ve ters proxy, kurumsal web uygulaması."
+            },
+            {
+              "id": 80,
+              "name": "IoT",
+              "cidr": "10.1.80.0/25",
+              "note": "Kamera, yazıcı, kartlı geçiş; internete çıkmaz."
+            },
+            {
+              "id": 85,
+              "name": "Misafir",
+              "cidr": "10.1.85.0/24",
+              "note": "Yalnızca internet, iç ağa erişemez."
+            }
+          ]
+        },
+        "bandwidth": {
+          "downMbps": 2000,
+          "upMbps": 2000,
+          "drivers": [
+            "Görüntülü görüşme",
+            "ERP",
+            "SaaS e-posta",
+            "Git ve CI",
+            "paket indirme",
+            "şube IPsec tünelleri",
+            "1 Gbps yedek hat"
+          ]
+        },
+        "firewalls": [
+          {
+            "segment": "perimeter",
+            "chosen": {
+              "product": "FortiGate 200G",
+              "vendor": "Fortinet",
+              "throughputGbps": 6,
+              "priceUsd": 8920,
+              "reason": "En ucuzu değil, ama 2 Gbps hatta IPS açıkken 6 Gbps ile VPN merkezi ve 7 Gbps TLS denetimi için pay bırakır, ortak yönetime girer. Fiyat ve hız tek cihazındır (FG-200G, lisans hariç); aktif-pasif HA için iki adet gerekir, hız ikiye katlanmaz."
+            },
+            "alternatives": [
+              {
+                "product": "PA-3410",
+                "vendor": "Palo Alto Networks",
+                "throughputGbps": 7.5,
+                "priceUsd": 25140,
+                "reason": "Güçlü uygulama denetimi var, ancak benzer kapasite için yaklaşık üç kat pahalı."
+              },
+              {
+                "product": "Force 3950",
+                "vendor": "Check Point",
+                "throughputGbps": 5.5,
+                "priceUsd": 12050,
+                "reason": "Yeterli, ancak Fortinet yönetimine girmez. Fiyata 1 yıllık SandBlast aboneliği dahildir (CPAP-SG3950-SNBT, PC Nation); aboneliksiz donanım SKU'su bulunamadı, bu yüzden diğer donanım fiyatlarıyla doğrudan karşılaştırılmaz."
+              },
+              {
+                "product": "Firepower 1150",
+                "vendor": "Cisco",
+                "throughputGbps": 4.9,
+                "priceUsd": 7830,
+                "reason": "Yeterli ve daha ucuz, ancak kapasitesi en düşük ve veri sayfası eski."
+              },
+              {
+                "product": "XGS 2300",
+                "vendor": "Sophos",
+                "throughputGbps": 5.9,
+                "priceUsd": 4290,
+                "reason": "En ucuz seçenek, ancak VPN merkezi için SD-WAN ve ortak yönetimde Fortinet tercih edildi."
+              }
+            ],
+            "rules": [
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.61.5",
+                "to": "10.1.10.0/26",
+                "note": "O1: Ağ cihazları yalnızca kayıt tutan bastion'dan yönetilir; yoksa yöneticiler cihazlara ulaşamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.61.5",
+                "to": "10.1.10.0/26",
+                "note": "O1: Ağ cihazları yalnızca kayıt tutan bastion'dan yönetilir; yoksa yöneticiler cihazlara ulaşamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.61.5",
+                "to": "10.2.10.0/26",
+                "note": "O1: Ağ cihazları yalnızca kayıt tutan bastion'dan yönetilir; yoksa yöneticiler cihazlara ulaşamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.61.5",
+                "to": "10.2.10.0/26",
+                "note": "O1: Ağ cihazları yalnızca kayıt tutan bastion'dan yönetilir; yoksa yöneticiler cihazlara ulaşamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.61.5",
+                "to": "10.3.10.0/26",
+                "note": "O1: Ağ cihazları yalnızca kayıt tutan bastion'dan yönetilir; yoksa yöneticiler cihazlara ulaşamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.61.5",
+                "to": "10.3.10.0/26",
+                "note": "O1: Ağ cihazları yalnızca kayıt tutan bastion'dan yönetilir; yoksa yöneticiler cihazlara ulaşamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.61.5",
+                "to": "10.4.10.0/26",
+                "note": "O1: Ağ cihazları yalnızca kayıt tutan bastion'dan yönetilir; yoksa yöneticiler cihazlara ulaşamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.61.5",
+                "to": "10.4.10.0/26",
+                "note": "O1: Ağ cihazları yalnızca kayıt tutan bastion'dan yönetilir; yoksa yöneticiler cihazlara ulaşamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 161,
+                "from": "10.1.61.20",
+                "to": "10.1.10.0/26",
+                "note": "O2: Zabbix ağ cihazlarının durumunu okur; O3'ün altında kalırsa izleme durur ve arızalar görülmez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 161,
+                "from": "10.1.61.20",
+                "to": "10.2.10.0/26",
+                "note": "O2: Zabbix ağ cihazlarının durumunu okur; O3'ün altında kalırsa izleme durur ve arızalar görülmez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 161,
+                "from": "10.1.61.20",
+                "to": "10.3.10.0/26",
+                "note": "O2: Zabbix ağ cihazlarının durumunu okur; O3'ün altında kalırsa izleme durur ve arızalar görülmez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 161,
+                "from": "10.1.61.20",
+                "to": "10.4.10.0/26",
+                "note": "O2: Zabbix ağ cihazlarının durumunu okur; O3'ün altında kalırsa izleme durur ve arızalar görülmez."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.1.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.2.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.3.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.4.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "10.1.0.0/16",
+                "to": "10.1.60.2",
+                "note": "O4: Bütün VLAN'lar relay ile DHCP sunucusuna gider, misafir dahil; yoksa istemciler IP alamaz."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.1.85.0/24",
+                "to": "10.1.60.2",
+                "note": "O4: Misafir DHCP dışında şube sunucusuna ulaşamaz; yoksa iç DNS kayıtlarını sorgulayabilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "10.1.0.0/16",
+                "to": "10.1.60.2",
+                "note": "O4: İç ağlar şube DNS ve NTP sunucusunu kullanır; yoksa ad çözümleme ve saat, dolayısıyla TLS ve loglar bozulur."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "10.1.0.0/16",
+                "to": "10.1.60.2",
+                "note": "O4: İç ağlar şube DNS ve NTP sunucusunu kullanır; yoksa ad çözümleme ve saat, dolayısıyla TLS ve loglar bozulur."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 123,
+                "from": "10.1.0.0/16",
+                "to": "10.1.60.2",
+                "note": "O4: İç ağlar şube DNS ve NTP sunucusunu kullanır; yoksa ad çözümleme ve saat, dolayısıyla TLS ve loglar bozulur."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.1.10.0/26",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.1.60.0/24",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.1.63.0/26",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.1.64.0/26",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.1.70.12",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.1.70.13",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.1.70.11",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.2.10.0/26",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.2.60.0/25",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.2.64.0/26",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.4.10.0/26",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.4.60.0/24",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.4.63.0/26",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.4.64.0/26",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.4.70.12",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.4.70.13",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.4.70.11",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "10.1.60.2",
+                "to": "internet",
+                "note": "O6: Şube DNS ve NTP sunucusu dış adresleri çözer ve saat alır; yoksa iç ağ dış adresleri çözemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "10.1.60.2",
+                "to": "internet",
+                "note": "O6: Şube DNS ve NTP sunucusu dış adresleri çözer ve saat alır; yoksa iç ağ dış adresleri çözemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 123,
+                "from": "10.1.60.2",
+                "to": "internet",
+                "note": "O6: Şube DNS ve NTP sunucusu dış adresleri çözer ve saat alır; yoksa iç ağ dış adresleri çözemez."
+              },
+              {
+                "action": "limit",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "internet",
+                "to": "10.1.70.10",
+                "note": "1: İnternetten kurumsal site yalnızca DMZ'deki WAF üzerinden yayınlanır ve yeni bağlantılar sınırlanır; yoksa site internetten açılmaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 5432,
+                "from": "10.1.70.11",
+                "to": "10.1.63.30",
+                "note": "2: Web uygulaması yalnızca kendi veritabanına ulaşır; yoksa site çalışmaz, daha geniş olursa ele geçirilen DMZ iç ağa açılır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.20.0/22",
+                "to": "10.1.60.31",
+                "note": "3: Personel ERP'ye ulaşır; yoksa günlük iş uygulaması kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.2.20.0/23",
+                "to": "10.1.60.31",
+                "note": "4: Şube personeli merkezî ERP'ye tünelle ulaşır; şubedeki izin bu kural olmadan işe yaramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.3.20.0/24",
+                "to": "10.1.60.31",
+                "note": "4: Şube personeli merkezî ERP'ye tünelle ulaşır; şubedeki izin bu kural olmadan işe yaramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.20.0/22",
+                "to": "10.1.60.31",
+                "note": "4: Şube personeli merkezî ERP'ye tünelle ulaşır; şubedeki izin bu kural olmadan işe yaramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.30.0/24",
+                "to": "10.1.60.32",
+                "note": "5: Yazılım ekibi Git ve CI sunucusuna ulaşır; yoksa kod teslim edilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.30.0/24",
+                "to": "10.1.60.32",
+                "note": "5: Yazılım ekibi Git ve CI sunucusuna ulaşır; yoksa kod teslim edilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.2.30.0/25",
+                "to": "10.1.60.32",
+                "note": "6: Şube yazılımcıları aynı Git ve CI sunucusunu tünelle kullanır; şubedeki izin bu kural olmadan işe yaramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.2.30.0/25",
+                "to": "10.1.60.32",
+                "note": "6: Şube yazılımcıları aynı Git ve CI sunucusunu tünelle kullanır; şubedeki izin bu kural olmadan işe yaramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.3.30.0/26",
+                "to": "10.1.60.32",
+                "note": "6: Şube yazılımcıları aynı Git ve CI sunucusunu tünelle kullanır; şubedeki izin bu kural olmadan işe yaramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.3.30.0/26",
+                "to": "10.1.60.32",
+                "note": "6: Şube yazılımcıları aynı Git ve CI sunucusunu tünelle kullanır; şubedeki izin bu kural olmadan işe yaramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.4.30.0/27",
+                "to": "10.1.60.32",
+                "note": "6: Şube yazılımcıları aynı Git ve CI sunucusunu tünelle kullanır; şubedeki izin bu kural olmadan işe yaramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.30.0/27",
+                "to": "10.1.60.32",
+                "note": "6: Şube yazılımcıları aynı Git ve CI sunucusunu tünelle kullanır; şubedeki izin bu kural olmadan işe yaramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.50.0/25",
+                "to": "10.1.60.0/24",
+                "note": "7: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.50.0/25",
+                "to": "10.1.60.0/24",
+                "note": "7: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3389,
+                "from": "10.1.50.0/25",
+                "to": "10.1.60.0/24",
+                "note": "7: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.50.0/25",
+                "to": "10.1.64.0/26",
+                "note": "7: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.50.0/25",
+                "to": "10.1.64.0/26",
+                "note": "7: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3389,
+                "from": "10.1.50.0/25",
+                "to": "10.1.64.0/26",
+                "note": "7: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.50.0/25",
+                "to": "10.1.70.0/27",
+                "note": "7: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.50.0/25",
+                "to": "10.1.70.0/27",
+                "note": "7: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3389,
+                "from": "10.1.50.0/25",
+                "to": "10.1.70.0/27",
+                "note": "7: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3128,
+                "from": "10.1.40.0/26",
+                "to": "10.1.64.40",
+                "note": "8: Ar-Ge internete yalnızca proxy ile çıkar; yoksa ekip internete hiç çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.1.64.40",
+                "to": "internet",
+                "note": "9: Proxy çıkışı tek noktadan web filtresiyle denetlenir; yoksa proxy kullanıcıları dışarı çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.64.40",
+                "to": "internet",
+                "note": "9: Proxy çıkışı tek noktadan web filtresiyle denetlenir; yoksa proxy kullanıcıları dışarı çıkamaz."
+              },
+              {
+                "action": "reject",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.1.40.0/26",
+                "to": "internet",
+                "note": "10: Proxy dışı Ar-Ge çıkışı reddedilir ve alarm üretir; yoksa fikri mülkiyet denetimsiz dışarı çıkabilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.1.20.0/22",
+                "to": "internet",
+                "note": "11: Normal internet erişimi IPS, TLS denetimi ve uygulama profiliyle geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.20.0/22",
+                "to": "internet",
+                "note": "11: Normal internet erişimi IPS, TLS denetimi ve uygulama profiliyle geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.1.30.0/24",
+                "to": "internet",
+                "note": "11: Normal internet erişimi IPS, TLS denetimi ve uygulama profiliyle geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.30.0/24",
+                "to": "internet",
+                "note": "11: Normal internet erişimi IPS, TLS denetimi ve uygulama profiliyle geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.1.50.0/25",
+                "to": "internet",
+                "note": "11: Normal internet erişimi IPS, TLS denetimi ve uygulama profiliyle geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.50.0/25",
+                "to": "internet",
+                "note": "11: Normal internet erişimi IPS, TLS denetimi ve uygulama profiliyle geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.30.0/24",
+                "to": "github.com",
+                "note": "12: Dış depolara SSH yalnızca onaylı Git adreslerine gider; daha geniş olursa veri SSH ile dışarı çıkabilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.30.0/24",
+                "to": "gitlab.com",
+                "note": "12: Dış depolara SSH yalnızca onaylı Git adreslerine gider; daha geniş olursa veri SSH ile dışarı çıkabilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 554,
+                "from": "10.1.80.0/25",
+                "to": "10.1.64.50",
+                "note": "13: Kameralar yalnızca kayıt sunucusuna ulaşır; yoksa görüntü kaydedilmez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "10.1.85.0/24",
+                "to": "internet",
+                "note": "14: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "10.1.85.0/24",
+                "to": "internet",
+                "note": "14: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.1.85.0/24",
+                "to": "internet",
+                "note": "14: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.85.0/24",
+                "to": "internet",
+                "note": "14: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.1.20.0/22",
+                "to": "10.1.80.20",
+                "note": "15: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.1.20.0/22",
+                "to": "10.1.80.20",
+                "note": "15: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.1.30.0/24",
+                "to": "10.1.80.20",
+                "note": "15: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.1.30.0/24",
+                "to": "10.1.80.20",
+                "note": "15: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.1.40.0/26",
+                "to": "10.1.80.20",
+                "note": "15: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.1.40.0/26",
+                "to": "10.1.80.20",
+                "note": "15: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.1.50.0/25",
+                "to": "10.1.80.20",
+                "note": "15: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.1.50.0/25",
+                "to": "10.1.80.20",
+                "note": "15: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3128,
+                "from": "10.1.70.0/27",
+                "to": "10.1.64.40",
+                "note": "16: DMZ sunucuları güncellemeyi proxy'den alır; yoksa yama alamazlar veya doğrudan internete açılmaları gerekir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.1.60.0/24",
+                "to": "10.1.61.20",
+                "note": "17: Sunucu aracıları izleme verisini Zabbix'e gönderir; şube izinleri bu kural olmadan işe yaramaz ve LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.1.63.0/26",
+                "to": "10.1.61.20",
+                "note": "17: Sunucu aracıları izleme verisini Zabbix'e gönderir; şube izinleri bu kural olmadan işe yaramaz ve LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.1.64.0/26",
+                "to": "10.1.61.20",
+                "note": "17: Sunucu aracıları izleme verisini Zabbix'e gönderir; şube izinleri bu kural olmadan işe yaramaz ve LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.1.70.12",
+                "to": "10.1.61.20",
+                "note": "17: Sunucu aracıları izleme verisini Zabbix'e gönderir; şube izinleri bu kural olmadan işe yaramaz ve LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.1.70.13",
+                "to": "10.1.61.20",
+                "note": "17: Sunucu aracıları izleme verisini Zabbix'e gönderir; şube izinleri bu kural olmadan işe yaramaz ve LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.1.70.11",
+                "to": "10.1.61.20",
+                "note": "17: Sunucu aracıları izleme verisini Zabbix'e gönderir; şube izinleri bu kural olmadan işe yaramaz ve LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.2.60.0/25",
+                "to": "10.1.61.20",
+                "note": "17: Sunucu aracıları izleme verisini Zabbix'e gönderir; şube izinleri bu kural olmadan işe yaramaz ve LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.2.64.0/26",
+                "to": "10.1.61.20",
+                "note": "17: Sunucu aracıları izleme verisini Zabbix'e gönderir; şube izinleri bu kural olmadan işe yaramaz ve LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.4.60.0/24",
+                "to": "10.1.61.20",
+                "note": "17: Sunucu aracıları izleme verisini Zabbix'e gönderir; şube izinleri bu kural olmadan işe yaramaz ve LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.4.63.0/26",
+                "to": "10.1.61.20",
+                "note": "17: Sunucu aracıları izleme verisini Zabbix'e gönderir; şube izinleri bu kural olmadan işe yaramaz ve LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.4.64.0/26",
+                "to": "10.1.61.20",
+                "note": "17: Sunucu aracıları izleme verisini Zabbix'e gönderir; şube izinleri bu kural olmadan işe yaramaz ve LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.4.70.12",
+                "to": "10.1.61.20",
+                "note": "17: Sunucu aracıları izleme verisini Zabbix'e gönderir; şube izinleri bu kural olmadan işe yaramaz ve LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.4.70.13",
+                "to": "10.1.61.20",
+                "note": "17: Sunucu aracıları izleme verisini Zabbix'e gönderir; şube izinleri bu kural olmadan işe yaramaz ve LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.4.70.11",
+                "to": "10.1.61.20",
+                "note": "17: Sunucu aracıları izleme verisini Zabbix'e gönderir; şube izinleri bu kural olmadan işe yaramaz ve LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 500,
+                "from": "wan-izmir",
+                "to": "wan-istanbul",
+                "note": "18: Şube IPsec tünelleri yalnızca bilinen adreslerden kurulur; yoksa şubeler merkeze bağlanamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 4500,
+                "from": "wan-izmir",
+                "to": "wan-istanbul",
+                "note": "18: Şube IPsec tünelleri yalnızca bilinen adreslerden kurulur; yoksa şubeler merkeze bağlanamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 500,
+                "from": "wan-amsterdam",
+                "to": "wan-istanbul",
+                "note": "18: Şube IPsec tünelleri yalnızca bilinen adreslerden kurulur; yoksa şubeler merkeze bağlanamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 4500,
+                "from": "wan-amsterdam",
+                "to": "wan-istanbul",
+                "note": "18: Şube IPsec tünelleri yalnızca bilinen adreslerden kurulur; yoksa şubeler merkeze bağlanamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 500,
+                "from": "wan-ankara",
+                "to": "wan-istanbul",
+                "note": "18: Şube IPsec tünelleri yalnızca bilinen adreslerden kurulur; yoksa şubeler merkeze bağlanamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 4500,
+                "from": "wan-ankara",
+                "to": "wan-istanbul",
+                "note": "18: Şube IPsec tünelleri yalnızca bilinen adreslerden kurulur; yoksa şubeler merkeze bağlanamaz."
+              },
+              {
+                "action": "limit",
+                "direction": "in",
+                "proto": "udp",
+                "port": 500,
+                "from": "internet",
+                "to": "wan-istanbul",
+                "note": "19: Çalışanlar her yerden VPN'e bağlanır, deneme saldırıları sınırlanır; yoksa uzaktan erişim çalışmaz."
+              },
+              {
+                "action": "limit",
+                "direction": "in",
+                "proto": "udp",
+                "port": 4500,
+                "from": "internet",
+                "to": "wan-istanbul",
+                "note": "19: Çalışanlar her yerden VPN'e bağlanır, deneme saldırıları sınırlanır; yoksa uzaktan erişim çalışmaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.200.0/22",
+                "to": "10.1.60.31",
+                "note": "20: Personel VPN profili uzaktan yalnızca ERP'ye ulaşır; daha geniş olursa çalınan hesap iç ağı görür."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.204.0/24",
+                "to": "10.1.60.32",
+                "note": "21: Geliştirici VPN profili uzaktan yalnızca Git ve CI'a ulaşır; daha geniş olursa çalınan hesap iç ağı görür."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.204.0/24",
+                "to": "10.1.60.32",
+                "note": "21: Geliştirici VPN profili uzaktan yalnızca Git ve CI'a ulaşır; daha geniş olursa çalınan hesap iç ağı görür."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.208.0/22",
+                "to": "10.4.60.31",
+                "note": "22: Hoca VPN profili evden yalnızca öğrenci bilgi sistemine ulaşır; Ankara kural 23 ile birlikte çalışır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.205.0/25",
+                "to": "10.1.61.5",
+                "note": "23: Yönetici VPN profili yalnızca bastion'a ulaşır, cihazlara oradan geçer; yoksa yönetim oturumları kaydedilmez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.205.0/25",
+                "to": "10.1.61.5",
+                "note": "23: Yönetici VPN profili yalnızca bastion'a ulaşır, cihazlara oradan geçer; yoksa yönetim oturumları kaydedilmez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 5432,
+                "from": "10.1.60.31",
+                "to": "10.1.63.31",
+                "note": "24: ERP yalnızca kendi veritabanına ulaşır; veri segmenti ayrıldığı için bu izin olmadan ERP çalışmaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3128,
+                "from": "10.1.60.0/24",
+                "to": "10.1.64.40",
+                "note": "25: İç sunucular güncellemeyi ve bildirimleri proxy'den alır; proxy ayrı segmentte olduğu için bu izin olmadan yama alınamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3128,
+                "from": "10.1.61.0/27",
+                "to": "10.1.64.40",
+                "note": "25: İç sunucular güncellemeyi ve bildirimleri proxy'den alır; proxy ayrı segmentte olduğu için bu izin olmadan yama alınamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3128,
+                "from": "10.1.63.0/26",
+                "to": "10.1.64.40",
+                "note": "25: İç sunucular güncellemeyi ve bildirimleri proxy'den alır; proxy ayrı segmentte olduğu için bu izin olmadan yama alınamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.61.5",
+                "to": "10.1.60.0/24",
+                "note": "26: Uzaktaki yönetici sunuculara yalnızca bastion'dan, kayıtlı oturumla geçer; yoksa uzaktan sunucu yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.61.5",
+                "to": "10.1.60.0/24",
+                "note": "26: Uzaktaki yönetici sunuculara yalnızca bastion'dan, kayıtlı oturumla geçer; yoksa uzaktan sunucu yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3389,
+                "from": "10.1.61.5",
+                "to": "10.1.60.0/24",
+                "note": "26: Uzaktaki yönetici sunuculara yalnızca bastion'dan, kayıtlı oturumla geçer; yoksa uzaktan sunucu yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.61.5",
+                "to": "10.1.64.0/26",
+                "note": "26: Uzaktaki yönetici sunuculara yalnızca bastion'dan, kayıtlı oturumla geçer; yoksa uzaktan sunucu yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.61.5",
+                "to": "10.1.64.0/26",
+                "note": "26: Uzaktaki yönetici sunuculara yalnızca bastion'dan, kayıtlı oturumla geçer; yoksa uzaktan sunucu yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3389,
+                "from": "10.1.61.5",
+                "to": "10.1.64.0/26",
+                "note": "26: Uzaktaki yönetici sunuculara yalnızca bastion'dan, kayıtlı oturumla geçer; yoksa uzaktan sunucu yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.61.5",
+                "to": "10.1.70.0/27",
+                "note": "26: Uzaktaki yönetici sunuculara yalnızca bastion'dan, kayıtlı oturumla geçer; yoksa uzaktan sunucu yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.61.5",
+                "to": "10.1.70.0/27",
+                "note": "26: Uzaktaki yönetici sunuculara yalnızca bastion'dan, kayıtlı oturumla geçer; yoksa uzaktan sunucu yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3389,
+                "from": "10.1.61.5",
+                "to": "10.1.70.0/27",
+                "note": "26: Uzaktaki yönetici sunuculara yalnızca bastion'dan, kayıtlı oturumla geçer; yoksa uzaktan sunucu yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.61.5",
+                "to": "10.1.63.0/26",
+                "note": "27: Veritabanı sunucuları yalnızca bastion'dan yönetilir; kullanıcı ve teknik VLAN'lar veri segmentine doğrudan ulaşamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.50.0/25",
+                "to": "10.1.61.5",
+                "note": "28: Ofisteki teknik ekip de cihazlara bastion'dan geçer; yoksa yönetim için VPN gerekir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.50.0/25",
+                "to": "10.1.61.5",
+                "note": "28: Ofisteki teknik ekip de cihazlara bastion'dan geçer; yoksa yönetim için VPN gerekir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.50.0/25",
+                "to": "10.1.61.10",
+                "note": "29: SOC ve operasyon Wazuh, Zabbix, Grafana, GLPI ve FortiManager panellerine ulaşır; yoksa alarmlar izlenemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.50.0/25",
+                "to": "10.1.61.20",
+                "note": "29: SOC ve operasyon Wazuh, Zabbix, Grafana, GLPI ve FortiManager panellerine ulaşır; yoksa alarmlar izlenemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.50.0/25",
+                "to": "10.1.61.22",
+                "note": "29: SOC ve operasyon Wazuh, Zabbix, Grafana, GLPI ve FortiManager panellerine ulaşır; yoksa alarmlar izlenemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.50.0/25",
+                "to": "10.1.61.21",
+                "note": "29: SOC ve operasyon Wazuh, Zabbix, Grafana, GLPI ve FortiManager panellerine ulaşır; yoksa alarmlar izlenemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.50.0/25",
+                "to": "10.1.61.6",
+                "note": "29: SOC ve operasyon Wazuh, Zabbix, Grafana, GLPI ve FortiManager panellerine ulaşır; yoksa alarmlar izlenemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 541,
+                "from": "172.31.2.2",
+                "to": "10.1.61.6",
+                "note": "30: Şube güvenlik duvarları tünelden FortiManager'a bağlanır; yoksa yapılandırma ve yedek merkezden yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 541,
+                "from": "172.31.3.2",
+                "to": "10.1.61.6",
+                "note": "30: Şube güvenlik duvarları tünelden FortiManager'a bağlanır; yoksa yapılandırma ve yedek merkezden yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 541,
+                "from": "172.31.4.2",
+                "to": "10.1.61.6",
+                "note": "30: Şube güvenlik duvarları tünelden FortiManager'a bağlanır; yoksa yapılandırma ve yedek merkezden yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 636,
+                "from": "10.1.61.0/27",
+                "to": "10.1.60.3",
+                "note": "31: Bastion ve paneller kimlik doğrulamayı dizinden yapar; yoksa ortak yönetim hesapları gerekir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 636,
+                "from": "10.4.60.3",
+                "to": "10.1.60.3",
+                "note": "32: Ankara RADIUS sunucusu kullanıcıları dizinden doğrular; Ankara kural 26 bu izin olmadan işe yaramaz."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "O7: Açıkça izin verilmeyen trafik geçmez ve loglanır; yoksa unutulan her servis açık kalır."
+              }
+            ]
+          },
+          {
+            "segment": "dmz-waf",
+            "chosen": {
+              "product": "ModSecurity + OWASP Core Rule Set (Nginx, iki sunucu, aktif-pasif)",
+              "vendor": "Açık kaynak",
+              "priceUsd": 0,
+              "reason": "Lisans ücreti yok, kurallar görülüp denetlenebilir. 0 USD yalnızca lisanstır; iki sunucu, bakım emeği ve yük testi dahil değildir. Kapasite ölçülmedi, doğrulama planı waf/README.md dosyasındadır."
+            },
+            "alternatives": [
+              {
+                "product": "Cloudflare WAF (Business planı, yıllık)",
+                "vendor": "Cloudflare",
+                "priceUsd": 2400,
+                "reason": "Fiyat yıllık abonelik, donanımla karşılaştırılmaz. Kurulumu kolay ve DDoS koruması da verir, ancak TLS trafiği şirket dışında açılır; KVKK ve öğrenci verisi nedeniyle tercih edilmedi."
+              },
+              {
+                "product": "FortiWeb 400F",
+                "vendor": "Fortinet",
+                "throughputGbps": 0.5,
+                "priceUsd": 22400,
+                "reason": "Fiyat donanımdır, lisans hariç. Ortak üreticiyle uyumlu, ancak satıcıların verdiği 500 Mbps Ankara'nın 3 Gbps planlama hedefine yetmez."
+              },
+              {
+                "product": "Barracuda WAF 660",
+                "vendor": "Barracuda",
+                "priceUsd": 22990,
+                "reason": "Fiyat donanımdır, yıllık abonelik ayrıca ödenir. Hazır cihaz ve destek sunar, ancak fiyatı yüksek ve hız değeri doğrulanamadı."
+              },
+              {
+                "product": "F5 BIG-IP Advanced WAF i2800",
+                "vendor": "F5",
+                "priceUsd": 46075,
+                "reason": "Fiyat donanımdır, lisans ve destek kapsamı teklifle doğrulanmalı. Güçlü bir kurumsal ürün, ancak bu ölçek için en pahalı seçenek ve özel uzmanlık ister."
+              }
+            ],
+            "rules": [
+              {
+                "action": "limit",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 443,
+                "from": "any",
+                "to": "10.1.70.10",
+                "note": "1: İnternetten ve kampüsten yalnızca WAF sanal adresine HTTPS gelir ve istekler sınırlanır; yoksa yayınlanan servislere ulaşılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 8080,
+                "from": "10.1.70.12",
+                "to": "10.1.70.11",
+                "note": "2: Yalnızca temiz istekler WAF düğümünden uygulamaya gider; yoksa WAF arkasındaki uygulama cevap veremez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 8080,
+                "from": "10.1.70.13",
+                "to": "10.1.70.11",
+                "note": "2: Yalnızca temiz istekler WAF düğümünden uygulamaya gider; yoksa WAF arkasındaki uygulama cevap veremez."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "3: WAF'ın izin vermediği her istek reddedilir ve loglanır; yoksa WAF'ın korumadığı yollar açık kalır."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "izmir",
+        "name": "İzmir Ofisi",
+        "role": "branch",
+        "location": "İzmir, TR",
+        "population": {
+          "staff": 132,
+          "students": 0,
+          "rnd": 40,
+          "software": 25
+        },
+        "network": {
+          "cidr": "10.2.0.0/16",
+          "dmz": false,
+          "vlans": [
+            {
+              "id": 10,
+              "name": "Yönetim",
+              "cidr": "10.2.10.0/26",
+              "note": "Ağ cihazlarının yönetimi, yalnızca VPN ve bastion ile."
+            },
+            {
+              "id": 20,
+              "name": "Personel",
+              "cidr": "10.2.20.0/23",
+              "note": "120 × 2 cihaz × 1,3 büyüme = 312 adres."
+            },
+            {
+              "id": 30,
+              "name": "Yazılım",
+              "cidr": "10.2.30.0/25",
+              "note": "25 × 2 × 1,3 = 65 adres; Git ve CI erişimi."
+            },
+            {
+              "id": 40,
+              "name": "Ar-Ge",
+              "cidr": "10.2.40.0/25",
+              "note": "40 × 2 × 1,3 = 104 adres; internete yalnızca proxy ile çıkar."
+            },
+            {
+              "id": 50,
+              "name": "Teknik",
+              "cidr": "10.2.50.0/26",
+              "note": "12 × 2 × 1,3 = 32 adres; altyapı yetkisi olan ekip."
+            },
+            {
+              "id": 60,
+              "name": "Sunucu",
+              "cidr": "10.2.60.0/25",
+              "note": "Altyapı ve Ar-Ge verisi. Aynı VLAN içi akışlar sunucu güvenlik duvarıyla sınırlanır."
+            },
+            {
+              "id": 64,
+              "name": "Sınır servisleri",
+              "cidr": "10.2.64.0/26",
+              "note": "Proxy ve kamera kayıt. Ar-Ge verisinden ayrıdır."
+            },
+            {
+              "id": 80,
+              "name": "IoT",
+              "cidr": "10.2.80.0/25",
+              "note": "Kamera, yazıcı, kartlı geçiş; internete çıkmaz."
+            },
+            {
+              "id": 85,
+              "name": "Misafir",
+              "cidr": "10.2.85.0/24",
+              "note": "Yalnızca internet, iç ağa erişemez."
+            }
+          ]
+        },
+        "bandwidth": {
+          "downMbps": 2000,
+          "upMbps": 2000,
+          "drivers": [
+            "Ar-Ge veri setleri",
+            "test ortamları",
+            "Git ve CI",
+            "ERP",
+            "görüntülü görüşme",
+            "1 Gbps yedek hat"
+          ]
+        },
+        "firewalls": [
+          {
+            "segment": "perimeter",
+            "chosen": {
+              "product": "FortiGate 120G",
+              "vendor": "Fortinet",
+              "throughputGbps": 2.8,
+              "priceUsd": 4280,
+              "reason": "En ucuzu değil, ama 2 Gbps hattı IPS açıkken 2,8 Gbps ile karşılar, 3 Gbps TLS denetimi sunar ve ortak yönetime girer. Fiyat ve hız tek cihazındır (FG-120G, lisans hariç); aktif-pasif HA için iki adet gerekir, hız ikiye katlanmaz."
+            },
+            "alternatives": [
+              {
+                "product": "PA-460",
+                "vendor": "Palo Alto Networks",
+                "throughputGbps": 2.1,
+                "priceUsd": 4750,
+                "reason": "Yeterli, ancak kaynaklardaki hız 2,1-3 Gbps arasında değişiyor ve daha pahalı."
+              },
+              {
+                "product": "Force 3920",
+                "vendor": "Check Point",
+                "throughputGbps": 3.2,
+                "priceUsd": 6020,
+                "reason": "Yeterli, ancak Fortinet yönetimine girmez. Fiyata 1 yıllık SandBlast aboneliği dahildir (CPAP-SG3920-SNBT, PC Nation); aboneliksiz donanım SKU'su bulunamadı, bu yüzden diğer donanım fiyatlarıyla doğrudan karşılaştırılmaz."
+              },
+              {
+                "product": "Firepower 1140",
+                "vendor": "Cisco",
+                "throughputGbps": 3.3,
+                "priceUsd": 2860,
+                "reason": "Daha ucuz ve yeterli, ancak Fortinet yönetimine girmez ve veri sayfası eski."
+              },
+              {
+                "product": "XGS 2100",
+                "vendor": "Sophos",
+                "throughputGbps": 5.6,
+                "priceUsd": 2290,
+                "reason": "En ucuz seçenek ve kapasitesi yüksek, ancak değer ideal koşullarda ölçülmüş ve ortak yönetim dışında kalıyor."
+              }
+            ],
+            "rules": [
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.61.5",
+                "to": "10.2.10.0/26",
+                "note": "O1: Ağ cihazları yalnızca kayıt tutan bastion'dan yönetilir; yoksa yöneticiler cihazlara ulaşamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.61.5",
+                "to": "10.2.10.0/26",
+                "note": "O1: Ağ cihazları yalnızca kayıt tutan bastion'dan yönetilir; yoksa yöneticiler cihazlara ulaşamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 161,
+                "from": "10.1.61.20",
+                "to": "10.2.10.0/26",
+                "note": "O2: Zabbix ağ cihazlarının durumunu okur; O3'ün altında kalırsa izleme durur ve arızalar görülmez."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.1.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.2.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.3.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.4.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "10.2.0.0/16",
+                "to": "10.2.60.2",
+                "note": "O4: Bütün VLAN'lar relay ile DHCP sunucusuna gider, misafir dahil; yoksa istemciler IP alamaz."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.2.85.0/24",
+                "to": "10.2.60.2",
+                "note": "O4: Misafir DHCP dışında şube sunucusuna ulaşamaz; yoksa iç DNS kayıtlarını sorgulayabilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "10.2.0.0/16",
+                "to": "10.2.60.2",
+                "note": "O4: İç ağlar şube DNS ve NTP sunucusunu kullanır; yoksa ad çözümleme ve saat, dolayısıyla TLS ve loglar bozulur."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "10.2.0.0/16",
+                "to": "10.2.60.2",
+                "note": "O4: İç ağlar şube DNS ve NTP sunucusunu kullanır; yoksa ad çözümleme ve saat, dolayısıyla TLS ve loglar bozulur."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 123,
+                "from": "10.2.0.0/16",
+                "to": "10.2.60.2",
+                "note": "O4: İç ağlar şube DNS ve NTP sunucusunu kullanır; yoksa ad çözümleme ve saat, dolayısıyla TLS ve loglar bozulur."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.2.10.0/26",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.2.60.0/25",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.2.64.0/26",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "10.2.60.2",
+                "to": "internet",
+                "note": "O6: Şube DNS ve NTP sunucusu dış adresleri çözer ve saat alır; yoksa iç ağ dış adresleri çözemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "10.2.60.2",
+                "to": "internet",
+                "note": "O6: Şube DNS ve NTP sunucusu dış adresleri çözer ve saat alır; yoksa iç ağ dış adresleri çözemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 123,
+                "from": "10.2.60.2",
+                "to": "internet",
+                "note": "O6: Şube DNS ve NTP sunucusu dış adresleri çözer ve saat alır; yoksa iç ağ dış adresleri çözemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.2.40.0/25",
+                "to": "10.2.60.20",
+                "note": "1: Ar-Ge yalnızca kendi veri sunucusuna ulaşır; yoksa araştırma verisine erişilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.2.40.0/25",
+                "to": "10.2.60.20",
+                "note": "1: Ar-Ge yalnızca kendi veri sunucusuna ulaşır; yoksa araştırma verisine erişilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3128,
+                "from": "10.2.40.0/25",
+                "to": "10.2.64.10",
+                "note": "2: Ar-Ge internete yalnızca proxy ile çıkar; yoksa ekip internete hiç çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.2.64.10",
+                "to": "internet",
+                "note": "3: Proxy çıkışı tek noktadan web filtresiyle denetlenir; yoksa proxy kullanıcıları dışarı çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.2.64.10",
+                "to": "internet",
+                "note": "3: Proxy çıkışı tek noktadan web filtresiyle denetlenir; yoksa proxy kullanıcıları dışarı çıkamaz."
+              },
+              {
+                "action": "reject",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.2.40.0/25",
+                "to": "internet",
+                "note": "4: Proxy dışı Ar-Ge çıkışı reddedilir ve alarm üretir; yoksa fikri mülkiyet denetimsiz dışarı çıkabilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.2.20.0/23",
+                "to": "10.1.60.31",
+                "note": "5: Personel merkezî ERP'ye tünelle ulaşır; İstanbul kural 4 ile birlikte çalışır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.2.30.0/25",
+                "to": "10.1.60.32",
+                "note": "6: Yazılımcılar Git ve CI sunucusuna tünelle ulaşır; İstanbul kural 6 ile birlikte çalışır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.2.30.0/25",
+                "to": "10.1.60.32",
+                "note": "6: Yazılımcılar Git ve CI sunucusuna tünelle ulaşır; İstanbul kural 6 ile birlikte çalışır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.2.50.0/26",
+                "to": "10.2.60.0/25",
+                "note": "7: Sunucu yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.2.50.0/26",
+                "to": "10.2.60.0/25",
+                "note": "7: Sunucu yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3389,
+                "from": "10.2.50.0/26",
+                "to": "10.2.60.0/25",
+                "note": "7: Sunucu yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.2.50.0/26",
+                "to": "10.2.64.0/26",
+                "note": "7: Sunucu yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.2.50.0/26",
+                "to": "10.2.64.0/26",
+                "note": "7: Sunucu yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3389,
+                "from": "10.2.50.0/26",
+                "to": "10.2.64.0/26",
+                "note": "7: Sunucu yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.2.20.0/23",
+                "to": "internet",
+                "note": "8: Normal internet erişimi IPS, TLS denetimi ve uygulama profiliyle geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.2.20.0/23",
+                "to": "internet",
+                "note": "8: Normal internet erişimi IPS, TLS denetimi ve uygulama profiliyle geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.2.30.0/25",
+                "to": "internet",
+                "note": "8: Normal internet erişimi IPS, TLS denetimi ve uygulama profiliyle geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.2.30.0/25",
+                "to": "internet",
+                "note": "8: Normal internet erişimi IPS, TLS denetimi ve uygulama profiliyle geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.2.50.0/26",
+                "to": "internet",
+                "note": "8: Normal internet erişimi IPS, TLS denetimi ve uygulama profiliyle geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.2.50.0/26",
+                "to": "internet",
+                "note": "8: Normal internet erişimi IPS, TLS denetimi ve uygulama profiliyle geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.2.30.0/25",
+                "to": "github.com",
+                "note": "9: Dış depolara SSH yalnızca onaylı Git adreslerine gider; daha geniş olursa veri SSH ile dışarı çıkabilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.2.30.0/25",
+                "to": "gitlab.com",
+                "note": "9: Dış depolara SSH yalnızca onaylı Git adreslerine gider; daha geniş olursa veri SSH ile dışarı çıkabilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 554,
+                "from": "10.2.80.0/25",
+                "to": "10.2.64.50",
+                "note": "10: Kameralar yalnızca kayıt sunucusuna ulaşır; yoksa görüntü kaydedilmez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "10.2.85.0/24",
+                "to": "internet",
+                "note": "11: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "10.2.85.0/24",
+                "to": "internet",
+                "note": "11: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.2.85.0/24",
+                "to": "internet",
+                "note": "11: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.2.85.0/24",
+                "to": "internet",
+                "note": "11: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.2.20.0/23",
+                "to": "10.2.80.20",
+                "note": "12: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.2.20.0/23",
+                "to": "10.2.80.20",
+                "note": "12: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.2.30.0/25",
+                "to": "10.2.80.20",
+                "note": "12: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.2.30.0/25",
+                "to": "10.2.80.20",
+                "note": "12: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.2.40.0/25",
+                "to": "10.2.80.20",
+                "note": "12: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.2.40.0/25",
+                "to": "10.2.80.20",
+                "note": "12: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.2.50.0/26",
+                "to": "10.2.80.20",
+                "note": "12: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.2.50.0/26",
+                "to": "10.2.80.20",
+                "note": "12: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.2.60.0/25",
+                "to": "10.1.61.20",
+                "note": "13: Proxy ve sunucular izleme verisini Zabbix'e gönderir; İstanbul kural 17 ile birlikte çalışır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.2.64.0/26",
+                "to": "10.1.61.20",
+                "note": "13: Proxy ve sunucular izleme verisini Zabbix'e gönderir; İstanbul kural 17 ile birlikte çalışır."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 500,
+                "from": "wan-istanbul",
+                "to": "wan-izmir",
+                "note": "14: IPsec tüneli yalnızca merkezin adresinden kurulur; yoksa şube merkeze bağlanamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 4500,
+                "from": "wan-istanbul",
+                "to": "wan-izmir",
+                "note": "14: IPsec tüneli yalnızca merkezin adresinden kurulur; yoksa şube merkeze bağlanamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3128,
+                "from": "10.2.60.0/25",
+                "to": "10.2.64.10",
+                "note": "15: Sunucular güncellemeyi proxy'den alır; proxy ayrı segmentte olduğu için bu izin olmadan yama alınamaz."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "O7: Açıkça izin verilmeyen trafik geçmez ve loglanır; yoksa unutulan her servis açık kalır."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "amsterdam",
+        "name": "Amsterdam Ofisi",
+        "role": "branch",
+        "location": "Amsterdam, NL",
+        "population": {
+          "staff": 88,
+          "students": 0,
+          "rnd": 0,
+          "software": 20
+        },
+        "network": {
+          "cidr": "10.3.0.0/16",
+          "dmz": false,
+          "vlans": [
+            {
+              "id": 10,
+              "name": "Yönetim",
+              "cidr": "10.3.10.0/26",
+              "note": "Ağ cihazlarının yönetimi, yalnızca VPN ve bastion ile."
+            },
+            {
+              "id": 20,
+              "name": "Personel",
+              "cidr": "10.3.20.0/24",
+              "note": "80 × 2 cihaz × 1,3 büyüme = 208 adres."
+            },
+            {
+              "id": 30,
+              "name": "Yazılım",
+              "cidr": "10.3.30.0/26",
+              "note": "20 × 2 × 1,3 = 52 adres; Git ve CI erişimi."
+            },
+            {
+              "id": 50,
+              "name": "Teknik",
+              "cidr": "10.3.50.0/27",
+              "note": "8 × 2 × 1,3 = 21 adres; altyapı yetkisi olan ekip."
+            },
+            {
+              "id": 60,
+              "name": "Sunucu",
+              "cidr": "10.3.60.0/26",
+              "note": "Altyapı, yerel log toplayıcı ve müşteri verisi. Aynı VLAN içi akışlar sunucu güvenlik duvarıyla sınırlanır."
+            },
+            {
+              "id": 64,
+              "name": "Sınır servisleri",
+              "cidr": "10.3.64.0/26",
+              "note": "Kamera kayıt. Müşteri verisinden ayrıdır."
+            },
+            {
+              "id": 80,
+              "name": "IoT",
+              "cidr": "10.3.80.0/26",
+              "note": "Kamera, yazıcı, kartlı geçiş; internete çıkmaz."
+            },
+            {
+              "id": 85,
+              "name": "Misafir",
+              "cidr": "10.3.85.0/24",
+              "note": "Yalnızca internet, iç ağa erişemez."
+            }
+          ]
+        },
+        "bandwidth": {
+          "downMbps": 500,
+          "upMbps": 500,
+          "drivers": [
+            "SaaS",
+            "müşteri görüşmeleri",
+            "İstanbul ile toplantılar",
+            "Git ve CI",
+            "ERP",
+            "250 Mbps yedek hat"
+          ]
+        },
+        "firewalls": [
+          {
+            "segment": "perimeter",
+            "chosen": {
+              "product": "FortiGate 70G",
+              "vendor": "Fortinet",
+              "throughputGbps": 1.3,
+              "priceUsd": 1210,
+              "reason": "En ucuzu değil, ama 500 Mbps hatta IPS açıkken 1,3 Gbps ile pay bırakır, ortak yönetime girer; 60F sipariş sonuna yaklaştığı için seçilmedi. Fiyat ve hız tek cihazındır (FG-70G, lisans hariç); aktif-pasif HA için iki adet gerekir, hız ikiye katlanmaz."
+            },
+            "alternatives": [
+              {
+                "product": "PA-410",
+                "vendor": "Palo Alto Networks",
+                "throughputGbps": 0.8,
+                "priceUsd": 850,
+                "reason": "Daha ucuz ve yeterli, ancak büyüme payı düşük ve ortak yönetim dışında kalıyor."
+              },
+              {
+                "product": "Spark 1600",
+                "vendor": "Check Point",
+                "throughputGbps": 1.5,
+                "priceUsd": 4010,
+                "reason": "Kapasitesi yüksek, ancak ortak yönetim dışında. Fiyata 1 yıllık SandBlast aboneliği dahildir (CPAP-SG1600-SNBT, checkfirewalls.com); aboneliksiz donanım SKU'su bulunamadı, bu yüzden diğer donanım fiyatlarıyla doğrudan karşılaştırılmaz."
+              },
+              {
+                "product": "Firepower 1010",
+                "vendor": "Cisco",
+                "throughputGbps": 0.88,
+                "priceUsd": 1070,
+                "reason": "Yeterli ve biraz daha ucuz, ancak ortak yönetim dışında kalıyor ve veri sayfası eski."
+              },
+              {
+                "product": "XGS 88",
+                "vendor": "Sophos",
+                "throughputGbps": 2,
+                "priceUsd": 640,
+                "reason": "Fiyat ve hız güçlü, ancak değer ideal koşullarda ölçülmüş ve ortak yönetim dışında kalıyor."
+              }
+            ],
+            "rules": [
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.61.5",
+                "to": "10.3.10.0/26",
+                "note": "O1: Ağ cihazları yalnızca kayıt tutan bastion'dan yönetilir; yoksa yöneticiler cihazlara ulaşamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.61.5",
+                "to": "10.3.10.0/26",
+                "note": "O1: Ağ cihazları yalnızca kayıt tutan bastion'dan yönetilir; yoksa yöneticiler cihazlara ulaşamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 161,
+                "from": "10.1.61.20",
+                "to": "10.3.10.0/26",
+                "note": "O2: Zabbix ağ cihazlarının durumunu okur; O3'ün altında kalırsa izleme durur ve arızalar görülmez."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.1.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.2.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.3.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.4.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "10.3.0.0/16",
+                "to": "10.3.60.2",
+                "note": "O4: Bütün VLAN'lar relay ile DHCP sunucusuna gider, misafir dahil; yoksa istemciler IP alamaz."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.3.85.0/24",
+                "to": "10.3.60.2",
+                "note": "O4: Misafir DHCP dışında şube sunucusuna ulaşamaz; yoksa iç DNS kayıtlarını sorgulayabilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "10.3.0.0/16",
+                "to": "10.3.60.2",
+                "note": "O4: İç ağlar şube DNS ve NTP sunucusunu kullanır; yoksa ad çözümleme ve saat, dolayısıyla TLS ve loglar bozulur."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "10.3.0.0/16",
+                "to": "10.3.60.2",
+                "note": "O4: İç ağlar şube DNS ve NTP sunucusunu kullanır; yoksa ad çözümleme ve saat, dolayısıyla TLS ve loglar bozulur."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 123,
+                "from": "10.3.0.0/16",
+                "to": "10.3.60.2",
+                "note": "O4: İç ağlar şube DNS ve NTP sunucusunu kullanır; yoksa ad çözümleme ve saat, dolayısıyla TLS ve loglar bozulur."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.3.10.0/26",
+                "to": "10.3.60.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.3.64.0/26",
+                "to": "10.3.60.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "10.3.60.2",
+                "to": "internet",
+                "note": "O6: Şube DNS ve NTP sunucusu dış adresleri çözer ve saat alır; yoksa iç ağ dış adresleri çözemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "10.3.60.2",
+                "to": "internet",
+                "note": "O6: Şube DNS ve NTP sunucusu dış adresleri çözer ve saat alır; yoksa iç ağ dış adresleri çözemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 123,
+                "from": "10.3.60.2",
+                "to": "internet",
+                "note": "O6: Şube DNS ve NTP sunucusu dış adresleri çözer ve saat alır; yoksa iç ağ dış adresleri çözemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.3.20.0/24",
+                "to": "10.3.60.20",
+                "note": "1: Personel müşteri verisini yerel CRM'den kullanır; yoksa satış ekibi çalışamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.3.50.0/27",
+                "to": "10.3.60.0/26",
+                "note": "2: Sunucu yönetimi yerel teknik ekiptedir ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.3.50.0/27",
+                "to": "10.3.60.0/26",
+                "note": "2: Sunucu yönetimi yerel teknik ekiptedir ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.3.50.0/27",
+                "to": "10.3.64.0/26",
+                "note": "2: Sunucu yönetimi yerel teknik ekiptedir ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.3.50.0/27",
+                "to": "10.3.64.0/26",
+                "note": "2: Sunucu yönetimi yerel teknik ekiptedir ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.3.60.0/26",
+                "to": "10.1.0.0/16",
+                "note": "3: GDPR: kişisel veri onaysız yurt dışına aktarılamaz; yoksa veri tünelle Türkiye'ye gidebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.3.60.0/26",
+                "to": "10.2.0.0/16",
+                "note": "3: GDPR: kişisel veri onaysız yurt dışına aktarılamaz; yoksa veri tünelle Türkiye'ye gidebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.3.60.0/26",
+                "to": "10.4.0.0/16",
+                "note": "3: GDPR: kişisel veri onaysız yurt dışına aktarılamaz; yoksa veri tünelle Türkiye'ye gidebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.3.60.0/26",
+                "to": "172.31.3.1",
+                "note": "3: GDPR: kişisel veri onaysız yurt dışına aktarılamaz; yoksa veri tünelle Türkiye'ye gidebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.3.64.0/26",
+                "to": "10.1.0.0/16",
+                "note": "3: GDPR: kişisel veri onaysız yurt dışına aktarılamaz; yoksa veri tünelle Türkiye'ye gidebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.3.64.0/26",
+                "to": "10.2.0.0/16",
+                "note": "3: GDPR: kişisel veri onaysız yurt dışına aktarılamaz; yoksa veri tünelle Türkiye'ye gidebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.3.64.0/26",
+                "to": "10.4.0.0/16",
+                "note": "3: GDPR: kişisel veri onaysız yurt dışına aktarılamaz; yoksa veri tünelle Türkiye'ye gidebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.3.64.0/26",
+                "to": "172.31.3.1",
+                "note": "3: GDPR: kişisel veri onaysız yurt dışına aktarılamaz; yoksa veri tünelle Türkiye'ye gidebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.1.0.0/16",
+                "to": "10.3.60.0/26",
+                "note": "4: GDPR: merkezden kişisel veriye doğrudan erişim engellenir; yoksa merkez yetkisi veriyi görebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.1.0.0/16",
+                "to": "10.3.64.0/26",
+                "note": "4: GDPR: merkezden kişisel veriye doğrudan erişim engellenir; yoksa merkez yetkisi veriyi görebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.2.0.0/16",
+                "to": "10.3.60.0/26",
+                "note": "4: GDPR: merkezden kişisel veriye doğrudan erişim engellenir; yoksa merkez yetkisi veriyi görebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.2.0.0/16",
+                "to": "10.3.64.0/26",
+                "note": "4: GDPR: merkezden kişisel veriye doğrudan erişim engellenir; yoksa merkez yetkisi veriyi görebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.4.0.0/16",
+                "to": "10.3.60.0/26",
+                "note": "4: GDPR: merkezden kişisel veriye doğrudan erişim engellenir; yoksa merkez yetkisi veriyi görebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.4.0.0/16",
+                "to": "10.3.64.0/26",
+                "note": "4: GDPR: merkezden kişisel veriye doğrudan erişim engellenir; yoksa merkez yetkisi veriyi görebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "172.31.3.1",
+                "to": "10.3.60.0/26",
+                "note": "4: GDPR: merkezden kişisel veriye doğrudan erişim engellenir; yoksa merkez yetkisi veriyi görebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "172.31.3.1",
+                "to": "10.3.64.0/26",
+                "note": "4: GDPR: merkezden kişisel veriye doğrudan erişim engellenir; yoksa merkez yetkisi veriyi görebilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.3.20.0/24",
+                "to": "10.1.60.31",
+                "note": "5: Personel merkezî ERP'ye tünelle ulaşır; İstanbul kural 4 ile birlikte çalışır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.3.30.0/26",
+                "to": "10.1.60.32",
+                "note": "6: Yazılımcılar Git ve CI sunucusuna tünelle ulaşır; İstanbul kural 6 ile birlikte çalışır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.3.30.0/26",
+                "to": "10.1.60.32",
+                "note": "6: Yazılımcılar Git ve CI sunucusuna tünelle ulaşır; İstanbul kural 6 ile birlikte çalışır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.3.20.0/24",
+                "to": "internet",
+                "note": "7: Normal internet erişimi IPS, web filtresi ve uygulama profiliyle geçer, TLS denetimi kapalıdır; yoksa SaaS kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.3.20.0/24",
+                "to": "internet",
+                "note": "7: Normal internet erişimi IPS, web filtresi ve uygulama profiliyle geçer, TLS denetimi kapalıdır; yoksa SaaS kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.3.30.0/26",
+                "to": "internet",
+                "note": "7: Normal internet erişimi IPS, web filtresi ve uygulama profiliyle geçer, TLS denetimi kapalıdır; yoksa SaaS kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.3.30.0/26",
+                "to": "internet",
+                "note": "7: Normal internet erişimi IPS, web filtresi ve uygulama profiliyle geçer, TLS denetimi kapalıdır; yoksa SaaS kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.3.50.0/27",
+                "to": "internet",
+                "note": "7: Normal internet erişimi IPS, web filtresi ve uygulama profiliyle geçer, TLS denetimi kapalıdır; yoksa SaaS kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.3.50.0/27",
+                "to": "internet",
+                "note": "7: Normal internet erişimi IPS, web filtresi ve uygulama profiliyle geçer, TLS denetimi kapalıdır; yoksa SaaS kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.3.30.0/26",
+                "to": "github.com",
+                "note": "8: Dış depolara SSH yalnızca onaylı Git adreslerine gider; daha geniş olursa veri SSH ile dışarı çıkabilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.3.30.0/26",
+                "to": "gitlab.com",
+                "note": "8: Dış depolara SSH yalnızca onaylı Git adreslerine gider; daha geniş olursa veri SSH ile dışarı çıkabilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 554,
+                "from": "10.3.80.0/26",
+                "to": "10.3.64.50",
+                "note": "9: Kameralar yalnızca kayıt sunucusuna ulaşır; yoksa görüntü kaydedilmez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "10.3.85.0/24",
+                "to": "internet",
+                "note": "10: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "10.3.85.0/24",
+                "to": "internet",
+                "note": "10: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.3.85.0/24",
+                "to": "internet",
+                "note": "10: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.3.85.0/24",
+                "to": "internet",
+                "note": "10: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.3.20.0/24",
+                "to": "10.3.80.20",
+                "note": "11: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.3.20.0/24",
+                "to": "10.3.80.20",
+                "note": "11: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.3.30.0/26",
+                "to": "10.3.80.20",
+                "note": "11: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.3.30.0/26",
+                "to": "10.3.80.20",
+                "note": "11: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.3.50.0/27",
+                "to": "10.3.80.20",
+                "note": "11: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.3.50.0/27",
+                "to": "10.3.80.20",
+                "note": "11: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.3.60.0/26",
+                "to": "archive.ubuntu.com",
+                "note": "12: Proxy olmadığı için sunucular yalnızca onaylı güncelleme adreslerine çıkar; yoksa yama alınamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.3.60.0/26",
+                "to": "security.ubuntu.com",
+                "note": "12: Proxy olmadığı için sunucular yalnızca onaylı güncelleme adreslerine çıkar; yoksa yama alınamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.3.64.0/26",
+                "to": "archive.ubuntu.com",
+                "note": "12: Proxy olmadığı için sunucular yalnızca onaylı güncelleme adreslerine çıkar; yoksa yama alınamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.3.64.0/26",
+                "to": "security.ubuntu.com",
+                "note": "12: Proxy olmadığı için sunucular yalnızca onaylı güncelleme adreslerine çıkar; yoksa yama alınamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 500,
+                "from": "wan-istanbul",
+                "to": "wan-amsterdam",
+                "note": "13: IPsec tüneli yalnızca merkezin adresinden kurulur; yoksa şube merkeze bağlanamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 4500,
+                "from": "wan-istanbul",
+                "to": "wan-amsterdam",
+                "note": "13: IPsec tüneli yalnızca merkezin adresinden kurulur; yoksa şube merkeze bağlanamaz."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "O7: Açıkça izin verilmeyen trafik geçmez ve loglanır; yoksa unutulan her servis açık kalır."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ankara-akademik",
+        "name": "Ankara Akademik Şube",
+        "role": "campus",
+        "location": "Ankara, TR",
+        "population": {
+          "staff": 630,
+          "students": 10000,
+          "rnd": 20,
+          "software": 10
+        },
+        "network": {
+          "cidr": "10.4.0.0/16",
+          "dmz": true,
+          "vlans": [
+            {
+              "id": 10,
+              "name": "Yönetim",
+              "cidr": "10.4.10.0/26",
+              "note": "Ağ cihazlarının yönetimi, yalnızca VPN ve bastion ile."
+            },
+            {
+              "id": 20,
+              "name": "Personel",
+              "cidr": "10.4.20.0/22",
+              "note": "200 × 2 cihaz × 1,3 büyüme = 520 adres."
+            },
+            {
+              "id": 30,
+              "name": "Yazılım",
+              "cidr": "10.4.30.0/27",
+              "note": "10 × 2 × 1,3 = 26 adres; Git ve CI erişimi."
+            },
+            {
+              "id": 40,
+              "name": "Ar-Ge",
+              "cidr": "10.4.40.0/26",
+              "note": "20 × 2 × 1,3 = 52 adres; internete yalnızca proxy ile çıkar."
+            },
+            {
+              "id": 50,
+              "name": "Teknik",
+              "cidr": "10.4.50.0/25",
+              "note": "30 × 2 × 1,3 = 78 adres; altyapı yetkisi olan ekip."
+            },
+            {
+              "id": 60,
+              "name": "Sunucu",
+              "cidr": "10.4.60.0/24",
+              "note": "Altyapı ve uygulama: DNS, RADIUS, öğrenci bilgi sistemi, dosya. Aynı VLAN içi akışlar sunucu güvenlik duvarıyla sınırlanır."
+            },
+            {
+              "id": 63,
+              "name": "Veri",
+              "cidr": "10.4.63.0/26",
+              "note": "LMS veritabanı. Yalnızca LMS uygulamasından ve teknik ekipten SSH ile erişilir."
+            },
+            {
+              "id": 64,
+              "name": "Sınır servisleri",
+              "cidr": "10.4.64.0/26",
+              "note": "Proxy ve kamera kayıt. Öğrenci bilgi sisteminden ayrıdır."
+            },
+            {
+              "id": 70,
+              "name": "DMZ",
+              "cidr": "10.4.70.0/26",
+              "note": "WAF ve ters proxy, LMS uygulaması ve API."
+            },
+            {
+              "id": 80,
+              "name": "IoT",
+              "cidr": "10.4.80.0/24",
+              "note": "Kamera, yazıcı, kartlı geçiş; internete çıkmaz."
+            },
+            {
+              "id": 85,
+              "name": "Misafir",
+              "cidr": "10.4.85.0/24",
+              "note": "Yalnızca internet, iç ağa erişemez."
+            },
+            {
+              "id": 90,
+              "name": "Hoca",
+              "cidr": "10.4.88.0/21",
+              "note": "400 × 2 × 1,3 = 1.040 adres; not sistemi erişimi."
+            },
+            {
+              "id": 100,
+              "name": "Öğrenci Wi-Fi Yurt 1",
+              "cidr": "10.4.128.0/20",
+              "note": "Ağ geçidi 10.4.128.1, ayrılmış 10.4.128.2-30, DHCP havuzu 10.4.128.31-10.4.143.254, kullanılabilir 4.064 adres. 10.4.128.0/17 öğrenci rezervinin parçasıdır, relay ile 10.4.60.2'ye gider."
+            },
+            {
+              "id": 101,
+              "name": "Öğrenci Wi-Fi Yurt 2",
+              "cidr": "10.4.144.0/20",
+              "note": "Ağ geçidi 10.4.144.1, ayrılmış 10.4.144.2-30, DHCP havuzu 10.4.144.31-10.4.159.254, kullanılabilir 4.064 adres. 10.4.128.0/17 öğrenci rezervinin parçasıdır, relay ile 10.4.60.2'ye gider."
+            },
+            {
+              "id": 102,
+              "name": "Öğrenci Wi-Fi Kütüphane",
+              "cidr": "10.4.160.0/20",
+              "note": "Ağ geçidi 10.4.160.1, ayrılmış 10.4.160.2-30, DHCP havuzu 10.4.160.31-10.4.175.254, kullanılabilir 4.064 adres. 10.4.128.0/17 öğrenci rezervinin parçasıdır, relay ile 10.4.60.2'ye gider."
+            },
+            {
+              "id": 103,
+              "name": "Öğrenci Wi-Fi Mühendislik",
+              "cidr": "10.4.176.0/20",
+              "note": "Ağ geçidi 10.4.176.1, ayrılmış 10.4.176.2-30, DHCP havuzu 10.4.176.31-10.4.191.254, kullanılabilir 4.064 adres. 10.4.128.0/17 öğrenci rezervinin parçasıdır, relay ile 10.4.60.2'ye gider."
+            },
+            {
+              "id": 104,
+              "name": "Öğrenci Wi-Fi Fen-Edebiyat",
+              "cidr": "10.4.192.0/20",
+              "note": "Ağ geçidi 10.4.192.1, ayrılmış 10.4.192.2-30, DHCP havuzu 10.4.192.31-10.4.207.254, kullanılabilir 4.064 adres. 10.4.128.0/17 öğrenci rezervinin parçasıdır, relay ile 10.4.60.2'ye gider."
+            },
+            {
+              "id": 105,
+              "name": "Öğrenci Wi-Fi İİBF",
+              "cidr": "10.4.208.0/20",
+              "note": "Ağ geçidi 10.4.208.1, ayrılmış 10.4.208.2-30, DHCP havuzu 10.4.208.31-10.4.223.254, kullanılabilir 4.064 adres. 10.4.128.0/17 öğrenci rezervinin parçasıdır, relay ile 10.4.60.2'ye gider."
+            },
+            {
+              "id": 106,
+              "name": "Öğrenci Wi-Fi Yemekhane ve sosyal alan",
+              "cidr": "10.4.224.0/20",
+              "note": "Ağ geçidi 10.4.224.1, ayrılmış 10.4.224.2-30, DHCP havuzu 10.4.224.31-10.4.239.254, kullanılabilir 4.064 adres. 10.4.128.0/17 öğrenci rezervinin parçasıdır, relay ile 10.4.60.2'ye gider."
+            },
+            {
+              "id": 107,
+              "name": "Öğrenci Wi-Fi Spor ve açık alan",
+              "cidr": "10.4.240.0/20",
+              "note": "Ağ geçidi 10.4.240.1, ayrılmış 10.4.240.2-30, DHCP havuzu 10.4.240.31-10.4.255.254, kullanılabilir 4.064 adres. 10.4.128.0/17 öğrenci rezervinin parçasıdır, relay ile 10.4.60.2'ye gider."
+            },
+            {
+              "id": 110,
+              "name": "Laboratuvar",
+              "cidr": "10.4.110.0/23",
+              "note": "300 bilgisayar × 1,3 = 390 adres; riskli denemeler kampüs ağından ayrılır."
+            }
+          ]
+        },
+        "bandwidth": {
+          "downMbps": 10000,
+          "upMbps": 10000,
+          "drivers": [
+            "Öğrenci Wi-Fi",
+            "LMS ve sınavlar",
+            "video",
+            "yazılım güncellemeleri",
+            "uzaktan ders",
+            "5 Gbps yedek hat"
+          ]
+        },
+        "firewalls": [
+          {
+            "segment": "perimeter",
+            "chosen": {
+              "product": "FortiGate 900G",
+              "vendor": "Fortinet",
+              "throughputGbps": 30,
+              "priceUsd": 32320,
+              "reason": "En ucuzu değil, ama 10 Gbps hatta IPS açıkken 30 Gbps, 28 milyon oturum ve 16,7 Gbps TLS denetimi ile büyüme payı bırakır, ortak yönetime girer. Fiyat ve hız tek cihazındır (FG-900G, lisans hariç); aktif-pasif HA için iki adet gerekir, hız ikiye katlanmaz."
+            },
+            "alternatives": [
+              {
+                "product": "PA-3440",
+                "vendor": "Palo Alto Networks",
+                "throughputGbps": 12.8,
+                "priceUsd": 64040,
+                "reason": "Yeterli, ancak kaynaklardaki hız 12,8-20 Gbps arasında değişiyor ve yaklaşık iki kat pahalı."
+              },
+              {
+                "product": "Force 9300",
+                "vendor": "Check Point",
+                "throughputGbps": 10.5,
+                "priceUsd": 42990,
+                "reason": "Hattı karşılar, ancak neredeyse hiç pay bırakmaz. Fiyata 1 yıllık SandBlast aboneliği dahildir (CPAP-SG9300-SNBT, checkfirewalls.com); aboneliksiz donanım SKU'su bulunamadı, bu yüzden diğer donanım fiyatlarıyla doğrudan karşılaştırılmaz."
+              },
+              {
+                "product": "Secure Firewall 3110",
+                "vendor": "Cisco",
+                "throughputGbps": 17,
+                "priceUsd": 23740,
+                "reason": "Daha ucuz ve hızı yeterli, ancak 2 milyon oturum tahmini ihtiyaca çok yakın ve ortak yönetim dışında."
+              },
+              {
+                "product": "XGS 3300",
+                "vendor": "Sophos",
+                "throughputGbps": 12,
+                "priceUsd": 6700,
+                "reason": "Çok daha ucuz, ancak değer ideal koşullarda ölçülmüş, pay düşük ve oturum kapasitesi doğrulanamadı."
+              }
+            ],
+            "rules": [
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.1.61.5",
+                "to": "10.4.10.0/26",
+                "note": "O1: Ağ cihazları yalnızca kayıt tutan bastion'dan yönetilir; yoksa yöneticiler cihazlara ulaşamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.61.5",
+                "to": "10.4.10.0/26",
+                "note": "O1: Ağ cihazları yalnızca kayıt tutan bastion'dan yönetilir; yoksa yöneticiler cihazlara ulaşamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 161,
+                "from": "10.1.61.20",
+                "to": "10.4.10.0/26",
+                "note": "O2: Zabbix ağ cihazlarının durumunu okur; O3'ün altında kalırsa izleme durur ve arızalar görülmez."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.1.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.2.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.3.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "any",
+                "to": "10.4.10.0/26",
+                "note": "O3: Ele geçirilen bir cihaz yönetim ağına ulaşamaz ve deneme alarm üretir; yoksa saldırgan ağ cihazlarına geçebilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "10.4.0.0/16",
+                "to": "10.4.60.2",
+                "note": "O4: Bütün VLAN'lar relay ile DHCP sunucusuna gider, misafir dahil; yoksa istemciler IP alamaz."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.4.85.0/24",
+                "to": "10.4.60.2",
+                "note": "O4: Misafir DHCP dışında şube sunucusuna ulaşamaz; yoksa iç DNS kayıtlarını sorgulayabilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "10.4.0.0/16",
+                "to": "10.4.60.2",
+                "note": "O4: İç ağlar şube DNS ve NTP sunucusunu kullanır; yoksa ad çözümleme ve saat, dolayısıyla TLS ve loglar bozulur."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "10.4.0.0/16",
+                "to": "10.4.60.2",
+                "note": "O4: İç ağlar şube DNS ve NTP sunucusunu kullanır; yoksa ad çözümleme ve saat, dolayısıyla TLS ve loglar bozulur."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 123,
+                "from": "10.4.0.0/16",
+                "to": "10.4.60.2",
+                "note": "O4: İç ağlar şube DNS ve NTP sunucusunu kullanır; yoksa ad çözümleme ve saat, dolayısıyla TLS ve loglar bozulur."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.4.10.0/26",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.4.60.0/24",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.4.63.0/26",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.4.64.0/26",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.4.70.12",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.4.70.13",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "10.4.70.11",
+                "to": "10.1.61.10",
+                "note": "O5: Cihaz, sunucu ve WAF logları TLS ile toplayıcıya gider; yoksa SIEM alarm üretemez ve 5651 kayıtları eksik kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "10.4.60.2",
+                "to": "internet",
+                "note": "O6: Şube DNS ve NTP sunucusu dış adresleri çözer ve saat alır; yoksa iç ağ dış adresleri çözemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "10.4.60.2",
+                "to": "internet",
+                "note": "O6: Şube DNS ve NTP sunucusu dış adresleri çözer ve saat alır; yoksa iç ağ dış adresleri çözemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 123,
+                "from": "10.4.60.2",
+                "to": "internet",
+                "note": "O6: Şube DNS ve NTP sunucusu dış adresleri çözer ve saat alır; yoksa iç ağ dış adresleri çözemez."
+              },
+              {
+                "action": "limit",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "internet",
+                "to": "10.4.70.10",
+                "note": "1: İnternetten LMS, mobil uygulama ve API yalnızca WAF üzerinden yayınlanır ve yeni bağlantılar sınırlanır; kaynak any olursa misafir de LMS'e ulaşır ve kural 3 ölü kalır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 5432,
+                "from": "10.4.70.11",
+                "to": "10.4.63.30",
+                "note": "2: LMS uygulaması yalnızca kendi veritabanına ulaşır; yoksa LMS çalışmaz, daha geniş olursa ele geçirilen DMZ iç ağa açılır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.20.0/22",
+                "to": "10.4.70.10",
+                "note": "3: Kampüs kullanıcıları LMS'e en yüksek öncelikle ulaşır; kural 4'ün altına düşerse öğrenciler sınava giremez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.88.0/21",
+                "to": "10.4.70.10",
+                "note": "3: Kampüs kullanıcıları LMS'e en yüksek öncelikle ulaşır; kural 4'ün altına düşerse öğrenciler sınava giremez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.128.0/17",
+                "to": "10.4.70.10",
+                "note": "3: Kampüs kullanıcıları LMS'e en yüksek öncelikle ulaşır; kural 4'ün altına düşerse öğrenciler sınava giremez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.110.0/23",
+                "to": "10.4.70.10",
+                "note": "3: Kampüs kullanıcıları LMS'e en yüksek öncelikle ulaşır; kural 4'ün altına düşerse öğrenciler sınava giremez."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.4.128.0/17",
+                "to": "10.0.0.0/8",
+                "note": "4: Öğrenci ve misafir iç ağa geçemez; yoksa ele geçirilen bir cihaz ERP ve sunuculara ulaşabilir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.4.85.0/24",
+                "to": "10.0.0.0/8",
+                "note": "4: Öğrenci ve misafir iç ağa geçemez; yoksa ele geçirilen bir cihaz ERP ve sunuculara ulaşabilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.4.128.0/17",
+                "to": "internet",
+                "note": "5: Öğrenci yalnızca TCP 80 ve 443 ile internete çıkar, diğer portlar O7'ye düşer; P2P denetimi L3/L4 değil, up-ogrenci uygulama profilindedir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.128.0/17",
+                "to": "internet",
+                "note": "5: Öğrenci yalnızca TCP 80 ve 443 ile internete çıkar, diğer portlar O7'ye düşer; P2P denetimi L3/L4 değil, up-ogrenci uygulama profilindedir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.88.0/21",
+                "to": "10.4.60.31",
+                "note": "6: Hocalar öğrenci bilgi sistemine ulaşır ve erişim loglanır; yoksa not girilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.20.0/22",
+                "to": "10.4.60.31",
+                "note": "7: Personel öğrenci bilgi sistemine ulaşır ve erişim loglanır; yoksa öğrenci işleri yürümez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.20.0/22",
+                "to": "10.1.60.31",
+                "note": "8: Personel merkezî ERP'ye tünelle ulaşır; İstanbul kural 4 ile birlikte çalışır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 445,
+                "from": "10.4.110.0/23",
+                "to": "10.4.60.40",
+                "note": "9: Laboratuvar ders dosyalarına ulaşır, SMB yalnızca bu sunucuya açıktır; yoksa ders materyali kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.4.110.0/23",
+                "to": "internet",
+                "note": "10: Laboratuvar internete çıkar, iç sistemlere çıkamaz; bant sınırı trafik şekillendirmeyle uygulanır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.110.0/23",
+                "to": "internet",
+                "note": "10: Laboratuvar internete çıkar, iç sistemlere çıkamaz; bant sınırı trafik şekillendirmeyle uygulanır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3128,
+                "from": "10.4.40.0/26",
+                "to": "10.4.64.10",
+                "note": "11: Ar-Ge internete yalnızca proxy ile çıkar; yoksa ekip internete hiç çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.4.64.10",
+                "to": "internet",
+                "note": "12: Proxy çıkışı tek noktadan web filtresiyle denetlenir; yoksa proxy kullanıcıları dışarı çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.64.10",
+                "to": "internet",
+                "note": "12: Proxy çıkışı tek noktadan web filtresiyle denetlenir; yoksa proxy kullanıcıları dışarı çıkamaz."
+              },
+              {
+                "action": "reject",
+                "direction": "forward",
+                "proto": "any",
+                "from": "10.4.40.0/26",
+                "to": "internet",
+                "note": "13: Proxy dışı Ar-Ge çıkışı reddedilir ve alarm üretir; yoksa araştırma verisi denetimsiz dışarı çıkabilir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.4.30.0/27",
+                "to": "10.1.60.32",
+                "note": "14: Yazılımcılar Git ve CI sunucusuna tünelle ulaşır; İstanbul kural 6 ile birlikte çalışır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.30.0/27",
+                "to": "10.1.60.32",
+                "note": "14: Yazılımcılar Git ve CI sunucusuna tünelle ulaşır; İstanbul kural 6 ile birlikte çalışır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.4.50.0/25",
+                "to": "10.4.60.0/24",
+                "note": "15: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.50.0/25",
+                "to": "10.4.60.0/24",
+                "note": "15: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3389,
+                "from": "10.4.50.0/25",
+                "to": "10.4.60.0/24",
+                "note": "15: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.4.50.0/25",
+                "to": "10.4.64.0/26",
+                "note": "15: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.50.0/25",
+                "to": "10.4.64.0/26",
+                "note": "15: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3389,
+                "from": "10.4.50.0/25",
+                "to": "10.4.64.0/26",
+                "note": "15: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.4.50.0/25",
+                "to": "10.4.70.0/26",
+                "note": "15: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.50.0/25",
+                "to": "10.4.70.0/26",
+                "note": "15: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3389,
+                "from": "10.4.50.0/25",
+                "to": "10.4.70.0/26",
+                "note": "15: Sunucu ve DMZ yönetimi yalnızca teknik ekipte ve loglu; yoksa sunucular yönetilemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.4.20.0/22",
+                "to": "internet",
+                "note": "16: Kurum cihazları IPS, TLS denetimi ve uygulama profilinden geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.20.0/22",
+                "to": "internet",
+                "note": "16: Kurum cihazları IPS, TLS denetimi ve uygulama profilinden geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.4.30.0/27",
+                "to": "internet",
+                "note": "16: Kurum cihazları IPS, TLS denetimi ve uygulama profilinden geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.30.0/27",
+                "to": "internet",
+                "note": "16: Kurum cihazları IPS, TLS denetimi ve uygulama profilinden geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.4.50.0/25",
+                "to": "internet",
+                "note": "16: Kurum cihazları IPS, TLS denetimi ve uygulama profilinden geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.50.0/25",
+                "to": "internet",
+                "note": "16: Kurum cihazları IPS, TLS denetimi ve uygulama profilinden geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.4.88.0/21",
+                "to": "internet",
+                "note": "16: Kurum cihazları IPS, TLS denetimi ve uygulama profilinden geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.88.0/21",
+                "to": "internet",
+                "note": "16: Kurum cihazları IPS, TLS denetimi ve uygulama profilinden geçer; yoksa SaaS ve web kullanılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 554,
+                "from": "10.4.80.0/24",
+                "to": "10.4.64.50",
+                "note": "17: Kameralar yalnızca kayıt sunucusuna ulaşır; yoksa görüntü kaydedilmez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "10.4.85.0/24",
+                "to": "internet",
+                "note": "18: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "10.4.85.0/24",
+                "to": "internet",
+                "note": "18: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "10.4.85.0/24",
+                "to": "internet",
+                "note": "18: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.4.85.0/24",
+                "to": "internet",
+                "note": "18: Misafir yalnızca internete çıkar; bant sınırı trafik şekillendirmeyle uygulanır; yoksa ziyaretçi internete çıkamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.4.20.0/22",
+                "to": "10.4.80.20",
+                "note": "19: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.4.20.0/22",
+                "to": "10.4.80.20",
+                "note": "19: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.4.30.0/27",
+                "to": "10.4.80.20",
+                "note": "19: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.4.30.0/27",
+                "to": "10.4.80.20",
+                "note": "19: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.4.40.0/26",
+                "to": "10.4.80.20",
+                "note": "19: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.4.40.0/26",
+                "to": "10.4.80.20",
+                "note": "19: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.4.50.0/25",
+                "to": "10.4.80.20",
+                "note": "19: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.4.50.0/25",
+                "to": "10.4.80.20",
+                "note": "19: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.4.88.0/21",
+                "to": "10.4.80.20",
+                "note": "19: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.4.88.0/21",
+                "to": "10.4.80.20",
+                "note": "19: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "10.4.110.0/23",
+                "to": "10.4.80.20",
+                "note": "19: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "10.4.110.0/23",
+                "to": "10.4.80.20",
+                "note": "19: Yazıcılar IoT ağında olduğu için baskı ayrı izin ister; yoksa kimse yazdıramaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3128,
+                "from": "10.4.70.0/26",
+                "to": "10.4.64.10",
+                "note": "20: DMZ sunucuları güncellemeyi proxy'den alır; yoksa yama alamazlar veya doğrudan internete açılmaları gerekir."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.4.60.0/24",
+                "to": "10.1.61.20",
+                "note": "21: Sunucular ve LMS izleme verisini Zabbix'e gönderir; İstanbul kural 17 ile birlikte çalışır, yoksa LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.4.63.0/26",
+                "to": "10.1.61.20",
+                "note": "21: Sunucular ve LMS izleme verisini Zabbix'e gönderir; İstanbul kural 17 ile birlikte çalışır, yoksa LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.4.64.0/26",
+                "to": "10.1.61.20",
+                "note": "21: Sunucular ve LMS izleme verisini Zabbix'e gönderir; İstanbul kural 17 ile birlikte çalışır, yoksa LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.4.70.12",
+                "to": "10.1.61.20",
+                "note": "21: Sunucular ve LMS izleme verisini Zabbix'e gönderir; İstanbul kural 17 ile birlikte çalışır, yoksa LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.4.70.13",
+                "to": "10.1.61.20",
+                "note": "21: Sunucular ve LMS izleme verisini Zabbix'e gönderir; İstanbul kural 17 ile birlikte çalışır, yoksa LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 10051,
+                "from": "10.4.70.11",
+                "to": "10.1.61.20",
+                "note": "21: Sunucular ve LMS izleme verisini Zabbix'e gönderir; İstanbul kural 17 ile birlikte çalışır, yoksa LMS yanıt süresi ölçülemez."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 500,
+                "from": "wan-istanbul",
+                "to": "wan-ankara",
+                "note": "22: IPsec tüneli yalnızca merkezin adresinden kurulur; yoksa şube merkeze bağlanamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 4500,
+                "from": "wan-istanbul",
+                "to": "wan-ankara",
+                "note": "22: IPsec tüneli yalnızca merkezin adresinden kurulur; yoksa şube merkeze bağlanamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "10.1.208.0/22",
+                "to": "10.4.60.31",
+                "note": "23: Hoca VPN profili evden yalnızca öğrenci bilgi sistemine ulaşır; İstanbul kural 22 ile birlikte çalışır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3128,
+                "from": "10.4.60.0/24",
+                "to": "10.4.64.10",
+                "note": "24: İç sunucular güncellemeyi proxy'den alır; proxy ayrı segmentte olduğu için bu izin olmadan yama alınamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3128,
+                "from": "10.4.63.0/26",
+                "to": "10.4.64.10",
+                "note": "24: İç sunucular güncellemeyi proxy'den alır; proxy ayrı segmentte olduğu için bu izin olmadan yama alınamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 1812,
+                "from": "10.4.10.0/26",
+                "to": "10.4.60.3",
+                "note": "25: Erişim noktaları 802.1X için yerel RADIUS'a gider; yoksa öğrenci ve personel Wi-Fi'ye giremez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 1813,
+                "from": "10.4.10.0/26",
+                "to": "10.4.60.3",
+                "note": "25: Erişim noktaları 802.1X için yerel RADIUS'a gider; yoksa öğrenci ve personel Wi-Fi'ye giremez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 636,
+                "from": "10.4.60.3",
+                "to": "10.1.60.3",
+                "note": "26: Ankara RADIUS sunucusu kullanıcıları dizinden doğrular; İstanbul kural 32 ile birlikte çalışır."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "10.4.50.0/25",
+                "to": "10.4.63.0/26",
+                "note": "27: Veritabanı sunucusu yalnızca teknik ekipten SSH ile yönetilir; veritabanı portu LMS dışında kimseye açık değildir."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "O7: Açıkça izin verilmeyen trafik geçmez ve loglanır; yoksa unutulan her servis açık kalır."
+              }
+            ]
+          },
+          {
+            "segment": "dmz-waf",
+            "chosen": {
+              "product": "ModSecurity + OWASP Core Rule Set (Nginx, iki sunucu, aktif-pasif)",
+              "vendor": "Açık kaynak",
+              "priceUsd": 0,
+              "reason": "Lisans ücreti yok, kurallar görülüp denetlenebilir. 0 USD yalnızca lisanstır; iki sunucu, bakım emeği ve yük testi dahil değildir. Kapasite ölçülmedi, doğrulama planı waf/README.md dosyasındadır."
+            },
+            "alternatives": [
+              {
+                "product": "Cloudflare WAF (Business planı, yıllık)",
+                "vendor": "Cloudflare",
+                "priceUsd": 2400,
+                "reason": "Fiyat yıllık abonelik, donanımla karşılaştırılmaz. Kurulumu kolay ve DDoS koruması da verir, ancak TLS trafiği şirket dışında açılır; KVKK ve öğrenci verisi nedeniyle tercih edilmedi."
+              },
+              {
+                "product": "FortiWeb 400F",
+                "vendor": "Fortinet",
+                "throughputGbps": 0.5,
+                "priceUsd": 22400,
+                "reason": "Fiyat donanımdır, lisans hariç. Ortak üreticiyle uyumlu, ancak satıcıların verdiği 500 Mbps Ankara'nın 3 Gbps planlama hedefine yetmez."
+              },
+              {
+                "product": "Barracuda WAF 660",
+                "vendor": "Barracuda",
+                "priceUsd": 22990,
+                "reason": "Fiyat donanımdır, yıllık abonelik ayrıca ödenir. Hazır cihaz ve destek sunar, ancak fiyatı yüksek ve hız değeri doğrulanamadı."
+              },
+              {
+                "product": "F5 BIG-IP Advanced WAF i2800",
+                "vendor": "F5",
+                "priceUsd": 46075,
+                "reason": "Fiyat donanımdır, lisans ve destek kapsamı teklifle doğrulanmalı. Güçlü bir kurumsal ürün, ancak bu ölçek için en pahalı seçenek ve özel uzmanlık ister."
+              }
+            ],
+            "rules": [
+              {
+                "action": "limit",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 443,
+                "from": "any",
+                "to": "10.4.70.10",
+                "note": "1: İnternetten ve kampüsten yalnızca WAF sanal adresine HTTPS gelir ve istekler sınırlanır; yoksa yayınlanan servislere ulaşılamaz."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 8080,
+                "from": "10.4.70.12",
+                "to": "10.4.70.11",
+                "note": "2: Yalnızca temiz istekler WAF düğümünden uygulamaya gider; yoksa WAF arkasındaki uygulama cevap veremez."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 8080,
+                "from": "10.4.70.13",
+                "to": "10.4.70.11",
+                "note": "2: Yalnızca temiz istekler WAF düğümünden uygulamaya gider; yoksa WAF arkasındaki uygulama cevap veremez."
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "3: WAF'ın izin vermediği her istek reddedilir ve loglanır; yoksa WAF'ın korumadığı yollar açık kalır."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "remoteAccess": {
+      "type": "role-based-vpn",
+      "note": "İnternetten SSH veya RDP yoktur. Herkes İstanbul'a IPsec VPN ile, Active Directory ve RADIUS kimliği ile MFA kullanarak bağlanır. Dizin grubu profili belirler: yönetici oturumları kaydedilen bastion'a, geliştirici Git ve CI'a, personel ERP'ye, hoca öğrenci bilgi sistemine ulaşır. Her profilin ayrı adres havuzu vardır (nesneler.json). Profilleri BT Operasyon Sorumlusu verir, SOC Yöneticisi üç ayda bir gözden geçirir."
+    },
+    "monitoring": {
+      "siem": "Wazuh güvenlik loglarını toplar; Zabbix ve Grafana performansı izler; GLPI olay kaydı tutar. Log retention: 90 gün anında aranabilir, Türkiye şubelerinde 2 yıl, Amsterdam'da 1 yıl arşiv; 5651 kayıtları günlük zaman damgasıyla imzalanır.",
+      "owner": "SOC Yöneticisi güvenlik alarmlarından, BT Operasyon Sorumlusu uygulama ve altyapı alarmlarından sorumludur; L1, L2 ve L3 vardiyalı çalışır, DMZ'den iç ağa deneme gibi kritik olaylarda nöbetçi L2 aranır.",
+      "alertSink": "Güvenlik: GLPI kaydı ve SOC Telegram kanalı; kanala yalnızca yüksek ve kritik engellemeler, tekrarlanan başarısız girişler ve yeni açık portlar özet olarak düşer. Uygulama: GLPI kaydı ve operasyon e-posta kanalı. Kritik alarmlar nöbetçi telefonunu arar.",
+      "appVsSecurity": "Wazuh'tan gelen güvenlik alarmları SOC kanalına, Zabbix'ten gelen hat, CPU, HA ve LMS yanıt süresi alarmları operasyon kanalına düşer; kanal ve sahip ayrıdır."
+    },
+    "cveWatch": [
+      {
+        "id": "CVE-2026-24858",
+        "product": "FortiOS (FortiGate 70G, 120G, 200G, 900G) ve FortiManager",
+        "status": "mitigated",
+        "note": "FortiCloud SSO kimlik doğrulama atlatma, aktif olarak sömürüldü. Geçici önlem: FortiCloud SSO girişi kapalı, yönetim arayüzleri internete kapalı. Kalıcı çözüm: kurulumda 7.6.6, 7.4.11, 7.2.13, 7.0.19 veya üstü sürüm; FortiOS 8.0 etkilenmez; FortiManager sürümü aynı bildirimden doğrulanır. Sürüm her bakım penceresinde kontrol edilir. Açık güvenlik duvarının kendi yönetim katmanında olduğu için kural eklemek çözmez, kalıcı çözüm yamadır; uygulama katmanındaki açıklar ise WAF ve yama işidir."
+      }
+    ]
   },
   {
     "schemaVersion": 1,
@@ -3513,7 +8523,7 @@ export const COMPANIES: Company[] = [
       "course": "BGT207",
       "github": "yusufiyilmaz"
     },
-    "summary": "Hayal A.Ş. builds education software and runs its own academic campus. Six sites (Ankara HQ, Istanbul, London, a 10,000-student academic branch, a software team and a separate R&D building) each have their own line and firewall (FortiGate, Check Point in R&D for brand diversity), common VLANs (IT, staff, IoT, management), an encrypted VPN to Ankara and a Wazuh SIEM watched by a hybrid SOC.",
+    "summary": "Hayal A.Ş. builds education software and runs its own academic campus. Six sites (Ankara HQ, Istanbul, London, a 10,000-student academic branch, a software team and a separate R&D building) each have their own line and firewall (FortiGate, Check Point in R&D for brand diversity), common VLANs (IT, staff, IoT, management), an encrypted VPN to Ankara and a Wazuh SIEM watched by a hybrid SOC. Public web: only the company web site, in the Ankara DMZ behind Cloudflare WAF, which also gives DDoS protection. The grade and e-learning web application runs on the campus server VLAN and is not published to the internet; staff reach it from outside over VPN. The company has no mobile app and no public API.",
     "branches": [
       {
         "id": "ankara-hq",
@@ -3582,31 +8592,36 @@ export const COMPANIES: Company[] = [
               "product": "FortiGate 200F",
               "vendor": "Fortinet",
               "throughputGbps": 3.0,
-              "reason": "Chosen. Diğer şubelerdeki FortiGate'lerle aynı ekrandan yönetilir. Bütün şubelerin bağlandığı merkez olmaya uygun. 1 Gbps hattın 3 katı hız, büyüme payı var"
+              "priceUsd": 5544,
+              "reason": "Chosen. Diğer şubelerdeki FortiGate'lerle aynı ekrandan yönetilir. Bütün şubelerin bağlandığı merkez olmaya uygun. 1 Gbps hattın 3 katı hız, büyüme payı var. 2 adet, HA (aktif-pasif): biri bozulursa diğeri birkaç saniyede devralır"
             },
             "alternatives": [
               {
                 "product": "Palo Alto PA-1420",
                 "vendor": "Palo Alto Networks",
                 "throughputGbps": 4.8,
+                "priceUsd": 20778,
                 "reason": "Hangi uygulamanın kullanıldığını çok iyi tanır. Daha pahalı"
               },
               {
                 "product": "Check Point Quantum Force 9100",
                 "vendor": "Check Point",
                 "throughputGbps": 4.95,
+                "priceUsd": 56030,
                 "reason": "Kurumsal yönetim paneli çok gelişmiş. Lisans maliyeti yüksek"
               },
               {
                 "product": "Cisco Secure Firewall 3105",
                 "vendor": "Cisco",
                 "throughputGbps": 10.0,
+                "priceUsd": 31155,
                 "reason": "Çok güçlü, ağda Cisco switch varsa uyumlu. Bu şube için fazla büyük ve pahalı"
               },
               {
                 "product": "Sophos XGS 2300",
                 "vendor": "Sophos",
                 "throughputGbps": 1.4,
+                "priceUsd": 3495,
                 "reason": "Uygun fiyatlı, kullanımı kolay. 1 Gbps hatta yetiyor ama büyüme payı az"
               }
             ],
@@ -3634,9 +8649,9 @@ export const COMPANIES: Company[] = [
                 "direction": "in",
                 "proto": "tcp",
                 "port": 443,
-                "from": "any",
+                "from": "cloudflare-waf",
                 "to": "vlan40-dmz",
-                "note": "Only the company web site is reachable from the internet, and it sits in the DMZ."
+                "note": "The company web site sits in the DMZ behind Cloudflare WAF. Only Cloudflare addresses reach it, so nobody can go around the WAF."
               },
               {
                 "action": "deny",
@@ -3656,12 +8671,73 @@ export const COMPANIES: Company[] = [
                 "note": "Home workers connect by VPN with mandatory two-step verification; branches terminate their VPN here."
               },
               {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "firewall,vlan10-it,vlan20-employees",
+                "to": "internet",
+                "note": "IT and staff get web access; without this rule the default deny would cut them off. IoT and servers are not in this rule. The firewall itself downloads security updates here as soon as they are released."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "443,445,587,993",
+                "from": "vlan10-it,vlan20-employees",
+                "to": "vlan30-servers",
+                "note": "Staff reach the web, file (445) and e-mail (587, 993) services on the Ankara servers; without this rule the default deny would cut them off."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "443,445,514,587,993",
+                "from": "firewall,vpn-peers",
+                "to": "vlan30-servers",
+                "note": "Branches and home workers reach the same shared servers through the VPN, and every firewall's logs reach the SIEM on 514."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "vlan30-servers,vlan40-dmz",
+                "to": "internet",
+                "note": "Servers and the DMZ web server download security updates as soon as they are released."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "22,443",
+                "from": "vlan99-management",
+                "to": "branch-firewalls-over-vpn,vlan40-dmz",
+                "note": "From the management VLAN, Ankara IT reaches the admin screens of the branch firewalls over the VPN and manages the DMZ web server."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "home-vpn-users",
+                "to": "academic-vlan60-over-vpn",
+                "note": "Academic staff working from home pass through the Ankara VPN to reach the grade and e-learning system."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 161,
+                "from": "vlan30-servers",
+                "to": "firewall,branch-firewalls-over-vpn",
+                "note": "Zabbix reads line and device health from this firewall and, over the VPN, from the branch firewalls."
+              },
+              {
                 "action": "deny",
                 "direction": "in",
                 "proto": "any",
-                "from": "any",
-                "to": "any",
-                "note": "Default deny: anything not allowed above is blocked and logged to the central SIEM."
+                "note": "Catch-all default deny, always the last rule: whatever no rule above allowed is blocked and logged to the central SIEM."
               }
             ]
           }
@@ -3727,6 +8803,7 @@ export const COMPANIES: Company[] = [
               "product": "FortiGate 100F",
               "vendor": "Fortinet",
               "throughputGbps": 1.0,
+              "priceUsd": 3240,
               "reason": "Chosen. Ankara'daki FortiGate ile aynı panelden yönetilir. Misafir Wi-Fi'ı ayrı ağa almak kolay"
             },
             "alternatives": [
@@ -3734,24 +8811,28 @@ export const COMPANIES: Company[] = [
                 "product": "Sophos XGS 2100",
                 "vendor": "Sophos",
                 "throughputGbps": 1.25,
+                "priceUsd": 2293,
                 "reason": "Uygun fiyatlı, arayüzü kolay. Ama Ankara'dan ayrı bir panelle yönetilmesi gerekir"
               },
               {
                 "product": "Check Point Quantum Spark 1600",
                 "vendor": "Check Point",
                 "throughputGbps": 1.5,
+                "priceUsd": 5049,
                 "reason": "Küçük ofisler için iyi. Lisans maliyeti yüksek"
               },
               {
                 "product": "Palo Alto PA-440",
                 "vendor": "Palo Alto Networks",
                 "throughputGbps": 1.0,
-                "reason": "Güvenlik çok iyi ama bu büyüklükte bir ofis için pahalı"
+                "priceUsd": 1804,
+                "reason": "Güvenlik çok iyi. Ama Ankara'dan ayrı bir panelle yönetilmesi gerekir ve lisansları ayrı alınır"
               },
               {
                 "product": "pfSense (Netgate 6100)",
                 "vendor": "Netgate",
                 "throughputGbps": 1.0,
+                "priceUsd": 949,
                 "reason": "Ücretsiz yazılım, ucuz donanım. Ama üretici desteği sınırlı ve BT ekibinin bilgisi önemli"
               }
             ],
@@ -3770,9 +8851,18 @@ export const COMPANIES: Company[] = [
                 "direction": "in",
                 "proto": "tcp",
                 "port": "443,22",
-                "from": "vlan99-management",
+                "from": "vlan99-management,ankara-vlan99-over-vpn",
                 "to": "firewall",
-                "note": "Admin screens of the firewall open only from the management VLAN 99, with two-step verification."
+                "note": "Admin screens of the firewall open only from the management VLAN 99 here or in Ankara over the VPN, with two-step verification."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 161,
+                "from": "ankara-zabbix-over-vpn",
+                "to": "firewall",
+                "note": "Zabbix in Ankara reads line and device health over the VPN."
               },
               {
                 "action": "deny",
@@ -3791,12 +8881,46 @@ export const COMPANIES: Company[] = [
                 "note": "IoT devices (VLAN 80) cannot reach the internet or staff PCs."
               },
               {
+                "action": "limit",
+                "direction": "out",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "vlan50-guest",
+                "to": "internet",
+                "note": "Guests get web access only, 50 Mbps in total, so they cannot fill the office line."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "firewall,vlan10-it,vlan20-employees",
+                "to": "internet",
+                "note": "IT and staff get web access; without this rule the default deny would cut them off. The firewall itself downloads security updates here as soon as they are released."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": "500,4500",
+                "from": "firewall",
+                "to": "ankara-hq",
+                "note": "The encrypted VPN tunnel to Ankara: without it the branch cannot reach shared servers and its logs cannot reach the SIEM."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": "443,445,514,587,993",
+                "from": "firewall,vlan10-it,vlan20-employees",
+                "to": "ankara-servers",
+                "note": "Through the VPN, staff reach the shared Ankara servers (web 443, files 445, e-mail 587 and 993) and the firewall sends its logs to the SIEM (514)."
+              },
+              {
                 "action": "deny",
                 "direction": "in",
                 "proto": "any",
-                "from": "any",
-                "to": "any",
-                "note": "Default deny: anything not allowed above is blocked and logged to the central SIEM."
+                "note": "Catch-all default deny, always the last rule: whatever no rule above allowed is blocked and logged to the central SIEM."
               }
             ]
           }
@@ -3861,6 +8985,7 @@ export const COMPANIES: Company[] = [
               "product": "FortiGate 60F",
               "vendor": "Fortinet",
               "throughputGbps": 0.7,
+              "priceUsd": 765,
               "reason": "Chosen. Ankara'dan uzaktan yönetilir. Küçük ve ucuz. Ana hat koparsa 4G/5G yedek hatta otomatik geçer"
             },
             "alternatives": [
@@ -3868,24 +8993,28 @@ export const COMPANIES: Company[] = [
                 "product": "Check Point Quantum Spark 1600",
                 "vendor": "Check Point",
                 "throughputGbps": 1.5,
+                "priceUsd": 5049,
                 "reason": "Küçük ofislerde yaygın. Ama ayrı panel ve pahalı lisans"
               },
               {
                 "product": "Palo Alto PA-440",
                 "vendor": "Palo Alto Networks",
                 "throughputGbps": 1.0,
+                "priceUsd": 1804,
                 "reason": "Çok güvenli ama 38 kişilik ofis için pahalı"
               },
               {
                 "product": "Sophos XGS 2100",
                 "vendor": "Sophos",
                 "throughputGbps": 1.25,
+                "priceUsd": 2293,
                 "reason": "Bu ofis için fazla büyük. Sophos'un daha küçük modelleri de kullanılabilir"
               },
               {
                 "product": "pfSense (Netgate 6100)",
                 "vendor": "Netgate",
                 "throughputGbps": 1.0,
+                "priceUsd": 949,
                 "reason": "Ucuz. Ama uzaktan yönetimi ve desteği diğerleri kadar kolay değil"
               }
             ],
@@ -3904,16 +9033,25 @@ export const COMPANIES: Company[] = [
                 "direction": "in",
                 "proto": "tcp",
                 "port": "443,22",
-                "from": "vlan99-management",
+                "from": "vlan99-management,ankara-vlan99-over-vpn",
                 "to": "firewall",
-                "note": "Admin screens of the firewall open only from the management VLAN 99, with two-step verification."
+                "note": "Admin screens of the firewall open only from the management VLAN 99 here or in Ankara over the VPN, with two-step verification."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 161,
+                "from": "ankara-zabbix-over-vpn",
+                "to": "firewall",
+                "note": "Zabbix in Ankara reads line and device health over the VPN."
               },
               {
                 "action": "allow",
                 "direction": "out",
                 "proto": "udp",
                 "port": "500,4500",
-                "from": "vlan20-employees",
+                "from": "firewall",
                 "to": "ankara-hq",
                 "note": "Personal data of European customers travels to Ankara only through the encrypted VPN (UK GDPR)."
               },
@@ -3934,12 +9072,37 @@ export const COMPANIES: Company[] = [
                 "note": "IoT devices cannot reach the internet or staff PCs."
               },
               {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "vlan50-guest",
+                "to": "internet",
+                "note": "Guests get web access only; the deny rule above keeps them away from the company network."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "firewall,vlan10-it,vlan20-employees",
+                "to": "internet",
+                "note": "IT and staff get web access; without this rule the default deny would cut them off. The firewall itself downloads security updates here as soon as they are released."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": "443,445,514,587,993",
+                "from": "firewall,vlan10-it,vlan20-employees",
+                "to": "ankara-servers",
+                "note": "Through the VPN, staff reach the shared Ankara servers (web 443, files 445, e-mail 587 and 993) and the firewall sends its logs to the SIEM (514)."
+              },
+              {
                 "action": "deny",
                 "direction": "in",
                 "proto": "any",
-                "from": "any",
-                "to": "any",
-                "note": "Default deny: anything not allowed above is blocked and logged to the central SIEM."
+                "note": "Catch-all default deny, always the last rule: whatever no rule above allowed is blocked and logged to the central SIEM."
               }
             ]
           }
@@ -3951,7 +9114,7 @@ export const COMPANIES: Company[] = [
         "role": "campus",
         "location": "Istanbul, Turkey",
         "population": {
-          "staff": 215,
+          "staff": 615,
           "students": 10000
         },
         "network": {
@@ -4024,31 +9187,36 @@ export const COMPANIES: Company[] = [
               "product": "FortiGate 600F",
               "vendor": "Fortinet",
               "throughputGbps": 10.5,
-              "reason": "Chosen. 10 Gbps hattı karşılıyor. Captive portal, kullanıcı başı hız sınırı ve kayıt tutma hazır geliyor. Diğer şubelerle aynı panel"
+              "priceUsd": 22108,
+              "reason": "Chosen. 10 Gbps hattı karşılıyor. Captive portal, kullanıcı başı hız sınırı ve kayıt tutma hazır geliyor. Diğer şubelerle aynı panel. 2 adet, HA (aktif-pasif): biri bozulursa diğeri birkaç saniyede devralır"
             },
             "alternatives": [
               {
                 "product": "Palo Alto PA-3440",
                 "vendor": "Palo Alto Networks",
                 "throughputGbps": 12.8,
+                "priceUsd": 29776,
                 "reason": "Daha hızlı ve uygulama tanıması çok iyi. Ama 2 cihaz alındığında maliyet çok artıyor"
               },
               {
                 "product": "Sophos XGS 5500",
                 "vendor": "Sophos",
                 "throughputGbps": 12.4,
+                "priceUsd": 23586,
                 "reason": "Hızlı ve görece ucuz. Eğitim kurumlarında yaygın"
               },
               {
                 "product": "Cisco Secure Firewall 3120",
                 "vendor": "Cisco",
                 "throughputGbps": 21.0,
+                "priceUsd": 59978,
                 "reason": "Çok güçlü, büyüme payı fazla. Yönetimi daha karmaşık ve pahalı"
               },
               {
                 "product": "Check Point Quantum Force 19100",
                 "vendor": "Check Point",
                 "throughputGbps": 28.8,
+                "priceUsd": 116229,
                 "reason": "En güçlü aday ama bu şube için fazla büyük ve en pahalısı"
               }
             ],
@@ -4067,9 +9235,18 @@ export const COMPANIES: Company[] = [
                 "direction": "in",
                 "proto": "tcp",
                 "port": "443,22",
-                "from": "vlan99-management",
+                "from": "vlan99-management,ankara-vlan99-over-vpn",
                 "to": "firewall",
-                "note": "Admin screens of the firewall open only from the management VLAN 99, with two-step verification."
+                "note": "Admin screens of the firewall open only from the management VLAN 99 here or in Ankara over the VPN, with two-step verification."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 161,
+                "from": "ankara-zabbix-over-vpn",
+                "to": "firewall",
+                "note": "Zabbix in Ankara reads line and device health over the VPN."
               },
               {
                 "action": "allow",
@@ -4089,20 +9266,20 @@ export const COMPANIES: Company[] = [
                 "note": "Students can never reach the database directly."
               },
               {
+                "action": "deny",
+                "direction": "out",
+                "proto": "any",
+                "from": "vlan70-student-wifi",
+                "to": "p2p",
+                "note": "Torrent traffic is blocked on the student network. It sits above the limit rule because the first matching rule wins."
+              },
+              {
                 "action": "limit",
                 "direction": "out",
                 "proto": "any",
                 "from": "vlan70-student-wifi",
                 "to": "internet",
                 "note": "Every student is limited to 5 Mbps so a few big downloads cannot fill the campus line."
-              },
-              {
-                "action": "deny",
-                "direction": "out",
-                "proto": "any",
-                "from": "vlan70-student-wifi",
-                "to": "p2p",
-                "note": "Torrent traffic is blocked on the student network."
               },
               {
                 "action": "deny",
@@ -4121,12 +9298,64 @@ export const COMPANIES: Company[] = [
                 "note": "IoT devices (cameras, turnstiles, printers) have no internet access."
               },
               {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "firewall,vlan10-it,vlan20-staff,vlan30-faculty,vlan50-labs",
+                "to": "internet",
+                "note": "IT, staff, faculty and labs get web access; without this rule the default deny would cut them off. The firewall itself downloads security updates here as soon as they are released."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": "500,4500",
+                "from": "firewall",
+                "to": "ankara-hq",
+                "note": "The encrypted VPN tunnel to Ankara: without it the branch cannot reach shared servers and its logs cannot reach the SIEM."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": "443,445,514,587,993",
+                "from": "firewall,vlan10-it,vlan20-staff,vlan30-faculty",
+                "to": "ankara-servers",
+                "note": "Through the VPN, staff reach the shared Ankara servers (web 443, files 445, e-mail 587 and 993) and the firewall sends its logs to the SIEM (514)."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "vlan10-it,vlan20-staff,vlan30-faculty,vlan50-labs",
+                "to": "vlan60-servers",
+                "note": "Staff, faculty and labs reach the grade and e-learning system; the rule above covers students only."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "ankara-vpn",
+                "to": "vlan60-servers",
+                "note": "Staff working from outside reach the grade and e-learning system only through the VPN."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "vlan60-servers",
+                "to": "internet",
+                "note": "Servers download security updates as soon as they are released."
+              },
+              {
                 "action": "deny",
                 "direction": "in",
                 "proto": "any",
-                "from": "any",
-                "to": "any",
-                "note": "Default deny: anything not allowed above is blocked and logged to the central SIEM."
+                "note": "Catch-all default deny, always the last rule: whatever no rule above allowed is blocked and logged to the central SIEM."
               }
             ]
           }
@@ -4192,6 +9421,7 @@ export const COMPANIES: Company[] = [
               "product": "FortiGate 90G",
               "vendor": "Fortinet",
               "throughputGbps": 2.2,
+              "priceUsd": 2150,
               "reason": "Chosen. Hattın 2 katı hız. Diğer şubelerle aynı panel. Kaynak kodun dışarı gönderilmesini engelleyebiliyor (DLP)"
             },
             "alternatives": [
@@ -4199,24 +9429,28 @@ export const COMPANIES: Company[] = [
                 "product": "Palo Alto PA-460",
                 "vendor": "Palo Alto Networks",
                 "throughputGbps": 2.1,
+                "priceUsd": 4500,
                 "reason": "Uygulama tanıması çok iyi. Örneğin GitHub'da \"okumaya izin ver, başka hesaba yüklemeyi engelle\" denebilir. Pahalı"
               },
               {
                 "product": "Check Point Quantum Spark 1800",
                 "vendor": "Check Point",
                 "throughputGbps": 2.0,
+                "priceUsd": 6731,
                 "reason": "Güvenli, hızı yeterli. Ayrı panel ve pahalı lisans"
               },
               {
                 "product": "Sophos XGS 2300",
                 "vendor": "Sophos",
                 "throughputGbps": 1.4,
+                "priceUsd": 3495,
                 "reason": "Uygun fiyatlı ama 1 Gbps hatta büyüme payı az"
               },
               {
                 "product": "OPNsense (kendi sunucumuzda)",
                 "vendor": "Deciso",
                 "throughputGbps": 1.0,
+                "priceUsd": 0,
                 "reason": "Ücretsiz. DevOps ekibi yönetebilir. Ama üretici desteği yok ve hız sınırda"
               }
             ],
@@ -4235,9 +9469,18 @@ export const COMPANIES: Company[] = [
                 "direction": "in",
                 "proto": "tcp",
                 "port": "443,22",
-                "from": "vlan99-management",
+                "from": "vlan99-management,ankara-vlan99-over-vpn",
                 "to": "firewall",
-                "note": "Admin screens of the firewall open only from the management VLAN 99, with two-step verification."
+                "note": "Admin screens of the firewall open only from the management VLAN 99 here or in Ankara over the VPN, with two-step verification."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 161,
+                "from": "ankara-zabbix-over-vpn",
+                "to": "firewall",
+                "note": "Zabbix in Ankara reads line and device health over the VPN."
               },
               {
                 "action": "allow",
@@ -4257,12 +9500,46 @@ export const COMPANIES: Company[] = [
                 "note": "Test servers and real production servers live in separate VLANs; tests cannot reach real systems."
               },
               {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": "80,443",
+                "from": "firewall,vlan10-it,vlan20-developers,vlan30-test-servers",
+                "to": "internet",
+                "note": "Web and package downloads for developers. The DLP profile on this rule stops source code being uploaded anywhere except the company GitHub account. The firewall itself downloads security updates here as soon as they are released."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": "500,4500",
+                "from": "firewall",
+                "to": "ankara-hq",
+                "note": "The encrypted VPN tunnel to Ankara: without it the branch cannot reach shared servers and its logs cannot reach the SIEM."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": "443,445,514,587,993",
+                "from": "firewall,vlan10-it,vlan20-developers",
+                "to": "ankara-servers",
+                "note": "Through the VPN, staff reach the shared Ankara servers (web 443, files 445, e-mail 587 and 993) and the firewall sends its logs to the SIEM (514)."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "22,443",
+                "from": "vlan10-it,vlan20-developers",
+                "to": "vlan30-test-servers",
+                "note": "Developers and IT reach the test servers; without this rule the default deny would cut them off."
+              },
+              {
                 "action": "deny",
                 "direction": "in",
                 "proto": "any",
-                "from": "any",
-                "to": "any",
-                "note": "Default deny: anything not allowed above is blocked and logged to the central SIEM."
+                "note": "Catch-all default deny, always the last rule: whatever no rule above allowed is blocked and logged to the central SIEM."
               }
             ]
           }
@@ -4328,6 +9605,7 @@ export const COMPANIES: Company[] = [
               "product": "Check Point Quantum Spark 1800",
               "vendor": "Check Point",
               "throughputGbps": 2.0,
+              "priceUsd": 6731,
               "reason": "Chosen. Diğer şubelerden farklı üretici. SandBlast kum havuzu şüpheli dosyaları açılmadan önce test ediyor"
             },
             "alternatives": [
@@ -4335,24 +9613,28 @@ export const COMPANIES: Company[] = [
                 "product": "Palo Alto PA-440",
                 "vendor": "Palo Alto Networks",
                 "throughputGbps": 1.0,
+                "priceUsd": 1804,
                 "reason": "WildFire kum havuzu çok iyi. O da farklı bir üretici olur"
               },
               {
                 "product": "FortiGate 70F",
                 "vendor": "Fortinet",
                 "throughputGbps": 0.8,
+                "priceUsd": 955,
                 "reason": "Hızı yeterli ama diğer şubelerle aynı üretici olduğu için katmanlı güvenlik zayıflar"
               },
               {
                 "product": "Sophos XGS 2100",
                 "vendor": "Sophos",
                 "throughputGbps": 1.25,
+                "priceUsd": 2293,
                 "reason": "İyi ama kum havuzu ve DLP özellikleri ilk ikisi kadar güçlü değil"
               },
               {
                 "product": "pfSense (Netgate 6100)",
                 "vendor": "Netgate",
                 "throughputGbps": 1.0,
+                "priceUsd": 949,
                 "reason": "Ucuz ama kum havuzu ve DLP hazır gelmiyor. En gizli şube için uygun değil"
               }
             ],
@@ -4371,9 +9653,18 @@ export const COMPANIES: Company[] = [
                 "direction": "in",
                 "proto": "tcp",
                 "port": "443,22",
-                "from": "vlan99-management",
+                "from": "vlan99-management,ankara-vlan99-over-vpn",
                 "to": "firewall",
-                "note": "Admin screens of the firewall open only from the management VLAN 99, with two-step verification."
+                "note": "Admin screens of the firewall open only from the management VLAN 99 here or in Ankara over the VPN, with two-step verification."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 161,
+                "from": "ankara-zabbix-over-vpn",
+                "to": "firewall",
+                "note": "Zabbix in Ankara reads line and device health over the VPN."
               },
               {
                 "action": "deny",
@@ -4386,20 +9677,45 @@ export const COMPANIES: Company[] = [
               },
               {
                 "action": "allow",
-                "direction": "in",
+                "direction": "out",
                 "proto": "tcp",
-                "port": "80,443",
-                "from": "internet",
-                "to": "sandbox",
-                "note": "Every downloaded file is tried in a sandbox before it reaches R&D PCs."
+                "port": 443,
+                "from": "firewall,vlan10-it,vlan20-researchers,vlan30-rnd-servers",
+                "to": "work-sites-allowlist",
+                "note": "R&D reaches only work-related sites on an allow list, through the web proxy. Every downloaded file is tried in the SandBlast sandbox before it reaches a PC. The firewall and the R&D servers download security updates from this list as soon as they are released."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": "500,4500",
+                "from": "firewall",
+                "to": "ankara-hq",
+                "note": "The encrypted VPN tunnel to Ankara: without it the branch cannot reach shared servers and its logs cannot reach the SIEM."
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": "443,445,514,587,993",
+                "from": "firewall,vlan10-it,vlan20-researchers,vlan30-rnd-servers",
+                "to": "ankara-servers",
+                "note": "Through the VPN, staff reach the shared Ankara servers (web 443, files 445, e-mail 587 and 993) and the firewall sends its logs to the SIEM (514). R&D servers back up project files to Ankara on 445."
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "443,445",
+                "from": "vlan10-it,vlan20-researchers",
+                "to": "vlan30-rnd-servers",
+                "note": "Researchers and IT reach project files on the R&D servers; without this rule the default deny would cut them off."
               },
               {
                 "action": "deny",
                 "direction": "in",
                 "proto": "any",
-                "from": "any",
-                "to": "any",
-                "note": "Default deny: anything not allowed above is blocked and logged to the central SIEM."
+                "note": "Catch-all default deny, always the last rule: whatever no rule above allowed is blocked and logged to the central SIEM."
               }
             ]
           }
@@ -4411,12 +9727,26 @@ export const COMPANIES: Company[] = [
       "note": "Branches connect to the Ankara hub by encrypted VPN; home workers use VPN with two-step verification; firewall admin screens are reachable only from the management VLAN."
     },
     "monitoring": {
-      "siem": "Wazuh SIEM in Ankara (any vendor's logs, including the R&D Check Point), Zabbix for line and device health, GLPI ticketing so no incident is forgotten.",
-      "owner": "The NOC job belongs to the Ankara IT team; the SOC (4 L1, 2 L2, 1 L3 and a SOC manager) owns security alerts.",
+      "siem": "Wazuh SIEM in Ankara (any vendor's logs, including the R&D Check Point), Zabbix for line and device health, GLPI ticketing so no incident is forgotten. Log retention: firewall and security logs are kept for 1 year, the last 90 days online; academic and Istanbul guest Wi-Fi internet access logs are kept at least 2 years with a timestamp (Law 5651); London logs hold as little personal data as possible (UK GDPR). Turkish sites follow KVKK: camera recordings and personal data are kept only as long as needed.",
+      "owner": "The NOC job belongs to the Ankara IT team; the SOC (4 L1, 2 L2, 1 L3 and a SOC manager) owns security alerts. The Ankara IT team owns patching and backups: Fortinet and Check Point update notices are followed automatically and a security update is installed as soon as it is released; on top of that, the firmware of every device is checked every 30 days; every firewall config is exported to the Ankara backup server each night and after every change, and a restore is tested every 3 months.",
       "alertSink": "SIEM alerts to the SOC by phone, e-mail and message; weekday 08:00-24:00 in-house SOC, nights and weekends an outsourced security firm, on-call person phoned for critical alerts.",
       "appVsSecurity": "NOC watches whether the network works; SOC watches attacks; handling follows the NIST four-phase incident process."
     },
-    "slug": "hayal-as-ag-guvenligi"
+    "slug": "hayal-as-ag-guvenligi",
+    "cveWatch": [
+      {
+        "id": "CVE-2026-24858",
+        "product": "FortiOS (all FortiGate branches)",
+        "status": "patched",
+        "note": "Temporary: admin login through FortiCloud SSO stays off, and admin screens open only from VLAN 99. Permanent: FortiOS is upgraded to a fixed version (7.6.6, 7.4.11, 7.2.13, 7.0.19 or above, Fortinet advisory FG-IR-26-060)."
+      },
+      {
+        "id": "CVE-2024-24919",
+        "product": "Check Point Quantum Spark 1800 (R&D)",
+        "status": "patched",
+        "note": "Temporary: Remote Access VPN and Mobile Access stay off on this gateway, because the flaw needs one of them. Permanent: the Check Point security fix for Quantum Spark is installed."
+      }
+    ]
   },
   {
     "schemaVersion": 1,
@@ -9230,5 +14560,3382 @@ export const COMPANIES: Company[] = [
       "appVsSecurity": "Layered: network telemetry (Layer 2) for traffic spikes and DDoS, EDR/XDR (Layer 3) for host events, firewall logs (Layer 1) for policy hits."
     },
     "slug": "siber-guvenlik-sirketi"
+  },
+  {
+    "schemaVersion": 1,
+    "slug": "sirket-ag-guvenligi-policy-as-code",
+    "name": "Şirket Ağ Güvenliği — Policy-as-Code Çok Şubeli Tasarım",
+    "sector": "Education",
+    "author": {
+      "name": "Mahmut Çirka",
+      "course": "BGT207",
+      "github": "mahmutcirka"
+    },
+    "summary": "Ankara (genel merkez + veri merkezi), İstanbul ve Londra ofisleri, 10.000 öğrencili bir kampüs, hibrit çalışan yazılım ekibi ve izole Ar-Ge birimi olan bir eğitim / teknoloji şirketi (~11.500 kişi, ~23.000 cihaz). Ağ, Ankara merkezli hub-and-spoke SD-WAN; her sitede çift ISP ve HA firewall çifti var. Öğrenci ağı aynı kutuda ayrı bir sanal firewall'da, Ar-Ge kendi iç firewall'unun arkasında ve internete yalnızca proxy üzerinden çıkıyor, PROD'a yalnızca CI/CD hattı erişiyor. Kurallar YAML'da tutuluyor, akış testleriyle doğrulanıp FortiOS / PAN-OS config'ine otomatik derleniyor (policy-as-code). Config'ler Git'te ve FortiManager / Panorama revizyonlarında yedekli; haftalık şifreli offline kopya alınır ve altı ayda bir sıfır cihaza geri yükleme (restore) tatbikatı yapılır.",
+    "branches": [
+      {
+        "id": "ankara-ofisi",
+        "name": "Ankara Ofisi",
+        "role": "headquarters",
+        "location": "Ankara, TR",
+        "population": {
+          "staff": 220,
+          "software": 35
+        },
+        "network": {
+          "cidr": "10.10.0.0/16",
+          "dmz": true,
+          "vlans": [
+            {
+              "id": 10,
+              "name": "personel",
+              "cidr": "10.10.8.0/22",
+              "note": "Ofis personeli (staff): 220 kişi × 2 cihaz + %30 büyüme ≈ 570 adres"
+            },
+            {
+              "id": 20,
+              "name": "teknik",
+              "cidr": "10.10.20.0/24",
+              "note": "BT ve yazılım (software) ekibi; sunucu yönetimi yalnızca grp-bt-admin + MFA"
+            },
+            {
+              "id": 50,
+              "name": "sunucu",
+              "cidr": "10.10.50.0/23",
+              "note": "Veri merkezi: AD/DNS/NTP, ERP, dosya, SIEM, FortiManager, Panorama"
+            },
+            {
+              "id": 60,
+              "name": "misafir",
+              "cidr": "10.10.60.0/24",
+              "note": "Misafir (guest) Wi-Fi: yalnızca internet, kişi başı 10 Mbps"
+            },
+            {
+              "id": 70,
+              "name": "dmz",
+              "cidr": "10.10.70.0/24",
+              "note": "Kurumsal web sitesi; WAF arkasında, iç ağa geri dönemez"
+            },
+            {
+              "id": 90,
+              "name": "yonetim",
+              "cidr": "10.10.90.0/24",
+              "note": "Yönetim (management): yalnızca VPN + bastion, internetten kapalı"
+            }
+          ]
+        },
+        "bandwidth": {
+          "downMbps": 2000,
+          "upMbps": 2000,
+          "drivers": [
+            "Teams / Zoom",
+            "ERP",
+            "e-posta",
+            "şube IPsec tünelleri (hub)",
+            "yedekleme replikasyonu",
+            "SaaS"
+          ]
+        },
+        "firewalls": [
+          {
+            "segment": "perimeter",
+            "chosen": {
+              "product": "FortiGate 600F",
+              "vendor": "Fortinet",
+              "throughputGbps": 10.5,
+              "priceUsd": 12000,
+              "reason": "ASIC (NP7) hızlandırma, dahili SD-WAN hub, FortiManager ile tüm şubeleri tek panelden yönetim — 2× HA Active-Passive + SD-WAN Hub"
+            },
+            "alternatives": [
+              {
+                "product": "Palo Alto PA-3410",
+                "vendor": "Palo Alto Networks",
+                "throughputGbps": 5.0,
+                "priceUsd": 25000,
+                "reason": "En olgun App-ID/User-ID; aynı performans için lisans maliyeti belirgin yüksek"
+              },
+              {
+                "product": "Check Point Quantum 9300",
+                "vendor": "Check Point",
+                "throughputGbps": 6.0,
+                "priceUsd": 30000,
+                "reason": "SmartConsole ile güçlü merkezi politika yönetimi, ThreatCloud istihbaratı"
+              },
+              {
+                "product": "Cisco Secure Firewall 3120",
+                "vendor": "Cisco",
+                "throughputGbps": 7.0,
+                "priceUsd": 30000,
+                "reason": "Cisco anahtarlama/ISE altyapısıyla uyumlu, Talos istihbaratı; FMC yönetimi ağır"
+              },
+              {
+                "product": "Sophos XGS 6500",
+                "vendor": "Sophos",
+                "throughputGbps": 6.0,
+                "priceUsd": 20000,
+                "reason": "Kolay yönetim, Sophos EDR ile Synchronized Security"
+              }
+            ],
+            "rules": [
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-personel",
+                "to": "dhcp",
+                "note": "Personel IP'yi FortiGate DHCP sunucusundan alır; kapatılırsa ofiste kimse ağa giremez (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-teknik",
+                "to": "dhcp",
+                "note": "BT ekibi iş istasyonları için DHCP (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-misafir",
+                "to": "dhcp",
+                "note": "Misafir Wi-Fi için kısa kiralı (1 saat) DHCP (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 500,
+                "from": "geo-izinli",
+                "to": "firewall",
+                "note": "Tünel ve ZTNA yalnızca TR/GB IP'lerinden (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 4500,
+                "from": "geo-izinli",
+                "to": "firewall",
+                "note": "Tünel ve ZTNA yalnızca TR/GB IP'lerinden (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 443,
+                "from": "geo-izinli",
+                "to": "firewall",
+                "note": "Tünel ve ZTNA yalnızca TR/GB IP'lerinden (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 443,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Firewall yönetimi internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 80,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Firewall yönetimi internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 22,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Firewall yönetimi internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "udp",
+                "port": 161,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Firewall yönetimi internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "any",
+                "from": "tehdit-ip",
+                "note": "TEHDIT-IP-GIRIS-RED: Tehdit istihbaratı listesindeki IP'lerden gelen her şey"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "any",
+                "to": "tehdit-ip",
+                "note": "TEHDIT-IP-CIKIS-RED: Bilinen C2 / botnet / phishing altyapısına çıkış"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-mgmt",
+                "to": "grp-sube-mgmt",
+                "note": "MGMT-SUBE-CIHAZLARI: Merkezden şube ağ cihazlarının yönetimi"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "net-mgmt",
+                "to": "grp-sube-mgmt",
+                "note": "MGMT-SUBE-CIHAZLARI: Merkezden şube ağ cihazlarının yönetimi"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 161,
+                "from": "net-mgmt",
+                "to": "grp-sube-mgmt",
+                "note": "MGMT-SUBE-CIHAZLARI: Merkezden şube ağ cihazlarının yönetimi"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 541,
+                "from": "grp-sube-mgmt",
+                "to": "grp-yonetim-sunuculari",
+                "note": "SUBE-YONETIM-SUNUCULARI: Şube firewall'ları -> FortiManager / FortiAnalyzer / Panorama"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 514,
+                "from": "grp-sube-mgmt",
+                "to": "grp-yonetim-sunuculari",
+                "note": "SUBE-YONETIM-SUNUCULARI: Şube firewall'ları -> FortiManager / FortiAnalyzer / Panorama"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3978,
+                "from": "grp-sube-mgmt",
+                "to": "grp-yonetim-sunuculari",
+                "note": "SUBE-YONETIM-SUNUCULARI: Şube firewall'ları -> FortiManager / FortiAnalyzer / Panorama"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "net-personel, net-teknik, net-arge, grp-subeler, net-vpn-kullanici",
+                "to": "srv-ad-dns",
+                "note": "IC-KIMLIK-SERVISLERI: Active Directory, DNS, NTP, GPO (SMB) — tüm şubeler"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "net-personel, net-teknik, net-arge, grp-subeler, net-vpn-kullanici",
+                "to": "srv-ad-dns",
+                "note": "IC-KIMLIK-SERVISLERI: Active Directory, DNS, NTP, GPO (SMB) — tüm şubeler"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 88,
+                "from": "net-personel, net-teknik, net-arge, grp-subeler, net-vpn-kullanici",
+                "to": "srv-ad-dns",
+                "note": "IC-KIMLIK-SERVISLERI: Active Directory, DNS, NTP, GPO (SMB) — tüm şubeler"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 88,
+                "from": "net-personel, net-teknik, net-arge, grp-subeler, net-vpn-kullanici",
+                "to": "srv-ad-dns",
+                "note": "IC-KIMLIK-SERVISLERI: Active Directory, DNS, NTP, GPO (SMB) — tüm şubeler"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 636,
+                "from": "net-personel, net-teknik, net-arge, grp-subeler, net-vpn-kullanici",
+                "to": "srv-ad-dns",
+                "note": "IC-KIMLIK-SERVISLERI: Active Directory, DNS, NTP, GPO (SMB) — tüm şubeler"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 123,
+                "from": "net-personel, net-teknik, net-arge, grp-subeler, net-vpn-kullanici",
+                "to": "srv-ad-dns",
+                "note": "IC-KIMLIK-SERVISLERI: Active Directory, DNS, NTP, GPO (SMB) — tüm şubeler"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 445,
+                "from": "net-personel, net-teknik, net-arge, grp-subeler, net-vpn-kullanici",
+                "to": "srv-ad-dns",
+                "note": "IC-KIMLIK-SERVISLERI: Active Directory, DNS, NTP, GPO (SMB) — tüm şubeler"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-personel, net-teknik, grp-subeler",
+                "to": "srv-erp, srv-dosya",
+                "note": "ERP-DOSYA-ERISIM: ERP ve dosya sunucusu (merkez + şubeler)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 445,
+                "from": "net-personel, net-teknik, grp-subeler",
+                "to": "srv-erp, srv-dosya",
+                "note": "ERP-DOSYA-ERISIM: ERP ve dosya sunucusu (merkez + şubeler)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-vpn-kullanici (grp-uzaktan-calisan)",
+                "to": "srv-erp, srv-dosya",
+                "note": "UZAKTAN-CALISAN-ERISIM: ZTNA (MFA + cihaz uyumluluk kontrolü) ile uzaktan erişim"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 445,
+                "from": "net-vpn-kullanici (grp-uzaktan-calisan)",
+                "to": "srv-erp, srv-dosya",
+                "note": "UZAKTAN-CALISAN-ERISIM: ZTNA (MFA + cihaz uyumluluk kontrolü) ile uzaktan erişim"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "net-teknik (grp-bt-admin)",
+                "to": "net-veri-merkezi, net-dmz",
+                "note": "BT-SUNUCU-YONETIM: Sunucu yönetimi yalnızca BT-Admin grubuna (FSSO kimliği + MFA)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3389,
+                "from": "net-teknik (grp-bt-admin)",
+                "to": "net-veri-merkezi, net-dmz",
+                "note": "BT-SUNUCU-YONETIM: Sunucu yönetimi yalnızca BT-Admin grubuna (FSSO kimliği + MFA)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-teknik (grp-bt-admin)",
+                "to": "net-veri-merkezi, net-dmz",
+                "note": "BT-SUNUCU-YONETIM: Sunucu yönetimi yalnızca BT-Admin grubuna (FSSO kimliği + MFA)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 514,
+                "from": "personel, teknik, dmz, mgmt, vpn-sube, arge-transit",
+                "to": "grp-log-sunuculari",
+                "note": "LOG-TOPLAMA: Tüm loglar ve EDR/Wazuh ajanları SIEM'e"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "personel, teknik, dmz, mgmt, vpn-sube, arge-transit",
+                "to": "grp-log-sunuculari",
+                "note": "LOG-TOPLAMA: Tüm loglar ve EDR/Wazuh ajanları SIEM'e"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "1514:1515",
+                "from": "personel, teknik, dmz, mgmt, vpn-sube, arge-transit",
+                "to": "grp-log-sunuculari",
+                "note": "LOG-TOPLAMA: Tüm loglar ve EDR/Wazuh ajanları SIEM'e"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 514,
+                "from": "personel, teknik, dmz, mgmt, vpn-sube, arge-transit",
+                "to": "grp-log-sunuculari",
+                "note": "LOG-TOPLAMA: Tüm loglar ve EDR/Wazuh ajanları SIEM'e"
+              },
+              {
+                "action": "limit",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 443,
+                "from": "internet",
+                "to": "srv-web",
+                "note": "DMZ-WEB-YAYIN: Kurumsal web sitesi www.sirket.example (VIP + WAF + IPS; DoS politikasıyla yeni bağlantı hız limiti)"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-veri-merkezi",
+                "to": "fqdn-guncelleme",
+                "note": "SUNUCU-GUNCELLEME: Sunucular yalnızca onaylı güncelleme adreslerine çıkar"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-veri-merkezi",
+                "to": "fqdn-guncelleme",
+                "note": "SUNUCU-GUNCELLEME: Sunucular yalnızca onaylı güncelleme adreslerine çıkar"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 25,
+                "from": "srv-eposta-relay",
+                "to": "internet",
+                "note": "EPOSTA-RELAY-CIKIS: Dışarıya SMTP yalnızca e-posta relay sunucusundan"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 53,
+                "from": "srv-ad-dns",
+                "to": "internet",
+                "note": "DNS-NTP-DIS-COZUMLEME: Tüm şirketin DNS'i AD sunucularından dışarı çözülür; NTP kaynağı da bunlardır"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": 53,
+                "from": "srv-ad-dns",
+                "to": "internet",
+                "note": "DNS-NTP-DIS-COZUMLEME: Tüm şirketin DNS'i AD sunucularından dışarı çözülür; NTP kaynağı da bunlardır"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": 123,
+                "from": "srv-ad-dns",
+                "to": "internet",
+                "note": "DNS-NTP-DIS-COZUMLEME: Tüm şirketin DNS'i AD sunucularından dışarı çözülür; NTP kaynağı da bunlardır"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "udp",
+                "port": 443,
+                "from": "personel, teknik, misafir",
+                "to": "internet",
+                "note": "QUIC-RED: QUIC engellenir, tarayıcı TLS'e düşer ve SSL inceleme çalışır"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-teknik",
+                "to": "internet",
+                "note": "TEKNIK-INTERNET: BT ekibi internet (SSH dahil)"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-teknik",
+                "to": "internet",
+                "note": "TEKNIK-INTERNET: BT ekibi internet (SSH dahil)"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 22,
+                "from": "net-teknik",
+                "to": "internet",
+                "note": "TEKNIK-INTERNET: BT ekibi internet (SSH dahil)"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-personel",
+                "to": "internet",
+                "note": "PERSONEL-INTERNET: Personel internet (DNS yalnızca iç DNS üzerinden)"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-personel",
+                "to": "internet",
+                "note": "PERSONEL-INTERNET: Personel internet (DNS yalnızca iç DNS üzerinden)"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "net-misafir",
+                "to": "rfc1918",
+                "note": "MISAFIR-IC-AG-RED: Misafir hiçbir iç ağa erişemez"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-misafir",
+                "to": "internet",
+                "note": "MISAFIR-INTERNET: Misafir internet, kişi başı 10 Mbps"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-misafir",
+                "to": "internet",
+                "note": "MISAFIR-INTERNET: Misafir internet, kişi başı 10 Mbps"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 53,
+                "from": "net-misafir",
+                "to": "internet",
+                "note": "MISAFIR-INTERNET: Misafir internet, kişi başı 10 Mbps"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": 53,
+                "from": "net-misafir",
+                "to": "internet",
+                "note": "MISAFIR-INTERNET: Misafir internet, kişi başı 10 Mbps"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "VARSAYILAN-RED: Açıkça izin verilmeyen her şey reddedilir ve loglanır"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "istanbul-ofisi",
+        "name": "İstanbul Ofisi",
+        "role": "branch",
+        "location": "İstanbul, TR",
+        "population": {
+          "staff": 160,
+          "software": 25
+        },
+        "network": {
+          "cidr": "10.20.0.0/16",
+          "dmz": false,
+          "vlans": [
+            {
+              "id": 10,
+              "name": "personel",
+              "cidr": "10.20.10.0/23",
+              "note": "Satış / pazarlama personeli (staff): 160 kişi × 2 cihaz + %30"
+            },
+            {
+              "id": 20,
+              "name": "teknik",
+              "cidr": "10.20.20.0/24",
+              "note": "Yerel BT ve yazılım (software) desteği"
+            },
+            {
+              "id": 30,
+              "name": "yazici",
+              "cidr": "10.20.30.0/24",
+              "note": "Yazıcı / IoT (printer): bağlantı başlatamaz"
+            },
+            {
+              "id": 60,
+              "name": "misafir",
+              "cidr": "10.20.60.0/24",
+              "note": "Misafir (guest) Wi-Fi: yalnızca internet"
+            },
+            {
+              "id": 90,
+              "name": "yonetim",
+              "cidr": "10.20.90.0/24",
+              "note": "Yönetim (management): yalnızca Ankara NOC'tan tünel üzerinden"
+            }
+          ]
+        },
+        "bandwidth": {
+          "downMbps": 1000,
+          "upMbps": 1000,
+          "drivers": [
+            "Teams / Zoom",
+            "CRM ve SaaS",
+            "ERP (Ankara tüneli)",
+            "web"
+          ]
+        },
+        "firewalls": [
+          {
+            "segment": "perimeter",
+            "chosen": {
+              "product": "FortiGate 200F",
+              "vendor": "Fortinet",
+              "throughputGbps": 3.0,
+              "priceUsd": 5500,
+              "reason": "Fiyat/performans lideri, SD-WAN spoke, ADVPN ile şubeler arası dinamik tünel — 2× HA Active-Passive"
+            },
+            "alternatives": [
+              {
+                "product": "Palo Alto PA-450",
+                "vendor": "Palo Alto Networks",
+                "throughputGbps": 1.7,
+                "priceUsd": 4500,
+                "reason": "Güçlü ama büyüme payı dar; 3 yıl içinde PA-460'a çıkmak gerekebilir"
+              },
+              {
+                "product": "Check Point Quantum 6200",
+                "vendor": "Check Point",
+                "throughputGbps": 1.5,
+                "priceUsd": 9000,
+                "reason": "Yeterli; küçük cihazlarda lisans/donanım maliyeti görece yüksek"
+              },
+              {
+                "product": "Cisco Secure Firewall 1150",
+                "vendor": "Cisco",
+                "throughputGbps": 3.0,
+                "priceUsd": 6000,
+                "reason": "Performans yeterli; SD-WAN için ayrı ürün (Catalyst SD-WAN) gerekebilir"
+              },
+              {
+                "product": "Sophos XGS 4300",
+                "vendor": "Sophos",
+                "throughputGbps": 3.0,
+                "priceUsd": 6500,
+                "reason": "Kolay yönetim, orta ölçekli ofis için uygun"
+              }
+            ],
+            "rules": [
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-personel",
+                "to": "dhcp",
+                "note": "Personel IP'yi FortiGate DHCP sunucusundan alır; kapatılırsa ofiste kimse ağa giremez (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-teknik",
+                "to": "dhcp",
+                "note": "BT ekibi iş istasyonları için DHCP (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-yazici",
+                "to": "dhcp",
+                "note": "Yazıcılar MAC'e bağlı sabit kiralama (rezervasyon) alır (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-misafir",
+                "to": "dhcp",
+                "note": "Misafir Wi-Fi için kısa kiralı (1 saat) DHCP (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 500,
+                "from": "geo-izinli",
+                "to": "firewall",
+                "note": "Hub tüneli için IKE (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 4500,
+                "from": "geo-izinli",
+                "to": "firewall",
+                "note": "Hub tüneli için IKE (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 443,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Yönetim internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 80,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Yönetim internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 22,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Yönetim internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "udp",
+                "port": 161,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Yönetim internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "any",
+                "from": "tehdit-ip",
+                "note": "TEHDIT-IP-GIRIS-RED: Tehdit listesindeki kaynaklar"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "any",
+                "to": "tehdit-ip",
+                "note": "TEHDIT-IP-CIKIS-RED: Bilinen kötü hedeflere çıkış"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "ankara-mgmt",
+                "to": "net-mgmt",
+                "note": "MERKEZ-YONETIM: Ankara NOC şube anahtar/AP'lerini yönetir"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "ankara-mgmt",
+                "to": "net-mgmt",
+                "note": "MERKEZ-YONETIM: Ankara NOC şube anahtar/AP'lerini yönetir"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 161,
+                "from": "ankara-mgmt",
+                "to": "net-mgmt",
+                "note": "MERKEZ-YONETIM: Ankara NOC şube anahtar/AP'lerini yönetir"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD / DNS / NTP / GPO"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD / DNS / NTP / GPO"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 88,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD / DNS / NTP / GPO"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 88,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD / DNS / NTP / GPO"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 636,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD / DNS / NTP / GPO"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 123,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD / DNS / NTP / GPO"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 445,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD / DNS / NTP / GPO"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-erp, ankara-dosya",
+                "note": "ERP-DOSYA: Merkez ERP ve dosya sunucusu"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 445,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-erp, ankara-dosya",
+                "note": "ERP-DOSYA: Merkez ERP ve dosya sunucusu"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "mgmt, personel, teknik",
+                "to": "ankara-log",
+                "note": "LOG-MERKEZE: Anahtar/AP syslog ve uç nokta ajanları -> SIEM"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "1514:1515",
+                "from": "mgmt, personel, teknik",
+                "to": "ankara-log",
+                "note": "LOG-MERKEZE: Anahtar/AP syslog ve uç nokta ajanları -> SIEM"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "net-personel, net-teknik",
+                "to": "net-yazici",
+                "note": "YAZICI-ERISIM: Yazdırma (yazıcılar istemciye bağlantı başlatamaz)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "net-personel, net-teknik",
+                "to": "net-yazici",
+                "note": "YAZICI-ERISIM: Yazdırma (yazıcılar istemciye bağlantı başlatamaz)"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "net-yazici",
+                "note": "YAZICI-IZOLE-RED: Yazıcılar hiçbir yere bağlantı başlatamaz (IoT izolasyonu)"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "personel, misafir",
+                "to": "net-yazilim",
+                "note": "YAZILIM-AGI-RED: Satış/operasyon geliştirici ortamlarına erişemez"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "udp",
+                "port": 443,
+                "from": "personel, teknik, misafir",
+                "to": "internet",
+                "note": "QUIC-RED: SSL incelemenin atlatılmasını önler"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-teknik",
+                "to": "internet",
+                "note": "TEKNIK-INTERNET: BT ekibi internet"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-teknik",
+                "to": "internet",
+                "note": "TEKNIK-INTERNET: BT ekibi internet"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 22,
+                "from": "net-teknik",
+                "to": "internet",
+                "note": "TEKNIK-INTERNET: BT ekibi internet"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-personel",
+                "to": "internet",
+                "note": "PERSONEL-INTERNET: Personel internet (yerel çıkış)"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-personel",
+                "to": "internet",
+                "note": "PERSONEL-INTERNET: Personel internet (yerel çıkış)"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "net-misafir",
+                "to": "rfc1918",
+                "note": "MISAFIR-IC-AG-RED: Misafir iç ağa erişemez"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-misafir",
+                "to": "internet",
+                "note": "MISAFIR-INTERNET: Misafir internet, kişi başı 10 Mbps"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-misafir",
+                "to": "internet",
+                "note": "MISAFIR-INTERNET: Misafir internet, kişi başı 10 Mbps"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 53,
+                "from": "net-misafir",
+                "to": "internet",
+                "note": "MISAFIR-INTERNET: Misafir internet, kişi başı 10 Mbps"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": 53,
+                "from": "net-misafir",
+                "to": "internet",
+                "note": "MISAFIR-INTERNET: Misafir internet, kişi başı 10 Mbps"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "VARSAYILAN-RED: Açıkça izin verilmeyen her şey"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "londra-ofisi",
+        "name": "Londra Ofisi",
+        "role": "branch",
+        "location": "London, UK",
+        "population": {
+          "staff": 60,
+          "software": 10
+        },
+        "network": {
+          "cidr": "10.30.0.0/16",
+          "dmz": false,
+          "vlans": [
+            {
+              "id": 10,
+              "name": "personel",
+              "cidr": "10.30.10.0/24",
+              "note": "Satış / hukuk personeli (staff): 60 kişi × 2 cihaz + %30"
+            },
+            {
+              "id": 20,
+              "name": "teknik",
+              "cidr": "10.30.20.0/24",
+              "note": "Yerel BT ve yazılım (software)"
+            },
+            {
+              "id": 60,
+              "name": "misafir",
+              "cidr": "10.30.60.0/24",
+              "note": "Misafir (guest) Wi-Fi: yalnızca internet"
+            },
+            {
+              "id": 90,
+              "name": "yonetim",
+              "cidr": "10.30.90.0/24",
+              "note": "Yönetim (management) + UK'de kalan yerel log toplayıcı (GDPR)"
+            }
+          ]
+        },
+        "bandwidth": {
+          "downMbps": 500,
+          "upMbps": 500,
+          "drivers": [
+            "Teams / Zoom",
+            "e-posta",
+            "ERP (mesai saatinde",
+            "tünel)",
+            "bulut yedekleme"
+          ]
+        },
+        "firewalls": [
+          {
+            "segment": "perimeter",
+            "chosen": {
+              "product": "FortiGate 100F",
+              "vendor": "Fortinet",
+              "throughputGbps": 1.0,
+              "priceUsd": 3500,
+              "reason": "Zero-Touch Provisioning, FortiExtender ile 5G yedek, merkezle aynı yönetim — 2× HA Active-Passive + 5G yedek"
+            },
+            "alternatives": [
+              {
+                "product": "Palo Alto PA-440",
+                "vendor": "Palo Alto Networks",
+                "throughputGbps": 1.0,
+                "priceUsd": 2000,
+                "reason": "Küçük ofis için güçlü; yönetim için Panorama gerekir"
+              },
+              {
+                "product": "Cisco Meraki MX85",
+                "vendor": "Cisco",
+                "throughputGbps": 0.75,
+                "priceUsd": 2500,
+                "reason": "Tamamen bulut yönetimli, uzak ofis için çok pratik; derin özelleştirme sınırlı"
+              },
+              {
+                "product": "Check Point Quantum Spark 1900",
+                "vendor": "Check Point",
+                "throughputGbps": 1.0,
+                "priceUsd": 3500,
+                "reason": "KOBİ odaklı, bulut yönetim seçeneği"
+              },
+              {
+                "product": "Sophos XGS 2300",
+                "vendor": "Sophos",
+                "throughputGbps": 1.0,
+                "priceUsd": 3000,
+                "reason": "Sophos Central ile kolay uzaktan yönetim"
+              }
+            ],
+            "rules": [
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-personel",
+                "to": "dhcp",
+                "note": "Personel IP'yi FortiGate DHCP sunucusundan alır; kapatılırsa ofiste kimse ağa giremez (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-teknik",
+                "to": "dhcp",
+                "note": "BT ekibi iş istasyonları için DHCP (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-misafir",
+                "to": "dhcp",
+                "note": "Misafir Wi-Fi için kısa kiralı (1 saat) DHCP (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 500,
+                "from": "geo-izinli",
+                "to": "firewall",
+                "note": "Hub tüneli için IKE (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 4500,
+                "from": "geo-izinli",
+                "to": "firewall",
+                "note": "Hub tüneli için IKE (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 443,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Yönetim internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 80,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Yönetim internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 22,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Yönetim internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "udp",
+                "port": 161,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Yönetim internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "any",
+                "from": "tehdit-ip",
+                "note": "TEHDIT-IP-GIRIS-RED: Tehdit listesindeki kaynaklar"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "any",
+                "to": "tehdit-ip",
+                "note": "TEHDIT-IP-CIKIS-RED: Bilinen kötü hedeflere çıkış"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "ankara-mgmt",
+                "to": "net-mgmt",
+                "note": "MERKEZ-YONETIM: Yerinde BT az; yönetim Ankara NOC'tan"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "ankara-mgmt",
+                "to": "net-mgmt",
+                "note": "MERKEZ-YONETIM: Yerinde BT az; yönetim Ankara NOC'tan"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 161,
+                "from": "ankara-mgmt",
+                "to": "net-mgmt",
+                "note": "MERKEZ-YONETIM: Yerinde BT az; yönetim Ankara NOC'tan"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD kimlik doğrulama (kişisel veri içermez)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD kimlik doğrulama (kişisel veri içermez)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 88,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD kimlik doğrulama (kişisel veri içermez)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 88,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD kimlik doğrulama (kişisel veri içermez)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 636,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD kimlik doğrulama (kişisel veri içermez)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 123,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD kimlik doğrulama (kişisel veri içermez)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-personel @ Pzt/Sal/Car/Per/Cum 07:00-20:00",
+                "to": "ankara-erp",
+                "note": "ERP-MESAI-ICI: ERP yalnızca UK mesai saatlerinde, DLP denetimli [zamanlama: SCH_MESAI_UK]"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-personel",
+                "to": "ankara-erp",
+                "note": "ERP-MESAI-DISI-RED: Mesai dışı ERP erişimi engellenir ve SOC'a alarm üretir"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 445,
+                "from": "net-personel, net-teknik",
+                "to": "ankara-dosya",
+                "note": "DOSYA-DLP: Dosya paylaşımı; UK müşteri PII kalıpları Türkiye'ye kopyalanamaz"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "srv-uk-log",
+                "to": "ankara-siem",
+                "note": "LOG-OZET-MERKEZE: Ham log UK'de kalır; merkeze yalnızca güvenlik olayı özeti"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "udp",
+                "port": 443,
+                "from": "personel, teknik, misafir",
+                "to": "internet",
+                "note": "QUIC-RED: SSL incelemenin atlatılmasını önler"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-teknik",
+                "to": "internet",
+                "note": "TEKNIK-INTERNET: BT ekibi internet"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-teknik",
+                "to": "internet",
+                "note": "TEKNIK-INTERNET: BT ekibi internet"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 22,
+                "from": "net-teknik",
+                "to": "internet",
+                "note": "TEKNIK-INTERNET: BT ekibi internet"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-personel",
+                "to": "internet",
+                "note": "PERSONEL-INTERNET: Personel internet + UK PII DLP"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-personel",
+                "to": "internet",
+                "note": "PERSONEL-INTERNET: Personel internet + UK PII DLP"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "net-misafir",
+                "to": "rfc1918",
+                "note": "MISAFIR-IC-AG-RED: Misafir iç ağa erişemez"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-misafir",
+                "to": "internet",
+                "note": "MISAFIR-INTERNET: Misafir internet, kişi başı 10 Mbps"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-misafir",
+                "to": "internet",
+                "note": "MISAFIR-INTERNET: Misafir internet, kişi başı 10 Mbps"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 53,
+                "from": "net-misafir",
+                "to": "internet",
+                "note": "MISAFIR-INTERNET: Misafir internet, kişi başı 10 Mbps"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": 53,
+                "from": "net-misafir",
+                "to": "internet",
+                "note": "MISAFIR-INTERNET: Misafir internet, kişi başı 10 Mbps"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "VARSAYILAN-RED: Açıkça izin verilmeyen her şey"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "akademik-sube",
+        "name": "Akademik Şube",
+        "role": "campus",
+        "location": "Ankara, TR",
+        "population": {
+          "staff": 750,
+          "students": 10000,
+          "software": 40
+        },
+        "network": {
+          "cidr": "10.40.0.0/14",
+          "dmz": true,
+          "vlans": [
+            {
+              "id": 10,
+              "name": "idari",
+              "cidr": "10.40.8.0/22",
+              "note": "İdari personel (staff) ve kampüs BT / yazılım (software) ekibi"
+            },
+            {
+              "id": 15,
+              "name": "akademisyen",
+              "cidr": "10.40.16.0/21",
+              "note": "Öğretim üyeleri (staff): 450 kişi × 2-3 cihaz"
+            },
+            {
+              "id": 30,
+              "name": "lab",
+              "cidr": "10.40.30.0/23",
+              "note": "Bilgisayar laboratuvarları; sınav oturumunda yalnızca sınav sunucusu"
+            },
+            {
+              "id": 50,
+              "name": "sunucu",
+              "cidr": "10.40.50.0/24",
+              "note": "LMS, OBS (not sistemi), sınav sunucusu, Kea DHCP kümesi"
+            },
+            {
+              "id": 70,
+              "name": "dmz",
+              "cidr": "10.40.70.0/24",
+              "note": "LMS ön yüzü (reverse proxy + WAF) ve öğrenci DNS çözümleyicisi"
+            },
+            {
+              "id": 90,
+              "name": "yonetim",
+              "cidr": "10.40.90.0/24",
+              "note": "Yönetim (management): yalnızca Ankara NOC'tan"
+            },
+            {
+              "id": 100,
+              "name": "ogrenci-wifi",
+              "cidr": "10.42.0.0/16",
+              "note": "Öğrenci (students) Wi-Fi / kablolu + eduroam misafir (guest); ayrı sanal firewall (vsys2)"
+            }
+          ]
+        },
+        "bandwidth": {
+          "downMbps": 20000,
+          "upMbps": 20000,
+          "drivers": [
+            "LMS video",
+            "online ders (Zoom / Teams)",
+            "öğrenci Wi-Fi web",
+            "yayın veri tabanları",
+            "işletim sistemi güncellemeleri",
+            "sınav günü zirveleri"
+          ]
+        },
+        "firewalls": [
+          {
+            "segment": "perimeter",
+            "chosen": {
+              "product": "Palo Alto PA-5420",
+              "vendor": "Palo Alto Networks",
+              "throughputGbps": 25,
+              "priceUsd": 90000,
+              "reason": "User-ID (10.000+ kimlik), App-ID ile VPN/proxy kaçışını yakalama, VSYS ile öğrenci ağı ayrı sanal firewall — 2× HA Active-Passive, 2 VSYS"
+            },
+            "alternatives": [
+              {
+                "product": "Cisco Secure Firewall 4215",
+                "vendor": "Cisco",
+                "throughputGbps": 30,
+                "priceUsd": 110000,
+                "reason": "Kampüste Cisco ISE/anahtarlama varsa güçlü entegrasyon"
+              },
+              {
+                "product": "Juniper SRX4600",
+                "vendor": "Juniper Networks",
+                "throughputGbps": 20,
+                "priceUsd": 70000,
+                "reason": "Üniversite ağlarında yaygın, güçlü yönlendirme; kimlik tabanlı politika daha zayıf"
+              },
+              {
+                "product": "Check Point Quantum 16200",
+                "vendor": "Check Point",
+                "throughputGbps": 11,
+                "priceUsd": 80000,
+                "reason": "Tek cihaz yetmez; Maestro ile yatay ölçekleme gerekir (maliyet artar)"
+              },
+              {
+                "product": "FortiGate 1800F",
+                "vendor": "Fortinet",
+                "throughputGbps": 9.1,
+                "priceUsd": 45000,
+                "reason": "Çok yüksek oturum kapasitesi; tam güvenlik profili açıkken 20G aktif-aktif hat için tek cihaz yetersiz"
+              }
+            ],
+            "rules": [
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-idari",
+                "to": "dhcp",
+                "note": "İdari personel ve kampüs BT için DHCP relay (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-akademisyen",
+                "to": "dhcp",
+                "note": "Akademisyen cihazları için DHCP relay (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-lab",
+                "to": "dhcp",
+                "note": "Laboratuvar bilgisayarları MAC rezervasyonlu DHCP alır (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "any",
+                "from": "tehdit-ip",
+                "note": "TEHDIT-GIRIS-RED: Tehdit listesindeki kaynaklar"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "any",
+                "to": "tehdit-ip",
+                "note": "TEHDIT-CIKIS-RED: Bilinen kötü hedeflere çıkış"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-ogrenci",
+                "to": "srv-lms-dmz, srv-ogr-dns",
+                "note": "OGR-GECIS-DMZ: vsys2'den gelen öğrenci yalnızca DMZ portal ve DNS'e"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-ogrenci",
+                "to": "srv-lms-dmz, srv-ogr-dns",
+                "note": "OGR-GECIS-DMZ: vsys2'den gelen öğrenci yalnızca DMZ portal ve DNS'e"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "net-ogrenci",
+                "to": "srv-lms-dmz, srv-ogr-dns",
+                "note": "OGR-GECIS-DMZ: vsys2'den gelen öğrenci yalnızca DMZ portal ve DNS'e"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "ogrenci-gecis",
+                "note": "OGR-GECIS-RED: vsys1 tarafında ikinci savunma hattı"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "ankara-mgmt",
+                "to": "net-mgmt",
+                "note": "MERKEZ-YONETIM: Ankara NOC kampüs ağ cihazlarını yönetir"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "ankara-mgmt",
+                "to": "net-mgmt",
+                "note": "MERKEZ-YONETIM: Ankara NOC kampüs ağ cihazlarını yönetir"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 161,
+                "from": "ankara-mgmt",
+                "to": "net-mgmt",
+                "note": "MERKEZ-YONETIM: Ankara NOC kampüs ağ cihazlarını yönetir"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "grp-kurumsal-aglar",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: Merkez AD (User-ID için de kaynak)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 88,
+                "from": "grp-kurumsal-aglar",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: Merkez AD (User-ID için de kaynak)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 389,
+                "from": "grp-kurumsal-aglar",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: Merkez AD (User-ID için de kaynak)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 123,
+                "from": "grp-kurumsal-aglar",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: Merkez AD (User-ID için de kaynak)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 445,
+                "from": "grp-kurumsal-aglar",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: Merkez AD (User-ID için de kaynak)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 514,
+                "from": "net-sunucu, net-mgmt",
+                "to": "ankara-log",
+                "note": "LOG-YONETIM-MERKEZE: Loglar SIEM'e (5651 arşivi dahil), cihaz Panorama'ya"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-sunucu, net-mgmt",
+                "to": "ankara-log",
+                "note": "LOG-YONETIM-MERKEZE: Loglar SIEM'e (5651 arşivi dahil), cihaz Panorama'ya"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3978,
+                "from": "net-sunucu, net-mgmt",
+                "to": "ankara-log",
+                "note": "LOG-YONETIM-MERKEZE: Loglar SIEM'e (5651 arşivi dahil), cihaz Panorama'ya"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-akademisyen (grp-akademisyen)",
+                "to": "srv-obs, srv-lms",
+                "note": "AKADEMISYEN-OBS-LMS: Not girişi ve ders yönetimi yalnızca akademisyen kimliğiyle"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-akademisyen (grp-akademisyen)",
+                "to": "srv-obs, srv-lms",
+                "note": "AKADEMISYEN-OBS-LMS: Not girişi ve ders yönetimi yalnızca akademisyen kimliğiyle"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-idari (grp-idari)",
+                "to": "srv-obs",
+                "note": "IDARI-OBS: Öğrenci işleri"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-idari (grp-idari)",
+                "to": "srv-obs",
+                "note": "IDARI-OBS: Öğrenci işleri"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-idari (grp-idari)",
+                "to": "ankara-erp",
+                "note": "IDARI-ERP: Merkez ERP (muhasebe, İK)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-idari (grp-idari)",
+                "to": "ankara-erp",
+                "note": "IDARI-ERP: Merkez ERP (muhasebe, İK)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-lab",
+                "to": "srv-sinav",
+                "note": "LAB-SINAV-SUNUCUSU: Laboratuvardan online sınav sunucusu"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "any",
+                "from": "lab @ Cmt/Paz 09:00-17:00",
+                "to": "internet",
+                "note": "LAB-SINAV-INTERNET-RED: Sınav oturumlarında laboratuvarlar internete çıkamaz (kopya önleme) [zamanlama: SCH_SINAV]"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-lab",
+                "to": "internet",
+                "note": "LAB-INTERNET: Ders saatlerinde laboratuvar interneti"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-lab",
+                "to": "internet",
+                "note": "LAB-INTERNET: Ders saatlerinde laboratuvar interneti"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 22,
+                "from": "net-lab",
+                "to": "internet",
+                "note": "LAB-INTERNET: Ders saatlerinde laboratuvar interneti"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-akademisyen (grp-akademisyen)",
+                "to": "fqdn-yayinci",
+                "note": "AKADEMIK-YAYINCI: Yayıncı veri tabanları öncelikli (kampüs IP lisansı)"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-akademisyen (grp-akademisyen)",
+                "to": "fqdn-yayinci",
+                "note": "AKADEMIK-YAYINCI: Yayıncı veri tabanları öncelikli (kampüs IP lisansı)"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-idari, net-akademisyen (grp-akademisyen, grp-idari)",
+                "to": "internet",
+                "note": "PERSONEL-INTERNET: Personel ve akademisyen interneti [App-ID: zoom, ms-teams, youtube-base]"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-idari, net-akademisyen (grp-akademisyen, grp-idari)",
+                "to": "internet",
+                "note": "PERSONEL-INTERNET: Personel ve akademisyen interneti [App-ID: zoom, ms-teams, youtube-base]"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "any",
+                "from": "net-idari, net-akademisyen (grp-akademisyen, grp-idari)",
+                "to": "internet",
+                "note": "PERSONEL-INTERNET: Personel ve akademisyen interneti [App-ID: zoom, ms-teams, youtube-base]"
+              },
+              {
+                "action": "limit",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 443,
+                "from": "internet",
+                "to": "srv-lms-dmz",
+                "note": "DMZ-LMS-YAYIN: LMS (lms.sirket.example) ve mobil öğrenci uygulaması API'si: evden derse ve sınava giriş; sınav günü taşkınına karşı hız limiti"
+              },
+              {
+                "action": "limit",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 80,
+                "from": "internet",
+                "to": "srv-lms-dmz",
+                "note": "DMZ-LMS-YAYIN: LMS (lms.sirket.example) ve mobil öğrenci uygulaması API'si: evden derse ve sınava giriş; sınav günü taşkınına karşı hız limiti"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "srv-lms-dmz",
+                "to": "srv-lms",
+                "note": "DMZ-LMS-ARKA-UC: Reverse proxy -> LMS uygulama sunucusu"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "udp",
+                "port": 53,
+                "from": "srv-ogr-dns",
+                "to": "internet",
+                "note": "OGR-DNS-DIS-COZUMLEME: Öğrenci DNS çözümleyicisinin dış sorguları (DNS Security ile; 10.000 cihazın tek DNS çıkışı)"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "VARSAYILAN-RED: vsys1: açıkça izin verilmeyen her şey"
+              }
+            ]
+          },
+          {
+            "segment": "students",
+            "chosen": {
+              "product": "Palo Alto PA-5420",
+              "vendor": "Palo Alto Networks",
+              "throughputGbps": 25,
+              "priceUsd": 90000,
+              "reason": "User-ID (10.000+ kimlik), App-ID ile VPN/proxy kaçışını yakalama, VSYS ile öğrenci ağı ayrı sanal firewall — 2× HA Active-Passive, 2 VSYS"
+            },
+            "alternatives": [
+              {
+                "product": "Cisco Secure Firewall 4215",
+                "vendor": "Cisco",
+                "throughputGbps": 30,
+                "priceUsd": 110000,
+                "reason": "Kampüste Cisco ISE/anahtarlama varsa güçlü entegrasyon"
+              },
+              {
+                "product": "Juniper SRX4600",
+                "vendor": "Juniper Networks",
+                "throughputGbps": 20,
+                "priceUsd": 70000,
+                "reason": "Üniversite ağlarında yaygın, güçlü yönlendirme; kimlik tabanlı politika daha zayıf"
+              },
+              {
+                "product": "Check Point Quantum 16200",
+                "vendor": "Check Point",
+                "throughputGbps": 11,
+                "priceUsd": 80000,
+                "reason": "Tek cihaz yetmez; Maestro ile yatay ölçekleme gerekir (maliyet artar)"
+              },
+              {
+                "product": "FortiGate 1800F",
+                "vendor": "Fortinet",
+                "throughputGbps": 9.1,
+                "priceUsd": 45000,
+                "reason": "Çok yüksek oturum kapasitesi; tam güvenlik profili açıkken 20G aktif-aktif hat için tek cihaz yetersiz"
+              }
+            ],
+            "rules": [
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-ogrenci",
+                "to": "dhcp",
+                "note": "Öğrenci DHCP istekleri kampüs Kea DHCP kümesine aktarılır (4 saat kira); kapatılırsa 10.000 cihaz IP alamaz (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "any",
+                "from": "ogrenci",
+                "to": "tehdit-ip",
+                "note": "OGR-TEHDIT-RED: Bilinen kötü hedefler (EDL)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "net-ogrenci",
+                "to": "srv-ogr-dns",
+                "note": "OGR-DNS: Öğrenci DNS'i (DNS Security ile) — kimlik doğrulamasından önce de gerekli"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-ogrenci (grp-ogrenci)",
+                "to": "srv-lms-dmz",
+                "note": "OGR-PORTAL: LMS / OBS öğrenci portalı (yalnızca DMZ ön yüzü)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-ogrenci (grp-ogrenci)",
+                "to": "srv-lms-dmz",
+                "note": "OGR-PORTAL: LMS / OBS öğrenci portalı (yalnızca DMZ ön yüzü)"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "ogrenci",
+                "to": "kurumsal-gecis",
+                "note": "OGR-KURUMSAL-RED: Öğrenci kurumsal ağa hiçbir şekilde giremez"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "ogrenci",
+                "to": "ogrenci",
+                "note": "OGR-OGR-RED: Öğrenci cihazları birbirine erişemez (solucan yayılımı)"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "any",
+                "from": "ogrenci",
+                "to": "internet",
+                "note": "OGR-KACIS-RED: P2P ve politika atlatma araçları (5651 + telif sorumluluğu) [App-ID: bittorrent, emule, tor, ultrasurf, psiphon]"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "udp",
+                "port": 443,
+                "from": "ogrenci",
+                "to": "internet",
+                "note": "OGR-QUIC-RED: QUIC engellenir; App-ID ve URL filtresi TLS üzerinden çalışır"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "any",
+                "from": "net-ogrenci (grp-ogrenci)",
+                "to": "internet",
+                "note": "OGR-EGITIM: Online ders uygulamaları öncelikli [App-ID: zoom, ms-teams, youtube-base]"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-ogrenci (grp-ogrenci)",
+                "to": "internet",
+                "note": "OGR-INTERNET: Genel web; kişi başı 20/5 Mbps Wi-Fi denetleyicisinde (rol bazlı)"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-ogrenci (grp-ogrenci)",
+                "to": "internet",
+                "note": "OGR-INTERNET: Genel web; kişi başı 20/5 Mbps Wi-Fi denetleyicisinde (rol bazlı)"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-ogrenci (grp-eduroam-misafir)",
+                "to": "internet",
+                "note": "OGR-EDUROAM: eduroam misafirleri yalnızca web"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-ogrenci (grp-eduroam-misafir)",
+                "to": "internet",
+                "note": "OGR-EDUROAM: eduroam misafirleri yalnızca web"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "OGR-VARSAYILAN-RED: vsys2: açıkça izin verilmeyen her şey (kimliksiz cihaz dahil)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "yazilim-ekibi",
+        "name": "Yazılım Ekibi",
+        "role": "branch",
+        "location": "İstanbul, TR",
+        "population": {
+          "staff": 10,
+          "software": 120
+        },
+        "network": {
+          "cidr": "10.50.0.0/16",
+          "dmz": true,
+          "vlans": [
+            {
+              "id": 10,
+              "name": "gelistirici",
+              "cidr": "10.50.10.0/23",
+              "note": "Geliştirici (software / dev) iş istasyonları: 130 kişi × 2 cihaz + %30"
+            },
+            {
+              "id": 30,
+              "name": "yazici-iot",
+              "cidr": "10.50.30.0/24",
+              "note": "Yazıcı (printer) ve QA test telefonları (IoT): iç ağa bağlantı başlatamaz"
+            },
+            {
+              "id": 40,
+              "name": "dev",
+              "cidr": "10.50.40.0/24",
+              "note": "Geliştirme ortamı; internet yok, paketler artifact proxy'den"
+            },
+            {
+              "id": 41,
+              "name": "test",
+              "cidr": "10.50.41.0/24",
+              "note": "Test / QA ortamı; internet yok"
+            },
+            {
+              "id": 42,
+              "name": "cicd",
+              "cidr": "10.50.42.0/24",
+              "note": "GitLab (git), CI/CD runner'ları, Nexus artifact proxy"
+            },
+            {
+              "id": 90,
+              "name": "yonetim",
+              "cidr": "10.50.90.0/24",
+              "note": "Yönetim (management)"
+            }
+          ]
+        },
+        "bandwidth": {
+          "downMbps": 1000,
+          "upMbps": 1000,
+          "drivers": [
+            "git",
+            "CI/CD",
+            "Docker imajları",
+            "paket depoları (artifact proxy)",
+            "AWS Direct Connect",
+            "Zoom"
+          ]
+        },
+        "firewalls": [
+          {
+            "segment": "perimeter",
+            "chosen": {
+              "product": "FortiGate 200F",
+              "vendor": "Fortinet",
+              "throughputGbps": 3.0,
+              "priceUsd": 5500,
+              "reason": "AWS'deki FortiGate-VM ile aynı FortiManager ve politika dili; DLP ve uygulama kontrolü dahil — Ofiste 2× HA Active-Passive"
+            },
+            "alternatives": [
+              {
+                "product": "Palo Alto PA-460",
+                "vendor": "Palo Alto Networks",
+                "throughputGbps": 2.5,
+                "priceUsd": 6000,
+                "reason": "Terraform / Ansible desteği çok iyi; buluttaki Fortinet ile ikinci politika dili ve konsol"
+              },
+              {
+                "product": "Check Point Quantum 6400",
+                "vendor": "Check Point",
+                "throughputGbps": 2.0,
+                "priceUsd": 12000,
+                "reason": "Threat Emulation güçlü; ayrı konsol ve daha yüksek maliyet"
+              },
+              {
+                "product": "Cisco Secure Firewall 1150",
+                "vendor": "Cisco",
+                "throughputGbps": 3.0,
+                "priceUsd": 6000,
+                "reason": "Performans yeterli; FMC operasyonu ağır, şirkette Cisco firewall yetkinliği yok"
+              },
+              {
+                "product": "Sophos XGS 3300",
+                "vendor": "Sophos",
+                "throughputGbps": 1.5,
+                "priceUsd": 5000,
+                "reason": "Uygun maliyet; DevOps otomasyonu (IaC) ve API desteği sınırlı"
+              }
+            ],
+            "rules": [
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-gelistirici",
+                "to": "dhcp",
+                "note": "Geliştirici iş istasyonları IP'yi FortiGate DHCP sunucusundan alır (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-yazici-iot",
+                "to": "dhcp",
+                "note": "Yazıcılar ve test cihazları için MAC rezervasyonlu DHCP (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 500,
+                "from": "geo-izinli",
+                "to": "firewall",
+                "note": "Tünel + ZTNA access proxy yalnızca TR/GB (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": 4500,
+                "from": "geo-izinli",
+                "to": "firewall",
+                "note": "Tünel + ZTNA access proxy yalnızca TR/GB (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 443,
+                "from": "geo-izinli",
+                "to": "firewall",
+                "note": "Tünel + ZTNA access proxy yalnızca TR/GB (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 80,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Yönetim internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 22,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Yönetim internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "udp",
+                "port": 161,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Yönetim internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "any",
+                "from": "tehdit-ip",
+                "note": "TEHDIT-IP-GIRIS-RED: Tehdit listesindeki kaynaklar"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "any",
+                "to": "tehdit-ip",
+                "note": "TEHDIT-IP-CIKIS-RED: Bilinen kötü hedeflere çıkış"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "ankara-mgmt",
+                "to": "net-mgmt",
+                "note": "MERKEZ-YONETIM: Ankara NOC yönetimi"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "ankara-mgmt",
+                "to": "net-mgmt",
+                "note": "MERKEZ-YONETIM: Ankara NOC yönetimi"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 161,
+                "from": "ankara-mgmt",
+                "to": "net-mgmt",
+                "note": "MERKEZ-YONETIM: Ankara NOC yönetimi"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "net-gelistirici, net-cicd, net-ztna",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD / DNS / NTP"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "net-gelistirici, net-cicd, net-ztna",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD / DNS / NTP"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 88,
+                "from": "net-gelistirici, net-cicd, net-ztna",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD / DNS / NTP"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 88,
+                "from": "net-gelistirici, net-cicd, net-ztna",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD / DNS / NTP"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 636,
+                "from": "net-gelistirici, net-cicd, net-ztna",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD / DNS / NTP"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 123,
+                "from": "net-gelistirici, net-cicd, net-ztna",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: AD / DNS / NTP"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "gelistirici, dev, test, cicd, mgmt",
+                "to": "ankara-log",
+                "note": "LOG-MERKEZE: Log ve EDR ajanları -> SIEM"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "1514:1515",
+                "from": "gelistirici, dev, test, cicd, mgmt",
+                "to": "ankara-log",
+                "note": "LOG-MERKEZE: Log ve EDR ajanları -> SIEM"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "grp-gelistirici-kaynak (grp-yazilim)",
+                "to": "srv-gitlab",
+                "note": "GELISTIRICI-GITLAB: Kod deposu (imzalı commit + korumalı branch GitLab tarafında)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "grp-gelistirici-kaynak (grp-yazilim)",
+                "to": "srv-gitlab",
+                "note": "GELISTIRICI-GITLAB: Kod deposu (imzalı commit + korumalı branch GitLab tarafında)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "grp-gelistirici-kaynak, net-dev, net-test",
+                "to": "srv-artifact",
+                "note": "ARTIFACT-PROXY: npm/pip/docker paketleri yalnızca iç Nexus proxy'den (tedarik zinciri kontrolü)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "grp-gelistirici-kaynak (grp-yazilim)",
+                "to": "net-dev, net-test",
+                "note": "GELISTIRICI-DEV-TEST: Geliştirme ve test ortamları"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "grp-gelistirici-kaynak (grp-yazilim)",
+                "to": "net-dev, net-test",
+                "note": "GELISTIRICI-DEV-TEST: Geliştirme ve test ortamları"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "3000:3099",
+                "from": "grp-gelistirici-kaynak (grp-yazilim)",
+                "to": "net-dev, net-test",
+                "note": "GELISTIRICI-DEV-TEST: Geliştirme ve test ortamları"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "8000:8999",
+                "from": "grp-gelistirici-kaynak (grp-yazilim)",
+                "to": "net-dev, net-test",
+                "note": "GELISTIRICI-DEV-TEST: Geliştirme ve test ortamları"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 5432,
+                "from": "grp-gelistirici-kaynak (grp-yazilim)",
+                "to": "net-dev, net-test",
+                "note": "GELISTIRICI-DEV-TEST: Geliştirme ve test ortamları"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "gelistirici, ztna, dev, test",
+                "to": "bulut-prod",
+                "note": "PROD-DOGRUDAN-ERISIM-RED: Geliştirici ve DEV/TEST ortamı PROD'a doğrudan ERİŞEMEZ (SOC alarmı)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6443,
+                "from": "net-cicd",
+                "to": "bulut-yonetim",
+                "note": "CICD-PROD-DAGITIM: PROD'a dağıtım yalnızca onaylı pipeline'dan"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-cicd",
+                "to": "bulut-yonetim",
+                "note": "CICD-PROD-DAGITIM: PROD'a dağıtım yalnızca onaylı pipeline'dan"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "net-cicd",
+                "to": "bulut-yonetim",
+                "note": "CICD-PROD-DAGITIM: PROD'a dağıtım yalnızca onaylı pipeline'dan"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6443,
+                "from": "net-cicd",
+                "to": "net-dev, net-test",
+                "note": "CICD-DEV-TEST-DAGITIM: DEV/TEST'e otomatik dağıtım"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-cicd",
+                "to": "net-dev, net-test",
+                "note": "CICD-DEV-TEST-DAGITIM: DEV/TEST'e otomatik dağıtım"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "net-cicd",
+                "to": "net-dev, net-test",
+                "note": "CICD-DEV-TEST-DAGITIM: DEV/TEST'e otomatik dağıtım"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "srv-artifact",
+                "to": "fqdn-paket",
+                "note": "ARTIFACT-PAKET-INDIRME: Paket depolarına yalnızca artifact proxy çıkar"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "any",
+                "from": "gelistirici, cicd",
+                "to": "fqdn-riskli-paylasim",
+                "note": "RISKLI-PAYLASIM-RED: Paste / dosya transfer siteleri (kaynak kod sızıntısı)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 631,
+                "from": "net-gelistirici",
+                "to": "net-yazici-iot",
+                "note": "YAZICI-IOT-ERISIM: Yazdırma ve QA'nın test cihazlarına uygulama yükleme (adb/SSH); cihazlar geri bağlantı başlatamaz"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 9100,
+                "from": "net-gelistirici",
+                "to": "net-yazici-iot",
+                "note": "YAZICI-IOT-ERISIM: Yazdırma ve QA'nın test cihazlarına uygulama yükleme (adb/SSH); cihazlar geri bağlantı başlatamaz"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-gelistirici",
+                "to": "net-yazici-iot",
+                "note": "YAZICI-IOT-ERISIM: Yazdırma ve QA'nın test cihazlarına uygulama yükleme (adb/SSH); cihazlar geri bağlantı başlatamaz"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "net-gelistirici",
+                "to": "net-yazici-iot",
+                "note": "YAZICI-IOT-ERISIM: Yazdırma ve QA'nın test cihazlarına uygulama yükleme (adb/SSH); cihazlar geri bağlantı başlatamaz"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "any",
+                "from": "dev, test",
+                "to": "internet",
+                "note": "DEV-TEST-INTERNET-RED: DEV/TEST internete çıkmaz (paketler artifact proxy'den)"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "yazici-iot",
+                "to": "gelistirici, dev, test, cicd, mgmt, hub, bulut",
+                "note": "YAZICI-IOT-IC-RED: Yazıcı ve test cihazları iç ağa bağlantı başlatamaz (IoT izolasyonu)"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-yazici-iot",
+                "to": "internet",
+                "note": "TEST-CIHAZI-INTERNET: QA test cihazları mobil uygulamayı gerçek API'ye karşı dener; yalnızca HTTPS, cihaz başı 20 Mbps"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "udp",
+                "port": 443,
+                "from": "gelistirici",
+                "to": "internet",
+                "note": "QUIC-RED: SSL incelemenin atlatılmasını önler"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-gelistirici",
+                "to": "internet",
+                "note": "GELISTIRICI-INTERNET: Geliştirici interneti; DLP: private key, API token, kaynak kod kalıpları"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-gelistirici",
+                "to": "internet",
+                "note": "GELISTIRICI-INTERNET: Geliştirici interneti; DLP: private key, API token, kaynak kod kalıpları"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 22,
+                "from": "net-gelistirici",
+                "to": "internet",
+                "note": "GELISTIRICI-INTERNET: Geliştirici interneti; DLP: private key, API token, kaynak kod kalıpları"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "VARSAYILAN-RED: Açıkça izin verilmeyen her şey"
+              }
+            ]
+          },
+          {
+            "segment": "cloud-prod",
+            "chosen": {
+              "product": "FortiGate-VM08 (AWS)",
+              "vendor": "Fortinet",
+              "throughputGbps": 4.0,
+              "priceUsd": 9000,
+              "reason": "Ofisle aynı FortiManager ve politika dili; DMZ + WAF; yıllık lisans + EC2 (c6i.2xlarge) dahil tahmini"
+            },
+            "alternatives": [
+              {
+                "product": "Palo Alto VM-Series (VM-300)",
+                "vendor": "Palo Alto Networks",
+                "throughputGbps": 2.0,
+                "priceUsd": 15000,
+                "reason": "Güçlü ama ofis tarafıyla ikinci politika dili ve konsol; lisans daha pahalı"
+              },
+              {
+                "product": "AWS Network Firewall",
+                "vendor": "Amazon Web Services",
+                "throughputGbps": 10,
+                "priceUsd": 3500,
+                "reason": "Yönetilen ve ölçeklenen hizmet; ancak FortiManager'la ortak politika yok, uygulama / kullanıcı denetimi sınırlı"
+              },
+              {
+                "product": "Check Point CloudGuard Network Security",
+                "vendor": "Check Point",
+                "throughputGbps": 3.0,
+                "priceUsd": 12000,
+                "reason": "Çoklu bulutta güçlü; ayrı SmartConsole ve ekip yetkinliği gerekir"
+              },
+              {
+                "product": "Cisco Secure Firewall Threat Defense Virtual",
+                "vendor": "Cisco",
+                "throughputGbps": 3.0,
+                "priceUsd": 10000,
+                "reason": "FMC ile yönetim ağır; şirkette Cisco firewall yetkinliği yok"
+              }
+            ],
+            "rules": [
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "any",
+                "from": "tehdit-ip",
+                "note": "TEHDIT-IP-GIRIS-RED: Tehdit listesindeki kaynaklar"
+              },
+              {
+                "action": "limit",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 443,
+                "from": "internet",
+                "to": "srv-ingress",
+                "note": "UYGULAMA-YAYIN: Müşteri web uygulaması ve mobil uygulama API'si (app.sirket.example, api.sirket.example) — WAF + yeni bağlantı hız limiti"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 8443,
+                "from": "srv-ingress",
+                "to": "net-app",
+                "note": "DMZ-UYGULAMA: Ingress yalnızca uygulama pod'larının 8443 portuna; DMZ ele geçirilse bile DB'ye yol yok"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 5432,
+                "from": "net-app",
+                "to": "net-db",
+                "note": "APP-DB: Uygulama -> veritabanı (yalnızca PostgreSQL)"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "net-gelistirici, net-ztna",
+                "note": "GELISTIRICI-PROD-RED: Ofis firewall'unu aşan bir hata olsa bile geliştirici PROD'a giremez (derinlemesine savunma)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6443,
+                "from": "net-cicd",
+                "to": "bulut-k8s-api, bulut-bastion",
+                "note": "CICD-YONETIM: Pipeline -> Kubernetes API / bastion"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "net-cicd",
+                "to": "bulut-k8s-api, bulut-bastion",
+                "note": "CICD-YONETIM: Pipeline -> Kubernetes API / bastion"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-cicd",
+                "to": "bulut-k8s-api, bulut-bastion",
+                "note": "CICD-YONETIM: Pipeline -> Kubernetes API / bastion"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "dmz, app, db, yonetim",
+                "to": "ankara-log",
+                "note": "LOG-MERKEZE: Bulut logları Ankara SIEM'e"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "1514:1515",
+                "from": "dmz, app, db, yonetim",
+                "to": "ankara-log",
+                "note": "LOG-MERKEZE: Bulut logları Ankara SIEM'e"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "net-db",
+                "note": "DB-CIKIS-RED: Veritabanı hiçbir yere bağlantı başlatamaz"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-app",
+                "to": "fqdn-harici-api",
+                "note": "APP-HARICI-API: Yalnızca sözleşmeli harici servislerin API'leri"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "VARSAYILAN-RED: Açıkça izin verilmeyen her şey"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "arge-ekibi",
+        "name": "Ar-Ge Ekibi",
+        "role": "branch",
+        "location": "Ankara, TR",
+        "population": {
+          "staff": 5,
+          "rnd": 45,
+          "software": 10
+        },
+        "network": {
+          "cidr": "10.60.0.0/16",
+          "dmz": false,
+          "vlans": [
+            {
+              "id": 10,
+              "name": "arge-pc",
+              "cidr": "10.60.10.0/24",
+              "note": "Ar-Ge (R&D) araştırmacı iş istasyonları"
+            },
+            {
+              "id": 30,
+              "name": "arge-lab",
+              "cidr": "10.60.30.0/24",
+              "note": "Ar-Ge (R&D) GPU / HPC lab ve şifreli NAS"
+            },
+            {
+              "id": 31,
+              "name": "izole-test",
+              "cidr": "10.60.31.0/24",
+              "note": "İzole lab: zararlı yazılım analizi ve IoT prototipleri (OPNsense arkasında)"
+            },
+            {
+              "id": 40,
+              "name": "arge-proxy",
+              "cidr": "10.60.40.0/24",
+              "note": "Ar-Ge web proxy: internete tek çıkış"
+            },
+            {
+              "id": 90,
+              "name": "yonetim",
+              "cidr": "10.60.90.0/24",
+              "note": "Yönetim (management): yalnızca iki yetkili yönetici iş istasyonu"
+            }
+          ]
+        },
+        "bandwidth": {
+          "downMbps": 1000,
+          "upMbps": 1000,
+          "drivers": [
+            "veri setleri",
+            "model ağırlıkları (HuggingFace)",
+            "makale veri tabanları",
+            "Zoom"
+          ]
+        },
+        "firewalls": [
+          {
+            "segment": "rnd",
+            "chosen": {
+              "product": "FortiGate 200F (ISFW)",
+              "vendor": "Fortinet",
+              "throughputGbps": 3.0,
+              "priceUsd": 5500,
+              "reason": "DLP, FortiSandbox entegrasyonu, merkezle aynı yönetim — 2× HA (ISFW) + izole lab için OPNsense"
+            },
+            "alternatives": [
+              {
+                "product": "Palo Alto PA-460",
+                "vendor": "Palo Alto Networks",
+                "throughputGbps": 2.5,
+                "priceUsd": 6000,
+                "reason": "Güçlü Enterprise DLP; ayrı lisans"
+              },
+              {
+                "product": "Check Point Quantum 6400",
+                "vendor": "Check Point",
+                "throughputGbps": 2.0,
+                "priceUsd": 12000,
+                "reason": "Threat Emulation (sandbox) çok başarılı"
+              },
+              {
+                "product": "Cisco Secure Firewall 1150",
+                "vendor": "Cisco",
+                "throughputGbps": 3.0,
+                "priceUsd": 6000,
+                "reason": "ISE + TrustSec ile mikro segmentasyon"
+              },
+              {
+                "product": "OPNsense (Deciso DEC3800)",
+                "vendor": "Deciso (açık kaynak)",
+                "throughputGbps": 1.5,
+                "priceUsd": 3000,
+                "reason": "Açık kaynak, düşük maliyet; izole test laboratuvarı için ideal, kurumsal sınır için değil"
+              }
+            ],
+            "rules": [
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67:68",
+                "from": "net-arge-pc",
+                "to": "dhcp",
+                "note": "Araştırmacı PC'leri IP'yi FortiGate DHCP sunucusundan alır; kapatılırsa kimse ağa giremez (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 443,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Yönetim internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 80,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Yönetim internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "tcp",
+                "port": 22,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Yönetim internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "udp",
+                "port": 161,
+                "from": "internet",
+                "to": "firewall",
+                "note": "Yönetim internetten kapalı (cihaza yönelik / local-in)"
+              },
+              {
+                "action": "deny",
+                "direction": "in",
+                "proto": "any",
+                "from": "tehdit-ip",
+                "note": "TEHDIT-IP-GIRIS-RED: Tehdit listesindeki kaynaklar"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "any",
+                "to": "tehdit-ip",
+                "note": "TEHDIT-IP-CIKIS-RED: Bilinen kötü hedeflere çıkış"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "ankara-yonetici",
+                "to": "net-mgmt",
+                "note": "MERKEZ-YONETIM: Yalnızca iki yetkili yönetici iş istasyonu (PAM oturumu)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "ankara-yonetici",
+                "to": "net-mgmt",
+                "note": "MERKEZ-YONETIM: Yalnızca iki yetkili yönetici iş istasyonu (PAM oturumu)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 161,
+                "from": "ankara-yonetici",
+                "to": "net-mgmt",
+                "note": "MERKEZ-YONETIM: Yalnızca iki yetkili yönetici iş istasyonu (PAM oturumu)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "grp-arge-kimlik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: Kurumsal ağa açılan TEK kapı (kimlik servisleri)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "grp-arge-kimlik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: Kurumsal ağa açılan TEK kapı (kimlik servisleri)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 88,
+                "from": "grp-arge-kimlik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: Kurumsal ağa açılan TEK kapı (kimlik servisleri)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 88,
+                "from": "grp-arge-kimlik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: Kurumsal ağa açılan TEK kapı (kimlik servisleri)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 636,
+                "from": "grp-arge-kimlik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: Kurumsal ağa açılan TEK kapı (kimlik servisleri)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 123,
+                "from": "grp-arge-kimlik",
+                "to": "ankara-ad-dns",
+                "note": "KIMLIK-SERVISLERI: Kurumsal ağa açılan TEK kapı (kimlik servisleri)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 6514,
+                "from": "net-arge-pc, net-arge-lab, net-arge-proxy, net-mgmt",
+                "to": "ankara-log",
+                "note": "LOG-MERKEZE: Log, EDR telemetrisi ve proxy erişim logları SIEM'e (izleme kesintisiz)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": "1514:1515",
+                "from": "net-arge-pc, net-arge-lab, net-arge-proxy, net-mgmt",
+                "to": "ankara-log",
+                "note": "LOG-MERKEZE: Log, EDR telemetrisi ve proxy erişim logları SIEM'e (izleme kesintisiz)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 514,
+                "from": "net-arge-pc, net-arge-lab, net-arge-proxy, net-mgmt",
+                "to": "ankara-log",
+                "note": "LOG-MERKEZE: Log, EDR telemetrisi ve proxy erişim logları SIEM'e (izleme kesintisiz)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "net-arge-pc (grp-arge)",
+                "to": "srv-gpu, srv-arge-nas",
+                "note": "ARASTIRMACI-LAB: Araştırmacılar GPU sunucuları ve şifreli NAS'a"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-arge-pc (grp-arge)",
+                "to": "srv-gpu, srv-arge-nas",
+                "note": "ARASTIRMACI-LAB: Araştırmacılar GPU sunucuları ve şifreli NAS'a"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 8888,
+                "from": "net-arge-pc (grp-arge)",
+                "to": "srv-gpu, srv-arge-nas",
+                "note": "ARASTIRMACI-LAB: Araştırmacılar GPU sunucuları ve şifreli NAS'a"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 445,
+                "from": "net-arge-pc (grp-arge)",
+                "to": "srv-gpu, srv-arge-nas",
+                "note": "ARASTIRMACI-LAB: Araştırmacılar GPU sunucuları ve şifreli NAS'a"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "kurumsal-ankara (grp-arge-rapor)",
+                "to": "srv-rapor",
+                "note": "YONETIM-RAPOR-PORTALI: Yönetim yalnızca rapor portalını görüntüler (indirme DLP ile kapalı)"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "grp-kurumsal",
+                "note": "KURUMSAL-ARGE-RED: Şirketin geri kalanı Ar-Ge'ye giremez (SOC alarmı)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "pc-lab-yonetici (grp-arge-lab-admin)",
+                "to": "net-izole",
+                "note": "IZOLE-LAB-YONETIM: Tek yönetici PC'sinden tek yönlü erişim"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3389,
+                "from": "pc-lab-yonetici (grp-arge-lab-admin)",
+                "to": "net-izole",
+                "note": "IZOLE-LAB-YONETIM: Tek yönetici PC'sinden tek yönlü erişim"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "net-izole",
+                "note": "IZOLE-LAB-CIKIS-RED: İzole laboratuvar hiçbir yere bağlantı başlatamaz (alarm)"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "any",
+                "from": "arge-pc, arge-lab, arge-proxy",
+                "to": "fqdn-kisisel-bulut",
+                "note": "KISISEL-BULUT-RED: Kişisel bulut depolama / paste siteleri, proxy üzerinden bile (veri sızıntısı)"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3128,
+                "from": "grp-arge-aglar",
+                "to": "srv-arge-proxy",
+                "note": "PROXY-ERISIMI: Araştırmacı PC'leri ve GPU sunucuları web'e yalnızca proxy üzerinden çıkar (AD kimliğiyle; GPU'lar proxy'de yalnızca akademik allow-list)"
+              },
+              {
+                "action": "deny",
+                "direction": "out",
+                "proto": "any",
+                "from": "arge-pc, arge-lab",
+                "to": "internet",
+                "note": "ARGE-DOGRUDAN-INTERNET-RED: Ar-Ge'nin proxy'yi atlayan doğrudan internet çıkışı yok (QUIC, SSH, tünel dahil)"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 80,
+                "from": "srv-arge-proxy",
+                "to": "internet",
+                "note": "PROXY-INTERNET: Yalnızca proxy sunucusu internete çıkar: kullanıcı bazlı log, DLP, sandbox, upload limiti"
+              },
+              {
+                "action": "allow",
+                "direction": "out",
+                "proto": "tcp",
+                "port": 443,
+                "from": "srv-arge-proxy",
+                "to": "internet",
+                "note": "PROXY-INTERNET: Yalnızca proxy sunucusu internete çıkar: kullanıcı bazlı log, DLP, sandbox, upload limiti"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "VARSAYILAN-RED: Açıkça izin verilmeyen her şey"
+              }
+            ]
+          },
+          {
+            "segment": "rnd-isolated-lab",
+            "chosen": {
+              "product": "OPNsense (Deciso DEC3800)",
+              "vendor": "Deciso (açık kaynak)",
+              "throughputGbps": 1.5,
+              "priceUsd": 3000,
+              "reason": "İnternete hiç bağlanmayan lab için şeffaf, denetlenebilir açık kaynak firewall; abonelik gerektirmez"
+            },
+            "alternatives": [
+              {
+                "product": "pfSense Plus (Netgate 6100)",
+                "vendor": "Netgate",
+                "throughputGbps": 1.0,
+                "priceUsd": 800,
+                "reason": "Uygun fiyatlı; ancak Plus lisans politikası değişken ve OPNsense'e göre güncelleme sıklığı düşük"
+              },
+              {
+                "product": "FortiGate 40F",
+                "vendor": "Fortinet",
+                "throughputGbps": 0.6,
+                "priceUsd": 500,
+                "reason": "Değeri FortiGuard aboneliğinde; internetsiz labda tehdit istihbaratı işe yaramaz"
+              },
+              {
+                "product": "IPFire (mini cihaz)",
+                "vendor": "IPFire (açık kaynak)",
+                "throughputGbps": 0.5,
+                "priceUsd": 600,
+                "reason": "Basit ve açık kaynak; zone (renk) modeli bu labın 4 bölgeli yapısı için kısıtlı"
+              },
+              {
+                "product": "Linux nftables (Protectli VP2420)",
+                "vendor": "Protectli + Linux",
+                "throughputGbps": 1.0,
+                "priceUsd": 400,
+                "reason": "En ucuz ve tam esnek; ancak arayüz ve değişiklik denetim izi yok, lab ekibi için bakım yükü"
+              }
+            ],
+            "rules": [
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 53,
+                "from": "net-analiz, net-iot",
+                "to": "srv-inetsim",
+                "note": "ANALIZ-SAHTE-INTERNET: Zararlı yazılımın C2 / indirme davranışı sahte internette gözlemlenir"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "udp",
+                "port": 53,
+                "from": "net-analiz, net-iot",
+                "to": "srv-inetsim",
+                "note": "ANALIZ-SAHTE-INTERNET: Zararlı yazılımın C2 / indirme davranışı sahte internette gözlemlenir"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 80,
+                "from": "net-analiz, net-iot",
+                "to": "srv-inetsim",
+                "note": "ANALIZ-SAHTE-INTERNET: Zararlı yazılımın C2 / indirme davranışı sahte internette gözlemlenir"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 443,
+                "from": "net-analiz, net-iot",
+                "to": "srv-inetsim",
+                "note": "ANALIZ-SAHTE-INTERNET: Zararlı yazılımın C2 / indirme davranışı sahte internette gözlemlenir"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 25,
+                "from": "net-analiz, net-iot",
+                "to": "srv-inetsim",
+                "note": "ANALIZ-SAHTE-INTERNET: Zararlı yazılımın C2 / indirme davranışı sahte internette gözlemlenir"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 22,
+                "from": "pc-lab-yonetici",
+                "to": "net-analiz, net-iot",
+                "note": "YONETICI-ERISIMI: Tek yönetici PC'sinden tek yönlü yönetim"
+              },
+              {
+                "action": "allow",
+                "direction": "forward",
+                "proto": "tcp",
+                "port": 3389,
+                "from": "pc-lab-yonetici",
+                "to": "net-analiz, net-iot",
+                "note": "YONETICI-ERISIMI: Tek yönetici PC'sinden tek yönlü yönetim"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "analiz, iot-prototip, sahte-internet",
+                "to": "uplink",
+                "note": "LAB-DISARI-RED: Laboratuvardan dışarı hiçbir paket çıkmaz (alarm)"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "from": "analiz",
+                "to": "iot-prototip",
+                "note": "ANALIZ-IOT-RED: Analiz edilen zararlı yazılım prototiplere bulaşamaz"
+              },
+              {
+                "action": "deny",
+                "direction": "forward",
+                "proto": "any",
+                "note": "VARSAYILAN-RED: Açıkça izin verilmeyen her şey"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "remoteAccess": {
+      "type": "role-based-vpn",
+      "note": "Hiçbir yerde public SSH yok. Uzaktan erişim FortiGate ZTNA ile rol bazlıdır: AD grubu + MFA + cihaz uyumluluğu. grp-uzaktan-calisan yalnızca ERP ve dosya sunucusuna, grp-yazilim yalnızca GitLab / DEV / TEST'e, grp-bt-admin yalnızca yönetim VLAN'ındaki bastion'a ulaşır. Tünel ve ZTNA girişleri yalnızca TR / GB IP'lerinden kabul edilir; şubeler Ankara hub'ına sertifikalı IKEv2 IPsec ile bağlanır."
+    },
+    "monitoring": {
+      "siem": "Wazuh SIEM (korelasyon kuralları kritik firewall kurallarına isabeti alarma bağlar) + FortiAnalyzer / Panorama (firewall logları) + Zabbix / Grafana (SNMPv3 metrikleri). Firewall ve kimlik logları 90 gün sıcak, 2 yıl WORM arşivde tutulur (5651, KVKK); Londra'nın ham logları UK'de kalır (GDPR).",
+      "owner": "Güvenlik alarmlarının sahibi SOC Yöneticisi (L1 7/24 MSSP, L2/L3 kurum içi); ağ erişilebilirliğinin sahibi Ağ Operasyon (NOC) Yöneticisi; P1 olaylarda karar CISO'nundur. Şube BT sorumluları yerinde müdahaleden sorumludur.",
+      "alertSink": "Wazuh panosu + ITSM ticket; P1/P2 alarmlar nöbetçi çağrı sistemine (Opsgenie) ve SOC Telegram kanalına düşer. Gece L1 MSSP 15 dakikada yanıtlamazsa kurum içi L2 nöbetçi aranır.",
+      "appVsSecurity": "Uygulama sağlığı (ERP, LMS, web sitesi up/down, hat doluluğu) Zabbix → NOC kanalına; güvenlik olayları (red kuralı isabetleri, IPS, DLP, kimlik hataları) Wazuh → SOC'a gider. İki akış ayrı sahipli ve ayrı panoludur."
+    },
+    "cveWatch": [
+      {
+        "id": "CVE-2024-21762",
+        "product": "FortiOS SSL-VPN (sslvpnd)",
+        "status": "mitigated",
+        "note": "SSL-VPN'de sınır dışı yazma (uzaktan kod çalıştırma). Tasarım SSL-VPN yerine ZTNA kullanıyor ve SSL-VPN tüm FortiGate'lerde kapalı (geçici önlem); kalıcı çözüm firmware 7.4.3 ve üzeri."
+      },
+      {
+        "id": "CVE-2024-3400",
+        "product": "PAN-OS GlobalProtect",
+        "status": "not-affected",
+        "note": "GlobalProtect gateway'inde komut enjeksiyonu. PA-AKADEMIK'te GlobalProtect yapılandırılmadı (uzaktan erişim FortiGate ZTNA'da); yine de PAN-OS düzeltilmiş sürümde tutuluyor ve ilgili tehdit imzası açık."
+      },
+      {
+        "id": "CVE-2024-55591",
+        "product": "FortiOS yönetim arayüzü (Node.js websocket)",
+        "status": "not-affected",
+        "note": "Yönetim arayüzünde kimlik doğrulama atlatma (7.0.x kolu). Cihazlar 7.4 kolunda ve yönetim arayüzleri internete kapalı (allowaccess ping + local-in red); bu saldırı yönetim düzlemine olduğu için firewall burada doğru katman."
+      }
+    ]
   }
 ];

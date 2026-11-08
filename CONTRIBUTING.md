@@ -19,6 +19,8 @@ workflow recipes, translations and bug reports.
   with Apache-2.0 and must be added to the
   [Third-Party Notices](docs/legal/THIRD_PARTY_NOTICES.md).
 - **No secrets or personal data** in code, tests, fixtures or screenshots.
+- Changing Firewall Lab companies, guides or hooks? They ship to users as a signed content pack; see
+  [Content updates](docs/CONTENT.md) for how, and for the optional proof (verification report, video) that speeds review.
 - Be respectful: see the [Code of Conduct](CODE_OF_CONDUCT.md).
 - Found a vulnerability in os-lab itself? Follow the [Security Policy](SECURITY.md);
   do **not** open a public issue.

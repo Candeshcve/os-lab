@@ -15,7 +15,16 @@ import { AppShell, LAB_ICON, labHref } from "../shell/app-shell";
 import { TopBar } from "../shell/top-bar";
 import { MinimalistHero } from "../apk-lab/components";
 import { Badge, Empty, Section, Skeleton } from "../components/ui";
+import { ContentPanel } from "./content-panel";
+import { localeFromPath, localePath } from "../i18n/paths";
 import { formatBytes, hostStore, type HostInfo, type LabStatus } from "../lib/api";
+
+const PROVIDER_LABEL: Record<string, string> = {
+  "native-macos": "Native on this Mac",
+  "macos-containers": "Containers on this Mac",
+  "linux-containers": "Containers on Linux",
+  wsl2: "Inside WSL2"
+};
 
 export function stateBadge(state: LabStatus["state"]) {
   if (state === "ready") return <Badge tone="success">Ready</Badge>;
@@ -42,6 +51,8 @@ function Stat({ icon, label, value, sub, tone }: { icon: React.ReactNode; label:
 
 function LabCard({ lab }: { lab: LabStatus }) {
   const missing = lab.requirements.filter((r) => r.required && !r.found);
+  const appiumMissing = lab.provider === "native-macos" && lab.requirements.some((r) => r.id === "appium" && !r.found);
+  const setupAvailable = lab.actions.some((a) => a.id === "setup");
   const href = labHref(lab.id);
   return (
     <div
@@ -58,7 +69,7 @@ function LabCard({ lab }: { lab: LabStatus }) {
         <p className="mt-1 text-xs leading-relaxed text-(--iux-muted-foreground)">{lab.summary}</p>
       </div>
       {lab.provider ? (
-        <p className="font-mono text-[11px] text-(--iux-muted-foreground)">provider · {lab.provider}</p>
+        <p className="text-xs text-(--iux-muted-foreground)">{PROVIDER_LABEL[lab.provider] ?? lab.provider}</p>
       ) : null}
       {lab.reasons.length > 0 && (
         <ul className="space-y-1 text-xs">
@@ -70,13 +81,20 @@ function LabCard({ lab }: { lab: LabStatus }) {
           ))}
         </ul>
       )}
+      {lab.notes.length > 0 && (
+        <ul className="space-y-1 text-xs text-(--iux-muted-foreground)">
+          {lab.notes.map((note) => (
+            <li key={note}>{note}</li>
+          ))}
+        </ul>
+      )}
       <div className="mt-auto flex flex-wrap gap-2 pt-1">
         <a className="iux-btn" data-variant={lab.state === "ready" ? "primary" : "outline"} href={href}>
-          Open
+          {lab.state === "needs-setup" ? "View requirements" : "Open"}
         </a>
-        {missing.length > 0 && lab.actions.some((a) => a.id === "setup") ? (
-          <a className="iux-btn bg-[#f36c21] text-white hover:bg-[#fa7b32]" href={`${href}#action=setup`}>
-            Install dependencies
+        {(missing.length > 0 || appiumMissing) && setupAvailable ? (
+          <a className="iux-btn bg-[#f36c21] text-white hover:bg-[#fa7b32]" href={`${href}#action=${appiumMissing && missing.length === 0 ? "appium-install" : "setup"}`}>
+            {appiumMissing && missing.length === 0 ? "Install Appium" : "Install dependencies"}
           </a>
         ) : null}
       </div>
@@ -109,7 +127,24 @@ export default function HostPage() {
   const host = data?.host;
   const labs = data?.labs ?? [];
   const ready = labs.filter((l) => l.state === "ready").length;
-  const setupLab = labs.find((l) => l.state === "needs-setup");
+  const hostLab = host?.os === "windows" ? "windows" : host?.os === "macos" ? "macos" : host?.os === "linux" ? "linux" : null;
+  const stateOrder = { ready: 0, "needs-setup": 1, unavailable: 2 };
+  const orderedLabs = labs.map((lab, index) => ({ lab, index })).sort((a, b) =>
+    stateOrder[a.lab.state] - stateOrder[b.lab.state] ||
+    Number(b.lab.id === hostLab) - Number(a.lab.id === hostLab) || a.index - b.index
+  );
+  // Labs this computer cannot run are not cards: one line says where they run instead.
+  const runnableLabs = orderedLabs.filter(({ lab }) => lab.state !== "unavailable");
+  const elsewhereLabs = orderedLabs.filter(({ lab }) => lab.state === "unavailable").map(({ lab }) => lab);
+  const setupLab = orderedLabs.find(({ lab }) => lab.state === "needs-setup" && lab.actions.some((a) => a.id === "setup"))?.lab;
+  const primaryLab = orderedLabs.find(({ lab }) => lab.state === "ready")?.lab;
+  const iosSimulatorReady = !!(host?.xcode?.installed && host.xcode.iosRuntime && host.xcode.iosDevice);
+  const virtualization = host?.os === "macos"
+    ? { label: "iOS Simulator", value: iosSimulatorReady ? "Available" : "Needs setup", sub: "Xcode on this Mac", ok: iosSimulatorReady }
+    : host?.os === "windows"
+      ? { label: "WSL2", value: host.wsl.distributions.length, sub: "installed distributions", ok: host.wsl.distributions.length > 0 }
+      : { label: "KVM", value: host?.kvm.usable ? "Usable" : host?.kvm.present ? "Denied" : "Absent", sub: host?.kvm.present && !host?.kvm.usable ? "join the kvm group" : "/dev/kvm", ok: !!host?.kvm.usable };
+  const containerCliInstalled = !!host?.tools.some((tool) => (tool.id === "docker" || tool.id === "podman") && tool.found);
   return (
     <AppShell activeId="host">
       <div className="iux min-h-screen">
@@ -124,9 +159,9 @@ export default function HostPage() {
               <MinimalistHero
                 badgeText={`${host.os} · ${host.arch}`}
                 headline={host.osPretty}
-                description={`${ready} of ${labs.length} labs can run on ${host.hostname || "this computer"} right now. Labs that need setup list what is missing, and Install dependencies previews exactly what will change before anything runs.`}
-                primaryCtaText={setupLab ? `Set up ${setupLab.label}` : "Open Android Lab"}
-                primaryCtaHref={setupLab ? `${labHref(setupLab.id)}#action=setup` : "/android/"}
+                description={`${ready} of ${runnableLabs.length} labs can run on ${host.hostname || "this computer"} right now. Labs that need setup list what is missing, and Install dependencies previews exactly what will change before anything runs.`}
+                primaryCtaText={setupLab ? `Set up ${setupLab.label}` : primaryLab ? `Open ${primaryLab.label}` : "View lab requirements"}
+                primaryCtaHref={setupLab ? `${labHref(setupLab.id)}#action=setup` : primaryLab ? labHref(primaryLab.id) : "#labs"}
                 secondaryCtaText="View jobs"
                 secondaryCtaHref="/jobs/"
                 illustration={
@@ -148,32 +183,32 @@ export default function HostPage() {
                 />
                 <Stat
                   icon={<LightningIcon size={14} />}
-                  label="KVM"
-                  value={host.kvm.usable ? "Usable" : host.kvm.present ? "Denied" : "Absent"}
-                  sub={host.kvm.present && !host.kvm.usable ? "join the kvm group" : "/dev/kvm"}
-                  tone={host.kvm.usable ? "ok" : "warn"}
+                  label={virtualization.label}
+                  value={virtualization.value}
+                  sub={virtualization.sub}
+                  tone={virtualization.ok ? "ok" : "warn"}
                 />
                 <Stat
                   icon={<PackageIcon size={14} />}
                   label="Containers"
                   value={host.runtime ?? "None"}
-                  sub={host.runtime ? "container runtime" : "install Docker or Podman"}
+                  sub={host.runtime ? "engine and Compose available" : containerCliInstalled ? "start engine and check Compose" : "install Docker or Podman"}
                   tone={host.runtime ? "ok" : "warn"}
                 />
                 <Stat
                   icon={<DesktopTowerIcon size={14} />}
-                  label={host.os === "windows" ? "WSL2" : "Python"}
-                  value={host.os === "windows" ? host.wsl.distributions.length : host.python}
-                  sub={host.os === "windows" ? "installed distributions" : host.wsl.guest ? "inside WSL2" : "console runtime"}
+                  label="Python"
+                  value={host.python}
+                  sub={host.wsl.guest ? "inside WSL2" : "console runtime"}
                 />
               </div>
 
-              <section className="space-y-3">
+              <section id="labs" className="space-y-3">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <h2 className="text-base font-semibold">Labs on this computer</h2>
                     <p className="text-xs text-(--iux-muted-foreground)">
-                      Availability follows this host's OS, architecture, KVM and tools. Unavailable labs explain where they run instead.
+                      Availability follows this host's OS, architecture, KVM and tools. Labs that cannot run here are left out.
                     </p>
                   </div>
                   <button type="button" className="iux-btn" data-variant="outline" onClick={() => void refresh()}>
@@ -181,15 +216,26 @@ export default function HostPage() {
                   </button>
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {labs.map((lab) => (
+                  {runnableLabs.map(({ lab }) => (
                     <LabCard key={lab.id} lab={lab} />
                   ))}
                 </div>
+                {elsewhereLabs.length > 0 ? (
+                  <p className="text-xs text-(--iux-muted-foreground)">
+                    Labs that do not run on this computer: {elsewhereLabs.map((lab) => lab.label).join(", ")}.{" "}
+                    <a className="underline" href={localePath("/health/", typeof window === "undefined" ? "en" : localeFromPath(window.location.pathname))}>
+                      See what each platform supports
+                    </a>
+                    .
+                  </p>
+                ) : null}
               </section>
 
               <Section icon={<PackageIcon size={16} />} title="Host tools" description={`Found on PATH for ${host.root}.`}>
                 <Tools host={host} />
               </Section>
+
+              <ContentPanel />
 
               <Section icon={<CpuIcon size={16} />} title="Providers" description="How each kind of guest would run on this host.">
                 <ul className="divide-y divide-(--iux-border)">

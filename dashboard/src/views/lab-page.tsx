@@ -8,7 +8,9 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowClockwiseIcon,
   CheckCircleIcon,
+  CircleNotchIcon,
   GearSixIcon,
+  InfoIcon,
   PlayIcon,
   PulseIcon,
   ShieldWarningIcon,
@@ -19,8 +21,7 @@ import {
 } from "@phosphor-icons/react";
 import { AppShell, LAB_ICON } from "../shell/app-shell";
 import { TopBar } from "../shell/top-bar";
-import { ProgressConsoleReport, ShellSnippet } from "../apk-lab/components";
-import type { ExecutionVersionStage } from "../apk-lab/components";
+import { ShellSnippet } from "../apk-lab/components";
 import { Badge, Empty, EndpointList, Field, PageHead, Section, Skeleton, Status } from "../components/ui";
 import { stateBadge } from "./host-page";
 import {
@@ -47,20 +48,22 @@ const REFERENCE: Record<LabId, { check: string; setup: string; where: string }> 
 };
 
 const ACTION_GROUPS: { title: string; ids: string[] }[] = [
-  { title: "Lifecycle", ids: ["start", "stop", "restart", "appium-start", "appium-stop"] },
+  { title: "Lifecycle", ids: ["start", "stop", "restart", "appium-install", "appium-start", "appium-stop"] },
   { title: "Inspect", ids: ["status", "doctor", "urls", "logs", "monitor"] },
   { title: "Maintenance", ids: ["backup", "service-install", "service-uninstall"] }
 ];
 
-const STAGE: Record<LabJob["state"], ExecutionVersionStage["status"]> = {
-  running: "Running",
-  succeeded: "Deployed",
-  failed: "Failed",
-  cancelled: "Failed",
-  "timed-out": "Failed"
-};
+/** Scripts print `##PROGRESS n/total label` per step; the last one drives the bar and the lines stay out of the output. */
+const PROGRESS = /^##PROGRESS (\d+)\/(\d+) (.*)$/;
+export function readProgress(lines: string[]): { step: number; total: number; label: string } | null {
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const m = PROGRESS.exec(lines[i].trim());
+    if (m && Number(m[2]) > 0) return { step: Math.min(Number(m[1]), Number(m[2])), total: Number(m[2]), label: m[3] };
+  }
+  return null;
+}
 
-function Requirements({ lab }: { lab: LabStatus }) {
+function Requirements({ lab, onInstall }: { lab: LabStatus; onInstall?: (action: string) => void }) {
   if (!lab.requirements.length) return <Empty>No host prerequisites are tracked for this lab.</Empty>;
   return (
     <ul className="divide-y divide-(--iux-border)">
@@ -73,8 +76,15 @@ function Requirements({ lab }: { lab: LabStatus }) {
           ) : (
             <WarningCircleIcon size={16} className="shrink-0 text-(--iux-muted-foreground)" />
           )}
-          <span className="min-w-0 flex-1">{r.label}</span>
-          {!r.found && r.hint ? <span className="text-xs text-(--iux-muted-foreground)">{r.hint}</span> : null}
+          <span className="min-w-0 flex-1 basis-40">
+            {r.label}
+            {!r.found && r.hint ? <span className="block text-xs text-(--iux-muted-foreground)">{r.hint}</span> : null}
+          </span>
+          {!r.found && r.id === "appium" && onInstall && lab.actions.some((a) => a.id === "appium-install") ? (
+            <button type="button" className="iux-btn" onClick={() => onInstall("appium-install")}>
+              Install Appium
+            </button>
+          ) : null}
           <Badge tone={r.found ? "success" : r.required ? "danger" : undefined}>
             {r.found ? "found" : r.required ? "missing" : "optional"}
           </Badge>
@@ -182,54 +192,82 @@ function JobPanel({ jobs, selected, onSelect }: { jobs: LabJob[]; selected: stri
   const current = jobs.find((j) => j.id === id);
   const detail = usePoll(() => (id ? api.job(id) : Promise.resolve(null)), current?.state === "running" ? 1500 : 0, [id, current?.state]);
   const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
   if (!jobs.length) return <Empty>No jobs for this lab yet. Preview an action above to start one.</Empty>;
-  const logs = detail.data?.logs ?? [];
+  const rawLogs = detail.data?.id === id ? detail.data.logs ?? [] : [];
+  const progress = readProgress(rawLogs);
+  const logs = rawLogs.filter((line) => !PROGRESS.test(line.trim()));
   return (
-    <ProgressConsoleReport
-      title={current?.label ?? "Job"}
-      description={current ? `${current.command} · started ${ago(current.startedAt)}${current.exitCode != null ? ` · exit ${current.exitCode}` : ""}${current.error ? ` · ${current.error}` : ""}` : ""}
-      stages={jobs.slice(0, 6).map((j) => ({
-        id: j.id,
-        version: j.action,
-        updatedAt: ago(j.startedAt),
-        status: STAGE[j.state],
-        active: j.id === id
-      }))}
-      logs={logs.length ? logs : [current?.state === "running" ? "Waiting for output…" : "No output."]}
-      streaming={current?.state === "running"}
-      footer={
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          {jobs.slice(0, 6).map((j) => (
-            <button
-              key={j.id}
-              type="button"
-              onClick={() => onSelect(j.id)}
-              className={`rounded-md px-2.5 py-1 font-mono text-xs ${j.id === id ? "bg-[#f36c21]/20 text-[#f36c21]" : "text-zinc-400 hover:text-white"}`}
-            >
-              {j.action}
-            </button>
-          ))}
-          {current?.state === "running" ? (
-            <button
-              type="button"
-              disabled={cancelling}
-              onClick={async () => {
-                setCancelling(true);
-                try {
-                  await api.cancel(current.id);
-                  await jobsStore.refresh();
-                } finally {
-                  setCancelling(false);
-                }
-              }}
-              className="flex items-center gap-1.5 rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-400 hover:bg-red-500/20"
-            >
-              <StopIcon size={12} weight="fill" /> Cancel job
-            </button>
-          ) : null}
+    <div className="iux-card gap-4 p-5" aria-busy={current?.state === "running"}>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="text-sm font-semibold">{current?.label ?? "Job"}</h3>
+          <p className="mt-1 text-xs text-(--iux-muted-foreground)">
+            Started {ago(current?.startedAt)}{current?.exitCode != null ? ` · exit ${current.exitCode}` : ""}
+          </p>
         </div>
-      }
-    />
+        <Badge tone={current?.state === "succeeded" ? "success" : current?.state === "running" ? "warning" : "danger"}>
+          {current?.state === "running" ? <CircleNotchIcon size={13} className="mr-1 inline animate-spin" /> : null}
+          {current?.state ?? "unknown"}
+        </Badge>
+      </div>
+      {current?.state === "running" ? (
+        <div role="status" className="space-y-1.5 text-xs text-(--iux-muted-foreground)">
+          <p>
+            {progress
+              ? `Step ${progress.step} of ${progress.total}: ${progress.label}`
+              : current.action === "setup" ? "Installing and checking dependencies…" : "Running action…"}{" "}
+            Output appears below as each step completes.
+          </p>
+          <div
+            className="h-1.5 overflow-hidden rounded-full bg-(--iux-muted)"
+            role={progress ? "progressbar" : undefined}
+            aria-valuemin={progress ? 0 : undefined}
+            aria-valuemax={progress?.total}
+            aria-valuenow={progress ? progress.step : undefined}
+          >
+            {progress ? (
+              <div className="h-full rounded-full bg-[#f36c21] transition-[width] duration-500" style={{ width: `${(progress.step / progress.total) * 100}%` }} />
+            ) : (
+              <div className="h-full w-1/3 animate-pulse rounded-full bg-[#f36c21]" />
+            )}
+          </div>
+        </div>
+      ) : null}
+      {current?.error ? <Status value={{ ok: false, text: current.error }} /> : null}
+      {detail.error ? <Status value={{ ok: false, text: `Could not load job output: ${detail.error}` }} /> : null}
+      {cancelError ? <Status value={{ ok: false, text: `Could not cancel job: ${cancelError}` }} /> : null}
+      <div className="flex flex-wrap gap-2">
+        {jobs.slice(0, 6).map((job) => (
+          <button key={job.id} type="button" onClick={() => { setCancelError(null); onSelect(job.id); }}
+            className="iux-btn" data-variant={job.id === id ? "primary" : "outline"}>
+            {job.action} · {job.state}
+          </button>
+        ))}
+        {current?.state === "running" ? (
+          <button type="button" className="iux-btn" data-variant="outline" disabled={cancelling}
+            onClick={async () => {
+              setCancelling(true);
+              setCancelError(null);
+              try {
+                await api.cancel(current.id);
+                await jobsStore.refresh();
+              } catch (e) {
+                setCancelError(message(e));
+              } finally {
+                setCancelling(false);
+              }
+            }}>
+            <StopIcon size={14} /> {cancelling ? "Cancelling…" : "Cancel job"}
+          </button>
+        ) : null}
+      </div>
+      <div>
+        <p className="mb-2 text-xs font-medium text-(--iux-muted-foreground)">Output · {current?.lines ?? 0} lines</p>
+        <pre className="max-h-80 overflow-auto rounded-lg border border-(--iux-border) bg-(--iux-muted) p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap break-words">{logs.length ? logs.join("\n") : current?.state === "running" ? "Waiting for output…" : "No output."}</pre>
+        {current?.truncated ? <p className="mt-1 text-xs text-(--iux-muted-foreground)">Earlier output was trimmed.</p> : null}
+      </div>
+    </div>
   );
 }
 
@@ -285,13 +323,13 @@ function Monitor({ lab }: { lab: LabId }) {
   );
 }
 
-function Configuration({ lab, onProfile }: { lab: LabId; onProfile: (profile: string) => void }) {
+function Configuration({ lab, ready, onProfile }: { lab: LabId; ready: boolean; onProfile: (profile: string) => void }) {
   const { data, error } = usePoll(() => api.config(lab), 0, [lab]);
   if (error) return <Section title="Configuration"><Status value={{ ok: false, text: error }} /></Section>;
   if (!data) return <Section title="Configuration"><Skeleton rows={2} /></Section>;
   return (
     <>
-      {data.endpoints.length ? (
+      {ready && data.endpoints.length ? (
         <Section icon={<PlayIcon size={16} />} title="Endpoints" description="Addresses from the lab's configuration; they answer once the lab is running.">
           <EndpointList items={data.endpoints} />
         </Section>
@@ -429,7 +467,7 @@ export default function LabPage({ lab: labId }: { lab: LabId }) {
                   ))}
                   {lab.notes.map((n) => (
                     <p key={n} className="flex gap-2 text-(--iux-muted-foreground)">
-                      <CheckCircleIcon size={16} className="mt-0.5 shrink-0" /> {n}
+                      <InfoIcon size={16} className="mt-0.5 shrink-0" /> {n}
                     </p>
                   ))}
                 </div>
@@ -476,11 +514,16 @@ export default function LabPage({ lab: labId }: { lab: LabId }) {
                         ) : null
                       }
                     >
-                      <Requirements lab={lab} />
+                      <Requirements lab={lab} onInstall={(action) => void preview(action)} />
                     </Section>
 
                     <Section icon={<PlayIcon size={16} />} title="Actions" description="Each action is previewed before it runs.">
                       <div className="flex flex-col gap-4">
+                        {lab.state === "needs-setup" ? (
+                          <p className="text-xs text-(--iux-muted-foreground)">
+                            Start, stop and the other actions appear once the missing dependencies are installed.
+                          </p>
+                        ) : null}
                         {lab.provider === "wsl2" ? (
                           <Field label="WSL2 distribution">
                             <select className="iux-input" value={distro} onChange={(e) => setDistro(e.target.value)}>
@@ -561,8 +604,8 @@ export default function LabPage({ lab: labId }: { lab: LabId }) {
                     <JobPanel jobs={jobs} selected={selectedJob} onSelect={setSelectedJob} />
                   </section>
 
-                  <Monitor lab={labId} />
-                  <Configuration lab={labId} onProfile={(p) => void preview("profile", { profile: p })} />
+                  {lab.state === "ready" ? <Monitor lab={labId} /> : null}
+                  <Configuration lab={labId} ready={lab.state === "ready"} onProfile={(p) => void preview("profile", { profile: p })} />
                 </>
               )}
             </>

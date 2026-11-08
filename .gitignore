@@ -46,3 +46,16 @@ lat.md/.cache/
 .private/
 teached/**/*
 dashboard/node_modules/
+dashboard/test-results/
+dashboard/playwright-report/
+# Release credentials (Apple signing + notarization). Only the READMEs are tracked.
+secrets/*
+!secrets/README.md
+app/out/
+app/src-tauri/resources/tools/uv-*
+app/**/*.p8
+app/**/*.p12
+app/**/*.pfx
+
+# Built content pack (scripts/build-content.py)
+dist-content/

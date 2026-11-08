@@ -10,7 +10,10 @@ cd ..
 make mac-doctor
 make mac-setup
 make mac-setup INSTALL=1   # Homebrew + Node + Appium + XCUITest
+bash ios-lab/mac/appium.sh install   # only Appium: no sudo, installed under ~/.oslab/appium
 ```
+
+The dashboard's **Install Appium** button (macOS Lab page, or This computer) runs `appium.sh install` with a step-by-step progress bar. It installs Node with Homebrew only if Node 20.19+/22.12+ is missing, then Appium and the XCUITest driver into `~/.oslab/appium` (override with `OSLAB_APPIUM_HOME`); no administrator rights or global npm directory. `appium.sh start` and the host tool check use that copy, or one already on `PATH`.
 
 `mac-setup` never installs Xcode itself. Install Xcode from the App Store or
 Apple Developer downloads, open it once, accept the licence, and install a

@@ -114,9 +114,9 @@ set_lab() {
 
 detect_runtime() {
   RUNTIME=""
-  if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+  if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
     RUNTIME="docker"
-  elif command -v podman >/dev/null 2>&1 && podman info >/dev/null 2>&1; then
+  elif command -v podman >/dev/null 2>&1 && podman info >/dev/null 2>&1 && podman compose version >/dev/null 2>&1; then
     RUNTIME="podman"
   fi
   if [ -n "$RUNTIME" ]; then

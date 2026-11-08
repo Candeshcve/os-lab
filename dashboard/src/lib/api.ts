@@ -6,6 +6,7 @@
  * Every POST carries X-OSLab: 1, which the server requires so other sites cannot drive the lab.
  */
 import { useEffect, useReducer } from "react";
+import type { CapabilityCatalog } from "../health/capabilities";
 
 export type LabId = "android" | "windows" | "linux" | "ios" | "macos";
 export type LabState = "ready" | "needs-setup" | "unavailable";
@@ -33,6 +34,7 @@ export interface HostInfo {
   kvm: { present: boolean; usable: boolean };
   wsl: { guest: boolean; distributions: string[] };
   runtime: string | null;
+  xcode: { installed: boolean; iosRuntime: boolean; iosDevice: boolean } | null;
   python: string;
   root: string;
   tools: HostTool[];
@@ -164,9 +166,24 @@ const post = <T>(path: string, body: unknown = {}) =>
     body: JSON.stringify(body)
   });
 
+export interface ContentState {
+  installed: boolean;
+  version: string | null;
+  sequence: number;
+  hooks: boolean;
+  updatedAt: number | null;
+  fileCount: number;
+  latest: { version: string | null; sequence: number; files: { data: number; hooks: number } } | null;
+  checkedAt: number | null;
+  offline: boolean;
+  source: string;
+  updateAvailable?: boolean;
+}
+
 export const api = {
   health: () => call<{ status: string; version: string; console: boolean }>("/api/health"),
   host: () => call<{ host: HostInfo; labs: LabStatus[] }>("/api/host"),
+  capabilities: () => call<CapabilityCatalog>("/api/capabilities"),
   config: (lab: LabId) => call<LabConfig>(`/api/labs/${lab}/config`),
   monitor: (lab: LabId) => call<LabMonitor>(`/api/labs/${lab}/monitor`),
   plan: (request: LabRequest) => post<{ plan: LabPlan; token: string }>("/api/labs/plan", { request }),
@@ -183,6 +200,12 @@ export const api = {
   reports: () => call<{ reports: Report[] }>("/api/reports"),
   apks: () => call<{ apks: { name: string; path: string; size: number }[] }>("/api/apks"),
   hooks: () => call<{ hooks: Hook[] }>("/api/hooks"),
+  // Signed content packs (console/content.py): only check/update touch the network
+  contentStatus: () => call<ContentState>("/api/content/status"),
+  contentCheck: () => post<ContentState>("/api/content/check"),
+  contentUpdate: (hooks: boolean) => post<ContentState>("/api/content/update", { hooks }),
+  contentReset: () => post<ContentState>("/api/content/reset"),
+  contentCompanies: () => call<{ companies: unknown[]; source: "downloaded" | "bundled"; version: string | null }>("/api/content/companies"),
   upload: async (file: File) => {
     const form = new FormData();
     form.append("apk", file);
@@ -243,6 +266,7 @@ export function createStore<T>(load: () => Promise<T>, intervalMs: number) {
 }
 
 export const hostStore = createStore(api.host, 15000);
+export const contentStore = createStore(api.contentStatus, 30000);
 export const jobsStore = createStore(async () => (await api.jobs()).jobs, 2500);
 export const healthStore = createStore(api.health, 5000);
 export const androidLogsStore = createStore(api.logs, 1000);
@@ -312,13 +336,16 @@ export function formatBytes(n: number | null | undefined): string {
     v /= 1024;
     i++;
   }
-  return `${v >= 10 || i === 0 ? Math.round(v) : v.toFixed(1)} ${units[i]}`;
+  const locale = typeof document === "undefined" ? "en" : document.documentElement.lang || "en";
+  return `${new Intl.NumberFormat(locale, { maximumFractionDigits: v >= 10 || i === 0 ? 0 : 1 }).format(v)} ${units[i]}`;
 }
 export function ago(seconds: number | null | undefined): string {
   if (!seconds) return "";
   const s = Math.max(0, Math.round(Date.now() / 1000 - seconds));
-  if (s < 60) return `${s}s ago`;
-  if (s < 3600) return `${Math.round(s / 60)}m ago`;
-  if (s < 86400) return `${Math.round(s / 3600)}h ago`;
-  return `${Math.round(s / 86400)}d ago`;
+  const locale = typeof document === "undefined" ? "en" : document.documentElement.lang || "en";
+  const format = new Intl.RelativeTimeFormat(locale, { numeric: "auto", style: "short" });
+  if (s < 60) return format.format(-s, "second");
+  if (s < 3600) return format.format(-Math.round(s / 60), "minute");
+  if (s < 86400) return format.format(-Math.round(s / 3600), "hour");
+  return format.format(-Math.round(s / 86400), "day");
 }

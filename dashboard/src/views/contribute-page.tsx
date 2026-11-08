@@ -2060,7 +2060,7 @@ export default function ContributePage({ html }: { html: string }) {
           {activeTab === "guide" ? (
             /* Tab 1: Contribution Guide from CONTRIBUTING.md */
             <div className="space-y-6">
-              <article className="legal-doc" dangerouslySetInnerHTML={{ __html: html }} />
+              <article className="legal-doc" lang="en" translate="no" dangerouslySetInnerHTML={{ __html: html }} />
               <p className="border-t border-(--iux-border) pt-4 text-xs text-(--iux-muted-foreground)">
                 Source:{" "}
                 <a className="underline" href={`${REPO_BLOB}/CONTRIBUTING.md`} target="_blank" rel="noreferrer">

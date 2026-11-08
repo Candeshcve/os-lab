@@ -12,5 +12,7 @@ what each lab does and why, and links to the implementation.
 - [[labctl]] — the cross-lab management CLI
 - [[setup]] — one-command installers for Linux, macOS and Windows
 - [[dashboard]] — the browser console: host overview, every lab, Android workbench
+- [[content]] — signed content packs: data and hooks that update between releases
 - [[legal]] — terms, acceptable use, privacy and third-party notices
 - [[tooling]] — CI, tests and community process
+- [[brand]] — the QS-Lab identity: marks, app icon and where they appear

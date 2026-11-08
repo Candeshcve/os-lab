@@ -35,6 +35,10 @@ try:
     import oslab  # noqa: E402  (console/oslab.py)
 except ImportError:  # a lone android-lab copy without the console module
     oslab = None
+try:
+    import content as content_packs  # noqa: E402  (console/content.py: signed content updates)
+except ImportError:
+    content_packs = None
 ARTIFACTS_DIR = os.path.join(SCRIPT_DIR, "artifacts")
 SCRIPTS_DIR = os.path.join(SCRIPT_DIR, "scripts")
 
@@ -112,6 +116,8 @@ def read_web_file(name: str) -> bytes:
 ALLOWED_HOSTS = {"127.0.0.1", "localhost", "::1"}
 HOST_CACHE = {"at": 0.0, "value": None}
 HOST_LOCK = threading.Lock()
+CONTENT = (content_packs.ContentStore(content_packs.default_content_dir(), REPO_ROOT)
+           if content_packs else None)
 JOBS = oslab.JobService(REPO_ROOT) if oslab else None
 SIGNER = oslab.PlanSigner() if oslab else None
 
@@ -129,7 +135,7 @@ def cached_host():
 class LabHttpHandler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         # Polling is frequent; keep the terminal for errors
-        if not self.path.startswith(("/api/logs", "/api/jobs", "/api/health", "/api/host", "/api/labs/")):
+        if not self.path.startswith(("/api/logs", "/api/jobs", "/api/health", "/api/host", "/api/labs/", "/api/capabilities")):
             super().log_message(fmt, *args)
 
     def _host_ok(self) -> bool:
@@ -156,8 +162,12 @@ class LabHttpHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self._host_ok():
             return
-        path = urllib.parse.urlparse(self.path).path
-        if path.startswith(("/api/host", "/api/labs", "/api/jobs")):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        if path.startswith("/api/content"):
+            self._content_get(path, urllib.parse.parse_qs(parsed.query))
+            return
+        if path.startswith(("/api/host", "/api/labs", "/api/jobs", "/api/capabilities")):
             if not oslab:
                 self._json(501, {"error": "The console module (console/oslab.py) is not installed"})
                 return
@@ -206,6 +216,8 @@ class LabHttpHandler(BaseHTTPRequestHandler):
         if path == "/api/host":
             host = cached_host()
             self._json(200, {"host": host, "labs": oslab.lab_catalog(REPO_ROOT, host)["labs"]})
+        elif path == "/api/capabilities":
+            self._json(200, oslab.capability_catalog())
         elif len(parts) == 4 and parts[:2] == ["api", "labs"] and parts[2] in oslab.LABS and parts[3] == "config":
             self._json(200, oslab.lab_config(REPO_ROOT, parts[2]))
         elif len(parts) == 4 and parts[:2] == ["api", "labs"] and parts[2] in oslab.LABS and parts[3] == "monitor":
@@ -230,6 +242,9 @@ class LabHttpHandler(BaseHTTPRequestHandler):
             self._json(403, {"error": "Missing X-OSLab header"})
             return
         path = urllib.parse.urlparse(self.path).path
+        if path.startswith("/api/content"):
+            self._content_post(path)
+            return
         if path.startswith(("/api/labs", "/api/jobs")):
             if not oslab:
                 self._json(501, {"error": "The console module (console/oslab.py) is not installed"})
@@ -240,6 +255,44 @@ class LabHttpHandler(BaseHTTPRequestHandler):
                 self._json(400, {"error": str(e)})
             return
         self._android_post()
+
+    def _content_get(self, path: str, query: dict):
+        """Content packs: what is installed, the companies, and the data files (see console/content.py)."""
+        if not CONTENT:
+            self._json(501, {"error": "The content module (console/content.py) is not installed"})
+            return
+        if path == "/api/content/status":
+            self._json(200, CONTENT.state())
+        elif path == "/api/content/companies":
+            self._json(200, CONTENT.companies())
+        elif path == "/api/content/file":
+            text = CONTENT.read_text((query.get("path") or [""])[0])
+            if text is None:
+                self._json(404, {"error": "Not a content file"})
+            else:
+                self._send_bytes(200, text.encode("utf-8"), "text/plain; charset=utf-8")
+        else:
+            self._json(404, {"error": "Not found"})
+
+    def _content_post(self, path: str):
+        if not CONTENT:
+            self._json(501, {"error": "The content module (console/content.py) is not installed"})
+            return
+        try:
+            data = self._read_json()
+            if path == "/api/content/check":
+                self._json(200, CONTENT.check())
+            elif path == "/api/content/update":
+                # Hooks run inside other processes, so they are only installed when asked for, every time.
+                self._json(200, CONTENT.update(include_hooks=data.get("hooks") is True))
+            elif path == "/api/content/reset":
+                self._json(200, CONTENT.reset())
+            else:
+                self._json(404, {"error": "Not found"})
+        except content_packs.ContentError as e:
+            self._json(400, {"error": str(e)})
+        except ValueError as e:
+            self._json(400, {"error": str(e)})
 
     def _lab_post(self, path: str):
         parts = [p for p in path.split("/") if p]
@@ -321,15 +374,7 @@ class LabHttpHandler(BaseHTTPRequestHandler):
             self._json(200, {"apks": found})
 
         elif path == "/api/hooks":
-            hooks = []
-            hooks_dir = os.path.join(SCRIPT_DIR, "hooks")
-            if os.path.isdir(hooks_dir):
-                for name in sorted(os.listdir(hooks_dir)):
-                    full = os.path.join(hooks_dir, name)
-                    if name.endswith(".js") and os.path.isfile(full):
-                        with open(full, encoding="utf-8", errors="replace") as f:
-                            hooks.append({"name": name, "path": f"hooks/{name}", "code": f.read(65536)})
-            self._json(200, {"hooks": hooks})
+            self._json(200, {"hooks": CONTENT.hooks() if CONTENT else []})
 
         elif path == "/api/reports":
             reports = []
