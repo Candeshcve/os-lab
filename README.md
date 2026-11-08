@@ -8,6 +8,8 @@
 
 ### [keyvanarasteh.github.io/os-lab](https://keyvanarasteh.github.io/os-lab/)
 
+[Code signing policy](CODE_SIGNING.md) · [Desktop releases](https://github.com/keyvanarasteh/os-lab/releases?q=app-v)
+
 Four research-backed, runnable operating-system security labs in one repository,
 each a reproducible, isolated guest driven by `make` and a shared management CLI.
 
