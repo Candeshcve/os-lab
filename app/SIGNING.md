@@ -40,7 +40,8 @@ builds the installers, submits them to SignPath, checks that each signature is `
    vulnerability-scanning workflows accurately; SignPath decides whether this project qualifies.
    The application and each release signing request require human approval.
 2. In SignPath, create the project `os-lab` with a signing policy `release-signing`, and connect it
-   to this GitHub repository as a trusted build system.
+   to this GitHub repository as a trusted build system. Ensure maintainers and approvers have
+   multi-factor authentication on GitHub and SignPath, as the Foundation terms require.
 3. In SignPath, create the default **artifact configuration** from
    [`signpath/artifact-configuration.xml`](signpath/artifact-configuration.xml). It restricts
    installer filenames to the requested version and checks the NSIS setup program's product name,

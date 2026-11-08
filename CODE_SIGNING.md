@@ -1,7 +1,7 @@
 # Code signing policy
 
 os-lab desktop releases are built from this public repository. Windows installer signing through
-SignPath Foundation is planned; **the current Windows installers are unsigned**. Check the
+SignPath Foundation is planned; **the 0.2.4 Windows installers are unsigned**. Check the
 Authenticode signature of a downloaded installer before relying on a claim that it is signed.
 
 Free code signing provided by [SignPath.io](https://signpath.io), certificate by
@@ -9,7 +9,7 @@ Free code signing provided by [SignPath.io](https://signpath.io), certificate by
 
 ## Roles and approval
 
-- **Committers and reviewers:** [repository maintainers](https://github.com/keyvanarasteh/os-lab/graphs/contributors). Changes from other contributors are reviewed by a maintainer before merge.
+- **Committer and reviewer:** [Keyvan Arasteh](https://github.com/keyvanarasteh). A maintainer reviews changes from other contributors before any release is signed.
 - **Signing approvers:** [the repository owner](https://github.com/keyvanarasteh), who reviews each release signing request in SignPath. A successful build alone does not approve signing.
 
 The [Windows release workflow](.github/workflows/release-win.yml) builds installers on a GitHub-hosted
