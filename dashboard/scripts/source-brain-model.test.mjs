@@ -24,3 +24,11 @@ test("Brain virtual window bounds drawing and respects type and text filters", (
   assert.equal(graphWindow(graph, "", ["job"], 100).nodes.length, 50);
   assert.equal(graphWindow(graph, "Owned 299", [], 0).nodes[0].id, "299");
 });
+
+test("Brain diff preserves unchanged context and bounds long histories", () => {
+  const result = sandbox.exports.compareLines("before\ncommon", "after\ncommon");
+  assert.equal(result.rows.filter(row => row.kind === "equal")[0].before, "common");
+  assert.equal(result.rows.find(row => row.kind === "remove").before, "before");
+  assert.equal(result.rows.find(row => row.kind === "add").after, "after");
+  assert.equal(sandbox.exports.compareLines(Array(1100).fill("owned").join("\n"), "owned").truncated, true);
+});

@@ -12,6 +12,7 @@ export async function sourceRequest<T>(path: string, body?: unknown, signal?: Ab
 }
 export function useSource<T>(path: string) {
   const previousPath = useRef(path);
+  const [dataPath, setDataPath] = useState(path);
   const [data, setData] = useState<T>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
@@ -23,10 +24,10 @@ export function useSource<T>(path: string) {
     setLoading(true); setError(undefined);
     if (previousPath.current !== path) setData(undefined);
     previousPath.current = path;
-    void sourceRequest<T>(path, undefined, controller.signal).then(setData).catch(e => {
+    void sourceRequest<T>(path, undefined, controller.signal).then(value => { if (!controller.signal.aborted) { setDataPath(path); setData(value); } }).catch(e => {
       if (!controller.signal.aborted) setError(String(e.message));
     }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [path, revision]);
-  return { data, error, loading, refresh };
+  return { data: dataPath === path ? data : undefined, error, loading, refresh };
 }

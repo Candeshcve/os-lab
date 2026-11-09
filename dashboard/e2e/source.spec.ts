@@ -237,11 +237,81 @@ test("Pipeline labels its pinned fallback and exposes stage inputs and network d
   await expect(page.getByText(/2026-11-09/)).toBeVisible();
 });
 
-test("Brain prototype loads an owned tab and refuses malformed graphs", async ({ page }) => {
+test("Brain loads an owned tab", async ({ page }) => {
   await sourceShell(page);
   await page.route("**/api/source/brain", route => route.fulfill({ json: { data: { manifest: { tabs: [{ id: "owned", label: "Owned graph", file: "owned.json" }] } } } }));
   await page.route("**/api/source/brain/files/owned.json", route => route.fulfill({ json: { nodes: [{ id: "owned", label: "Owned", type: "service" }], edges: [] } }));
   await page.goto("/source/brain/");
   await expect(page.getByRole("button", { name: "Owned graph" })).toBeVisible();
   await expect(page.getByText(/1 nodes/)).toBeVisible();
+});
+
+test("Brain graph, providers, rankings and export preserve snapshot boundaries", async ({ page }) => {
+  await sourceShell(page);
+  const graph = { meta: { analyzedAt: "2026-11-09", project: "Owned fixture" }, nodes: [
+    { id: "a", label: "Owned service", type: "service", data: { file: "owned.js", metrics: { cyclomaticComplexity: 3 }, flowSteps: [{ type: "call", label: "Owned call" }] } },
+    { id: "b", label: "Owned job", type: "job", data: {} }
+  ], edges: [{ id: "ab", source: "a", target: "b", label: "dispatch", type: "call" }] };
+  await page.route("**/api/source/brain", route => route.fulfill({ json: { data: { manifest: { tabs: [{ id: "owned", label: "Owned graph", file: "owned.json" }], providers: { source: "source.json", history: "history.json", aiRules: "rules.json" } } } } }));
+  await page.route("**/api/source/brain/files/*", route => {
+    const file = new URL(route.request().url()).pathname.split("/").pop();
+    const json = file === "owned.json" ? graph : file === "source.json" ? { "owned.js": { content: "return owned;" } } : file === "history.json" ? { "owned.js": [{ revision: "old", content: "old owned;" }, { revision: "new", content: "new owned;" }] } : { a: "Owned static rule" };
+    return route.fulfill({ json });
+  });
+  await page.goto("/source/brain/");
+  await page.getByRole("button", { name: "Owned service", exact: true }).first().click();
+  await expect(page).toHaveURL(/node=a/);
+  await page.getByRole("button", { name: "Source", exact: true }).click();
+  await expect(page.getByText("return owned;", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Diff", exact: true }).click();
+  await expect(page.getByText("old owned;", { exact: true })).toBeVisible();
+  await expect(page.getByText("new owned;", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Flowchart", exact: true }).click();
+  await expect(page.getByText("call → Owned call", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "AI rules", exact: true }).click();
+  await page.getByRole("button", { name: "AI rules", exact: true }).last().click();
+  await expect(page.getByRole("dialog", { name: "AI rules" })).toContainText("Owned static rule");
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Usages", exact: true }).click();
+  await expect(page.getByRole("button", { name: "a → b · dispatch", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Sequence", exact: true }).click();
+  await expect(page.getByText("Snapshot relationships are not a runtime trace.")).toBeVisible();
+  await page.getByRole("button", { name: "History", exact: true }).click();
+  await expect(page.getByText("old owned;", { exact: true })).toBeVisible();
+  for (const mode of ["Complexity", "Risk"]) {
+    await page.getByRole("button", { name: mode, exact: true }).click();
+    await expect(page.getByText("Recorded metrics rank review priorities; they are not security findings.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Owned service · 3", exact: true })).toBeVisible();
+  }
+  await page.getByRole("button", { name: "Stress", exact: true }).click();
+  await expect(page.getByText("Live stress testing is unavailable without an application provider.")).toBeVisible();
+  await page.getByRole("button", { name: "Export", exact: true }).click();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download JSON", exact: true }).click();
+  expect((await download).suggestedFilename()).toBe("source-brain-owned.json");
+});
+
+test("Brain virtual window filters locally and exports the complete owned graph", async ({ page }) => {
+  await sourceShell(page);
+  const graph = { nodes: Array.from({ length: 250 }, (_, i) => ({ id: String(i), type: i % 2 ? "job" : "service", label: `Owned ${i}`, data: {} })), edges: [] };
+  await page.route("**/api/source/brain", route => route.fulfill({ json: { data: { manifest: { tabs: [{ id: "owned", label: "Owned graph", file: "owned.json" }] } } } }));
+  await page.route("**/api/source/brain/files/*", route => route.fulfill({ json: graph }));
+  await page.goto("/source/brain/");
+  const canvas = page.getByRole("group", { name: "Snapshot graph" });
+  await expect(canvas.getByRole("button")).toHaveCount(100);
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(canvas.getByRole("button", { name: "Owned 100", exact: true })).toBeVisible();
+  await page.getByLabel("Filter results").fill("Owned 249");
+  await expect(canvas.getByRole("button")).toHaveCount(1);
+  await canvas.getByRole("button").focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/node=249/);
+  await page.getByRole("button", { name: "Source", exact: true }).click();
+  await expect(page.getByText("This provider is unavailable. Configure an authorized local snapshot.")).toBeVisible();
+  await page.getByRole("button", { name: "Export", exact: true }).click();
+  const pending = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download JSON", exact: true }).click();
+  const download = await pending;
+  const { readFileSync } = await import("node:fs");
+  expect(JSON.parse(readFileSync((await download.path())!, "utf8")).nodes.length).toBe(250);
 });

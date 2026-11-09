@@ -101,3 +101,10 @@ packages or a live Laravel service.
 [[dashboard/src/views/source/brain-model.ts]] validates bounded graph windows and
 [[dashboard/src/views/source/brain-data.ts]] reads only validated private JSON
 provider paths. Duplicate nodes, oversized graphs and unsafe paths fail clearly.
+
+[[dashboard/src/views/source/brain.tsx]] provides paged SVG/keyboard graph
+navigation, filters/legend, usages, source/history/diff, flow/sequence, static
+AI-rule review, recorded-metric rankings and full snapshot JSON export.
+
+Absent providers, including live application stress testing, stay explicitly
+unavailable. Snapshot relationships never claim to be runtime traces.

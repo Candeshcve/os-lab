@@ -36,3 +36,16 @@ are omitted with a visible count. Limits: 20,000 nodes / 50,000 edges, at most
 remain. JSON files and tab IDs are validated; provider URLs cannot escape the
 private JSON root or become external fetches. Missing providers are explicit
 unavailable states. Read-only GETs never run an application or collect telemetry.
+
+The implemented SVG viewer draws 100 nodes per page and at most 2,000 edges
+within that window, with an accessible node list and keyboard selection. Export
+preserves the full loaded snapshot, independent of the current viewport/filter.
+Flow display is capped at 300 steps/eight nesting levels; original data remains
+in node details/export. Revision diff uses bounded LCS (1,000 lines per side),
+with truncation shown. Metrics rank recorded complexity/risk values for review,
+not observed malicious behavior. Missing live stress support stays unavailable.
+
+Source provider values are strings or `{content}` records keyed by path. History
+values are arrays of `{revision, content}` records keyed by path. Flow/sequence/
+AI-rule values are keyed by node ID; `aiRules.global` is also supported. No
+source string, flow instruction or AI rule is executed.

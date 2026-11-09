@@ -378,3 +378,17 @@ and report dangling edges. Virtual windows bound rendering to at most 200 nodes.
 Three model tests, two manifest/API guard tests, dashboard types/i18n/build,
 **36 browser tests** and public EN/TR smoke passed. All graph fixtures are owned
 and generated in tests; no upstream graph export or application data was copied.
+
+## SRC-045: Brain viewer
+
+Implemented graph tabs/windowing/filters/legend/sidebar/keyboard selection,
+snapshot usages, file-backed source/history and bounded LCS side-by-side diff,
+flow/sequence views, static AI-rules dialog, complexity/risk ranking and full JSON
+export. Live stress has no configured application provider and is explicitly
+unavailable; it never returns simulated success or calls the upstream backend.
+
+Four model tests, types, **2,106**-key locales, local/Pages builds and a full
+**37-test** browser run passed. Three focused Brain journeys additionally cover
+every available subview, missing providers, keyboard selection and a 250-node
+owned snapshot: only 100 nodes render, while the download contains all 250.
+Public EN/TR smoke passed. No graph/provider dataset or new dependency imported.

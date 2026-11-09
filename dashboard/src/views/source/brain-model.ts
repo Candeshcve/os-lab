@@ -15,7 +15,7 @@ export function normalizeGraph(raw: unknown): BrainGraph {
   const nodes = value.nodes.map((node: unknown): BrainNode => {
     if (!node || typeof node !== "object") throw new Error("Invalid Brain node");
     const item = node as Record<string, unknown>;
-    if (typeof item.id !== "string" || ids.has(item.id)) throw new Error("Invalid or duplicate Brain node");
+    if (typeof item.id !== "string" || !item.id || item.id.length > 512 || ids.has(item.id)) throw new Error("Invalid or duplicate Brain node");
     ids.add(item.id);
     return { id: item.id, type: String(item.type ?? "unknown"), label: String(item.label ?? item.id), data: item.data && typeof item.data === "object" && !Array.isArray(item.data) ? item.data as Record<string, unknown> : {} };
   });
@@ -33,4 +33,20 @@ export function graphWindow(graph: BrainGraph, query: string, types: string[], o
   const page = nodes.slice(Math.max(0, offset), Math.max(0, offset) + Math.min(200, size));
   const ids = new Set(page.map(node => node.id));
   return { nodes: page, edges: graph.edges.filter(edge => ids.has(edge.source) && ids.has(edge.target)), total: nodes.length };
+}
+
+/** Bounded LCS line diff; no source is executed or sent to another service. */
+export function compareLines(before: string, after: string, limit = 1000) {
+  const a = before.split(/\r?\n/), b = after.split(/\r?\n/);
+  const m = Math.min(a.length, limit), n = Math.min(b.length, limit), width = n + 1;
+  const table = new Uint16Array((m + 1) * width);
+  for (let i = m - 1; i >= 0; i--) for (let j = n - 1; j >= 0; j--) table[i * width + j] = a[i] === b[j] ? 1 + table[(i + 1) * width + j + 1] : Math.max(table[(i + 1) * width + j], table[i * width + j + 1]);
+  const rows: { before?: string; after?: string; kind: string }[] = [];
+  let i = 0, j = 0;
+  while (i < m || j < n) {
+    if (i < m && j < n && a[i] === b[j]) { rows.push({ before: a[i++], after: b[j++], kind: "equal" }); }
+    else if (i < m && (j === n || table[(i + 1) * width + j] >= table[i * width + j + 1])) rows.push({ before: a[i++], kind: "remove" });
+    else rows.push({ after: b[j++], kind: "add" });
+  }
+  return { rows, truncated: a.length > m || b.length > n };
 }
