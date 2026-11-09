@@ -15,6 +15,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import stat
 import sys
 from dataclasses import asdict, dataclass, field
@@ -54,9 +55,15 @@ def load_hmac_key() -> bytes:
     if file_value:
         key_path = Path(file_value)
         try:
-            raw = key_path.read_bytes()
-        except OSError as exc:
-            raise SessionKeyError(f"Cannot read {ENV_HMAC_KEY_FILE} ({key_path}): {exc}") from exc
+            fd = os.open(key_path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0))
+            with os.fdopen(fd, "rb") as stream:
+                if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+                    raise OSError("Key must be a regular file")
+                raw = stream.read(4097)
+            if len(raw) > 4096:
+                raise SessionKeyError("Session key exceeds the size limit")
+        except OSError:
+            raise SessionKeyError(f"Cannot read {ENV_HMAC_KEY_FILE}") from None
         if raw.endswith(b"\r\n"):
             raw = raw[:-2]
         elif raw.endswith(b"\n"):
@@ -233,37 +240,51 @@ class SessionBundleReader:
 
     def verify_integrity(self) -> Dict[str, Any]:
         """Checks hashes and signature; returns validation results."""
-        manifest_file = self.session_dir / "manifest.json"
-        sig_file = self.session_dir / "manifest.sig"
-
-        if not manifest_file.exists():
-            return {"valid": False, "error": "Missing manifest.json"}
-
-        manifest_content = manifest_file.read_text(encoding="utf-8")
-        manifest = json.loads(manifest_content)
-
-        sig_valid = False
-        if sig_file.exists():
-            expected_sig = sig_file.read_text(encoding="utf-8").strip()
-            actual_sig = hmac.new(self.hmac_key, manifest_content.encode("utf-8"), hashlib.sha256).hexdigest()
-            sig_valid = hmac.compare_digest(expected_sig, actual_sig)
-
-        mismatches: List[str] = []
-        for rel_path, expected_hash in manifest.items():
-            f = self.session_dir / rel_path
-            if not f.exists():
-                mismatches.append(f"Missing file: {rel_path}")
-                continue
-            actual_hash = hashlib.sha256(f.read_bytes()).hexdigest()
-            if actual_hash != expected_hash:
-                mismatches.append(f"Hash mismatch on {rel_path}: expected {expected_hash}, got {actual_hash}")
-
-        return {
-            "valid": len(mismatches) == 0,
-            "signature_verified": sig_valid,
-            "mismatches": mismatches,
-            "file_count": len(manifest),
-        }
+        # The manifest is untrusted until authenticated. Never follow its paths
+        # outside this bundle, and require signatures to cover correlation inputs.
+        failure = {"valid": False, "signature_verified": False, "mismatches": [], "file_count": 0}
+        try:
+            total = 0
+            def read(relative: str, cap: int = 5 * 1024 * 1024) -> bytes:
+                nonlocal total
+                parts = relative.replace("\\", "/").split("/")
+                if not parts or any(not part or part in (".", "..") or ":" in part for part in parts):
+                    raise ValueError("Invalid manifest path")
+                path = self.session_dir
+                if path.is_symlink():
+                    raise ValueError("Linked bundle")
+                for part in parts:
+                    path = path / part
+                    if path.is_symlink():
+                        raise ValueError("Linked bundle member")
+                fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0))
+                with os.fdopen(fd, "rb") as stream:
+                    if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+                        raise ValueError("Nonregular bundle member")
+                    data = stream.read(cap + 1)
+                total += len(data)
+                if len(data) > cap or total > 16 * 1024 * 1024:
+                    raise ValueError("Bundle exceeds verification limit")
+                return data
+            content = read("manifest.json")
+            manifest = json.loads(content)
+            if (not isinstance(manifest, dict) or not {"session.json", "events.jsonl"} <= manifest.keys()
+                    or len(manifest) > 1000):
+                raise ValueError("Manifest must cover session.json and events.jsonl")
+            signature = read("manifest.sig", 128).decode("ascii").strip()
+            signature_valid = hmac.compare_digest(signature, hmac.new(self.hmac_key, content, hashlib.sha256).hexdigest())
+            if not signature_valid:
+                return {**failure, "error": "Manifest signature not verified"}
+            mismatches = []
+            for relative, expected in manifest.items():
+                if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
+                    raise ValueError("Invalid manifest hash")
+                if hashlib.sha256(read(relative)).hexdigest() != expected:
+                    mismatches.append("Hash mismatch on " + relative)
+            return {"valid": not mismatches, "signature_verified": True,
+                    "mismatches": mismatches, "file_count": len(manifest)}
+        except (OSError, ValueError, UnicodeError, TypeError, RecursionError):
+            return {**failure, "error": "Missing, invalid or unsafe signed session bundle"}
 
     def get_metadata(self) -> SessionMetadata:
         meta_file = self.session_dir / "session.json"

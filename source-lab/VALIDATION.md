@@ -193,3 +193,14 @@ owner-excluded work. Existing merger engine/API functionality is retained. The
 remaining active queue has 18 tasks; this skip is not recorded as completed work.
 This ledger-only change uses Markdown/graph/whitespace checks; runtime validation
 above applies to the preceding implementation milestone.
+
+## Next batch: SRC-024 runtime acceptance
+
+Managed generation/rotation/default URL and explicit `verify-session` jobs are
+implemented. Existing mode 0600, ownership and ambiguous-key checks remain. The
+engine now requires signed metadata/events and refuses traversal, symlinks,
+missing signatures, invalid manifests and wrong keys with bounded reads.
+
+Validation: focused console runtime tests **5 passed**; engine session/collector
+tests **20 passed**. Fixtures use temporary keys and owned generated inputs only.
+No browser installation, third-party assets or credentials were published.

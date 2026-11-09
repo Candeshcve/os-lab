@@ -32,7 +32,17 @@ def main():
     request = json.loads(sys.argv[1])
     control.build_plan(root, request)
     options = request["options"]
-    if options["action"] == "generate-key":
+    if options["action"] == "verify-session":
+        sys.path.insert(0, str(Path(root) / "source-lab/engine"))
+        from source_lab.evidence.session import SessionBundleReader
+        if not os.environ.get("IQ_SESSION_HMAC_KEY") and not os.environ.get("IQ_SESSION_HMAC_KEY_FILE"):
+            os.environ["IQ_SESSION_HMAC_KEY_FILE"] = str(control.checked(control.storage(root), "control/session-hmac.key", exists=True))
+        path = control.checked(control.storage(root), "analysis/" + options["slug"] + "/runtime-sessions/" + options["session"], exists=True)
+        result = SessionBundleReader(path).verify_integrity()
+        print(json.dumps(result), flush=True)
+        if not result["valid"] or not result["signature_verified"]:
+            raise SystemExit(1)
+    elif options["action"] == "generate-key":
         source_jobs.atomic(root, "control/session-hmac.key", (secrets.token_hex(32) + "\n").encode())
         print("Private signing key created. Previous sessions need their original key for verification.", flush=True)
     else:

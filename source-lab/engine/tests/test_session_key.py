@@ -145,3 +145,32 @@ def test_cli_ignores_tampered_session(tmp_path):
     assert "events.jsonl" in limitations
     findings = json.loads((out / "findings.json").read_text(encoding="utf-8"))
     assert all(f["state"] != "correlated_behavior" for f in findings)
+
+@pytest.mark.parametrize("kind", ["missing-signature", "wrong-key", "uncovered-events", "traversal", "symlink", "invalid-json"])
+def test_bundle_trust_boundaries(tmp_path, kind):
+    import hashlib
+    import hmac
+    session = _write_bundle(tmp_path)
+    if kind == "missing-signature":
+        (session / "manifest.sig").unlink()
+    elif kind == "wrong-key":
+        assert not SessionBundleReader(session, b"z" * 32).verify_integrity()["valid"]
+        return
+    elif kind == "invalid-json":
+        (session / "manifest.json").write_text("[]")
+    else:
+        manifest = json.loads((session / "manifest.json").read_text())
+        if kind == "uncovered-events":
+            del manifest["events.jsonl"]
+        elif kind == "traversal":
+            manifest["../outside"] = hashlib.sha256(b"outside").hexdigest()
+            (tmp_path / "outside").write_bytes(b"outside")
+        else:
+            outside = tmp_path / "outside"
+            outside.write_bytes((session / "events.jsonl").read_bytes())
+            (session / "events.jsonl").unlink()
+            (session / "events.jsonl").symlink_to(outside)
+        content = json.dumps(manifest, sort_keys=True).encode()
+        (session / "manifest.json").write_bytes(content)
+        (session / "manifest.sig").write_text(hmac.new(load_hmac_key(), content, hashlib.sha256).hexdigest())
+    assert not SessionBundleReader(session).verify_integrity()["valid"]

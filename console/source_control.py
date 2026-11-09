@@ -158,7 +158,7 @@ def runtime(root: str) -> dict:
     base = storage(root)
     key = checked(base, "control/session-hmac.key")
     env_key, env_file = os.environ.get("IQ_SESSION_HMAC_KEY"), os.environ.get("IQ_SESSION_HMAC_KEY_FILE")
-    source = "env" if env_key else "env-file" if env_file else "managed-file" if key.exists() else "none"
+    source = "env" if env_key is not None else "env-file" if env_file else "managed-file" if key.exists() else "none"
     configured = False
     problem = None
     material = None
@@ -170,7 +170,7 @@ def runtime(root: str) -> dict:
                 if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
                     raise ValueError()
                 file_material = stream.read(4097).rstrip(b"\r\n")
-        if env_key:
+        if env_key is not None:
             material = env_key.encode()
             if file_material is not None and material != file_material:
                 raise ValueError()
@@ -204,7 +204,7 @@ def build_plan(root: str, request: dict) -> dict:
         "detect": {"target", "platform", "runCanary", "testUrl", "session"},
         "crawl": {"repos", "sourceFile", "workers", "depth", "noAst", "noMetadata", "resume", "keepWorkspace"},
         "merge": {"slugs", "name", "includeFlagged", "allowClone", "mv", "plan"},
-        "runtime": {"action", "rotate", "testUrl"},
+        "runtime": {"action", "rotate", "testUrl", "slug", "session"},
     }
     if not isinstance(action, str) or action not in allowed or set(options) - allowed[action]:
         raise ArtifactError(400, "Unsupported Source Lab action or options")
@@ -243,7 +243,7 @@ def build_plan(root: str, request: dict) -> dict:
         if canary:
             if platform not in ("auto", "browser-extension"):
                 raise ArtifactError(400, "Canary collection requires a browser-extension target")
-            args += ["--run-canary", http_url(options.get("testUrl"))]
+            args += ["--run-canary", http_url(options.get("testUrl", runtime(root)["canary"]["testUrl"]))]
             effects.append("Starts optional browser tooling and contacts the chosen test URL. Synthetic sessions cannot confirm runtime findings.")
         elif "testUrl" in options:
             raise ArtifactError(400, "testUrl requires runCanary")
@@ -306,7 +306,20 @@ def build_plan(root: str, request: dict) -> dict:
         effects.append("Builds only operator-authorized extensions for disposable lab browser profiles.")
     else:
         operation = options.get("action")
-        if operation == "generate-key":
+        if operation != "verify-session" and set(options) & {"slug", "session"}:
+            raise ArtifactError(400, "Unexpected session selection")
+        if operation == "verify-session":
+            if set(options) != {"action", "slug", "session"}:
+                raise ArtifactError(400, "Choose a target slug and session to verify")
+            SourceArtifacts._slug(options["slug"])
+            if not isinstance(options["session"], str) or not re.fullmatch(r"ses_[A-Za-z0-9_.-]+", options["session"]):
+                raise ArtifactError(400, "Invalid session ID")
+            session_path = checked(base, "analysis/" + options["slug"] + "/runtime-sessions/" + options["session"], exists=True)
+            safe_tree(session_path)
+            if not runtime(root)["key"]["configured"]:
+                raise ArtifactError(409, "Session verification needs a configured signing key")
+            effects = ["Verifies signed metadata, events and artifact hashes locally; no key is displayed or network request made."]
+        elif operation == "generate-key":
             info = runtime(root)
             if info["key"]["source"] in ("env", "env-file"):
                 raise ArtifactError(409, "The key is owned by the environment")

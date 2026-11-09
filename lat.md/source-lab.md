@@ -20,7 +20,11 @@ The console reports native Python readiness; analysis pages remain in [[source-l
 
 [[source-lab/engine/source_lab/evidence/session.py]] signs and verifies session bundles. [[source-lab/engine/source_lab/collectors]] provides the browser canary and four platform telemetry importer libraries.
 
-[[source-lab/engine/source_lab/cli/run_detection.py#_verified_events]] excludes synthetic sessions and target/platform mismatches from correlation. Missing keys or failed integrity leave the static findings and an explicit coverage limitation. Live canary collection requires operator-installed Playwright and Chromium; setup does not install them.
+[[source-lab/engine/source_lab/cli/run_detection.py#_verified_events]] excludes synthetic sessions and target/platform mismatches from correlation. Missing keys or failed integrity leave the static findings and an explicit coverage limitation. Explicit console verification uses a previewed runtime job. Signed manifests must
+cover both metadata and events; unsafe paths, missing signatures and oversized
+bundles fail closed. Key material stays in the worker environment/private file.
+
+Live canary collection requires operator-installed Playwright and Chromium; setup does not install them.
 
 ## Read-only artifact API
 

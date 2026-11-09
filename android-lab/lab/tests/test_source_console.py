@@ -352,3 +352,28 @@ def test_engine_tree_stops_after_console_crash(tmp_path, monkeypatch):
         if parent.poll() is None:
             parent.kill()
             parent.wait(timeout=5)
+
+
+def test_runtime_verification_and_default_canary(console):
+    route = "/api/source/settings/runtime"
+    # Regenerate the owned fixture with the console-managed key, never printed.
+    key = (console[1] / "control/session-hmac.key").read_text().strip()
+    script = Path(web_ui.REPO_ROOT) / "source-lab/engine/tests/fixture_workspace.py"
+    fixture = console[1] / "verification-fixture"
+    result = subprocess.run([sys.executable, str(script), str(fixture)], input=key.encode().hex(),
+                            text=True, capture_output=True, timeout=30)
+    assert result.returncode == 0
+    import shutil
+    original = next((fixture / "analysis").glob("*/runtime-sessions/ses_*"))
+    destination = console[1] / "analysis/local__verification/runtime-sessions" / original.name
+    shutil.copytree(original, destination)
+    options = {"action": "verify-session", "slug": "local__verification", "session": original.name}
+    job = confirmed(console, route, options)
+    assert job.state == "succeeded", job.lines
+    (destination / "manifest.sig").unlink()
+    job = confirmed(console, route, options)
+    assert job.state == "failed"
+    assert key not in json.dumps(call(console, route)[1])
+    plan = source_control.build_plan(web_ui.REPO_ROOT, {"lab": "source", "action": "detect", "options": {
+        "target": source_control.candidates(web_ui.REPO_ROOT)[0]["key"], "runCanary": True}})
+    assert call(console, route)[1]["canary"]["testUrl"] in plan["engineArgs"]

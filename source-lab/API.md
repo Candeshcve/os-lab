@@ -46,7 +46,7 @@ omitted. Other labs retain their existing in-memory lifecycle.
 | `/deep-analysis/merge` | GET | Jobs and output reports; `download=folder` downloads an inspected ZIP; `plan=1&slugs=a__b,...` returns an exact read-only job preview, without launching the engine. |
 | `/deep-analysis/merge` | POST | Explicit `slugs`, optional `name` (60 chars), `includeFlagged`, `allowClone` (default false), `mv` (2/3), `plan` (manifest-only background check). |
 | `/settings/runtime` | GET | Key source/configuration/problem, default canary URL, optional Playwright availability and rotation warning. Never returns a key. |
-| `/settings/runtime` | POST | Options `action=generate-key` with explicit `rotate=true` to replace an existing managed key, or `action=set-canary` and `testUrl`. Both use preview/confirmation jobs. |
+| `/settings/runtime` | POST | Options `action=generate-key` with explicit `rotate=true` to replace an existing managed key, or `action=set-canary` and `testUrl`. These use preview/confirmation jobs. `action=verify-session`, `slug`, `session` verifies signed bundle integrity in a background job. |
 | `/sources` | GET | Three operator-provided CSV catalogs with counts and actual available files. `download` names one of those catalogs. No hardcoded dataset counts. |
 | `/brain` | GET | Operator-supplied `storage/brain-data/manifest.json`, with namespaced graph links. Missing data returns 404. |
 | `/brain/files/{path}` | GET | Bounded JSON under that Brain root. |
@@ -81,8 +81,7 @@ file-backed bundles. Rich Overview migration annotations, dependency categories,
 and all UI presentation remain SRC-031. Deep crawler tuning beyond these bounded
 options remains SRC-040. Snapshot data and richer Brain/Pipeline surfaces remain
 SRC-043–045. No database or Skills-backed Spotlight search is retained. The
-hello-world stub remains retired. Key/session verification workflow acceptance
-continues under SRC-024/025; existing read endpoints do not claim verification.
+hello-world stub remains retired. Explicit session verification uses a confirmed runtime job; read endpoints continue to label integrity as unverified.
 
 Runtime settings writes are atomic, use private modes where supported and never
 contact the configured URL. Rotation warns during preview that earlier sessions
