@@ -38,7 +38,11 @@ VERSION="$(node -p "require('$APP_DIR/src-tauri/tauri.conf.json').version")"
 TAG="app-v$VERSION"
 OUT="$APP_DIR/out/$VERSION"
 if [ "$PUBLISH" = 1 ]; then
-  git -C "$REPO" fetch -q origin "refs/tags/$TAG:refs/tags/$TAG" || die "release tag $TAG is missing"
+  # --force: CI checks out the tag ref, so the tag already exists locally and a plain
+  # fetch is rejected for clobbering it. Fall back to an already-present local tag.
+  git -C "$REPO" fetch -q --force origin "refs/tags/$TAG:refs/tags/$TAG" 2>/dev/null \
+    || git -C "$REPO" rev-parse -q --verify "refs/tags/$TAG^{commit}" >/dev/null \
+    || die "release tag $TAG is missing"
   [ "$(git -C "$REPO" rev-list -n 1 "$TAG")" = "$(git -C "$REPO" rev-parse HEAD)" ] \
     || die "$TAG does not point to this checkout; publish from the tagged commit"
 fi

@@ -88,6 +88,16 @@ by the operator; it is never redistributed by the app.
 `app/scripts/release-mac.sh` builds a universal DMG, signs it (Developer ID), notarizes the app and the DMG, staples, verifies with `codesign`/`spctl`/`stapler`, and with `--publish` uploads it to the GitHub release `app-v<version>` with a SHA-256 file. Without `--publish` it uploads nothing; `--no-notarize` signs only. Credentials come from the environment, the git-ignored `secrets/` folder or the login keychain, never from the repo (`secrets/README.md`); the script refuses to run if a key or secrets file is tracked.
 The Python helpers must be signed before Tauri bundles them, so this release path needs the Developer ID identity available in the keychain.
 
+### Automatic tag releases
+
+Once the `release-mac` workflow is enabled, pushing an `app-v<version>` tag builds, signs,
+notarizes and publishes the universal DMG and updater bundle automatically. The job needs these
+repository secrets: `APPLE_CERTIFICATE` (base64 `.p12` containing the Developer ID Application
+identity and its private key), `APPLE_CERTIFICATE_PASSWORD`, `KEYCHAIN_PASSWORD` (any random value
+for the temporary keychain), `APPLE_API_KEY_P8`, `APPLE_API_KEY` and `APPLE_API_ISSUER` from an
+App Store Connect API key, plus the shared `TAURI_SIGNING_PRIVATE_KEY`. To publish a tag that
+predates the change, run `gh workflow run release-mac.yml --ref app-v<version> -f publish=true`.
+
 ## Release (Windows installers, Linux packages)
 
 Releases are built and published locally on the machine that matches the platform; the GitHub
