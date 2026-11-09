@@ -3,8 +3,9 @@
 This is the implementation queue for [PLAN.md](PLAN.md), measured against
 [INVENTORY.md](INVENTORY.md). Completed engine foundation tasks are marked below. Check a task only
 when its acceptance evidence is linked in the implementation PR or this ledger.
-Foundation work is tracked in draft PR #103. Acceptance evidence is recorded in
-[VALIDATION.md](VALIDATION.md); remaining console and UI tasks are listed below.
+Implementation was merged in PR #103; the public Pages deployment fix is PR #105.
+Version 0.3.0 is published. Acceptance evidence and open bonus verification
+limits are recorded in [VALIDATION.md](VALIDATION.md).
 
 ## Scope
 

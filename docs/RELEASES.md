@@ -29,7 +29,7 @@ The script reads assets from `app/out/<version>` when present, otherwise downloa
 release with `gh`, verifies every SHA-256 through `app/scripts/build-update-manifest.mjs`, and
 uploads `latest.json` to the `app-updates` prerelease.
 
-## 0.3.0 — release preparation
+## 0.3.0
 
 - Add Source Lab: portable five-platform static analysis, signed evidence,
   structural maps, crawler/catalog workflows and guarded background jobs.
@@ -40,8 +40,12 @@ uploads `latest.json` to the `app-updates` prerelease.
 - Include workflow guides, owned-fixture acceptance and explicit capability
   limits. Skills, databases, OpenAPI and further merger UI remain excluded.
 - Native/live verification and related patches are tracked as Source Lab bonus
-  contributions. This section does not claim native manual acceptance or that
-  every platform package has been published.
+  contributions; native manual Source acceptance is not claimed.
+- Published Linux amd64/arm64 `.deb`, `.rpm` and `.AppImage`, macOS universal
+  `.dmg`/`.app.tar.gz`, and Windows x64 setup/MSI with hashes and verified updater
+  signatures. macOS is Developer ID signed and notarized. Windows has no
+  Authenticode signature and may show SmartScreen; publication was approved by
+  the owner. The updater feed covers all five platform entries.
 
 ## 0.2.9
 
