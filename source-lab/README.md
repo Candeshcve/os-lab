@@ -3,7 +3,9 @@
 Source Lab brings iQ-SourceContol into os-lab. The local Python engine and CLI
 are implemented; dashboard and console integration remain in the task queue.
 Only first-party source code and synthetic fixtures are included. Third-party
-archives, datasets and binaries are excluded.
+archives, datasets and binaries are excluded. Skills, database-backed repository
+management, and OpenAPI integration are also outside the requested scope.
+Analysis and browsing remain file-backed; engine schemas and generated types stay.
 
 - [Plan](PLAN.md): integration design, sequence, migration and release criteria.
 - [TODO](TODO.md): ordered tasks, dependencies and completion evidence.

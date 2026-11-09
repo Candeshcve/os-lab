@@ -42,7 +42,9 @@ Adapters cover Python, JS/TS, PHP, Rust, Swift, Objective-C, Kotlin, Java and ma
 
 [[source-lab/IMPORT_POLICY.md]] records the owner's authorization and exclusions. [[source-lab/PROVENANCE.json]] maps reviewed first-party imports to their source and current hashes; [[source-lab/UPSTREAM-MANIFEST.csv]] retains the historical extraction metadata.
 
-No third-party archives, datasets or binaries are imported. The Python package is `source_lab`, so its modules do not shadow the existing Android engine. No source UI, server route or remote deployment is activated by this foundation.
+No third-party archives, datasets or binaries are imported. Skills, database
+integration and OpenAPI are outside the requested migration scope; artifact
+readers and engine contracts remain file-backed. The Python package is `source_lab`, so its modules do not shadow the existing Android engine. No source UI, server route or remote deployment is activated by this foundation.
 
 ## Regression tests
 

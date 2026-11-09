@@ -1,6 +1,6 @@
 # Source Lab integration plan
 
-Bring every implemented engine capability and user-facing page in the pinned
+Bring the in-scope engine capabilities and user-facing pages in the pinned
 [parity inventory](INVENTORY.md) into os-lab as `source-lab`, with navigation in
 the existing dashboard and operations through the existing local console.
 The engine/CLI foundation is implemented; console and UI routes remain planned.
@@ -9,11 +9,18 @@ See README and the task queue for current behavior.
 ## Scope and rules
 
 The baseline is the inspected iQ-SourceContol commit recorded in the inventory,
-not its unfinished roadmap. Preserve all seven pages, docs/API reference,
-repository management, Brain subviews, five analyzers, crawler/merger, structural
-maps, signed runtime sessions, reports, skills and search. Every inventory item
-must end with a tested destination or an explicit, reviewed disposition.
-Renaming and adapting the framework must not remove capabilities.
+not its unfinished roadmap. Preserve Overview, Evidence, Deep analysis, Pipeline
+and Brain, the five analyzers, crawler/merger, structural maps, signed runtime
+sessions, reports and artifact-based navigation/search. Each retained inventory
+item needs a tested destination.
+
+The owner excludes Skills and agent/implementation-catalog integration, database
+integration (including the SQLite/Prisma repository manager, sync, taxonomy and
+notes), and OpenAPI/API-reference generation and pages. Their source routes are
+recorded as excluded, not pending work. Repository selection and file/bundle
+browsing in Deep analysis remain file-backed. Keep the engine JSON Schema and
+generated TypeScript contracts; these validate artifacts and do not add OpenAPI
+integration. This scope replaces the original all-pages parity target.
 
 Follow `AGENTS.md`, `CONTRIBUTING.md`, `lat.md/lat.md`, `lat.md/overview.md`,
 `lat.md/dashboard.md`, `lat.md/labctl.md`, `lat.md/setup.md`,
@@ -35,7 +42,7 @@ dependency of the dashboard, with optional Node syntax checks for the merger;
 Bun, Next.js and Prisma are not required by the core installed console.
 
 This choice preserves os-lab's current static distribution and minimal installer.
-Prototype the database and Brain ports before the bulk migration; document any
+Prototype the Brain port before the bulk migration; document any
 necessary architecture revision before importing their callers.
 
 | Proposed location | Responsibility |
@@ -43,10 +50,10 @@ necessary architecture revision before importing their callers.
 | `source-lab/engine/` | Namespaced Python analyzers, evidence, collectors, pipeline, sourcemap, CLIs and retained tests. Keep the CLI working-directory boundary and test import isolation. |
 | `source-lab/scripts/`, `Makefile`, `.env.example` | Idempotent preflight/setup, capability discovery, CLI entry points and supported lifecycle/data maintenance operations. |
 | `source-lab/doc/resources/` | Audited redistributable reference catalogs and research; optional external archive root for large/restricted source resources. |
-| `source-lab/storage/` | Gitignored writable analyses, clone workspace, staged targets, merged outputs, sessions, key/settings and repository index. Separate curated inputs from generated data and imported legacy snapshots. |
-| `console/source_lab/` | Proposed Python adapter: paths, validated API dispatch, job execution, artifact readers, SQLite repository store/sync and runtime settings. |
+| `source-lab/storage/` | Gitignored writable analyses, clone workspace, staged targets, merged outputs, sessions and key/settings. Separate curated inputs from generated data and imported legacy snapshots. |
+| `console/source_lab/` | Proposed Python adapter: paths, validated API dispatch, job execution, file-backed artifact readers and runtime settings. |
 | `dashboard/src/views/source/` | Ported React views and source-specific components/Brain store; reuse the os-lab shell, theme, Spotlight and components where practical. |
-| `dashboard/src/pages/source/`, locale route generation | Static routes in the inventory, docs/API reference and public capability descriptions. |
+| `dashboard/src/pages/source/`, locale route generation | Retained static routes in the inventory, project docs and public capability descriptions. |
 | `dashboard/src/lib/` | Namespaced typed API client generated from/validated against engine contracts; capability and job-store integration. |
 
 Use canonical lab id `source`, directory `source-lab`, page root `/source/`,
@@ -68,7 +75,8 @@ against it; do not add another hand-maintained schema mirror. Golden fixtures mu
 cover report contents, not volatile IDs/timestamps. Retain legacy AST links while
 clients still depend on them.
 
-Map every inventoried HTTP method to `/api/source`. The generic `/api` hello-world
+Map retained inventoried HTTP methods to `/api/source`. Do not add the
+excluded database, Skills/catalog or OpenAPI endpoints. The generic `/api` hello-world
 stub is deliberately retired in favor of os-lab health. Bind handlers to the
 console's localhost Host and mutation-header protections; no unauthenticated
 remote exposure is introduced. Keep arbitrary commands and unrestricted paths
@@ -93,16 +101,15 @@ missing tools, partial scans and not-applicable maps clearly. Scope browser test
 URLs and network acquisition to authorized targets; new capabilities must not
 silently expand target scope.
 
-Port repository data access to Python SQLite while retaining the logical schema,
-indexes, joins, counts, filter/sort/pagination semantics and manual/automatic
-ownership rules. First prove import of a disposable legacy database and compare
-all page/API results. Use explicit versioned, transactional migrations and a
-pre-migration backup; never run a destructive schema push or reset automatically.
+Read analysis bundles, targets, maps and sessions directly from validated local
+files. No database, ORM, repository-index sync, taxonomy or notes store is part
+of Source Lab. Existing JSON artifacts and generated contracts remain the
+engine/UI boundary.
 
 ## Data, licensing and portability
 
-Before importing code or archives, resolve missing top-level source license
-information, third-party rights and Apache-2.0 compatibility. Record origin commit,
+The owner authorized first-party publication under os-lab's Apache-2.0 rules;
+retain the grant and exclusions in IMPORT_POLICY.md. For permitted code, record origin commit,
 original path, upstream/local hashes and modifications; retain source manifests
 and add a relocation manifest. Update legal notices for actually imported code
 and dependencies. Review catalogs, own-repository metadata and research for
@@ -112,14 +119,15 @@ Provide an explicit, opt-in legacy import accepting an operator-supplied root.
 Dry-run first: inventory counts/hashes/bytes, schema versions, duplicates and
 unsupported items; produce an old-to-new path mapping. Copy into new storage
 without mutating `/home/pod/iQ-SourceContol`; preserve originals and manual edits.
-Import relevant analysis, AST/maps, sessions, repository taxonomy/notes and
-curated data. Verify counts/hashes and signature usability before switching.
-Keep database/settings backup and rollback instructions. Large or restricted
-archives remain external inputs acquired only with appropriate rights.
+Import authorized first-party analysis, AST/maps, sessions and settings only;
+do not import repository databases, taxonomy/notes or skill catalogs. Verify
+counts/hashes and signature usability before switching. Keep file/settings
+backup and rollback instructions. Third-party archives, datasets and binaries
+remain excluded from public distribution.
 
 Replace hardcoded `/i-vs`, source-checkout paths, port numbers, platform gate
 hostnames and systemd names with os-lab configuration. Preserve useful setup,
-service, docs and skills workflows through os-lab tools; legacy remote deployment
+service and project-docs workflows through os-lab tools; legacy remote deployment
 registrations remain reference-only. Do not edit iQ-iUX or iQ-Bridge for this port.
 Audit shared-component provenance without importing their cross-repo sync policy.
 
@@ -127,7 +135,7 @@ Audit shared-component provenance without importing their cross-repo sync policy
 
 Use the page and subfeature tables in the inventory as acceptance criteria.
 Source Lab appears in host/lab readiness and in the existing navigation with
-Overview, Repositories, Evidence, Analysis, Pipeline, Brain and Skills routes.
+Overview, Evidence, Deep analysis, Pipeline and Brain routes.
 Preserve deep-link query parameters, report downloads, mobile navigation,
 keyboard Spotlight records, theme, focus behavior and all usable Brain subviews.
 Inspect Brain hooks for actual data/provider support; absent data gets an honest
@@ -143,7 +151,7 @@ actions. Never treat empty coverage as proof a target is clean.
 
 Local routes use the console. Public Pages routes under `/os-lab/` provide
 readable documentation, reference/sample content and a clear local-install next
-step; live runs, keys, sync, merge and local records are unavailable there.
+step; live runs, keys, merge and local records are unavailable there.
 Do not poll a nonexistent engine or ship real private findings/sessions into the
 public build. Build links with locale/base helpers and update every active locale
 catalog (the current readiness guide requires seven). Verify the actual supported
@@ -161,13 +169,12 @@ The corresponding task IDs and explicit dependencies are in [TODO](TODO.md).
 | 2. Console integration | Lab registry, typed APIs, previews/jobs/cancellation, runtime settings/artifact guards. | Readiness and API contract tests, process cancellation/restart checks, signature/secret/path boundary tests. |
 | 3. Evidence and overview | Static routes/shell/Spotlight; evidence/session controls/reports; matrices/catalogs. | Fixture-backed local user journeys, optional-tool states, migrated query links and source download parity. |
 | 4. Analysis | Crawler/deep bundles/AST/map, merge preview/run/download, Pipeline and complete Brain viewer. | Crawl-to-map-to-evidence journey, merge output smoke, Brain views and explicit snapshot states. |
-| 5. Repository manager | SQLite parity spike first; index sync, filters/details, taxonomy and manual edits. | Legacy DB comparison, repeated sync preserves notes/manual taxonomy; transactional migration rollback. |
-| 6. Docs and agents | Skills browse/generate, implementation search, docs and generated OpenAPI. | Every inventoried handler documented, skill examples target new API; docs and search links resolve. |
+| 6. Project docs | Document implemented analysis workflows and configuration. | Retained workflow docs, graph links and search links resolve; excluded integrations are absent. |
 | 7. Distribution | Install/update/minimal mode, optional extras, legacy data import, local/public routing and notices. | Fresh install and update checks on supported hosts; full relevant checks and signed-off parity ledger. |
 
-The SQLite spike can run after foundation and before the repository slice;
-Brain feasibility is checked before slice 4. Neither spike justifies dropping
-features. Keep upstream future target classes and research-only collectors in a
+Slice 5 and the Skills/OpenAPI tasks from slice 6 are excluded by the owner's
+scope change; their IDs are retained only as exclusion records. Brain feasibility
+is checked before slice 4. Keep upstream future target classes and research-only collectors in a
 separate backlog so they do not obscure parity completion.
 
 ## Validation and completion
@@ -182,7 +189,7 @@ console/contract tests for new behavior, and exercise detection/reporting on
 benign fixtures for all five platforms. Check signature failure, missing keys,
 synthetic/live distinction, limits, traversal/symlinks, conflicting runs and
 cancellation. Test crawler partial failures/resume and merger eligibility/output.
-Compare SQLite API results and sync preservation against source fixtures.
+Verify file-backed artifact reads and target selection against sanitized fixtures.
 
 For dashboard changes run all required commands from `dashboard/`:
 
@@ -203,6 +210,6 @@ runner from `lat.md/tooling.md` when shared runtime/installers change. Preserve
 PowerShell 5.1/7 compatibility and UTF-8 BOM if Windows installer files change.
 
 Update relevant implemented-state graph nodes for each shipped slice and run
-`lat check`. Completion requires every inventory item and TODO acceptance check
+`lat check`. Completion requires every retained inventory item and active TODO acceptance check
 to have evidence, migration rollback to work, existing labs to pass regression
 checks, and a clean minimal install without an external iQ checkout.

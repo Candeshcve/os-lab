@@ -1,6 +1,6 @@
 # Source Lab migration inventory
 
-This is the parity baseline for the proposed Source Lab. Paths in this document
+This records the source snapshot and the retained migration scope for Source Lab. Paths in this document
 refer to the source repository unless explicitly described as os-lab destinations.
 No entry here claims the migration is implemented.
 
@@ -19,9 +19,23 @@ Read source `AGENTS.md`, `engine/AGENTS.md`, `lat.md/lat.md`, `architecture.md`,
 Source `lat check` passes. Historical test counts in source status are claims
 from its October snapshot, not tests rerun for this planning PR.
 
+## Scope disposition
+
+The owner excludes Skills/agent catalogs, database integration and OpenAPI.
+The database-backed repository manager, its sync/taxonomy/notes APIs, the Skills
+page and implementation catalog, and the OpenAPI/API-reference surfaces will
+not be ported. Retained browsing and search use local analysis artifacts.
+Engine JSON Schema and generated TypeScript contracts remain in scope.
+
+The original census stays intact for provenance: seven app pages, 29 API routes
+and 41 HTTP methods. The current target retains five app pages and 13 API routes
+(19 methods), excludes two app pages and 15 API routes (21 methods), and retires
+the remaining hello-world API route (one method).
+
 ## App pages
 
-All seven `page.tsx` routes have a proposed destination in the existing dashboard.
+The five retained `page.tsx` routes have destinations in the existing dashboard;
+the other two source pages are explicitly excluded.
 The route names below are logical paths; locale and Pages base prefixes must be
 applied through os-lab's path helpers.
 
@@ -32,13 +46,13 @@ applied through os-lab's path helpers.
 | `/evidence` | `/source/evidence/` | `ui/src/app/evidence/page.tsx` |
 | `/` | `/source/` | `ui/src/app/page.tsx` |
 | `/pipeline` | `/source/pipeline/` | `ui/src/app/pipeline/page.tsx` |
-| `/repos` | `/source/repos/` | `ui/src/app/repos/page.tsx` |
-| `/skills` | `/source/skills/` | `ui/src/app/skills/page.tsx` |
+| `/repos` | Excluded: database-backed repository manager | `ui/src/app/repos/page.tsx` |
+| `/skills` | Excluded: Skills integration | `ui/src/app/skills/page.tsx` |
 
 Additional surfaces: `/docs/[[...path]]` maps to `/source/docs/` and nested
-document routes; `/api-docs` maps to `/source/api-docs/`. Preserve docs navigation,
-API-reference rendering and spec downloads. `/labs/source/` is the new os-lab
-readiness/lifecycle page, beyond the seven source pages.
+document routes for ordinary project documentation. `/api-docs` and its spec
+download are excluded with OpenAPI. `/labs/source/` is the new os-lab
+readiness/lifecycle page, beyond the five retained source pages.
 
 | Page or shared surface | Required parity |
 |---|---|
@@ -46,16 +60,14 @@ readiness/lifecycle page, beyond the seven source pages.
 | Evidence | Target/platform selection, run/poll/cancel, state/severity filters, confidence, source/binary spans, hypothesis, alternatives, remediation, coverage and limitations; H1-H5 scorecard and decisive tests; runtime key status/generate/two-step rotate, canary URL/default/toggle, Playwright readiness, prior-session selection and event timeline; existing report downloads. |
 | Deep analysis | Repository selection/search, bundle status, manifest/threat/dependency/file/metadata views, AST and source browsing with `?repo=` and `&file=` links; repo-map stats, roles, targets, coverage, symbols/imports and entrypoints; selected-target crawler options/logs/cancel; merge preview, exclusions, flagged override, run/cancel and folder/ZIP/report results. |
 | Pipeline | Stage flowchart, inputs/outputs, network calls, GitHub requests, signatures, risk rules, manifest candidates and flow steps; explicit bundled-data fallback. |
-| Repositories | Text/category/all-selected-tag filters and counts, sorting/pagination, `?repo=owner/name` selection, metadata/overview/analysis/dependencies/file-tree/evidence tabs; notes and manual tag/category edits; taxonomy CRUD and protected system entries; sync status and counts. |
 | Brain | Tabs, graph/filter/legend/sidebar, usages, source, file history, side-by-side diff, flowchart and sequence views, AI-rules dialog, complexity/riskiest-files/stress panels, export, theme and virtual graph. Distinguish available snapshot data from controls whose data/provider is absent. |
-| Skills | Shipped skill browse/search/copy/download; live skill generation for data, implementations and repos; implementation catalog search and API links. |
-| Shell | Source Lab navigation inside the existing os-lab sidebar, grouped analysis links, mobile behavior, keyboard Spotlight with section/record search, light/dark theme, docs/API links, accessible focus and loading/empty/error states. |
+| Shell | Source Lab navigation inside the existing os-lab sidebar, grouped analysis links, mobile behavior, keyboard Spotlight with section/record search, light/dark theme, project-docs links, accessible focus and loading/empty/error states. |
 
 ## HTTP route census
 
 This table is generated from all source `api/**/route.ts` exported HTTP handlers.
-It is an implementation checklist, not a promise of binary-compatible URLs:
-internal clients and skills move together to the namespaced API. Preserve query,
+Retained rows are the implementation checklist; excluded rows are not future
+endpoints. Internal clients use the namespaced API. Preserve retained query,
 body, status, file download and cancellation semantics or document an intentional
 change and add a contract test.
 
@@ -70,28 +82,28 @@ change and add a contract test.
 | `/api/detection` | GET, POST, DELETE | `/api/source/detection` |
 | `/api/evidence/report` | GET | `/api/source/evidence/report` |
 | `/api/evidence` | GET | `/api/source/evidence` |
-| `/api/implementations` | GET | `/api/source/implementations` |
-| `/api/openapi` | GET | `/api/source/openapi` |
+| `/api/implementations` | GET | Excluded: Skills/implementation catalog |
+| `/api/openapi` | GET | Excluded: OpenAPI integration |
 | `/api/pipeline` | GET | `/api/source/pipeline` |
-| `/api/repo-categories/[key]` | PATCH, DELETE | `/api/source/repo-categories/[key]` |
-| `/api/repo-categories` | GET, POST | `/api/source/repo-categories` |
-| `/api/repo-tags/[key]` | PATCH, DELETE | `/api/source/repo-tags/[key]` |
-| `/api/repo-tags` | GET, POST | `/api/source/repo-tags` |
-| `/api/repos/[owner]/[name]/analysis` | GET | `/api/source/repos/[owner]/[name]/analysis` |
-| `/api/repos/[owner]/[name]/dependencies` | GET | `/api/source/repos/[owner]/[name]/dependencies` |
-| `/api/repos/[owner]/[name]/evidence` | GET | `/api/source/repos/[owner]/[name]/evidence` |
-| `/api/repos/[owner]/[name]/files` | GET | `/api/source/repos/[owner]/[name]/files` |
-| `/api/repos/[owner]/[name]` | GET, PATCH | `/api/source/repos/[owner]/[name]` |
-| `/api/repos` | GET | `/api/source/repos` |
-| `/api/repos/sync` | GET, POST | `/api/source/repos/sync` |
+| `/api/repo-categories/[key]` | PATCH, DELETE | Excluded: database-backed repository management |
+| `/api/repo-categories` | GET, POST | Excluded: database-backed repository management |
+| `/api/repo-tags/[key]` | PATCH, DELETE | Excluded: database-backed repository management |
+| `/api/repo-tags` | GET, POST | Excluded: database-backed repository management |
+| `/api/repos/[owner]/[name]/analysis` | GET | Excluded: database-backed repository management |
+| `/api/repos/[owner]/[name]/dependencies` | GET | Excluded: database-backed repository management |
+| `/api/repos/[owner]/[name]/evidence` | GET | Excluded: database-backed repository management |
+| `/api/repos/[owner]/[name]/files` | GET | Excluded: database-backed repository management |
+| `/api/repos/[owner]/[name]` | GET, PATCH | Excluded: database-backed repository management |
+| `/api/repos` | GET | Excluded: database-backed repository management |
+| `/api/repos/sync` | GET, POST | Excluded: database-backed repository management |
 | `/api` | GET | Retire hello-world stub; use os-lab health |
 | `/api/settings/runtime` | GET, POST | `/api/source/settings/runtime` |
-| `/api/skills/generate` | GET | `/api/source/skills/generate` |
-| `/api/skills` | GET | `/api/source/skills` |
+| `/api/skills/generate` | GET | Excluded: Skills/implementation catalog |
+| `/api/skills` | GET | Excluded: Skills/implementation catalog |
 | `/api/sources` | GET | `/api/source/sources` |
 | `/api/spotlight` | GET | `/api/source/spotlight` |
 
-## Engine and data capabilities
+## Engine and artifact capabilities
 
 The core detection path uses Python 3.11+ standard library modules; optional
 collectors and parsers have separate requirements.
@@ -105,8 +117,8 @@ collectors and parsers have separate requirements.
 | Crawler | Single/list/CSV/XLSX/scan-dir inputs, acquisition/resume/retries/rate limits/workers/depth/caps, manifest score and priority, threat/dependency/tree/metadata/AST/map stages, partial failures and interruption artifacts. | `engine/pipeline/ext_repo_analyzer.py` |
 | Merger and datasets | MV2/MV3 eligibility, flagged override, service-worker checks, shims/namespacing/manifest folding, Node syntax check when available, overwrite marker guard, ZIP/report/hub output; source CSV joining/enrichment. | `engine/pipeline/ext_merger.py`, `merge_csvs.py` |
 | Structural maps | Disk/ASAR/overlay read-only VFS; Python/JS/TS/PHP/Rust/Swift/ObjC/Kotlin/Java/markup/XML/plist adapters; symbols/types/import resolution/roles/rank/cycles/targets/filters; JSON/Markdown/DOT generate/query CLI. | `engine/sourcemap/`, `lat.md/repo-map.md` |
-| Repository index | SQLite Repo/Tag/Category/joins/analysis/dependency/file/evidence tables; idempotent union sync, retained vanished repos, replaced automatic taxonomy, preserved manual edits/notes. | `ui/prisma/schema.prisma`, `ui/src/lib/repo-*.ts` |
-| Archive and provenance | Explicit resource roots for catalogs, bundles, clones, upload targets, merged outputs, research and own-repository index; original extraction manifests, hashes and attributions; portable ops/docs/skills concepts. | `doc/resources/`, `engine/MANIFEST.csv`, `ui/MANIFEST.csv`, `ops/`, `agent-skills/` |
+| Repository index (excluded) | The SQLite/Prisma repository manager, database sync and taxonomy/notes are excluded by owner scope. | `ui/prisma/schema.prisma`, `ui/src/lib/repo-*.ts` |
+| Resources and provenance | Operator-supplied local inputs and outputs; original extraction manifests, hashes and attributions; portable setup and project-docs workflows. Third-party archives/datasets/binaries and database/skill catalogs remain excluded. | `engine/MANIFEST.csv`, `ui/MANIFEST.csv`, `ops/` |
 
 ## Limits and follow-ups
 
@@ -131,7 +143,7 @@ of implemented live capability.
 - Source `TODO.md` proposes platform-specific navigation/crawlers, MCP targets and
   broader datasets. Preserve that backlog separately from shipped parity; do not
   mark unchecked upstream aspirations as migrated features.
-- No top-level source license file was found in the inspected non-archive file
-  inventory. Resolve code and dataset redistribution rights and dependency notices
-  before importing. The local archive includes personal/repository metadata and
-  third-party material; audit and use opt-in resource acquisition where needed.
+- The inspected source had no top-level license file. The owner subsequently
+  authorized the first-party port into public os-lab; IMPORT_POLICY.md records
+  that authorization. Third-party archives/datasets/binaries remain excluded,
+  and new third-party dependencies require their own license/notices review.

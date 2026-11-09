@@ -6,6 +6,14 @@ when its acceptance evidence is linked in the implementation PR or this ledger.
 Foundation work is tracked in draft PR #103. Acceptance evidence is recorded in
 [VALIDATION.md](VALIDATION.md); console and UI tasks remain open.
 
+## Scope
+
+The owner excludes Skills/agent catalogs, database-backed repository management
+(including sync, taxonomy and notes), and OpenAPI/API-reference integration.
+Engine JSON Schema/generated TypeScript, file-backed target and bundle browsing,
+and ordinary project documentation remain in scope. Excluded items are neither
+open tasks nor completed implementation. Stable task IDs are preserved.
+
 ## Planning baseline
 
 These completed tasks describe this planning PR only, not delivered runtime.
@@ -21,7 +29,7 @@ Finish these before copying the affected source code or data.
 
 - [x] SRC-001 (no dependency): Resolve source code license and archive redistribution rights; list permitted/excluded assets and dependency notices. Accept: documented origin/license evidence compatible with os-lab, with unlicensed material held out pending resolution.
 - [x] SRC-002 (no dependency): Reconcile inventory with source at import time, including seven pages, docs/API, every method, shell and Brain subviews. Accept: pinned revision, upstream-to-destination parity ledger and explicit dispositions for stubs and unavailable data.
-- [ ] SRC-003 (SRC-001, SRC-002): Create sanitized detection/crawler/merge/map/session/repository fixtures and provenance/relocation manifest. Accept: reproducible fixtures without proprietary media, keys or personal metadata; checksums and upstream file mapping retained.
+- [ ] SRC-003 (SRC-001, SRC-002): Create sanitized detection/crawler/merge/map/session/UI fixtures and provenance/relocation manifest. Accept: reproducible fixtures without proprietary media, keys or personal metadata; checksums and upstream file mapping retained.
 
 ## Slice 1: Portable engine and lab foundation
 
@@ -39,7 +47,7 @@ Establish a usable static analysis path independently of optional runtime tools.
 Integrate with the existing console protections, readiness model and jobs.
 
 - [ ] SRC-020 (SRC-012, SRC-013): Add `source` to console lab metadata/order, host reports, capability/action models and frontend LabId maps. Accept: required/optional readiness and unavailable hosts are correct without KVM/Docker.
-- [ ] SRC-021 (SRC-020): Implement namespaced handler adapters for every inventory API method, query/body and response/error contract. Accept: method-by-method contract tests and intentional deviations documented; hello-world stub retired explicitly.
+- [ ] SRC-021 (SRC-020): Implement namespaced handler adapters for each retained inventory API method, query/body and response/error contract. Accept: method-by-method contract tests and intentional deviations documented; hello-world stub retired explicitly.
 - [ ] SRC-022 (SRC-021): Integrate exact-option previews, background logs/progress, conflict handling, timeout/cancel/process-tree cleanup and interrupted-on-restart reporting. Accept: two runs cannot corrupt the same output and cancelled/interrupted jobs cannot show success.
 - [ ] SRC-023 (SRC-021): Enforce localhost/mutation guards, allowlisted target/resource/session paths, symlink/traversal rejection, read caps and secret redaction. Accept: hostile-request regression tests pass and logs/responses disclose no credentials.
 - [ ] SRC-024 (SRC-021, SRC-023): Port managed runtime settings/key generation/rotation/default canary URL and integrity verification. Accept: environment ownership/precedence, mode 0600, rotation warnings and tampered/missing-signature cases tested; key values never reach UI.
@@ -50,7 +58,7 @@ Integrate with the existing console protections, readiness model and jobs.
 
 Use os-lab's static pages, existing shell and locale/base-path helpers.
 
-- [ ] SRC-030 (SRC-020): Add `/labs/source/`, `/source/` and nested routes, sidebar/icon/availability, mobile navigation, theme and record Spotlight. Accept: all inventory destinations and query links resolve locally, with accessible keyboard/focus behavior.
+- [ ] SRC-030 (SRC-020): Add `/labs/source/`, `/source/` and nested routes, sidebar/icon/availability, mobile navigation, theme and record Spotlight. Accept: all retained inventory destinations and query links resolve locally, with accessible keyboard/focus behavior.
 - [ ] SRC-031 (SRC-021, SRC-030): Port Overview matrices (properties/backgrounds/dependencies/permissions), inspector, annotations, counts, filters, sources and CSV downloads. Accept: fixture results match the source UI and all tabs have loading/empty/error states.
 - [ ] SRC-032 (SRC-022, SRC-031): Port source-list crawler runner/options/progress/logs and H1-H5 reference. Accept: configured inputs validated, preview/run/cancel workflow works and failures render beside actions.
 - [ ] SRC-033 (SRC-025, SRC-026, SRC-030): Port Evidence findings/state/severity/scorecard/spans/coverage/verification, target/platform runner, polling/cancel, session list/timeline and reports. Accept: five-platform fixture journeys preserve evidence levels and explain partial coverage.
@@ -67,32 +75,35 @@ Keep structural maps distinct from evidence and expose snapshot provenance.
 - [ ] SRC-044 (SRC-003, SRC-030): Prototype Brain's data/provider hooks and React/Astro embedding. Accept: documented feasibility for each inventory subview, dependency licenses checked and snapshot/API roots portable.
 - [ ] SRC-045 (SRC-044): Port Brain graph/tabs/filter/legend/usages/source/history/diff/flowchart/sequence/AI-rules/complexity/risk/stress/export and virtual store behavior. Accept: each usable upstream view has a fixture-backed check; absent providers show explicit unavailable states.
 
-## Slice 5: Repository manager
+## Slice 6: Project documentation
 
-Prove storage compatibility before switching repository consumers.
+Document implemented file-backed workflows and configuration without adding
+Skills, databases or an OpenAPI reference.
 
-- [ ] SRC-050 (SRC-003, SRC-011): Spike Python SQLite against disposable legacy DB and source schema/query behavior. Accept: all tables/joins/counts/sorts/filters/pagination match and the framework-port decision is recorded.
-- [ ] SRC-051 (SRC-050): Implement versioned transactional migrations/backup, idempotent source sync and automatic classification. Accept: repeated sync retains vanished repos, manual tags/categories/notes and evidence identities; rollback restores prior DB.
-- [ ] SRC-052 (SRC-021, SRC-051): Port repositories/details/analysis/dependencies/files/evidence/sync APIs and taxonomy CRUD. Accept: contract tests cover system taxonomy protection, note edits, counts and safe path handling.
-- [ ] SRC-053 (SRC-030, SRC-052): Port repository table/filter/tag/category counts/sorting/pagination, query selection, five detail tabs and taxonomy manager. Accept: edit-sync-refresh preserves user data and Spotlight finds repositories.
-
-## Slice 6: Skills, implementation search and references
-
-Keep human and agent consumers aligned with the migrated API.
-
-- [ ] SRC-060 (SRC-021, SRC-030, SRC-052): Port shipped skill catalog and data/implementations/repos generators, implementation search and Skills UI. Accept: browse/copy/download/generate/search return accurate current data and every example uses namespaced routes.
-- [ ] SRC-061 (SRC-021): Generate OpenAPI from the implemented API contract and render `/source/api-docs/`. Accept: every inventoried retained method is present; statuses, downloads and runtime limitations are documented.
-- [ ] SRC-062 (SRC-014, SRC-015, SRC-045, SRC-053, SRC-060): Publish portable Source Lab docs and graph links, update README/setup/labctl/dashboard/tooling graph nodes as features ship. Accept: docs distinguish shipped features from upstream backlog, links resolve and `lat check` passes.
+- [ ] SRC-062 (SRC-014, SRC-015, SRC-045): Publish portable Source Lab docs and graph links, update README/setup/labctl/dashboard/tooling graph nodes as features ship. Accept: docs describe retained workflows and scope exclusions, links resolve and `lat check` passes.
 
 ## Slice 7: Distribution, import and release
 
 Release only after both installed-console and public-site behavior is verified.
 
-- [ ] SRC-070 (SRC-013, SRC-024): Integrate Linux/macOS/Windows install/update/minimal paths and optional parser/browser tools; adapt useful service/docs/skill operations. Accept: fresh install/update without source checkout; Python core works without Bun/Next/Node/KVM and optional tools have honest remediation.
-- [ ] SRC-071 (SRC-001, SRC-011, SRC-024, SRC-051): Implement opt-in legacy dry-run/copy/import for resources/artifacts/maps/AST/sessions/DB/settings with path mapping and backups. Accept: counts/hashes/signatures/manual edits verified, originals unchanged and rollback documented/tested.
-- [ ] SRC-072 (SRC-030 through SRC-062): Complete all active locale catalogs and Pages equivalents. Accept: `/os-lab/` links, English/non-English switching, docs/samples/deep routes work; local-only actions/engine polling/private outputs are absent from public build.
+- [ ] SRC-070 (SRC-013, SRC-024): Integrate Linux/macOS/Windows install/update/minimal paths and optional parser/browser tools; adapt useful service/project-docs operations. Accept: fresh install/update without source checkout; Python core works without Bun/Next/Node/KVM and optional tools have honest remediation.
+- [ ] SRC-071 (SRC-001, SRC-011, SRC-024): Implement opt-in legacy dry-run/copy/import for authorized first-party artifacts/maps/AST/sessions/settings with path mapping and backups. Accept: counts/hashes/signatures verified; databases, skills and third-party archives/datasets/binaries excluded, originals unchanged and rollback documented/tested.
+- [ ] SRC-072 (SRC-030, SRC-031, SRC-032, SRC-033, SRC-034, SRC-041, SRC-042, SRC-043, SRC-045, SRC-062): Complete all active locale catalogs and Pages equivalents. Accept: `/os-lab/` links, English/non-English switching, docs/samples/deep routes work; local-only actions/engine polling/private outputs are absent from public build.
 - [ ] SRC-073 (SRC-070, SRC-071, SRC-072): Run engine/console regression tests and relevant repository checks, shell syntax and installer parse checks; dashboard check/i18n/build/e2e and browser local/Pages smoke. Accept: commands/results recorded, committed `dashboard/dist` current and existing labs pass.
-- [ ] SRC-074 (SRC-002, SRC-062, SRC-073): Audit every inventory row/subfeature and API method, finalize attribution/legal notices and release/runbook/rollback docs. Accept: no silent omissions, all exceptions reviewed and each claimed capability has validation evidence.
+- [ ] SRC-074 (SRC-002, SRC-062, SRC-073): Audit every retained inventory row/subfeature and API method, finalize attribution/legal notices and release/runbook/rollback docs. Accept: no silent omissions, all exceptions reviewed and each claimed capability has validation evidence.
+
+## Excluded by owner
+
+These task IDs are retired from the active queue rather than marked complete.
+
+| Former task | Excluded work |
+|---|---|
+| SRC-050 | SQLite compatibility spike. |
+| SRC-051 | Database migrations, repository-index sync and automatic classification. |
+| SRC-052 | Database-backed repository/taxonomy APIs. |
+| SRC-053 | Repository manager page, notes, tags and categories. |
+| SRC-060 | Skills, live skill generation and implementation-catalog search. |
+| SRC-061 | OpenAPI generation and API-reference page. |
 
 ## Follow-up backlog carried from upstream
 

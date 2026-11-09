@@ -28,7 +28,7 @@ No console listener, request protection or public live action has been added.
 Implemented acceptance checks cover SRC-001/002/010/011/013/014/015: retained
 engine tests plus portable launcher, independent target outputs, five-platform
 reports, namespace isolation, synthetic evidence rejection, standalone PE input
-and resource/output separation. SRC-003 remains open for repository/session/UI
+and resource/output separation. SRC-003 remains open for session/UI
 migration fixtures, and SRC-012 is completed in the subsequent contracts milestone.
 CLI pipeline modules are retained, but their console/UI workflows remain open.
 
@@ -86,3 +86,19 @@ checks were unchanged since the preceding validated milestones.
 This slice is original standard-library code and generated contracts, reviewed
 against the same contribution/security/legal rules. It adds no dependency,
 network activity, archive, dataset, binary or private fixture.
+
+## Scope reduction
+
+The owner removed Skills/agent catalogs, database integration (including the
+repository manager and sync/taxonomy/notes), and OpenAPI/API-reference integration.
+SRC-050/051/052/053/060/061 are retired as exclusions, not marked implemented.
+Their dependencies are removed from active tasks. Five app pages and 13 source
+API routes (19 methods) remain migration targets; the full source census stays
+in the inventory with explicit dispositions. Engine schemas/generated types and
+file-backed analysis browsing remain required. No runtime implementation was
+removed, because these integrations had not been added.
+
+This update changes planning documents only. Validation covers Markdown links,
+task/dependency references, scope counts, `lat check`, provenance/exclusion checks
+and whitespace. Previous runtime test results above are historical; they are not
+reported as rerun for this scope-only update.
