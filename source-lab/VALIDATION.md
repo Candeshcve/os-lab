@@ -331,3 +331,22 @@ AST reads require an index match and retain private-path/read-budget guards.
 Dashboard types, **2,067**-key locales, local/Pages builds and **34 browser tests**
 passed. Source console suite **36 passed**; the AST/local-target test was rerun
 after the private-name guard. Public EN/TR smoke passed without engine calls.
+
+## SRC-070: Distribution implementation; native acceptance pending
+
+The app staging/required-runtime lists include Source engine, adapters, schema,
+probe and list parser. Private Source state/resources and archive/binary inputs
+are excluded. Update tests preserve Source settings. Minimal installers skip
+pip upgrades and call download-free doctor. Unsupported Python cannot appear
+ready. PowerShell's UTF-8 BOM is preserved.
+
+Validation: **6 Node staging tests**, **5 Rust runtime tests** (a temporary Cargo
+harness imports the actual module with its existing serde dependency), shell
+syntax and supported-interpreter console test passed. Staged **441 tracked
+runtime files** plus current dashboard were exercised outside a checkout using
+`python -S`: readiness and owned-fixture detection passed without site packages,
+Node or virtualization. No app build/publication was performed.
+
+Native macOS/Windows fresh install/update and PowerShell parser acceptance are
+not verified on this Linux host; SRC-070 stays unchecked until that evidence is
+available. The implementation is committed for review and later host testing.

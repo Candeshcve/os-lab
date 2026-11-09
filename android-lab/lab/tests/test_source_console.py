@@ -468,3 +468,10 @@ def test_deep_ast_and_selected_private_crawl(console):
     job = confirmed(console, "/api/source/deep-analysis", {"target": "targets/sample", "noMetadata": True, "noAst": True})
     assert job.state == "succeeded", job.lines
     assert call(console, "/api/source/deep-analysis", {"options": {"target": "../../outside"}, "preview": True})[0] == 400
+
+
+def test_source_requires_supported_python(monkeypatch):
+    monkeypatch.setattr(source_control, "readiness", lambda root: {"python": {"version": "3.10.9"}, "storage": {"writable": True}, "optional": {}})
+    status = source_control.lab_status(web_ui.REPO_ROOT, "linux")
+    assert status["state"] == "unavailable"
+    assert not status["requirements"][0]["found"]

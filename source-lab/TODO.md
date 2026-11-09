@@ -88,6 +88,9 @@ Skills, databases or an OpenAPI reference.
 
 ## Slice 7: Distribution, import and release
 
+SRC-070 implementation is delivered; native macOS/Windows acceptance remains
+pending. Linux staged-runtime and update-preservation evidence is in VALIDATION.md.
+
 Release only after both installed-console and public-site behavior is verified.
 
 - [ ] SRC-070 (SRC-013, SRC-024): Integrate Linux/macOS/Windows install/update/minimal paths and optional parser/browser tools; adapt useful service/project-docs operations. Accept: fresh install/update without source checkout; Python core works without Bun/Next/Node/KVM and optional tools have honest remediation.

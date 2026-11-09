@@ -27,7 +27,9 @@ def readiness(root: str) -> dict:
 def lab_status(root: str, os_name: str) -> dict:
     report = readiness(root) if os_name in ("linux", "macos", "windows") else {}
     installed = (Path(root) / "source-lab/run.py").is_file()
-    runnable = bool(report.get("python")) and installed
+    version = str(report.get("python", {}).get("version", "")).split(".")
+    supported = len(version) >= 2 and all(p.isdigit() for p in version[:2]) and tuple(map(int, version[:2])) >= (3, 11)
+    runnable = supported and installed
     writable = report.get("storage", {}).get("writable", False)
     requirements = [
         {"id": "python", "label": "Python 3.11+", "found": runnable, "required": True,
