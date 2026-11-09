@@ -17,7 +17,7 @@ export function useSource<T>(path: string) {
   const [revision, setRevision] = useState(0);
   const refresh = useCallback(() => setRevision(n => n + 1), []);
   useEffect(() => {
-    if (PUBLIC_SOURCE) return;
+    if (PUBLIC_SOURCE || !path) { setLoading(false); return; }
     const controller = new AbortController();
     setLoading(true); setError(undefined); setData(undefined);
     void sourceRequest<T>(path, undefined, controller.signal).then(setData).catch(e => {

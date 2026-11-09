@@ -2008,5 +2008,21 @@
   "Source lists are capped.": "Kaynak listeleri sınırlıdır.",
   "These heuristics prioritize review; they do not prove malicious behavior.": "Bu sezgisel kurallar incelemeye öncelik verir; kötü niyetli davranışı kanıtlamaz.",
   "Timeout": "Zaman aşımı",
-  "summary rows": "özet satırı"
+  "summary rows": "özet satırı",
+  "Coverage": "Kapsam",
+  "Scorecard": "Puan kartı",
+  "Severity": "Önem derecesi",
+  "Platform": "Platform",
+  "Sessions": "Oturumlar",
+  "Session": "Oturum",
+  "Timeline": "Zaman çizelgesi",
+  "Verification": "Doğrulama",
+  "Remediation": "Düzeltme",
+  "Limitations": "Sınırlamalar",
+  "Detection": "Tespit",
+  "Preview action": "İşlemi önizle",
+  "Operation logs": "İşlem günlükleri",
+  "Select a target to inspect evidence.": "Kanıtları incelemek için hedef seçin.",
+  "Signatures are not verified by browsing. Synthetic events cannot establish live behavior.": "Göz atma imzaları doğrulamaz. Sentetik olaylar canlı davranışı kanıtlayamaz.",
+  "No findings.": "Bulgu yok."
 }

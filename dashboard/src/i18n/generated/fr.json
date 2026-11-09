@@ -2008,5 +2008,21 @@
   "Source lists are capped.": "Les listes de sources sont limitées.",
   "These heuristics prioritize review; they do not prove malicious behavior.": "Ces heuristiques priorisent l’examen ; elles ne prouvent pas un comportement malveillant.",
   "Timeout": "Délai maximal",
-  "summary rows": "lignes de résumé"
+  "summary rows": "lignes de résumé",
+  "Coverage": "Couverture",
+  "Scorecard": "Tableau de scores",
+  "Severity": "Gravité",
+  "Platform": "Plateforme",
+  "Sessions": "Sessions",
+  "Session": "Session",
+  "Timeline": "Chronologie",
+  "Verification": "Vérification",
+  "Remediation": "Correction",
+  "Limitations": "Limites",
+  "Detection": "Détection",
+  "Preview action": "Prévisualiser l’action",
+  "Operation logs": "Journaux d’opération",
+  "Select a target to inspect evidence.": "Choisissez une cible pour examiner les preuves.",
+  "Signatures are not verified by browsing. Synthetic events cannot establish live behavior.": "La consultation ne vérifie pas les signatures. Les événements synthétiques ne prouvent pas de comportement réel.",
+  "No findings.": "Aucun résultat."
 }

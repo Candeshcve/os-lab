@@ -283,3 +283,15 @@ Final batch results:
 SRC-024/025/030/031/032 are complete. **13** active implementation tasks and four
 upstream follow-ups remain; SRC-042 stays explicitly skipped. Actual native
 collection, remaining analysis UIs and distribution acceptance are still pending.
+
+## SRC-033: Evidence dashboard
+
+Implemented target/platform detection previews, jobs/logs/cancellation, evidence
+state/severity/text filters, confidence, source/binary spans, alternatives,
+verification tests, remediation, coverage, scorecard, sessions and event timelines,
+and allowlisted report links. Browsing never asserts signature verification.
+
+Dashboard typecheck/i18n/build passed; full browser suite **32 passed**, including
+five platform journeys with partial coverage and preserved evidence states. Local
+and Pages builds emitted 409 routes; public smoke preserves EN/TR routes without
+engine calls. Existing engine five-platform tests supply parser acceptance.

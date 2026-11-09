@@ -2008,5 +2008,21 @@
   "Source lists are capped.": "فهرست‌های منبع محدود هستند.",
   "These heuristics prioritize review; they do not prove malicious behavior.": "این قواعد بررسی را اولویت‌بندی می‌کنند؛ رفتار مخرب را ثابت نمی‌کنند.",
   "Timeout": "مهلت",
-  "summary rows": "ردیف خلاصه"
+  "summary rows": "ردیف خلاصه",
+  "Coverage": "پوشش",
+  "Scorecard": "کارت امتیاز",
+  "Severity": "شدت",
+  "Platform": "سکو",
+  "Sessions": "نشست‌ها",
+  "Session": "نشست",
+  "Timeline": "خط زمانی",
+  "Verification": "راستی‌آزمایی",
+  "Remediation": "اصلاح",
+  "Limitations": "محدودیت‌ها",
+  "Detection": "تشخیص",
+  "Preview action": "پیش‌نمایش عملیات",
+  "Operation logs": "گزارش عملیات",
+  "Select a target to inspect evidence.": "برای بررسی شواهد هدفی انتخاب کنید.",
+  "Signatures are not verified by browsing. Synthetic events cannot establish live behavior.": "مرور، امضاها را تأیید نمی‌کند. رویدادهای مصنوعی رفتار زنده را ثابت نمی‌کنند.",
+  "No findings.": "یافته‌ای نیست."
 }

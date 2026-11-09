@@ -73,3 +73,8 @@ per-package dependency sections without importing private datasets.
 repository slugs, workers/depth and crawler options. Live Source readiness and
 Git gate actions; previews invalidate on edits. Runs use the existing jobs API
 for output, cancellation and conflicts. No progress percentage is invented.
+
+[[dashboard/src/views/source/evidence.tsx]] exposes findings, coverage, H1-H5
+scorecards, sessions/events and report links. Detection uses the shared
+[[dashboard/src/views/source/action.tsx]] preview/job component. Evidence states,
+partial coverage and browsing-without-verification remain explicit.

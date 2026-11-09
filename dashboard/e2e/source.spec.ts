@@ -7,6 +7,8 @@ async function sourceShell(page: Page) {
     if (path === "/api/host") json = { host: { os: "linux", arch: "x86_64" }, labs: [{ id: "source", label: "Source Lab", state: "ready", actions: [] }] };
     if (path === "/api/jobs") json = { jobs: [] };
     if (path === "/api/logs") json = { logs: [] };
+    if (path === "/api/source/detection") json = { targets: [{ key: "targets/sample", name: "sample", slug: "owned__sample" }], runner: { ready: true }, run: null };
+    if (path === "/api/source/evidence") json = new URL(route.request().url()).searchParams.has("slug") ? { slug: "owned__sample", findings: [], coverage: { limitations: ["Static only"] }, scorecard: {}, sessions: [], reports: [] } : { targets: [{ slug: "owned__sample", platform: "browser-extension" }], truncated: false };
     if (path === "/api/source/analyzer") json = { run: null, report: null, summaryCount: 0, summaryRows: [], sourceFiles: [{ name: "owned.txt", format: "TXT" }], sourceFilesTruncated: false };
     if (path === "/api/source/analyzer/merged") json = matrixFixture;
     if (path === "/api/source/sources") json = { stats: {}, files: [], mergedExtensions: [], curated: [], monitored: [] };
@@ -158,3 +160,25 @@ test("Source crawler honors live missing requirements", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Preview crawl" })).toBeDisabled();
   await expect(page.getByText("Crawler needs live Source Lab readiness and Git. Check Readiness & setup for missing requirements.")).toBeVisible();
 });
+
+for (const platform of ["browser-extension", "windows-app", "macos-app", "android-app", "ios-app"]) {
+  test(`Evidence preserves ${platform} states, coverage and verification`, async ({ page }) => {
+    await sourceShell(page);
+    await page.route("**/api/source/evidence?slug=*", route => route.fulfill({ json: {
+      slug: "owned__sample", platform, coverage: { parser_mode: "fixture", limitations: ["Partial fixture coverage"] },
+      scorecard: { dimensions: { H1: { score: 1 } }, note: "Static triage only" }, sessions: [], reports: ["findings.json"],
+      findings: [{ finding_id: "owned.rule", platform, state: "static_lead", severity: "high", confidence: 0.5,
+        hypothesis: "Owned fixture hypothesis", evidence: [{ file: "owned.js", line: 1, artifact: "source" }],
+        verification: "Owned decisive test", alternative_explanations: ["Benign fixture"], limitations: [], remediation: "Review fixture" }]
+    } }));
+    await page.goto("/source/evidence/?slug=owned__sample");
+    await expect(page.getByText("Owned fixture hypothesis")).toBeVisible();
+    await page.getByText("Coverage", { exact: true }).click();
+    await expect(page.getByText(/Partial fixture coverage/)).toBeVisible();
+    await page.getByText("Verification", { exact: true }).click();
+    await expect(page.getByText(/Owned decisive test/)).toBeVisible();
+    await expect(page.getByRole("link", { name: "findings.json" })).toHaveAttribute("href", /evidence\/report\?slug=owned__sample&file=findings.json/);
+    await page.getByRole("combobox", { name: /^State/ }).selectOption("correlated_behavior");
+    await expect(page.getByText("Owned fixture hypothesis")).not.toBeVisible();
+  });
+}

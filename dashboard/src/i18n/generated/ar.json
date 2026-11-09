@@ -2008,5 +2008,21 @@
   "Source lists are capped.": "قوائم المصادر محدودة.",
   "These heuristics prioritize review; they do not prove malicious behavior.": "تعطي هذه القواعد أولوية للمراجعة؛ ولا تثبت سلوكًا ضارًا.",
   "Timeout": "المهلة",
-  "summary rows": "صفوف الملخص"
+  "summary rows": "صفوف الملخص",
+  "Coverage": "التغطية",
+  "Scorecard": "بطاقة النتائج",
+  "Severity": "الخطورة",
+  "Platform": "المنصة",
+  "Sessions": "الجلسات",
+  "Session": "الجلسة",
+  "Timeline": "الخط الزمني",
+  "Verification": "التحقق",
+  "Remediation": "المعالجة",
+  "Limitations": "القيود",
+  "Detection": "الكشف",
+  "Preview action": "معاينة الإجراء",
+  "Operation logs": "سجلات العملية",
+  "Select a target to inspect evidence.": "اختر هدفًا لفحص الأدلة.",
+  "Signatures are not verified by browsing. Synthetic events cannot establish live behavior.": "التصفح لا يتحقق من التواقيع. الأحداث الاصطناعية لا تثبت سلوكًا حيًا.",
+  "No findings.": "لا توجد نتائج."
 }
