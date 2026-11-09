@@ -1,4 +1,11 @@
 import { expect, test } from "@playwright/test";
+import { execFileSync } from "node:child_process";
+
+test("embedded command inventory matches the shipped CLI and configuration sources", () => {
+  const result = execFileSync(process.platform === "win32" ? "python" : "python3",
+    ["../scripts/build-how-to-use-reference.py", "--check"], { encoding: "utf8" });
+  expect(result).toContain("matches all allowlisted sources");
+});
 
 test.beforeEach(async ({ page }) => {
   await page.route("**/api/**", route => {
@@ -29,6 +36,16 @@ test("Workspace prompt includes task, shipped support and workflow limits withou
   const prompt = await page.getByLabel("Generated prompt", { exact: true }).inputValue();
   expect(await page.evaluate(() => (window as any).copiedPrompt)).toBe(prompt);
   for (const text of [task, "local dashboard", "Windows Lab", "Linux Lab", "iOS Lab", "macOS Lab", "Android Lab", "Source Lab", "Firewall Lab", "full", "partial", "none", "PRIVACY.md", "RUNBOOK.md", "preview", "not runtime observations", "roll back"]) expect(prompt).toContain(text);
+  // Guard the detailed operational context that was previously absent from
+  // the high-level catalog, including less prominent native/helper workflows.
+  for (const text of ["## 1. Host requirements", "## 11. Troubleshooting", "# Generated technical command inventory",
+    "--report-only", "make -C win-lab wait-install", "make -C linux-lab wait-ready",
+    "dump-sandbox --pkg PACKAGE", "vbox-deploy-android", "IQ_SESSION_HMAC_KEY_FILE",
+    "--expected-plan", "--map-min-role-confidence", "mac-appium-stop", "render-rules.py",
+    "SSH_WAIT_TIMEOUT", "OSLAB_CONTENT_OFFLINE", "ssh-config-doctor.sh",
+    "frida==", "## npm scripts: `app/package.json`", "## Reference sources"]) expect(prompt).toContain(text);
+  expect(prompt).not.toContain("WINDOWS_PASSWORD=admin");
+  expect(prompt).not.toContain("MOBSF_API_KEY=compact-lab-key");
   expect(sent.some(body => body.includes(task))).toBe(false);
   expect(await page.evaluate(() => location.search + location.hash + JSON.stringify(localStorage))).not.toContain(task);
   await page.getByLabel("What do you want to do?").fill("A different task");

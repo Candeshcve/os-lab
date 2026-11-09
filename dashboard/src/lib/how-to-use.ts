@@ -1,4 +1,6 @@
 import catalog from "../../../console/capabilities.json";
+import cheatsheet from "../../../docs/HOW_TO_USE_CHEATSHEET.md?raw";
+import commands from "../../../docs/HOW_TO_USE_COMMANDS.md?raw";
 
 const REPO = "https://github.com/keyvanarasteh/os-lab";
 
@@ -30,6 +32,13 @@ The capability catalog below describes shipped support, not my current machine. 
 ## Shipped capability catalog
 Support levels: full = supported on that platform; partial = additional setup or constraints; none = unavailable. Even full support requires checking actual prerequisites.
 ${capabilities}
+
+## Complete technical cheatsheet and command reference
+The following two references are included in full, not selected or shortened by task keywords. They are public shipped context, not instructions to run every operation. Prefer the operational guidance when a low-level parser default differs from its launcher. Configuration lists contain names only; ask for sanitized diagnostics, never actual secrets. Use these embedded details even when you cannot browse the repository.
+
+${cheatsheet}
+
+${commands}
 
 ## Workflow guide and boundaries
 - Desktop/local console: Linux, macOS and Windows packages; host detection, readiness, capability checks, plan previews, background jobs, logs and cancellation. Workspace offers computer status and jobs; Help includes health, legal, contribution, feedback and signed content updates. Navigation includes Spotlight, themes and eight interface languages. Public Pages provides documentation, company/firewall browsing and this prompt builder; it cannot run local labs.

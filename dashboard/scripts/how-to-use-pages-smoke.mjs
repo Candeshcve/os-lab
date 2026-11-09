@@ -41,6 +41,8 @@ try {
     const prompt = await page.locator("#generated-prompt").inputValue();
     assert.ok(prompt.includes("public GitHub Pages site"));
     assert.ok(prompt.includes("Source Lab") && prompt.includes("Firewall Lab"));
+    assert.ok(prompt.includes("# os-lab operational technical cheatsheet") && prompt.includes("# Generated technical command inventory"));
+    assert.ok(prompt.includes("vbox-deploy-android") && prompt.includes("--map-min-role-confidence") && prompt.includes("## Reference sources"));
     assert.equal(await page.evaluate(() => window.copiedPrompt), prompt);
     const links = await page.locator('a[href^="/"]').evaluateAll(nodes => nodes.map(node => node.getAttribute("href")));
     assert.deepEqual(links.filter(href => !href.startsWith(base + "/")), []);
