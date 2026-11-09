@@ -1,8 +1,9 @@
 # Source Lab
 
-Source Lab brings iQ-SourceContol into os-lab. The Python engine, CLI
-and read-only evidence/report console routes are implemented; dashboard and
-mutating console integration remain in the task queue.
+Source Lab brings iQ-SourceContol into os-lab. The Python engine, CLI and guarded console API are implemented. The local
+dashboard provides navigation, Overview matrices, inspectors, source catalogs and
+a previewed crawler runner. Remaining analysis views and distribution work stay
+in the task queue.
 Only first-party source code and synthetic fixtures are included. Third-party
 archives, datasets and binaries are excluded. Skills, database-backed repository
 management, and OpenAPI integration are also outside the requested scope.

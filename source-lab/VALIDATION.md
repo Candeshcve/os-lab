@@ -270,7 +270,7 @@ Final batch results:
 - Repository runner: **7 passed, 0 failed, 0 skipped** stages; Android/console
   **146 passed, 2 skipped**, Source engine **158 passed**, sample analysis,
   **70** shell scripts, graph, dashboard typecheck and committed-build freshness.
-- Dashboard: typecheck, **2,011** catalog keys across seven locales, local and
+- Dashboard: typecheck, **2,010** catalog keys across seven locales, local and
   Pages **409-route** builds, and full browser suite **27 passed**.
 - Public browser smoke: **16** EN/TR Source destinations, preserved locale/base/
   query links, no local API requests, operation buttons or hydration errors.
