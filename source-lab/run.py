@@ -33,7 +33,7 @@ def status() -> dict:
                      "tree_sitter": importlib.util.find_spec("tree_sitter") is not None,
                      "playwright": importlib.util.find_spec("playwright") is not None},
         "capabilities": ["static-detection", "structural-map", "crawler", "merge", "csv-merge"],
-        "actions": ["doctor", "setup", "status", "detect", "map", "crawl", "merge", "merge-csvs"],
+        "actions": ["doctor", "setup", "status", "contracts", "detect", "map", "crawl", "merge", "merge-csvs"],
     }
 
 
@@ -46,6 +46,7 @@ def main(argv: list[str] | None = None) -> int:
               "  status, doctor [--json]  Read-only readiness and optional-tool checks\n"
               "  setup                   Create private local storage (no downloads)\n"
               "  detect TARGET [options] Analyze a local target; --help lists formats/runtime options\n"
+              "  contracts [options]     Export/validate engine contracts and generated types\n"
               "  map [options]           Generate/query a structural source map\n"
               "  crawl [options]         Analyze explicitly selected repositories (may contact GitHub)\n"
               "  merge [options]         Preview/build a merged extension (may acquire selected sources)\n"
@@ -82,6 +83,7 @@ def main(argv: list[str] | None = None) -> int:
     # Keep each engine invocation in this process, isolated from the console and
     # Android's modules. No shell evaluation or imports into the host server.
     commands = {
+        "contracts": ("source_lab.contracts", []),
         "detect": ("source_lab.cli.run_detection", []),
         "map": ("source_lab.sourcemap", []),
         "crawl": ("source_lab.pipeline.ext_repo_analyzer", ["--out-dir", str(paths.analysis), "--workspace", str(paths.workspace)]),

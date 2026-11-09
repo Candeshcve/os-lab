@@ -596,3 +596,23 @@ CSV joining can write into mutable state without modifying operator-supplied res
 ### Standalone PE input
 
 A single executable path must be parsed directly and counted in coverage, rather than treated as an empty directory scan.
+
+## Contracts
+
+Contract tests validate actual engine output and keep generated schemas/types synchronized with the Python models.
+
+### Evidence artifact compatibility
+
+Produced V2 findings and coverage must validate against exported contracts; unsupported schema versions must be rejected.
+
+### Malformed findings rejected
+
+Out-of-range or non-finite confidence, unknown states, empty evidence and missing target identities must fail contract validation.
+
+### Structural map compatibility
+
+Generated structural maps must satisfy the V1 contract and reject evidence-contract version numbers.
+
+### Generated contracts stay current
+
+Committed JSON Schema and frontend TypeScript must match regeneration from the engine models without manual duplicate definitions.

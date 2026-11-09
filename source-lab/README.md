@@ -44,3 +44,18 @@ from runtime correlation. Native importers remain library entry points.
 Read [import/publication policy](IMPORT_POLICY.md) for authorization, exclusions
 and the checks required before each public commit. Retained tests run with
 `make -C source-lab test` in a Python environment containing pytest.
+
+## Engine contracts
+
+`./labctl source contracts` prints the engine JSON Schema; `--format typescript`
+prints frontend types generated from the same models. Regenerate committed files:
+
+```bash
+./labctl source contracts --out source-lab/contracts/schema.json
+./labctl source contracts --format typescript --out dashboard/src/lib/source-contracts.ts
+./labctl source contracts --check /path/to/analysis-v2.json --kind AnalysisV2
+./labctl source contracts --check /path/to/repo-map.json --kind RepoMapV1
+```
+
+The validator supports the schema vocabulary emitted by this engine, including
+unsupported-version rejection; it is not a general-purpose JSON Schema library.

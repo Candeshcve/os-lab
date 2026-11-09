@@ -29,7 +29,7 @@ Implemented acceptance checks cover SRC-001/002/010/011/013/014/015: retained
 engine tests plus portable launcher, independent target outputs, five-platform
 reports, namespace isolation, synthetic evidence rejection, standalone PE input
 and resource/output separation. SRC-003 remains open for repository/session/UI
-migration fixtures, and SRC-012 remains open for exported schemas/frontend types.
+migration fixtures, and SRC-012 is completed in the subsequent contracts milestone.
 CLI pipeline modules are retained, but their console/UI workflows remain open.
 
 Validation commands and final results are recorded in the PR after the complete
@@ -71,3 +71,18 @@ Follow-up results: dashboard check, translation check and local build pass; all
 17 browser tests pass. The separate Pages build passes. Browser smoke verifies
 12 English/Turkish local/Pages legal routes, both language-switch directions,
 following the terms link, correct Pages prefixes and no hydration errors.
+
+## Generated contracts milestone
+
+The next slice completes SRC-012: exported V2 evidence/V1 structural-map schemas,
+engine-vocabulary validation and generated frontend types. All 141 engine tests
+pass, including actual report/map compatibility, invalid versions/states,
+non-finite/out-of-range confidence and regeneration freshness. Dashboard type and
+translation checks pass; the generated file is unused by current runtime pages,
+so it does not change the built assets. `lat check`, provenance/exclusion checks
+and staged whitespace checks pass. The existing Android suite and browser
+checks were unchanged since the preceding validated milestones.
+
+This slice is original standard-library code and generated contracts, reviewed
+against the same contribution/security/legal rules. It adds no dependency,
+network activity, archive, dataset, binary or private fixture.

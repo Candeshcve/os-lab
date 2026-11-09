@@ -8,6 +8,12 @@ Source Lab provides local source/package analysis through a namespaced Python en
 
 [[source-lab/engine/source_lab/analyzers]] contains the source and binary parsers and rule families. Findings distinguish capabilities and static leads from runtime observations. [[source-lab/engine/source_lab/paths.py#Paths]] configures resource and private-state roots without absolute developer paths.
 
+## Contracts
+
+[[source-lab/engine/source_lab/contracts.py#schema_document]] exports JSON Schema from the Python models and engine envelopes. [[source-lab/engine/source_lab/contracts.py#typescript]] generates [[dashboard/src/lib/source-contracts.ts]].
+
+[[source-lab/engine/source_lab/contracts.py#validate]] checks the emitted schema vocabulary, including versions, evidence states, coverage and finite confidence. `labctl source contracts` exports JSON or TypeScript and can validate a local artifact. [[source-lab/contracts/schema.json]] is the committed schema snapshot.
+
 ## Runtime evidence
 
 [[source-lab/engine/source_lab/evidence/session.py]] signs and verifies session bundles. [[source-lab/engine/source_lab/collectors]] provides the browser canary and four platform telemetry importer libraries.
