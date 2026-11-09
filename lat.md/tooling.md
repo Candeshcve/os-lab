@@ -18,12 +18,14 @@ the committed `dashboard/dist` differs from a fresh build.
 
 ## Tests
 
-The android lab carries the only automated test suite today.
+Android and Source Lab have independent automated test suites.
 
 It lives in [[android-lab/lab/tests]] (analyzer, reporter, MobSF client, secret
 scanner, patcher, flow parser, agentic engine, web UI, and the host engine in
 [[console/oslab.py]]). Shell scripts across the
 VM labs are kept `bash -n` clean and use `set -euo pipefail`.
+The [[source-lab]] engine tests run in their own process from
+[[source-lab/engine]] so their imports cannot collide with Android tests.
 
 ## Community and contribution
 
@@ -32,9 +34,9 @@ Contribution flow, coding conventions and the authorization stance.
 They are in [[CONTRIBUTING.md]], step by step from setup to pull request, and
 the [[dashboard]] renders the same file at `/contribute/`. Contributions must not
 add vendor binaries or proprietary media (see [[legal#Google platform-tools]]).
-The proposed Source Lab migration is tracked in [[source-lab/README.md]],
-with its plan, task queue and pinned source inventory. These are planning
-documents; Source Lab has no implemented runtime yet.
+The Source Lab migration is tracked in [[source-lab/README.md]], with its plan,
+task queue and pinned source inventory. [[source-lab]] records the implemented
+engine foundation; UI and console integration remain in the task queue.
 
 Issue and PR templates are in
 [[.github/ISSUE_TEMPLATE]] and [[.github/PULL_REQUEST_TEMPLATE.md]]; behavior

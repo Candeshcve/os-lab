@@ -1,9 +1,10 @@
 # Source Lab TODO
 
 This is the implementation queue for [PLAN.md](PLAN.md), measured against
-[INVENTORY.md](INVENTORY.md). All implementation tasks are open. Check a task only
+[INVENTORY.md](INVENTORY.md). Completed engine foundation tasks are marked below. Check a task only
 when its acceptance evidence is linked in the implementation PR or this ledger.
-Task owners and PR links are assigned when work starts.
+Foundation work is tracked in draft PR #103. Acceptance evidence is recorded in
+[VALIDATION.md](VALIDATION.md); console and UI tasks remain open.
 
 ## Planning baseline
 
@@ -18,20 +19,20 @@ These completed tasks describe this planning PR only, not delivered runtime.
 
 Finish these before copying the affected source code or data.
 
-- [ ] SRC-001 (no dependency): Resolve source code license and archive redistribution rights; list permitted/excluded assets and dependency notices. Accept: documented origin/license evidence compatible with os-lab, with unlicensed material held out pending resolution.
-- [ ] SRC-002 (no dependency): Reconcile inventory with source at import time, including seven pages, docs/API, every method, shell and Brain subviews. Accept: pinned revision, upstream-to-destination parity ledger and explicit dispositions for stubs and unavailable data.
+- [x] SRC-001 (no dependency): Resolve source code license and archive redistribution rights; list permitted/excluded assets and dependency notices. Accept: documented origin/license evidence compatible with os-lab, with unlicensed material held out pending resolution.
+- [x] SRC-002 (no dependency): Reconcile inventory with source at import time, including seven pages, docs/API, every method, shell and Brain subviews. Accept: pinned revision, upstream-to-destination parity ledger and explicit dispositions for stubs and unavailable data.
 - [ ] SRC-003 (SRC-001, SRC-002): Create sanitized detection/crawler/merge/map/session/repository fixtures and provenance/relocation manifest. Accept: reproducible fixtures without proprietary media, keys or personal metadata; checksums and upstream file mapping retained.
 
 ## Slice 1: Portable engine and lab foundation
 
 Establish a usable static analysis path independently of optional runtime tools.
 
-- [ ] SRC-010 (SRC-003): Import analyzers/binfmt/evidence/collectors/CLI/tests under `source-lab/engine/`, isolate imports from existing Android modules and retain provenance. Accept: retained suite passes in its documented environment and importing either lab cannot shadow the other.
-- [ ] SRC-011 (SRC-010): Configure resource/work roots and gitignored storage, fixtures, `.env.example` and portable launchers. Accept: clean checkout operates with explicit paths and no `/home/pod` dependency; generated data never pollutes code/catalog inputs.
+- [x] SRC-010 (SRC-003): Import analyzers/binfmt/evidence/collectors/CLI/tests under `source-lab/engine/`, isolate imports from existing Android modules and retain provenance. Accept: retained suite passes in its documented environment and importing either lab cannot shadow the other.
+- [x] SRC-011 (SRC-010): Configure resource/work roots and gitignored storage, fixtures, `.env.example` and portable launchers. Accept: clean checkout operates with explicit paths and no `/home/pod` dependency; generated data never pollutes code/catalog inputs.
 - [ ] SRC-012 (SRC-010): Export V2 evidence and structural-map schemas; add validation/generated frontend contracts and format compatibility fixtures. Accept: unsupported versions/errors are visible; no hand-maintained duplicate schema.
-- [ ] SRC-013 (SRC-011): Add Makefile/preflight/setup and `labctl source` dispatch, supported verbs, doctor/status and `all` handling. Accept: static runs need Python/storage only; unsupported VM verbs give a useful error and existing lab dispatch still works.
-- [ ] SRC-014 (SRC-010, SRC-011): Verify auto/explicit detection on browser/userscript, Windows/Electron, macOS, Android and iOS fixtures; preserve rule families/H1-H5 and all CLI reports including STIX. Accept: expected evidence/coverage artifacts for every platform, including parser failures/caps.
-- [ ] SRC-015 (SRC-010, SRC-011): Import sourcemap CLI/VFS/adapters/resolver/filter/rank/export functions. Accept: disk/ASAR, supported languages, generate/query, JSON/Markdown/DOT, fallback parsers and binary-only not-applicable tests pass.
+- [x] SRC-013 (SRC-011): Add Makefile/preflight/setup and `labctl source` dispatch, supported verbs, doctor/status and `all` handling. Accept: static runs need Python/storage only; unsupported VM verbs give a useful error and existing lab dispatch still works.
+- [x] SRC-014 (SRC-010, SRC-011): Verify auto/explicit detection on browser/userscript, Windows/Electron, macOS, Android and iOS fixtures; preserve rule families/H1-H5 and all CLI reports including STIX. Accept: expected evidence/coverage artifacts for every platform, including parser failures/caps.
+- [x] SRC-015 (SRC-010, SRC-011): Import sourcemap CLI/VFS/adapters/resolver/filter/rank/export functions. Accept: disk/ASAR, supported languages, generate/query, JSON/Markdown/DOT, fallback parsers and binary-only not-applicable tests pass.
 
 ## Slice 2: Console and contracts
 

@@ -6,7 +6,7 @@
 #
 # Usage:
 #   scripts/run-tests.sh            run everything
-#   scripts/run-tests.sh --quick    only the android unit tests
+#   scripts/run-tests.sh --quick    only the Android and Source Lab unit tests
 #   scripts/run-tests.sh --no-venv  use the current environment, do not create .venv
 #   scripts/run-tests.sh -h|--help  show this help
 #
@@ -85,6 +85,14 @@ else
   bad "could not prepare a Python environment with pytest"
 fi
 
+# Source Lab runs separately to keep its package/test imports out of Android.
+hdr "Source Lab engine tests (pytest)"
+if [ -n "$PY" ] && ( cd "$ROOT/source-lab/engine" && "$PY" -m pytest tests -q ); then
+  ok "source-lab/engine test suite"
+else
+  bad "source-lab/engine test suite"
+fi
+
 if [ "$QUICK" = "1" ]; then
   printf '\n%s--quick: skipping remaining stages%s\n' "$YELLOW" "$RESET"
 else
@@ -126,7 +134,7 @@ else
   hdr "Stage 5: dashboard (typecheck + committed build is current)"
   DASH="$ROOT/dashboard"
   if [ -d "$DASH/node_modules" ] && command -v node >/dev/null 2>&1; then
-    if ( cd "$DASH" && ./node_modules/.bin/tsc --noEmit ); then ok "dashboard typecheck"; else bad "dashboard typecheck (cd dashboard && npm run check)"; fi
+    if ( cd "$DASH" && ./node_modules/.bin/astro sync && ./node_modules/.bin/tsc --noEmit ); then ok "dashboard typecheck"; else bad "dashboard typecheck (cd dashboard && npm run check)"; fi
     # Same filesystem as the project: Astro moves build files with rename(2)
     TMP_OUT="$(mktemp -d "$DASH/.check-build.XXXXXX")"
     if ( cd "$DASH" && ./node_modules/.bin/astro build --outDir "$TMP_OUT" >/dev/null 2>&1 ); then

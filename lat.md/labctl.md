@@ -16,6 +16,10 @@ The mappings are `win` -> [[win-lab]], `android` -> [[android-lab/lab]], `ios`
 `win` and `linux` (plus `ios` on Linux). On macOS, `ios` is redirected to the
 native `make -C ios-lab mac-*` path.
 
+Source Lab dispatches directly to [[source-lab/run.py#main]] through
+`source` or `source-lab`. It is included in `all status`, `all doctor` and
+`all monitor`, but not in VM start/stop/restart/profile fan-out.
+
 ## Commands
 
 The CLI exposes profiles, config, lifecycle, status/monitor, logs, shell, urls,

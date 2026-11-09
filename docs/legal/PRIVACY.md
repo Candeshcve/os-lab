@@ -1,6 +1,6 @@
 # Privacy Notice
 
-_Last updated: November 3, 2026_
+_Last updated: November 9, 2026_
 
 os-lab is software you run yourself. The project does not operate a hosted
 service, has no accounts, and **does not collect telemetry, analytics or crash
@@ -28,6 +28,8 @@ requests of its own.
 | Android workbench log | Console memory | Last 1,000 lines, until cleared or the console stops |
 | APKs you upload | `android-lab/lab/apks/` | Until you delete them |
 | Analysis results, reports, traffic captures | `android-lab/lab/artifacts/` and each lab's folders | Until you delete them (`make clean` for Android) |
+| Source Lab analysis reports, cloned workspaces, merged lab extensions and runtime sessions | `source-lab/storage/` by default, or the operator-configured storage root | Until you delete them; the project does not receive them |
+| Source Lab input catalogs and local targets | Operator-provided resource/target paths; no third-party datasets are bundled | Managed by the operator |
 | Lab configuration, including passwords you set | Each lab's `.env` | Until you change it; shown masked in the console |
 | VM disks, backups and shared folders | Each lab's `storage/`, `backups/`, `shared/` | Until you delete them |
 
@@ -63,7 +65,14 @@ receives your IP address and the request, under its own privacy policy:
   download installation media or recovery images.
 - **Google** (`dl.google.com`): Android platform tools, downloaded when `adb`
   is missing (set `OSLAB_NO_DOWNLOAD=1` to prevent it), and emulator images.
-- **The targets you analyse** and any service a guest or app connects to.
+- **Source Lab repository acquisition and metadata**: explicitly invoking its crawler
+  or merge acquisition can contact GitHub for selected repositories. Local static
+  detection and structural mapping do not contact a network service. Source Lab
+  setup and readiness checks do not download or install software.
+- **The targets you analyse** and any service a guest or app connects to. Source
+  Lab's optional live browser canary visits only the test URL the operator passes;
+  its session events and artifacts stay in local output storage. Simulated canary
+  fallback is labeled and excluded from runtime correlation.
 
 **Docker-Android analytics.** The Android emulator image reports usage analytics
 to its maintainers (Google Forms) unless disabled, including the host's OS

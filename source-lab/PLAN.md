@@ -3,7 +3,8 @@
 Bring every implemented engine capability and user-facing page in the pinned
 [parity inventory](INVENTORY.md) into os-lab as `source-lab`, with navigation in
 the existing dashboard and operations through the existing local console.
-This is a proposal; no Source Lab runtime, routes or actions ship in this PR.
+The engine/CLI foundation is implemented; console and UI routes remain planned.
+See README and the task queue for current behavior.
 
 ## Scope and rules
 
