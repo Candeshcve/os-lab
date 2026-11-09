@@ -11,6 +11,10 @@ backend: host detection, lab plans and jobs live in `console/oslab.py`.
 
 ## Pages
 
+The GitHub Pages build has a separate public home and publishes only Firewall
+Lab routes. `scripts/deploy-page.sh --dry-run` stages that artifact in
+`build-pages/`. The console-backed routes below remain local.
+
 | Route | What it shows |
 |-------|---------------|
 | `/` | This computer: OS, CPU, memory, disk, KVM, container runtime, host tools, and which labs can run here (ready / needs setup / unavailable, with reasons) |

@@ -122,13 +122,13 @@ Rezerv bloklar bugün boştur ve başka VLAN ile çakışmaz. Açıldıklarında
 
 ## En iyi 5 güvenlik duvarı
 
-Ana hat: 10 Gbps. Fiyat tek cihazın lisans ve destek hariç donanım fiyatıdır.
+Ana hat: 10 Gbps. Fiyat tek cihazın lisans ve destek hariç donanım fiyatıdır. Check Point fiyatına 1 yıllık SandBlast aboneliği dahildir, doğrudan karşılaştırılmaz.
 
 | Model | Koruma hızı | Hat yükü | Fiyat (USD, adet) | Karar |
 |---|---:|---:|---:|---|
 | **FortiGate 900G ×2** | 30 Gbps | %33 | 32.320 | **Seçildi:** en ucuzu değil, ama hattın üç katı kapasite TLS denetimi ve büyüme için pay bırakır, ortak yönetime girer |
 | Palo Alto PA-3440 | 12,8-20 Gbps | %50-78 | 64.040 | Yeterli, ancak kaynaklardaki hız farklı ve yaklaşık iki kat pahalı |
-| Check Point Force 9300 | 10,5 Gbps | %95 | Teklif gerekli | Hattı karşılar, ancak neredeyse hiç pay bırakmaz |
+| Check Point Force 9300 | 10,5 Gbps | %95 | 42.990 (1 yıl abonelik dahil) | Hattı karşılar, ancak neredeyse hiç pay bırakmaz |
 | Cisco Secure Firewall 3110 | 17 Gbps | %59 | 23.740 | Daha ucuz ve hızı yeterli, ancak tahmini oturum sayısında sınıra yaklaşıyor ve ortak yönetim dışında kalıyor |
 | Sophos XGS 3300 | 12 Gbps | %83 | 6.700 | Çok daha ucuz, ancak değer ideal koşullarda ölçülmüş, pay düşük ve oturum kapasitesi doğrulanamadı |
 

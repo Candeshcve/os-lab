@@ -10,6 +10,9 @@ SCRIPTS_DIR = os.path.join(LAB_DIR, "scripts")
 
 # Tests run offline: preflight must never download platform-tools from Google
 os.environ.setdefault("OSLAB_NO_DOWNLOAD", "1")
+# ...and must neither read nor write the real downloaded content, nor reach GitHub for it
+os.environ.setdefault("OSLAB_CONTENT_DIR", os.path.join(__import__("tempfile").mkdtemp(prefix="oslab-content-test-"), "content"))
+os.environ.setdefault("OSLAB_CONTENT_OFFLINE", "1")
 
 for p in [LAB_DIR, SCRIPTS_DIR]:
     if p not in sys.path:

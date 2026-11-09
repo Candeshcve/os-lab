@@ -72,7 +72,7 @@ LABS = {
         "dir": "ios-lab/mac",
         "labctl": None,
         "containers": [],
-        "summary": "Native Xcode Simulator and Appium/XCUITest on a Mac.",
+        "summary": "Manage this Mac's Xcode simulators and optional Appium/XCUITest automation.",
     },
 }
 
@@ -96,9 +96,21 @@ TOOLS = [
     ("sudo", "sudo"),
 ]
 
+# Tools that only make sense on some hosts; everything else is reported everywhere.
+TOOL_HOSTS = {
+    "xcrun": {"macos"}, "brew": {"macos"},
+    "wsl": {"windows"},
+    "apt-get": {"linux"}, "pkexec": {"linux"}, "sudo": {"linux", "macos"},
+}
+
+
+def tools_for_host(os_name: str) -> list[tuple[str, str]]:
+    return [(t, label) for t, label in TOOLS if os_name in TOOL_HOSTS.get(t, {os_name})]
+
+
 LABCTL_ACTIONS = ["status", "doctor", "urls", "logs", "monitor", "start", "stop", "restart",
                   "profile", "resize", "setup", "backup", "service-install", "service-uninstall"]
-MAC_ACTIONS = ["status", "doctor", "setup", "start", "stop", "appium-start", "appium-stop"]
+MAC_ACTIONS = ["status", "doctor", "setup", "start", "stop", "appium-install", "appium-start", "appium-stop"]
 
 ACTION_INFO = {
     "status": ("Status", "One-shot state, endpoints and resource report."),
@@ -115,9 +127,19 @@ ACTION_INFO = {
     "backup": ("Backup", "Write a guest backup archive into the lab's backups/ folder."),
     "service-install": ("Install boot service", "Start this lab automatically at boot (systemd)."),
     "service-uninstall": ("Remove boot service", "Remove the systemd boot unit."),
+    "appium-install": ("Install Appium", "Install Node (Homebrew if needed), Appium and the XCUITest driver for this user only. No administrator rights."),
     "appium-start": ("Start Appium", "Start the Appium server with XCUITest."),
     "appium-stop": ("Stop Appium", "Stop the Appium server."),
 }
+
+# On the native Mac path "start" and "stop" drive the iOS Simulator, not a container stack.
+NATIVE_SIMULATOR_INFO = {
+    "start": ("Start iOS Simulator", "Boot the configured iOS Simulator device on this Mac."),
+    "stop": ("Stop iOS Simulator", "Shut the iOS Simulator down."),
+}
+
+# Offered while a required dependency is missing: install it, install Appium, or run the preflight.
+SETUP_STATE_ACTIONS = {"setup", "appium-install", "doctor"}
 
 PRIVILEGED = {"setup", "service-install", "service-uninstall"}
 SECRET_PARTS = ("PASSWORD", "SECRET", "TOKEN", "API_KEY", "PRIVATE_KEY", "CREDENTIAL")
@@ -147,8 +169,16 @@ def host_arch() -> str:
     return {"amd64": "x86_64", "x64": "x86_64", "arm64": "aarch64"}.get(m, m)
 
 
+def _managed_appium() -> str | None:
+    """Appium installed by ios-lab/mac/appium.sh install (user folder, no global npm)."""
+    path = os.path.join(os.environ.get("OSLAB_APPIUM_HOME") or os.path.expanduser("~/.oslab/appium"),
+                        "node_modules", ".bin", "appium")
+    return path if os.path.isfile(path) and os.access(path, os.X_OK) else None
+
+
 def _which(name: str) -> str | None:
-    return shutil.which(name)
+    found = shutil.which(name)
+    return found or (_managed_appium() if name == "appium" else None)
 
 
 def _read(path: str) -> str:
@@ -219,9 +249,29 @@ def wsl_distributions() -> list[str]:
 
 def container_runtime() -> str | None:
     for name in ("docker", "podman"):
-        if _which(name):
+        if _which(name) and _capture([name, "info"], timeout=5)[0] == 0 \
+                and _capture([name, "compose", "version"], timeout=5)[0] == 0:
             return name
     return None
+
+
+def xcode_status() -> dict:
+    """Full Xcode and an available iOS Simulator, not just the command-line tools."""
+    if host_os() != "macos":
+        return {"installed": False, "iosRuntime": False, "iosDevice": False}
+    installed = _capture(["xcodebuild", "-version"], timeout=5)[0] == 0
+    if not installed:
+        return {"installed": False, "iosRuntime": False, "iosDevice": False}
+    code, output = _capture(["xcrun", "simctl", "list", "-j", "devices", "available"], timeout=10)
+    try:
+        devices = json.loads(output)["devices"] if code == 0 else {}
+        ios_device = any("iOS" in runtime and any(d.get("isAvailable", True) for d in entries)
+                         for runtime, entries in devices.items())
+    except (ValueError, KeyError, TypeError, AttributeError):
+        ios_device = False
+    code, output = _capture(["xcrun", "simctl", "list", "runtimes"], timeout=10)
+    ios_runtime = code == 0 and any(line.startswith("iOS ") for line in output.splitlines())
+    return {"installed": installed, "iosRuntime": ios_runtime, "iosDevice": ios_device}
 
 
 def host_info(root: str) -> dict:
@@ -246,10 +296,11 @@ def host_info(root: str) -> dict:
         "kvm": {"present": kvm_exists, "usable": kvm_exists and os.access(kvm_path, os.R_OK | os.W_OK)},
         "wsl": {"guest": in_wsl, "distributions": wsl_distributions()},
         "runtime": container_runtime(),
+        "xcode": xcode_status() if os_name == "macos" else None,
         "python": platform.python_version(),
         "root": root,
-        "tools": [{"id": t, "label": label, "found": bool(_which(t)), "path": _which(t)} for t, label in TOOLS],
-        "providers": provider_report(os_name, arch),
+        "tools": [{"id": t, "label": label, "found": bool(_which(t)), "path": _which(t)} for t, label in tools_for_host(os_name)],
+        "providers": [p for p in provider_report(os_name, arch) if p["candidate"]],
     }
 
 
@@ -316,12 +367,19 @@ def lab_status(lab: str, host: dict) -> dict:
                 "actions": [], "installed": os.path.isdir(os.path.join(host["root"], meta["dir"]))}
 
     if provider == "native-macos":
+        if lab == "ios":
+            notes.append("Uses the same native Xcode installation as macOS Lab on this Mac.")
+        xcode = host.get("xcode") or {}
         reqs += [
-            _req("xcrun", "Xcode command-line tools", tools.get("xcrun"), hint="xcode-select --install"),
-            _req("brew", "Homebrew", tools.get("brew"), hint="https://brew.sh"),
+            _req("xcode", "Full Xcode", xcode.get("installed"), hint="Install and open Xcode, then accept its license"),
+            _req("ios-runtime", "iOS Simulator runtime", xcode.get("iosRuntime"), hint="Xcode > Settings > Components"),
+            _req("ios-device", "Available iOS Simulator device", xcode.get("iosDevice"), hint="Add a simulator in Xcode"),
+            _req("brew", "Homebrew", tools.get("brew"), required=False, hint="https://brew.sh (needed for automated Appium setup)"),
             _req("node", "Node.js", tools.get("node"), required=False, hint="brew install node"),
-            _req("appium", "Appium (XCUITest)", tools.get("appium"), required=False, hint="npm i -g appium"),
+            _req("appium", "Appium (XCUITest)", tools.get("appium"), required=False, hint="Install Appium (no administrator rights)"),
         ]
+        if not tools.get("appium"):
+            notes.append("Appium automation needs Appium and its XCUITest driver; the simulator can run without them.")
     elif provider == "wsl2":
         distros = host["wsl"]["distributions"]
         reqs += [
@@ -330,17 +388,19 @@ def lab_status(lab: str, host: dict) -> dict:
         ]
         notes.append("Commands run inside the selected WSL2 distribution; Docker/Podman and KVM are checked there by Doctor.")
     else:
-        reqs.append(_req("runtime", "Docker or Podman", runtime, hint="Install dependencies"))
+        reqs.append(_req("runtime", "Working Docker or Podman with Compose", runtime,
+                         hint="Start the engine and install its Compose plugin if needed"))
         reqs.append(_req("bash", "Bash", tools.get("bash")))
         needs_kvm = lab in ("windows", "linux", "ios")
-        reqs.append(_req("kvm", "Usable /dev/kvm", kvm, required=needs_kvm,
-                         hint="Enable virtualization in firmware, then Install dependencies (adds you to the kvm group)"))
+        if os_name == "linux":
+            reqs.append(_req("kvm", "Usable /dev/kvm", kvm, required=needs_kvm,
+                             hint="Enable virtualization in firmware, then Install dependencies (adds you to the kvm group)"))
         if lab in ("windows", "ios") and arch != "x86_64":
             reasons.append(f"{meta['label']} guests need an x86_64 host; this host is {arch}.")
             state = "unavailable"
         if lab == "android":
             reqs.append(_req("adb", "Android Debug Bridge", tools.get("adb"), required=False, hint="Install dependencies"))
-            if not kvm:
+            if os_name == "linux" and not kvm:
                 notes.append("No usable KVM: static analysis (MobSF, mitmproxy, tools) works; the emulator needs KVM.")
         if provider == "macos-containers":
             notes.append("On macOS only the lightweight/static Android profile runs; the emulator needs a Linux/KVM host.")
@@ -350,7 +410,20 @@ def lab_status(lab: str, host: dict) -> dict:
         reasons.append("Missing: " + ", ".join(r["label"] for r in reqs if r["required"] and not r["found"]) + ".")
 
     actions = actions_for(lab, provider) if state != "unavailable" else []
-    return {"id": lab, "label": meta["label"], "summary": meta["summary"], "state": state, "provider": provider,
+    if state == "needs-setup":
+        # Something this lab requires is missing: only the ways to fix or diagnose that are offered.
+        # Start, stop, resize, logs and the rest come back once the requirements are met.
+        actions = [x for x in actions if x["id"] in SETUP_STATE_ACTIONS]
+    if provider == "native-macos":
+        # Installed Appium: offer start/stop, not install. Not installed: offer install, not start/stop.
+        drop = {"appium-install"} if tools.get("appium") else {"appium-start", "appium-stop"}
+        actions = [a for a in actions if a["id"] not in drop]
+        for a in actions:
+            if a["id"] in NATIVE_SIMULATOR_INFO:
+                a["label"], a["description"] = NATIVE_SIMULATOR_INFO[a["id"]]
+    summary = ("Run the iOS Simulator with this Mac's Xcode; Appium automation is optional."
+               if lab == "ios" and provider == "native-macos" else meta["summary"])
+    return {"id": lab, "label": meta["label"], "summary": summary, "state": state, "provider": provider,
             "reasons": reasons, "requirements": reqs, "notes": notes, "actions": actions,
             "installed": os.path.isdir(os.path.join(host["root"], meta["dir"]))}
 
@@ -365,13 +438,34 @@ def actions_for(lab: str, provider: str | None) -> list[dict]:
     else:
         names = []
     return [{"id": n, "label": ACTION_INFO[n][0], "description": ACTION_INFO[n][1],
-             "privileged": n in PRIVILEGED} for n in names]
+             "privileged": n in PRIVILEGED and provider != "native-macos"} for n in names]
 
 
 def lab_catalog(root: str, host: dict | None = None) -> dict:
     host = host or host_info(root)
     return {"host": {"os": host["os"], "arch": host["arch"]},
             "labs": [lab_status(lab, host) for lab in LAB_ORDER]}
+
+
+def capability_catalog() -> dict:
+    """Health's platform tree. Lab support levels follow the same provider rules as lab_status."""
+    with open(os.path.join(os.path.dirname(__file__), "capabilities.json"), encoding="utf-8") as f:
+        catalog = json.load(f)
+    for group in catalog["groups"]:
+        for item in group["items"]:
+            lab = item.get("lab")
+            if not lab:
+                continue
+            for platform in ("macos", "windows", "linux"):
+                provider = provider_for(lab, platform)
+                if provider is None:
+                    level = "none"
+                elif provider in ("wsl2", "macos-containers") or (lab == "ios" and platform == "linux"):
+                    level = "partial"
+                else:
+                    level = "full"
+                item["support"][platform]["level"] = level
+    return catalog
 
 
 # ── Configuration ────────────────────────────────────────────────────────────
@@ -532,7 +626,7 @@ def plan(root: str, request: dict, host: dict | None = None) -> dict:
         script, extra = {
             "status": ("status-mac.sh", None), "doctor": ("doctor-mac.sh", None),
             "setup": ("setup-mac.sh", "--install"), "start": ("run-simulator.sh", None),
-            "stop": ("stop-simulator.sh", None), "appium-start": ("appium.sh", "start"),
+            "stop": ("stop-simulator.sh", None), "appium-install": ("appium.sh", "install"), "appium-start": ("appium.sh", "start"),
             "appium-stop": ("appium.sh", "stop"),
         }[action]
         path = _scoped(root, "ios-lab", "mac", script)
@@ -540,7 +634,7 @@ def plan(root: str, request: dict, host: dict | None = None) -> dict:
             raise PlanError("Provider script is missing: ios-lab/mac/" + script)
         program, args = "bash", [path] + ([extra] if extra else [])
         privileged = False
-        timeout = 3600 if action == "setup" else 300
+        timeout = 3600 if action == "setup" else 1800 if action == "appium-install" else 300
     else:
         labctl = _scoped(root, "labctl")
         if not os.path.isfile(labctl):
@@ -742,24 +836,36 @@ class JobService:
             for old in sorted(self.jobs.values(), key=lambda j: j.started_at)[:-50]:
                 if old.state != "running":
                     self.jobs.pop(old.id, None)
-        threading.Thread(target=self._run, args=(job, plan_), daemon=True).start()
+        try:
+            threading.Thread(target=self._run, args=(job, plan_), daemon=True).start()
+        except RuntimeError as e:
+            job.state = "failed"
+            job.error = f"Could not start the job worker: {e}"
+            job.finished_at = time.time()
         return job
 
     def _run(self, job: Job, plan_: dict) -> None:
-        redact = secret_values(self.root)
-        env = dict(os.environ, NO_COLOR="1", TERM="dumb")
-        popen_kw: dict = {}
-        if os.name == "posix":
-            popen_kw["start_new_session"] = True
-        else:
-            popen_kw["creationflags"] = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+        timer: threading.Timer | None = None
+        redact: list[str] = []
         try:
+            redact = secret_values(self.root)
+            env = dict(os.environ, NO_COLOR="1", TERM="dumb")
+            popen_kw: dict = {}
+            if os.name == "posix":
+                popen_kw["start_new_session"] = True
+            else:
+                popen_kw["creationflags"] = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+            if job.cancelled:
+                job.state = "cancelled"
+                return
             job.proc = subprocess.Popen([plan_["program"]] + plan_["args"], cwd=self.root, env=env,
                                         stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                         bufsize=1, text=True, encoding="utf-8", errors="replace", **popen_kw)
             timer = threading.Timer(plan_["timeoutSec"], self._timeout, args=(job,))
             timer.daemon = True
             timer.start()
+            if job.cancelled:
+                self._signal(job)
             assert job.proc.stdout is not None
             for line in job.proc.stdout:
                 line = ANSI.sub("", line.rstrip("\r\n"))
@@ -770,13 +876,27 @@ class JobService:
                     del job.lines[: len(job.lines) - MAX_LINES]
                     job.truncated = True
             job.exit_code = job.proc.wait()
-            timer.cancel()
             if job.state == "running":
                 job.state = "cancelled" if job.cancelled else ("succeeded" if job.exit_code == 0 else "failed")
-        except OSError as e:
-            job.state = "failed"
-            job.error = str(e)
+                if job.state == "failed":
+                    job.error = f"Command exited with status {job.exit_code}. See output below."
+        except Exception as e:
+            if job.state == "running":
+                job.state = "failed"
+            if job.proc and job.proc.poll() is None:
+                self._signal(job)
+                try:
+                    job.exit_code = job.proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    job.proc.kill()
+                    job.exit_code = job.proc.wait()
+            error = str(e)
+            for value in redact:
+                error = error.replace(value, "[redacted]")
+            job.error = error or type(e).__name__
         finally:
+            if timer:
+                timer.cancel()
             job.finished_at = time.time()
             job.proc = None
 
@@ -790,9 +910,10 @@ class JobService:
         job = self.jobs.get(job_id)
         if not job:
             raise KeyError(job_id)
-        if job.state == "running" and job.proc:
+        if job.state == "running":
             job.cancelled = True
-            self._signal(job)
+            if job.proc:
+                self._signal(job)
         return job
 
     @staticmethod
@@ -842,7 +963,7 @@ def monitor(root: str, lab: str, host: dict | None = None) -> dict:
     if not names:
         return {"lab": lab, "state": "unknown", "note": "This lab runs natively; use Status.", "containers": []}
     if not runtime:
-        return {"lab": lab, "state": "no-runtime", "note": "Docker or Podman is not installed.", "containers": []}
+        return {"lab": lab, "state": "no-runtime", "note": "No working Docker or Podman engine with Compose is available.", "containers": []}
     fmt = ["--format", "json"] if runtime == "podman" else ["--format", "{{json .}}"]
     code, out = _capture([runtime, "ps", "-a"] + fmt, timeout=8)
     if code != 0:

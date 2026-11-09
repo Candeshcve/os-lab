@@ -61,13 +61,13 @@ Ar-Ge merkezidir. Şirketin en fazla Ar-Ge personeli ve fikri mülkiyet açısı
 
 ## En iyi 5 güvenlik duvarı
 
-Ana hat: 2 Gbps. Fiyat tek cihazın lisans ve destek hariç donanım fiyatıdır.
+Ana hat: 2 Gbps. Fiyat tek cihazın lisans ve destek hariç donanım fiyatıdır. Check Point fiyatına 1 yıllık SandBlast aboneliği dahildir, doğrudan karşılaştırılmaz.
 
 | Model | Koruma hızı | Hat yükü | Fiyat (USD, adet) | Karar |
 |---|---:|---:|---:|---|
 | **FortiGate 120G ×2** | 2,8 Gbps | %71 | 4.280 | **Seçildi:** en ucuzu değil, ama hattı karşılar, 3 Gbps TLS denetimi sunar ve ortak yönetime girer |
 | Palo Alto PA-460 | 2,1-3 Gbps | %67-95 | 4.750 | Yeterli, ancak kaynaklardaki hız farklı ve daha pahalı |
-| Check Point Force 3920 | 3,2 Gbps | %63 | Teklif gerekli | Yeterli, ancak Fortinet yönetimine girmez |
+| Check Point Force 3920 | 3,2 Gbps | %63 | 6.020 (1 yıl abonelik dahil) | Yeterli, ancak Fortinet yönetimine girmez |
 | Cisco Firepower 1140 | 3,3 Gbps | %61 | 2.860 | Daha ucuz ve yeterli, ancak Fortinet yönetimine girmez ve veri sayfası eski |
 | Sophos XGS 2100 | 5,6 Gbps | %36 | 2.290 | En ucuz seçenek ve kapasitesi yüksek, ancak değer ideal koşullarda ölçülmüş ve ortak yönetim dışında kalıyor |
 

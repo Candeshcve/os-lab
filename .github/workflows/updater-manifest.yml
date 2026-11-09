@@ -1,0 +1,53 @@
+name: updater-manifest
+
+# Publish app-updates/latest.json without anyone running a command.
+#
+# Artifact builds stay local (each platform host uploads to app-v<version>). This workflow
+# watches for a release whose five signed assets are all present, builds the feed, verifies
+# every signature, uploads it and marks that release as GitHub Latest. It is idempotent and
+# never downgrades the feed, so a partial upload of a newer version is simply skipped until
+# the next run. The schedule is the safety net; a manual run can pin a version.
+
+on:
+  schedule:
+    - cron: '*/20 * * * *'
+  release:
+    types: [published, edited]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Publish this version instead of auto-detecting
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: updater-manifest
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install minisign
+        run: bash app/scripts/install-minisign-linux.sh
+      - name: Publish the newest complete release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [ -n "${VERSION:-}" ]; then
+            node scripts/publish-app-update.mjs "$VERSION" --mark-latest --verify
+          else
+            node scripts/publish-app-update.mjs --detect-latest --allow-none --mark-latest --verify
+          fi

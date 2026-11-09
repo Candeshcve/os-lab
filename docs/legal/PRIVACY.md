@@ -52,7 +52,10 @@ Clearing your browser's site data removes them.
 Installing, updating and running the labs contacts third parties. Each one
 receives your IP address and the request, under its own privacy policy:
 
-- **GitHub**: cloning and updating os-lab; tool downloads such as JADX.
+- **GitHub**: cloning and updating os-lab; tool downloads such as JADX; and the signed
+  content pack (Firewall Lab data, guides, hooks) when you press *Check for updates* or
+  *Update content*. Nothing is downloaded in the background, and `OSLAB_CONTENT_OFFLINE=1`
+  switches it off.
 - **Package managers**: apt, dnf, pacman, Homebrew, winget or Chocolatey, PyPI
   (Python dependencies) and npm (when the dashboard is rebuilt).
 - **Container registries**, mainly Docker Hub, for the lab images.

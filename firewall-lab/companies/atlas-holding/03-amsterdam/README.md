@@ -58,13 +58,13 @@ Ar-Ge ekibi ve internete açık servis olmadığı için VLAN 40 ve DMZ yoktur.
 
 ## En iyi 5 güvenlik duvarı
 
-Ana hat: 500 Mbps. Fiyat tek cihazın lisans ve destek hariç donanım fiyatıdır.
+Ana hat: 500 Mbps. Fiyat tek cihazın lisans ve destek hariç donanım fiyatıdır. Check Point fiyatına 1 yıllık SandBlast aboneliği dahildir, doğrudan karşılaştırılmaz.
 
 | Model | Koruma hızı | Hat yükü | Fiyat (USD, adet) | Karar |
 |---|---:|---:|---:|---|
 | **FortiGate 70G ×2** | 1,3 Gbps | %38 | 1.210 | **Seçildi:** en ucuzu değil, ama hattın iki katından fazla kapasite ve TLS denetimi için pay bırakır, ortak yönetime girer |
 | Palo Alto PA-410 | 800 Mbps | %63 | 850 | Daha ucuz ve yeterli, ancak büyüme payı düşük ve ortak yönetim dışında kalıyor |
-| Check Point Spark 1600 | 1,5 Gbps | %33 | Teklif gerekli | Kapasitesi yüksek, ancak ortak yönetim dışında kalıyor. Bulunan 7.600 USD 3 yıllık lisans paketidir, donanım fiyatlarıyla karşılaştırılmaz |
+| Check Point Spark 1600 | 1,5 Gbps | %33 | 4.010 (1 yıl abonelik dahil) | Kapasitesi yüksek, ancak ortak yönetim dışında kalıyor |
 | Cisco Firepower 1010 | 880 Mbps | %57 | 1.070 | Yeterli ve biraz daha ucuz, ancak ortak yönetim dışında kalıyor ve veri sayfası eski |
 | Sophos XGS 88 | 2 Gbps | %25 | 640 | Fiyat ve hız güçlü, ancak değer ideal koşullarda ölçülmüş ve ortak yönetim dışında kalıyor |
 

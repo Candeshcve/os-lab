@@ -134,7 +134,8 @@
               "product": "Force 3950",
               "vendor": "Check Point",
               "throughputGbps": 5.5,
-              "reason": "Yeterli, ancak Fortinet yönetimine girmez. Fiyat: teklif gerekli, tek cihaz donanım fiyatı herkese açık bulunamadı."
+              "priceUsd": 12050,
+              "reason": "Yeterli, ancak Fortinet yönetimine girmez. Fiyata 1 yıllık SandBlast aboneliği dahildir (CPAP-SG3950-SNBT, PC Nation); aboneliksiz donanım SKU'su bulunamadı, bu yüzden diğer donanım fiyatlarıyla doğrudan karşılaştırılmaz."
             },
             {
               "product": "Firepower 1150",
@@ -1628,7 +1629,8 @@
               "product": "Force 3920",
               "vendor": "Check Point",
               "throughputGbps": 3.2,
-              "reason": "Yeterli, ancak Fortinet yönetimine girmez. Fiyat: teklif gerekli, tek cihaz donanım fiyatı herkese açık bulunamadı."
+              "priceUsd": 6020,
+              "reason": "Yeterli, ancak Fortinet yönetimine girmez. Fiyata 1 yıllık SandBlast aboneliği dahildir (CPAP-SG3920-SNBT, PC Nation); aboneliksiz donanım SKU'su bulunamadı, bu yüzden diğer donanım fiyatlarıyla doğrudan karşılaştırılmaz."
             },
             {
               "product": "Firepower 1140",
@@ -2280,7 +2282,8 @@
               "product": "Spark 1600",
               "vendor": "Check Point",
               "throughputGbps": 1.5,
-              "reason": "Kapasitesi yüksek, ancak ortak yönetim dışında. Fiyat: teklif gerekli; bulunan 7.600 USD 3 yıllık lisans paketidir, tek cihaz donanım fiyatı değildir ve karşılaştırılmaz."
+              "priceUsd": 4010,
+              "reason": "Kapasitesi yüksek, ancak ortak yönetim dışında. Fiyata 1 yıllık SandBlast aboneliği dahildir (CPAP-SG1600-SNBT, checkfirewalls.com); aboneliksiz donanım SKU'su bulunamadı, bu yüzden diğer donanım fiyatlarıyla doğrudan karşılaştırılmaz."
             },
             {
               "product": "Firepower 1010",
@@ -3058,7 +3061,8 @@
               "product": "Force 9300",
               "vendor": "Check Point",
               "throughputGbps": 10.5,
-              "reason": "Hattı karşılar, ancak neredeyse hiç pay bırakmaz. Fiyat: teklif gerekli, tek cihaz donanım fiyatı herkese açık bulunamadı."
+              "priceUsd": 42990,
+              "reason": "Hattı karşılar, ancak neredeyse hiç pay bırakmaz. Fiyata 1 yıllık SandBlast aboneliği dahildir (CPAP-SG9300-SNBT, checkfirewalls.com); aboneliksiz donanım SKU'su bulunamadı, bu yüzden diğer donanım fiyatlarıyla doğrudan karşılaştırılmaz."
             },
             {
               "product": "Secure Firewall 3110",

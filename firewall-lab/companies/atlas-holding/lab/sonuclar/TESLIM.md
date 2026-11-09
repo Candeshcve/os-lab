@@ -4,8 +4,8 @@ Bu dosyayı `lab/teslim-kontrol.sh` üretir, elle düzenlenmez. Dersin deposuna 
 
 | Bilgi | Değer |
 |---|---|
-| Tarih | 2026-11-06 21:12 +03 |
-| `os-lab` sürümü | 003577b 2026-11-06 |
+| Tarih | 2026-11-07 19:48 +03 |
+| `os-lab` sürümü | 0e09c32 2026-11-07 |
 | Ortam | Linux 6.6.87.2-microsoft-standard-WSL2, Python 3.12.3 |
 
 ## Sonuç
@@ -15,17 +15,11 @@ Bu dosyayı `lab/teslim-kontrol.sh` üretir, elle düzenlenmez. Dersin deposuna 
 | Dersin şema doğrulayıcısı (`validate.py`) | Geçti |
 | Dersin katalog aracı (`catalog.py`) | Çalıştı |
 | Dersin kural üreticisi: nftables sözdizimi | 4 / 4 güvenlik duvarı yüklendi |
-| Sağlık denetimi (`audit.ts`) | 95 / 100 (42 kontrol, 1 bulgu) |
+| Sağlık denetimi (`audit.ts`) | 100 / 100 (42 kontrol, 0 bulgu) |
 
 **Sağlık denetiminin puanı güvenlik kanıtı değildir.** Denetim çoğunlukla metinde anahtar kelime arar, kuralları çalıştırmaz. Bu projenin öğrencilerin bütün internetini kesen önceki sürümü 100 / 100 almıştı. Gerçek sonuçlar [PAKET.md](PAKET.md) ve [MODEL.md](MODEL.md) dosyalarındadır.
 
 **Dersin kural üreticisi hakkında:** `nft -c` yalnızca sözdizimini denetler. Araç `internet`, `wan-*` ve FQDN değerlerini `any` olarak işler ve `direction: in` kurallarını güvenlik duvarının kendi girişine yazar, ayrıca kendi başına SSH izni ekler. Bu yüzden üretilen dosya doğrudan üretimde kullanılacak bir kural seti değildir.
-
-## Sağlık denetimi bulguları
-
-| Önem | Kontrol | Başlık | Etkilenen | Açıklama |
-|---:|---|---|---:|---|
-| 2 | `fiveProducts` | Product prices missing | 4 | Bilinçli: doğrulanamayan fiyatlar çıkarıldı, teklif gelince eklenir |
 
 ## Dersin kataloğunda görünecek satırlar
 

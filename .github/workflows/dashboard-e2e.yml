@@ -1,0 +1,38 @@
+name: dashboard-e2e
+
+on:
+  pull_request:
+    paths:
+      - 'dashboard/**'
+      - '.github/workflows/dashboard-e2e.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'dashboard/**'
+      - '.github/workflows/dashboard-e2e.yml'
+
+jobs:
+  browser:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - run: npm ci --no-audit --no-fund
+        working-directory: dashboard
+      - run: npx playwright install --with-deps chromium
+        working-directory: dashboard
+      - run: npm run build
+        working-directory: dashboard
+      - run: npm run test:i18n
+        working-directory: dashboard
+      - run: npm run test:e2e
+        working-directory: dashboard
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: dashboard-playwright-report
+          path: dashboard/playwright-report/

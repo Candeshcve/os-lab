@@ -17,6 +17,12 @@ the Android workbench in [[dashboard/src/views/android/pages.tsx]].
 [[dashboard/src/lib/api.ts]] is the typed client; it mirrors qLar's
 `shared/os-lab.ts` contract.
 
+## UX readiness
+
+[[ux-readiness]] records the dashboard's action, endpoint, and navigation
+rules. The detailed implementation checklist is [[docs/UX_READINESS.md]].
+The feedback route is in [[dashboard/src/views/feedback-page.tsx]].
+
 ## Host engine
 
 [[console/oslab.py]] ports the qLar desktop OS Lab runtime to the Python
