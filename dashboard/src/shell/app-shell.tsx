@@ -69,6 +69,7 @@ export function sectionHref(id: string): string {
   if (id.startsWith("legal-")) return localized(`/legal/${id.slice(6)}/`);
   if (id === "android-overview") return localized("/android/");
   if (id.startsWith("android-")) return localized(`/android/${id.slice(8)}/`);
+  if (id.startsWith("source-")) return localized(`/source/${id === "source-overview" ? "" : id.slice(7) + "/"}`);
   if (id.startsWith("lab-")) return localized(`/labs/${id.slice(4)}/`);
   return localized("/");
 }
@@ -100,6 +101,7 @@ function buildGroups(labs: LabStatus[] | undefined, running: Set<string>, androi
     { label: "os-lab", items: [
       { id: "host", label: "Home", icon: <DesktopTowerIcon size={16} /> },
       { id: "firewall", label: copy[locale].lab, icon: <FireIcon size={16} /> },
+      { id: "source-overview", label: "Source Lab", icon: LAB_ICON.source() },
       { id: "feedback", label: "Feedback", icon: <ChatCircleTextIcon size={16} /> },
       { id: "repo", label: "Repository", icon: <BookOpenIcon size={16} /> }
     ] }
@@ -142,6 +144,15 @@ function buildGroups(labs: LabStatus[] | undefined, running: Set<string>, androi
             { id: "android-sitemap", label: "Routes & Sitemap" }
           ]
         },
+        { id: "source", label: "Source Lab", icon: LAB_ICON.source(),
+          badge: running.has("source") ? <RunningDot /> : <StatePill lab={lab("source")} />,
+          children: [
+            { id: "source-overview", label: "Overview" }, { id: "lab-source", label: "Readiness & setup" },
+            { id: "source-analyzer", label: "Crawler" }, { id: "source-evidence", label: "Evidence" },
+            { id: "source-deep-analysis", label: "Deep analysis" }, { id: "source-pipeline", label: "Pipeline" },
+            { id: "source-brain", label: "Brain" }, { id: "source-sources", label: "Sources" },
+            { id: "source-settings/runtime", label: "Runtime settings" }
+          ] },
         ...(labShown(labs, "ios", activeId) ? [labItem("ios", "iOS Lab")] : []),
         ...(labShown(labs, "windows", activeId) ? [labItem("windows", "Windows Lab")] : []),
         ...(labShown(labs, "macos", activeId) ? [labItem("macos", "macOS Lab")] : []),
@@ -273,6 +284,9 @@ export function AppShell({
   children: ReactNode;
 }) {
   const [collapsed, setCollapsed] = useSidebarCollapsed("oslab.sidebar.collapsed");
+  const [sourceQuery, setSourceQuery] = useState("");
+  const [sourceRecords, setSourceRecords] = useState<SpotlightRecord[]>([]);
+  const [sourceSearchError, setSourceSearchError] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const [spotlightOpen, setSpotlightOpen] = useState(false);
   const drawerRef = useRef<HTMLDialogElement>(null);
@@ -290,6 +304,23 @@ export function AppShell({
     if (!navOpen && drawer.open) drawer.close();
   }, [navOpen]);
 
+  useEffect(() => {
+    if (PUBLIC_PAGES || !spotlightOpen) return;
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      const query = sourceQuery.replace(/^source:\s*/i, "").slice(0, 200);
+      void fetch(`/api/source/spotlight?section=evidence&limit=25&q=${encodeURIComponent(query)}`, { signal: controller.signal })
+        .then(async response => { if (!response.ok) throw new Error(); return response.json(); })
+        .then(result => {
+          setSourceSearchError(false);
+          setSourceRecords((result.data ?? []).filter((r: { href?: string }) => r.href?.startsWith("/source/")).map((r: { title: string; href: string }) => ({
+            id: r.href, section: "source-evidence", title: r.title, href: r.href
+          })));
+        }).catch(() => { if (!controller.signal.aborted) { setSourceRecords([]); setSourceSearchError(true); } });
+    }, 200);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [spotlightOpen, sourceQuery]);
+
   const running = useMemo(() => new Set((jobs ?? []).filter((j) => j.state === "running").map((j) => j.lab)), [jobs]);
   const groups = useMemo(
     () => buildGroups(host?.labs, running, Boolean(androidLogs?.running), locale, activeId),
@@ -298,6 +329,7 @@ export function AppShell({
   const meta = useMemo(buildMeta, []);
   const records = useMemo<SpotlightRecord[]>(
     () => [
+      ...sourceRecords,
       ...(host?.labs ?? []).flatMap((lab) =>
         lab.actions.map((action) => ({
           id: `${lab.id}:${action.id}`,
@@ -315,7 +347,7 @@ export function AppShell({
         badge: job.state
       }))
     ],
-    [host?.labs, jobs]
+    [host?.labs, jobs, sourceRecords]
   );
   const allCommands = useMemo<SpotlightCommand[]>(
     () => [
@@ -381,6 +413,8 @@ export function AppShell({
         </div>
       </div>
       <Spotlight
+        onQueryChange={setSourceQuery}
+        searchError={sourceSearchError && !PUBLIC_PAGES ? "Source search unavailable" : undefined}
         open={spotlightOpen}
         onOpenChange={setSpotlightOpen}
         groups={groups}
@@ -394,6 +428,7 @@ export function AppShell({
           ...(labShown(host?.labs, "linux", activeId) ? [{ scope: "linux", description: "Linux Lab actions", icon: <CpuIcon size={16} /> }] : [])
         ]}
         onNavigate={(section, record) => {
+          if (record?.href?.startsWith("/source/")) return go(localePath(record.href, locale));
           if (record && section === "jobs") return go(`${sectionHref("jobs")}#${record.id}`);
           if (record && section.startsWith("lab-")) return go(`${sectionHref(section)}#action=${record.id.split(":")[1]}`);
           go(sectionHref(section));

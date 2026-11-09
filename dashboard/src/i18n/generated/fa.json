@@ -1935,5 +1935,19 @@
   "Runs locally with Python 3.11+. Open the installed console to check readiness and run analyses.": "به‌صورت محلی با پایتون ۳٫۱۱ یا جدیدتر اجرا می‌شود. برای بررسی آمادگی و اجرای تحلیل‌ها کنسول نصب‌شده را باز کنید.",
   "Source Lab": "Source Lab",
   "The 50 most recent lab jobs. Source Lab keeps private restart records and marks unfinished work as interrupted.": "۵۰ کار اخیر آزمایشگاه. Source Lab سوابق خصوصی راه‌اندازی مجدد را نگه می‌دارد و کارهای ناتمام را قطع‌شده علامت می‌زند.",
-  "interrupted": "قطع‌شده"
+  "interrupted": "قطع‌شده",
+  "Readiness & setup": "آمادگی و راه‌اندازی",
+  "Crawler": "خزنده",
+  "Deep analysis": "تحلیل عمیق",
+  "Pipeline": "خط پردازش",
+  "Brain": "Brain",
+  "Runtime settings": "تنظیمات زمان اجرا",
+  "Local Source Lab": "Source Lab محلی",
+  "Run the installed console to inspect private source artifacts and launch analyses.": "برای بررسی خروجی‌های خصوصی و اجرای تحلیل، کنسول نصب‌شده را اجرا کنید.",
+  "Public pages do not connect to your local engine. No targets, catalogs or sessions are published.": "صفحات عمومی به موتور محلی شما متصل نمی‌شوند. هدف‌ها، فهرست‌ها و نشست‌ها منتشر نمی‌شوند.",
+  "This view is queued for implementation. Existing engine and console API workflows remain available.": "این نما در صف پیاده‌سازی است. گردش‌کارهای موتور و API کنسول در دسترس هستند.",
+  "Source search unavailable": "جستجوی منبع در دسترس نیست",
+  "Source Lab pages": "صفحات Source Lab",
+  "Evidence": "شواهد",
+  "Sources": "منابع"
 }

@@ -215,3 +215,16 @@ and target-mismatched events are rejected. Browser simulation stays synthetic.
 
 Validation: session/collector suite **29 passed**. Actual native collection and
 live browser tooling are not claimed; see [COLLECTORS.md](COLLECTORS.md).
+
+## Next batch: SRC-030 navigation acceptance
+
+Eight Source destinations plus the existing readiness route use the shared
+sidebar/mobile drawer, themes and locale helpers. Local Spotlight searches
+file-backed target records with debouncing, cancellation and error feedback.
+Future Evidence/Deep/Pipeline/Brain/settings views are explicit placeholders.
+
+Validation: dashboard typecheck, 1,951-key/seven-locale check, 409-page local and
+Pages builds; existing/browser navigation suite 21 passed initially and the
+hydration-timing correction for Spotlight passed its focused rerun. Public smoke
+checks 16 EN/TR destinations, locale/query/base links and absence of engine
+requests/actions. No private artifact or third-party dataset enters the build.

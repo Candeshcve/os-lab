@@ -1935,5 +1935,19 @@
   "Runs locally with Python 3.11+. Open the installed console to check readiness and run analyses.": "يعمل محليًا باستخدام Python 3.11 أو أحدث. افتح وحدة التحكم المثبتة للتحقق من الجاهزية وتشغيل التحليلات.",
   "Source Lab": "Source Lab",
   "The 50 most recent lab jobs. Source Lab keeps private restart records and marks unfinished work as interrupted.": "أحدث 50 مهمة مختبر. يحتفظ Source Lab بسجلات خاصة لإعادة التشغيل ويضع علامة على العمل غير المكتمل بأنه منقطع.",
-  "interrupted": "منقطع"
+  "interrupted": "منقطع",
+  "Readiness & setup": "الجاهزية والإعداد",
+  "Crawler": "الزاحف",
+  "Deep analysis": "التحليل المتعمق",
+  "Pipeline": "مسار المعالجة",
+  "Brain": "Brain",
+  "Runtime settings": "إعدادات وقت التشغيل",
+  "Local Source Lab": "Source Lab المحلي",
+  "Run the installed console to inspect private source artifacts and launch analyses.": "شغّل وحدة التحكم المثبتة لفحص النتائج الخاصة وبدء التحليلات.",
+  "Public pages do not connect to your local engine. No targets, catalogs or sessions are published.": "لا تتصل الصفحات العامة بالمحرك المحلي. لا تُنشر الأهداف أو الفهارس أو الجلسات.",
+  "This view is queued for implementation. Existing engine and console API workflows remain available.": "هذا العرض قيد التنفيذ لاحقًا. تظل وظائف المحرك وواجهة API متاحة.",
+  "Source search unavailable": "البحث في المصادر غير متاح",
+  "Source Lab pages": "صفحات Source Lab",
+  "Evidence": "الأدلة",
+  "Sources": "المصادر"
 }

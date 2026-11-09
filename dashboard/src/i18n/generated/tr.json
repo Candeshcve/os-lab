@@ -1935,5 +1935,19 @@
   "Runs locally with Python 3.11+. Open the installed console to check readiness and run analyses.": "Python 3.11+ ile yerel olarak çalışır. Hazırlığı kontrol etmek ve analiz çalıştırmak için kurulu konsolu açın.",
   "Source Lab": "Source Lab",
   "The 50 most recent lab jobs. Source Lab keeps private restart records and marks unfinished work as interrupted.": "En son 50 laboratuvar işi. Source Lab özel yeniden başlatma kayıtları tutar ve tamamlanmamış işleri kesintiye uğramış olarak işaretler.",
-  "interrupted": "kesintiye uğradı"
+  "interrupted": "kesintiye uğradı",
+  "Readiness & setup": "Hazırlık ve kurulum",
+  "Crawler": "Tarayıcı",
+  "Deep analysis": "Derin analiz",
+  "Pipeline": "İşlem hattı",
+  "Brain": "Brain",
+  "Runtime settings": "Çalışma zamanı ayarları",
+  "Local Source Lab": "Yerel Source Lab",
+  "Run the installed console to inspect private source artifacts and launch analyses.": "Özel kaynak çıktılarını incelemek ve analiz başlatmak için kurulu konsolu çalıştırın.",
+  "Public pages do not connect to your local engine. No targets, catalogs or sessions are published.": "Genel sayfalar yerel motorunuza bağlanmaz. Hedefler, kataloglar veya oturumlar yayımlanmaz.",
+  "This view is queued for implementation. Existing engine and console API workflows remain available.": "Bu görünüm uygulama sırasındadır. Mevcut motor ve konsol API iş akışları kullanılabilir.",
+  "Source search unavailable": "Kaynak araması kullanılamıyor",
+  "Source Lab pages": "Source Lab sayfaları",
+  "Evidence": "Kanıt",
+  "Sources": "Kaynaklar"
 }

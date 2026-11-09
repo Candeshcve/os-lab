@@ -1935,5 +1935,19 @@
   "Runs locally with Python 3.11+. Open the installed console to check readiness and run analyses.": "Fonctionne localement avec Python 3.11+. Ouvrez la console installée pour vérifier les prérequis et lancer des analyses.",
   "Source Lab": "Source Lab",
   "The 50 most recent lab jobs. Source Lab keeps private restart records and marks unfinished work as interrupted.": "Les 50 dernières tâches. Source Lab conserve des journaux privés de redémarrage et marque les tâches inachevées comme interrompues.",
-  "interrupted": "interrompu"
+  "interrupted": "interrompu",
+  "Readiness & setup": "Prérequis et installation",
+  "Crawler": "Explorateur",
+  "Deep analysis": "Analyse approfondie",
+  "Pipeline": "Pipeline",
+  "Brain": "Brain",
+  "Runtime settings": "Paramètres d’exécution",
+  "Local Source Lab": "Source Lab local",
+  "Run the installed console to inspect private source artifacts and launch analyses.": "Lancez la console installée pour consulter les résultats privés et démarrer les analyses.",
+  "Public pages do not connect to your local engine. No targets, catalogs or sessions are published.": "Les pages publiques ne se connectent pas à votre moteur local. Aucune cible, aucun catalogue ni aucune session ne sont publiés.",
+  "This view is queued for implementation. Existing engine and console API workflows remain available.": "Cette vue est en attente d’implémentation. Les fonctions du moteur et de l’API restent disponibles.",
+  "Source search unavailable": "Recherche de sources indisponible",
+  "Source Lab pages": "Pages Source Lab",
+  "Evidence": "Preuves",
+  "Sources": "Sources"
 }

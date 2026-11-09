@@ -60,7 +60,7 @@ Integrate with the existing console protections, readiness model and jobs.
 
 Use os-lab's static pages, existing shell and locale/base-path helpers.
 
-- [ ] SRC-030 (SRC-020): Add `/labs/source/`, `/source/` and nested routes, sidebar/icon/availability, mobile navigation, theme and record Spotlight. Accept: all retained inventory destinations and query links resolve locally, with accessible keyboard/focus behavior.
+- [x] SRC-030 (SRC-020): Add `/labs/source/`, `/source/` and nested routes, sidebar/icon/availability, mobile navigation, theme and record Spotlight. Accept: all retained inventory destinations and query links resolve locally, with accessible keyboard/focus behavior.
 - [ ] SRC-031 (SRC-021, SRC-030): Port Overview matrices (properties/backgrounds/dependencies/permissions), inspector, annotations, counts, filters, sources and CSV downloads. Accept: fixture results match the source UI and all tabs have loading/empty/error states.
 - [ ] SRC-032 (SRC-022, SRC-031): Port source-list crawler runner/options/progress/logs and H1-H5 reference. Accept: configured inputs validated, preview/run/cancel workflow works and failures render beside actions.
 - [ ] SRC-033 (SRC-025, SRC-026, SRC-030): Port Evidence findings/state/severity/scorecard/spans/coverage/verification, target/platform runner, polling/cancel, session list/timeline and reports. Accept: five-platform fixture journeys preserve evidence levels and explain partial coverage.

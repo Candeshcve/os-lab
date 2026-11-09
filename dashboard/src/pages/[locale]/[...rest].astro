@@ -1,4 +1,5 @@
 ---
+import SourcePage, { type SourcePageId } from "../../views/source/pages";
 import Base from "../../layouts/Base.astro";
 import HostPage from "../../views/host-page";
 import JobsPage from "../../views/jobs-page";
@@ -19,7 +20,8 @@ const labs = ["android", "windows", "linux", "ios", "macos", "source"] as const;
 export function getStaticPaths() {
   const labs = ["android", "windows", "linux", "ios", "macos", "source"];
   const androidPages = ["", "analytics", "console", "providers", "sitemap", "workflows"];
-  const routes = ["", "jobs", "contribute", "feedback", "content", "health", "legal", ...LEGAL_DOCS.map((doc) => `legal/${doc.slug}`), ...labs.map((lab) => `labs/${lab}`), ...androidPages.map((page) => page ? `android/${page}` : "android")];
+  const sourcePages = ["", "analyzer", "evidence", "deep-analysis", "pipeline", "brain", "sources", "settings/runtime"];
+  const routes = [...sourcePages.map(page => page ? `source/${page}` : "source"),"", "jobs", "contribute", "feedback", "content", "health", "legal", ...LEGAL_DOCS.map((doc) => `legal/${doc.slug}`), ...labs.map((lab) => `labs/${lab}`), ...androidPages.map((page) => page ? `android/${page}` : "android")];
   return FIREWALL_LOCALES.filter((locale) => locale !== "en").flatMap((locale) =>
     routes.map((rest) => ({ params: { locale, rest } }))
   );
@@ -36,7 +38,8 @@ const contentHtml = rest === "content" ? rewriteLinks(await Object.values(conten
 const lab = rest.startsWith("labs/") ? rest.slice(5) as typeof labs[number] : null;
 const labTitle: Record<typeof labs[number], string> = { android: "Android Lab · Runtime & setup", windows: "Windows Lab", linux: "Linux Lab", ios: "iOS Lab", macos: "macOS Lab", source: "Source Lab" };
 const androidTitle: Record<string, string> = { android: "Android Lab", "android/analytics": "Android Lab · Analytics", "android/console": "Android Lab · Console", "android/providers": "Android Lab · Providers", "android/sitemap": "Android Lab · Sitemap", "android/workflows": "Android Lab · Workflows" };
-const title = rest === "" ? "This computer" : rest === "jobs" ? "Jobs" : rest === "contribute" ? "Contribute" : rest === "feedback" ? "Feedback" : rest === "content" ? "Content updates" : rest === "health" ? "Health check" : doc ? doc.title : rest === "legal" ? "Legal" : lab ? labTitle[lab] : androidTitle[rest] ?? "os-lab";
+const sourcePage = rest === "source" ? "" : rest.startsWith("source/") ? rest.slice(7) : null;
+const title = sourcePage !== null ? "Source Lab" : rest === "" ? "This computer" : rest === "jobs" ? "Jobs" : rest === "contribute" ? "Contribute" : rest === "feedback" ? "Feedback" : rest === "content" ? "Content updates" : rest === "health" ? "Health check" : doc ? doc.title : rest === "legal" ? "Legal" : lab ? labTitle[lab] : androidTitle[rest] ?? "os-lab";
 ---
 <Base title={title} description={doc?.description} lang={locale}>
   {rest === "" && <HostPage client:only="react" />}
@@ -48,6 +51,7 @@ const title = rest === "" ? "This computer" : rest === "jobs" ? "Jobs" : rest ==
   {rest === "legal" && <LegalIndexPage client:only="react" />}
   {doc && <LegalDocPage slug={doc.slug} html={legalHtml} client:only="react" />}
   {lab && <LabPage lab={lab} client:only="react" />}
+  {sourcePage !== null && <SourcePage page={sourcePage as SourcePageId} client:only="react" />}
   {rest === "android" && <OverviewPage client:only="react" />}
   {rest === "android/analytics" && <AnalyticsPage client:only="react" />}
   {rest === "android/console" && <ConsolePage client:only="react" />}

@@ -53,3 +53,13 @@ without Node use the committed `dashboard/dist`. Every POST must carry
 `X-OSLab: 1` and every request a localhost `Host`, so other sites cannot drive
 the lab. Lab starts require the token returned by the plan preview. See
 [[tooling#Local test runner]] for the build freshness check.
+
+## Source navigation
+
+[[dashboard/src/views/source/pages.tsx]] provides localized Source Lab routes and
+uses the existing shell for mobile navigation and themes. The sidebar and
+Spotlight include Source destinations; record search reads private file-backed
+results only while the local palette is open.
+
+Public Source pages are informational, make no engine requests, and preserve
+locale/base/query links. Unimplemented analysis views say so explicitly.
