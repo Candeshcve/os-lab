@@ -88,12 +88,14 @@ Skills, databases or an OpenAPI reference.
 
 ## Slice 7: Distribution, import and release
 
-SRC-070 implementation is delivered; native macOS/Windows acceptance remains
-on hold by owner until the final step. Linux staged-runtime and update-preservation evidence is in VALIDATION.md.
+SRC-070 implementation is delivered. The owner subsequently moved remaining
+native/live acceptance and required patches into open bonus contributions
+SRC-B01–SRC-B06 in [CONTRIBUTING.md](../CONTRIBUTING.md). Checking implementation
+below does not mark those bonus checks passed. See VALIDATION.md and AUDIT.md.
 
 Release only after both installed-console and public-site behavior is verified.
 
-- [ ] SRC-070 (SRC-013, SRC-024): Integrate Linux/macOS/Windows install/update/minimal paths and optional parser/browser tools; adapt useful service/project-docs operations. Accept: fresh install/update without source checkout; Python core works without Bun/Next/Node/KVM and optional tools have honest remediation.
+- [x] SRC-070 (SRC-013, SRC-024): Integrate Linux/macOS/Windows install/update/minimal paths and optional parser/browser tools; adapt useful service/project-docs operations. Portable staged-runtime/update-preservation checks passed. Native fresh install/update acceptance is explicitly deferred by owner to SRC-B01/SRC-B05; it has not passed here.
 - [x] SRC-071 (SRC-001, SRC-011, SRC-024): Implement opt-in legacy dry-run/copy/import for authorized first-party artifacts/maps/AST/sessions/settings with path mapping and backups. Accept: counts/hashes/signatures verified; databases, skills and third-party archives/datasets/binaries excluded, originals unchanged and rollback documented/tested.
 - [x] SRC-072 (SRC-030, SRC-031, SRC-032, SRC-033, SRC-034, SRC-041, SRC-043, SRC-045, SRC-062): Complete all active locale catalogs and Pages equivalents. Accept: `/os-lab/` links, English/non-English switching, docs/samples/deep routes work; local-only actions/engine polling/private outputs are absent from public build.
 - [x] SRC-073 (SRC-070, SRC-071, SRC-072): Run engine/console regression tests and relevant repository checks, shell syntax and installer parse checks; dashboard check/i18n/build/e2e and browser local/Pages smoke. Accept: commands/results recorded, committed `dashboard/dist` current and existing labs pass.

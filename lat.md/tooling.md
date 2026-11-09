@@ -5,7 +5,9 @@ test suite, contribution flow and the project's security/licensing stance.
 
 ## Local test runner
 
-GitHub Actions is disabled for this repo; tests run locally via one script.
+The local runner complements enabled browser/content and Linux/macOS package
+workflows. Windows review builds do not imply permission to publish without
+Authenticode; its workflow requires SignPath or explicit unsigned-release approval.
 
 [[scripts/run-tests.sh]] is the CI replacement. It prepares a Python
 environment (a `.venv-test` unless `--no-venv`), runs the pytest suite in
@@ -36,8 +38,8 @@ the [[dashboard]] renders the same file at `/contribute/`. Contributions must no
 add vendor binaries or proprietary media (see [[legal#Google platform-tools]]).
 The Source Lab migration is tracked in [[source-lab/README.md]], with its plan,
 task queue and pinned source inventory. [[source-lab]] records the implemented
-engine, console and file-backed dashboard workflows. Native acceptance and
-release finalization remain tracked in its task queue.
+engine, console and file-backed dashboard workflows. Remaining native/live
+verification and patches are open Source bonus tasks in [[CONTRIBUTING.md]].
 
 Issue and PR templates are in
 [[.github/ISSUE_TEMPLATE]] and [[.github/PULL_REQUEST_TEMPLATE.md]]; behavior

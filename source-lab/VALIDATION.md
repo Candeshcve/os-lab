@@ -478,3 +478,22 @@ and stale intermediate UI status text were corrected. No new production
 dependency, third-party archive/dataset/binary, actual session or key is added.
 The import policy, Terms, Acceptable Use, Privacy, notices, contribution/security
 rules and staged paths were reviewed; `lat check` and `git diff --check` passed.
+
+## Finalization and owner deferral
+
+The app version is now **0.3.0** in Tauri, npm and Cargo manifests/locks.
+The integration was rebased onto master `5d823f5b`; its firewall/catalog and
+reservation changes are preserved. The owner directed remaining verification
+steps and required patches to bonus contributions before merge/release.
+SRC-B01–SRC-B06 are open and reservable in Contribute, with priorities and
+acceptance results. Native/manual/live checks remain unverified; no test result
+is inferred from that deferral. Release signatures and platform build checks
+are still required. No actual legacy data was imported.
+
+After rebase and bonus integration: all seven repository stages passed again
+(**153 + 176 tests**, two optional Android skips), dashboard types and **2,135**
+matching locale keys passed, local/Pages builds produced **457 routes**, **39**
+browser tests and the **112-route** public smoke passed. All six bonus cards
+were confirmed available with their exact reservation links and no hydration
+errors. Rust runtime **5**, staging/helper **7**, model **4** and portable
+acceptance **6** checks passed. `lat check` and whitespace checks passed.

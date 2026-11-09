@@ -2120,5 +2120,18 @@
   "Merged": "Combinado",
   "Curated": "Seleccionado",
   "Monitored": "Supervisado",
-  "Privileges": "Privilegios"
+  "Privileges": "Privilegios",
+  "Bonus: native Source installation": "Extra: instalación nativa de Source",
+  "Verify fresh installs, updates and private state on macOS and Windows.": "Verificar instalaciones nuevas, actualizaciones y datos privados en macOS y Windows.",
+  "Bonus: live browser acceptance": "Extra: validación del navegador en vivo",
+  "Verify the browser canary on owned targets with real Playwright and Chromium.": "Verificar la sonda del navegador en objetivos propios con Playwright y Chromium reales.",
+  "Bonus: native telemetry workflows": "Extra: flujos de telemetría nativa",
+  "Add authorized host collection recipes for the four native telemetry importers.": "Añadir instrucciones de recopilación autorizada para los cuatro importadores de telemetría nativa.",
+  "Bonus: reproducible Source snapshots": "Extra: instantáneas reproducibles de Source",
+  "Generate Brain and Pipeline snapshots with provenance from owned source trees.": "Generar instantáneas de Brain y Pipeline con procedencia desde árboles de código propios.",
+  "Bonus: native process and path checks": "Extra: controles nativos de procesos y rutas",
+  "Verify cancellation, restart, locks and filesystem protections on native hosts.": "Verificar cancelación, reinicio, bloqueos y protección del sistema de archivos en equipos nativos.",
+  "Bonus: large workspace browsing": "Extra: explorar espacios grandes",
+  "Add bounded pagination and summaries for workspaces beyond current read limits.": "Añadir paginación acotada y resúmenes para espacios que superen los límites de lectura.",
+  "Document results and required patches in source-lab/VALIDATION.md.": "Documentar resultados y parches necesarios en source-lab/VALIDATION.md."
 }

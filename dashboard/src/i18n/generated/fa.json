@@ -2120,5 +2120,18 @@
   "Merged": "ادغام‌شده",
   "Curated": "گزینش‌شده",
   "Monitored": "پایش‌شده",
-  "Privileges": "امتیازها"
+  "Privileges": "امتیازها",
+  "Bonus: native Source installation": "امتیازی: نصب بومی Source",
+  "Verify fresh installs, updates and private state on macOS and Windows.": "نصب تازه، به‌روزرسانی و داده‌های خصوصی را در macOS و Windows بررسی کنید.",
+  "Bonus: live browser acceptance": "امتیازی: بررسی مرورگر زنده",
+  "Verify the browser canary on owned targets with real Playwright and Chromium.": "کاوشگر مرورگر را با Playwright و Chromium واقعی روی اهداف متعلق به خود بررسی کنید.",
+  "Bonus: native telemetry workflows": "امتیازی: گردش کار تله‌متری بومی",
+  "Add authorized host collection recipes for the four native telemetry importers.": "راهنمای گردآوری مجاز میزبان را برای چهار واردکننده تله‌متری بومی اضافه کنید.",
+  "Bonus: reproducible Source snapshots": "امتیازی: نماهای تکرارپذیر Source",
+  "Generate Brain and Pipeline snapshots with provenance from owned source trees.": "نماهای Brain و Pipeline را با اطلاعات منشأ از درخت‌های کد خود بسازید.",
+  "Bonus: native process and path checks": "امتیازی: بررسی بومی فرایند و مسیر",
+  "Verify cancellation, restart, locks and filesystem protections on native hosts.": "لغو، راه‌اندازی مجدد، قفل‌ها و حفاظت فایل‌سیستم را روی میزبان‌های بومی بررسی کنید.",
+  "Bonus: large workspace browsing": "امتیازی: مرور فضای کاری بزرگ",
+  "Add bounded pagination and summaries for workspaces beyond current read limits.": "صفحه‌بندی محدود و خلاصه را برای فضاهای کاری فراتر از محدودیت خواندن اضافه کنید.",
+  "Document results and required patches in source-lab/VALIDATION.md.": "نتایج و وصله‌های لازم را در source-lab/VALIDATION.md ثبت کنید."
 }

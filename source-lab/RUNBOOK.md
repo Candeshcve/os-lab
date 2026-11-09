@@ -1,9 +1,10 @@
 # Source Lab operator and release runbook
 
-This migration is a draft. Static engine, guarded console workflows and the
-retained file-backed dashboard views are implemented. Native macOS/Windows
-installer acceptance is on hold by the owner until the last step. Do not treat
-Linux checks as native platform acceptance or advertise a completed release.
+Static engine, guarded console workflows and the retained file-backed dashboard
+views are implemented. The owner moved remaining native/live verification and
+required patches into open Source Lab bonus contributions, SRC-B01–SRC-B06 in
+[Contributing](../CONTRIBUTING.md). Portable checks do not establish native manual
+acceptance. Package signing/verification remains required for release publication.
 
 ## Start and configure
 
@@ -92,8 +93,10 @@ update with existing private state, Python 3.11+ readiness, static detection,
 previews/jobs/cancellation, report/source browsing and the documented optional
 fallbacks. Parse the Windows installer with both PowerShell 5.1 and 7; preserve
 its UTF-8 BOM. Record host/interpreter/app revision and results without private
-targets, keys, personal paths or session artifacts. The held native checks are
-required before finalizing SRC-070/SRC-073/SRC-074 or merging the draft.
+targets, keys, personal paths or session artifacts. Native acceptance remains
+open under SRC-B01/SRC-B05; live browser checks are SRC-B02. The owner deferred
+these checks from the integration merge into bonus work. This is a documented
+exception to the initial plan, not a passed native test.
 
 ## Operation recovery
 

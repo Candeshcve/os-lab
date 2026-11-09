@@ -8,8 +8,8 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "The roadmap task id being reserved, exactly as shown on the Contribute page (e.g. PENT-02, OS-11, FW-16). The file name must be <id>.json.",
-      "pattern": "^(PENT|OS|FW)-[0-9]{2}$"
+      "description": "The roadmap task id being reserved, exactly as shown on the Contribute page (e.g. PENT-02, OS-11, FW-16, SRC-B01). The file name must be <id>.json.",
+      "pattern": "^((PENT|OS|FW)-[0-9]{2}|SRC-B[0-9]{2})$"
     },
     "name": {
       "type": "string",

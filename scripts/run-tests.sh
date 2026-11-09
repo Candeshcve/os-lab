@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # os-lab local test runner — the CI replacement.
 #
-# GitHub Actions is disabled for this repo; run this script locally instead.
+# Run locally alongside the enabled browser/content and package workflows.
 # It mirrors what the old workflow did, plus repo-wide shell and graph checks.
 #
 # Usage:

@@ -2120,5 +2120,18 @@
   "Merged": "مدمج",
   "Curated": "منتقى",
   "Monitored": "مراقَب",
-  "Privileges": "الصلاحيات"
+  "Privileges": "الصلاحيات",
+  "Bonus: native Source installation": "إضافي: تثبيت Source الأصلي",
+  "Verify fresh installs, updates and private state on macOS and Windows.": "تحقق من التثبيت الجديد والتحديثات والبيانات الخاصة على macOS وWindows.",
+  "Bonus: live browser acceptance": "إضافي: التحقق من المتصفح الحي",
+  "Verify the browser canary on owned targets with real Playwright and Chromium.": "تحقق من مسبار المتصفح على أهداف تملكها باستخدام Playwright وChromium الحقيقيين.",
+  "Bonus: native telemetry workflows": "إضافي: سير عمل القياسات الأصلية",
+  "Add authorized host collection recipes for the four native telemetry importers.": "أضف إرشادات جمع مصرح بها للمضيف للمستوردات الأربعة للقياسات الأصلية.",
+  "Bonus: reproducible Source snapshots": "إضافي: لقطات Source قابلة للتكرار",
+  "Generate Brain and Pipeline snapshots with provenance from owned source trees.": "أنشئ لقطات Brain وPipeline مع معلومات المصدر من أشجار الشفرة التي تملكها.",
+  "Bonus: native process and path checks": "إضافي: فحوص العمليات والمسارات الأصلية",
+  "Verify cancellation, restart, locks and filesystem protections on native hosts.": "تحقق من الإلغاء وإعادة التشغيل والأقفال وحماية نظام الملفات على المضيفات الأصلية.",
+  "Bonus: large workspace browsing": "إضافي: تصفح مساحات العمل الكبيرة",
+  "Add bounded pagination and summaries for workspaces beyond current read limits.": "أضف صفحات محدودة وملخصات لمساحات العمل التي تتجاوز حدود القراءة الحالية.",
+  "Document results and required patches in source-lab/VALIDATION.md.": "وثق النتائج والتصحيحات المطلوبة في source-lab/VALIDATION.md."
 }

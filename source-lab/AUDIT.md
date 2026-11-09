@@ -65,3 +65,9 @@ acceptance, native verification and recovery. Portable checks exercise all five
 platforms with an empty PATH and disabled site packages; this is distinct from
 native installation or live collection acceptance. Follow-up work must retain
 these distinctions and the owner's explicit exclusions.
+
+The owner subsequently moved remaining native/live verification and required
+patches to open bonus contributions SRC-B01–SRC-B06 in
+[Contributing](../CONTRIBUTING.md). They are visible in the dashboard task list
+and are not marked complete. This supersedes the initial native pre-merge gate;
+it does not waive package signatures or claim native manual verification.

@@ -2120,5 +2120,18 @@
   "Merged": "Birleştirilmiş",
   "Curated": "Seçilmiş",
   "Monitored": "İzlenen",
-  "Privileges": "Ayrıcalıklar"
+  "Privileges": "Ayrıcalıklar",
+  "Bonus: native Source installation": "Bonus: yerel Source kurulumu",
+  "Verify fresh installs, updates and private state on macOS and Windows.": "macOS ve Windows üzerinde yeni kurulumları, güncellemeleri ve özel durumu doğrulayın.",
+  "Bonus: live browser acceptance": "Bonus: canlı tarayıcı doğrulaması",
+  "Verify the browser canary on owned targets with real Playwright and Chromium.": "Gerçek Playwright ve Chromium ile sahip olduğunuz hedeflerde tarayıcı kanaryasını doğrulayın.",
+  "Bonus: native telemetry workflows": "Bonus: yerel telemetri iş akışları",
+  "Add authorized host collection recipes for the four native telemetry importers.": "Dört yerel telemetri içe aktarıcısı için yetkili ana makine toplama tarifleri ekleyin.",
+  "Bonus: reproducible Source snapshots": "Bonus: tekrarlanabilir Source anlık görüntüleri",
+  "Generate Brain and Pipeline snapshots with provenance from owned source trees.": "Sahip olduğunuz kaynak ağaçlarından köken bilgisiyle Brain ve Pipeline anlık görüntüleri üretin.",
+  "Bonus: native process and path checks": "Bonus: yerel süreç ve yol kontrolleri",
+  "Verify cancellation, restart, locks and filesystem protections on native hosts.": "Yerel ana makinelerde iptal, yeniden başlatma, kilit ve dosya sistemi korumalarını doğrulayın.",
+  "Bonus: large workspace browsing": "Bonus: büyük çalışma alanlarını inceleme",
+  "Add bounded pagination and summaries for workspaces beyond current read limits.": "Mevcut okuma sınırlarını aşan çalışma alanları için sınırlı sayfalama ve özetler ekleyin.",
+  "Document results and required patches in source-lab/VALIDATION.md.": "Sonuçları ve gereken yamaları source-lab/VALIDATION.md içinde belgeleyin."
 }

@@ -1,8 +1,9 @@
 # App releases
 
 Release packages use the scripts in `app/scripts/` on their matching hosts.
-Linux and macOS workflows are enabled; Windows builds remain disabled pending
-signing/publication configuration. Local builds remain supported. The
+Linux and macOS workflows publish signed packages. Windows review builds can
+run independently; publication requires SignPath configuration or explicit
+unsigned-release approval. Local builds remain supported. The
 `updater-manifest` workflow publishes the signed feed only when all required
 platform assets are present. The release note for each version follows.
 

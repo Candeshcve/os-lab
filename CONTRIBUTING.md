@@ -227,6 +227,28 @@ read-only, `set -euo pipefail`, clear exit codes (`0` clean / `1` problem /
 | **FW-37** | **KVKK/Cookie/Privacy-Text Compliance Checker** | Checks allowlisted pages for required KVKK/cookie/privacy notices, flagging missing/stale policies. (Teached 23.10) | **Medium** · Small |
 | **FW-38** | **"Explain-Your-Rule" Audit (Unexplained Rule = Vulnerability)** | Requires a one-line justification per rule and blocks sign-off until every rule has a rationale. (Teached 23.10) | **Medium** · Small |
 
+### Source Lab bonus contributions — open
+
+The owner deferred the following remaining verification and related patches to
+bonus contributions. They are reservable in **Contribute → Roadmap & TODOs** as
+`SRC-B01`–`SRC-B06`; they are not course exam options or claims of completed
+native/live acceptance. Follow [the runbook](source-lab/RUNBOOK.md), record
+sanitized evidence in [VALIDATION.md](source-lab/VALIDATION.md), and include any
+required fixes with the verification. Release signatures remain mandatory.
+
+| Task | Priority | Required result |
+|---|---|---|
+| SRC-B01 — Native install/update | High | Fresh packaged and minimal macOS/Windows install, restart/update with existing private state, Python 3.11+ readiness, five-platform portable acceptance fingerprint and Source UI/report smoke; parse Windows installer with PowerShell 5.1 and 7. |
+| SRC-B02 — Live browser | High | Owned canary target, real Playwright/Chromium, signed non-synthetic session, deliberate tamper rejection, profile/process cleanup and documented optional-tool fallback. |
+| SRC-B03 — Native telemetry | Medium | Authorized Windows/macOS/Android/iOS collection recipes feeding the four retained importer libraries, host/tool provenance, integrity checks and no fabricated live proof. |
+| SRC-B04 — Snapshot generation | Medium | Reproducible Brain/Pipeline generation from owned source, revisions/dates/provider validation and absent-provider tests; no database, Skills or OpenAPI integration. |
+| SRC-B05 — Native lifecycle/path checks | High | Cancellation/timeout/restart, cross-process locks, CRLF sessions, symlink/junction/reparse-point refusal and private-key behavior on actual native hosts; patch failures. |
+| SRC-B06 — Large workspace browsing | Medium | Bounded pagination/summary-only reads beyond current target/session/aggregate limits, clear partial coverage and measured owned-fixture UI/API performance. |
+
+Further merger UI is skipped by owner. Research-only collection and remote
+hosting proposals remain separate upstream follow-ups, not hidden release
+requirements or implemented capabilities. See [scope audit](source-lab/AUDIT.md).
+
 ## Step 4: Add tests
 
 Add or update tests in `android-lab/lab/tests/` for any change in behaviour.

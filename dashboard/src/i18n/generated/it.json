@@ -2120,5 +2120,18 @@
   "Merged": "Unito",
   "Curated": "Selezionato",
   "Monitored": "Monitorato",
-  "Privileges": "Privilegi"
+  "Privileges": "Privilegi",
+  "Bonus: native Source installation": "Bonus: installazione nativa di Source",
+  "Verify fresh installs, updates and private state on macOS and Windows.": "Verificare nuove installazioni, aggiornamenti e dati privati su macOS e Windows.",
+  "Bonus: live browser acceptance": "Bonus: verifica del browser reale",
+  "Verify the browser canary on owned targets with real Playwright and Chromium.": "Verificare la sonda del browser su obiettivi propri con Playwright e Chromium reali.",
+  "Bonus: native telemetry workflows": "Bonus: flussi di telemetria nativa",
+  "Add authorized host collection recipes for the four native telemetry importers.": "Aggiungere procedure di raccolta autorizzata per i quattro importatori di telemetria nativa.",
+  "Bonus: reproducible Source snapshots": "Bonus: snapshot Source riproducibili",
+  "Generate Brain and Pipeline snapshots with provenance from owned source trees.": "Generare snapshot Brain e Pipeline con provenienza da alberi sorgente propri.",
+  "Bonus: native process and path checks": "Bonus: controlli nativi di processi e percorsi",
+  "Verify cancellation, restart, locks and filesystem protections on native hosts.": "Verificare annullamento, riavvio, blocchi e protezioni del filesystem sugli host nativi.",
+  "Bonus: large workspace browsing": "Bonus: esplorazione di grandi spazi",
+  "Add bounded pagination and summaries for workspaces beyond current read limits.": "Aggiungere paginazione limitata e riepiloghi per spazi oltre gli attuali limiti di lettura.",
+  "Document results and required patches in source-lab/VALIDATION.md.": "Documentare risultati e patch necessarie in source-lab/VALIDATION.md."
 }

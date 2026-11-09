@@ -116,4 +116,7 @@ unavailable. Snapshot relationships never claim to be runtime traces.
 
 The English technical prose is labeled; navigation and internal guide/legal
 links preserve locale/base paths. No private artifact or OpenAPI reference is
-rendered. [[source-lab/RUNBOOK.md]] records operation/recovery and held native gates.
+rendered. [[source-lab/RUNBOOK.md]] records operation/recovery and native bonus checks.
+
+[[dashboard/src/views/source-bonus-tasks.tsx]] adds six open, reservable Source
+verification/patch tasks to Contribute. They preserve explicit native/live limits.
