@@ -180,6 +180,26 @@ export interface ContentState {
   updateAvailable?: boolean;
 }
 
+export interface AppUpdateState {
+  installed: string | null;
+  latest: string | null;
+  updateAvailable: boolean;
+  checkedAt: number | null;
+  platform: string | null;
+  kind: string;
+  releaseUrl: string | null;
+  asset: { name: string; url: string } | null;
+  supported: boolean;
+  offline: boolean;
+  installing: boolean;
+  install: {
+    phase: "downloading" | "opening" | "done" | "error";
+    error: string | null;
+    path: string | null;
+    version?: string;
+  } | null;
+}
+
 export const api = {
   health: () => call<{ status: string; version: string; console: boolean }>("/api/health"),
   host: () => call<{ host: HostInfo; labs: LabStatus[] }>("/api/host"),
@@ -206,6 +226,10 @@ export const api = {
   contentUpdate: (hooks: boolean) => post<ContentState>("/api/content/update", { hooks }),
   contentReset: () => post<ContentState>("/api/content/reset"),
   contentCompanies: () => call<{ companies: unknown[]; source: "downloaded" | "bundled"; version: string | null }>("/api/content/companies"),
+  // Signed app releases (console/app_update.py): only the desktop app reports a version
+  appUpdateStatus: () => call<AppUpdateState>("/api/app/update"),
+  appUpdateCheck: () => post<AppUpdateState>("/api/app/update/check"),
+  appUpdateInstall: () => post<AppUpdateState>("/api/app/update/install"),
   upload: async (file: File) => {
     const form = new FormData();
     form.append("apk", file);
@@ -259,7 +283,7 @@ export function createStore<T>(load: () => Promise<T>, intervalMs: number) {
   }
   function use() {
     const [, rerender] = useReducer((n: number) => n + 1, 0);
-    useEffect(() => subscribe(rerender), []);
+    useEffect(() => import.meta.env.PUBLIC_SITE_MODE === "pages" ? undefined : subscribe(rerender), []);
     return { data, error, refresh };
   }
   return { use, refresh, get: () => data };

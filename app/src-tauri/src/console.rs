@@ -88,7 +88,7 @@ impl Console {
         healthy(port).then(|| url_for(port))
     }
 
-    pub fn start(&self, root: &Path, source: Source, log: &Path, data_dir: &Path, content_dir: &Path) -> Result<Started, String> {
+    pub fn start(&self, root: &Path, source: Source, log: &Path, data_dir: &Path, content_dir: &Path, app_version: &str) -> Result<Started, String> {
         if let Some(url) = self.running_url() {
             return Ok(Started {
                 url,
@@ -121,6 +121,8 @@ impl Console {
             .env("PYTHONUNBUFFERED", "1")
             .env("PYTHONIOENCODING", "utf-8")
             .env("OSLAB_CONTENT_DIR", content_dir)
+            // Lets the dashboard compare this build with the published release (console/app_update.py).
+            .env("OSLAB_APP_VERSION", app_version)
             .stdin(Stdio::null())
             .stdout(Stdio::from(out))
             .stderr(Stdio::from(err));

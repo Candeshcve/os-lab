@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowUpRightIcon,
   BookOpenIcon,
@@ -53,7 +53,20 @@ export function ContributeModal({ onClose, locale = "en" }: { onClose: () => voi
     };
   }, [onClose]);
 
-  const people = COMPANIES.filter((c) => c.author.github && c.author.name !== "Seed Example");
+  const [people, setPeople] = useState(() => COMPANIES.filter((c) => c.author.github && c.author.name !== "Seed Example")
+    .map((c) => ({ slug: c.slug, company: c.name, github: c.author.github! })));
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(`https://raw.githubusercontent.com/keyvanarasteh/os-lab/master/firewall-lab/catalog.json?t=${Date.now()}`, { signal: controller.signal, cache: "no-store" })
+      .then((response) => { if (!response.ok) throw new Error(`Catalog: ${response.status}`); return response.json(); })
+      .then((catalog: { contributors?: typeof people }) => {
+        if (Array.isArray(catalog.contributors)) setPeople(Array.from(new Map(catalog.contributors
+          .filter((c) => c.slug && c.company && /^[\w-]+$/.test(c.github))
+          .map((c) => [c.github.toLowerCase(), c])).values()));
+      })
+      .catch(() => { /* The bundled list remains available offline. */ });
+    return () => controller.abort();
+  }, []);
 
   return (
     <div className="cm-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
@@ -79,9 +92,9 @@ export function ContributeModal({ onClose, locale = "en" }: { onClose: () => voi
           <ul className="cm-people">
             {people.map((c, i) => (
               <li key={c.slug} style={{ animationDelay: `${300 + i * 45}ms` }}>
-                <a href={`https://github.com/${c.author.github}`} target="_blank" rel="noreferrer">
-                  <img src={`https://github.com/${c.author.github}.png?size=64`} alt="" width="32" height="32" loading="lazy" />
-                  <span><strong>@{c.author.github}</strong><small>{c.name}</small></span>
+                <a href={`https://github.com/${c.github}`} target="_blank" rel="noreferrer">
+                  <img src={`https://github.com/${c.github}.png?size=64`} alt="" width="32" height="32" loading="lazy" />
+                  <span><strong>@{c.github}</strong><small>{c.company}</small></span>
                 </a>
               </li>
             ))}

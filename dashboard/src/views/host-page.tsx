@@ -15,6 +15,7 @@ import { AppShell, LAB_ICON, labHref } from "../shell/app-shell";
 import { TopBar } from "../shell/top-bar";
 import { MinimalistHero } from "../apk-lab/components";
 import { Badge, Empty, Section, Skeleton } from "../components/ui";
+import { AppUpdatePanel } from "./app-update-panel";
 import { ContentPanel } from "./content-panel";
 import { localeFromPath, localePath } from "../i18n/paths";
 import { formatBytes, hostStore, type HostInfo, type LabStatus } from "../lib/api";
@@ -234,6 +235,8 @@ export default function HostPage() {
               <Section icon={<PackageIcon size={16} />} title="Host tools" description={`Found on PATH for ${host.root}.`}>
                 <Tools host={host} />
               </Section>
+
+              <AppUpdatePanel />
 
               <ContentPanel />
 

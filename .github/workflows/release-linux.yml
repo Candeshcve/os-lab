@@ -114,6 +114,8 @@ jobs:
             echo "The $tag tag does not point to this commit" >&2
             exit 1
           }
+          find ship -mindepth 1 -type f -exec mv -ft ship {} +
+          find ship -mindepth 1 -type d -empty -delete
           (cd ship && sha256sum -c -- *.sha256)
           if ! gh release view "$tag" >/dev/null 2>&1; then
             gh release create "$tag" --target "$GITHUB_SHA" --title "os-lab app $version" \

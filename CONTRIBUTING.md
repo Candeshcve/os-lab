@@ -71,6 +71,16 @@ Looking for high-impact areas to contribute? The following curated tasks are cla
 
 These tasks are also interactively browsable and filterable inside the dashboard under the **Contribute → Roadmap & TODOs** tab.
 
+### Reserving a task
+
+So two people don't build the same thing, **reserve a task before you start**. A reservation is just a
+PR that adds one file, `reservations/<TASK-ID>.json` (one file per task, so reservations never conflict).
+The easiest way is the **Reserve via PR** button on each task card, which opens a pre-filled PR for you;
+by hand, copy the template in [`reservations/README.md`](reservations/README.md). The dashboard shows each
+task as Available, Reserved, PR open or Done, and you keep your file's `status`/`pr` current as you go.
+Course midterm reservations add a `course` (and an option number in `note`) — see the course's
+`vize/vize-projesi.md`.
+
 ### 1. Penetration Testing (Pentesting)
 
 | ID | Task | Scope & Reference | Priority / Effort |
@@ -151,6 +161,28 @@ These tasks are also interactively browsable and filterable inside the dashboard
 | **OS-34** | **Bridged vs NAT Network Adapter Configurator & Checker** | Reads/sets adapter mode and verifies a reachable LAN IP (root cause of SSH failures). (Teached 12.10) | **Medium** · Small |
 | **OS-35** | **Browser-Extension Injection Detector (Static)** | `sha256sum`/`unzip`/`jq`/`rg` pipeline → H1–H5 clue report, detector/evidence/risk-rule kept distinct. (Teached ders06) | **Medium** · Small |
 | **OS-36** | **Classroom Server Reachability Checker (ping + SSH sweep)** | Sweeps the class subnet (e.g. `10.25.130.x`), reporting up/down and optional local roster mapping. (Teached 26.10) | **Medium** · Tiny–Small |
+| **OS-37** | **DNS Resolver Inventory & Health Check** | `resolvectl`/`resolv.conf`/stub (`127.0.0.53`) + per-interface DNS → report; flags the no-usable-resolver fault (Wi-Fi vs cable). (Teached 02.11) | **High** · Small |
+| **OS-38** | **Multi-Resolver nslookup/dig Comparator** | Queries a name against campus / `8.8.8.8` / `1.1.1.1`, compares answers and latency over N tries → report (the 02.11 homework). (Teached 02.11) | **High** · Small |
+| **OS-39** | **netplan DNS Configurator (approval-gated)** | Persistent DNS via `/etc/netplan/*.yaml` with a shown diff, `netplan try`/apply and a verify query; static vs DHCP. (Teached 02.11) | **Medium** · Small |
+| **OS-40** | **Wi-Fi / Interface DNS Troubleshooter** | Reproduces the 02.11 fault (DHCP `ignore-auto-dns`, empty resolver on Wi-Fi) and offers the `nmcli` fix; cache + AP/router/switch primer. (Teached 02.11) | **High** · Small |
+
+#### Bonus — shipped reference tools (not reservable)
+
+These are already implemented and merged under
+[`linux-lab/scripts/bonus/`](linux-lab/scripts/bonus/). They close recurring
+gaps that are not covered by OS-01…OS-40 and are **not** vize tasks — reserve an
+`OS-…` row above instead. Read them as worked examples of the lab's script style:
+read-only, `set -euo pipefail`, clear exit codes (`0` clean / `1` problem /
+`2` usage), portable between macOS and Linux, no external tools required.
+
+| ID | Tool | What it does |
+|---|---|---|
+| **OS-B1** | `env-doctor.sh` | Validates a lab `.env` against its `.env.example` — missing keys, empty values, unknown/extra keys, duplicates (`--json` for CI). Nothing today checks a copied `.env` for drift. |
+| **OS-B2** | `port-check.sh` | Reports whether the lab's `WEB_PORT`/`SSH_PORT` (or ports you pass) are free on `127.0.0.1` via bash `/dev/tcp`, catching the "port already allocated" start failure before `make up`. |
+| **OS-B3** | `ssh-config-doctor.sh` | Summarises each `~/.ssh/config` Host block and flags a missing `HostName`, an absent `IdentityFile`, or a key with group/other-readable permissions that `ssh` silently ignores. |
+| **OS-B4** | `shell-lint.sh` | `bash -n` (the repo's required gate) over the `*.sh` you touched, plus `shellcheck` advisories when installed — a scoped pre-PR check instead of the whole-repo `run-tests.sh`. |
+| **OS-B5** | `md-linkcheck.sh` | Verifies local (non-http) Markdown links resolve on disk, so a typo'd path in `VERIFY.md`/`REPORT.md`/docs is caught before it becomes a dead link. |
+| **OS-B6** | `secret-scan.sh` | Scans for known credential signatures (PEM/OpenSSH keys, AWS/GitHub/Slack/Google tokens) and reports `file:line` + rule with the value **redacted**; `--staged` for a pre-commit check. Complements the release scripts' tracked-key guard. |
 
 ### 3. Firewall Solutions
 

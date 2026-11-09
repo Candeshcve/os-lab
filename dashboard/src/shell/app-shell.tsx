@@ -15,6 +15,7 @@ import {
   CpuIcon,
   DesktopTowerIcon,
   FireIcon,
+  ChatCircleTextIcon,
   GitPullRequestIcon,
   HeartbeatIcon,
   ScalesIcon,
@@ -39,6 +40,7 @@ import { copy, firewallPath, type FirewallLocale } from "../firewall/locale";
 import { localeFromPath, localePath } from "../i18n/paths";
 
 export const REPO_URL = "https://github.com/keyvanarasteh/os-lab";
+const PUBLIC_PAGES = import.meta.env.PUBLIC_SITE_MODE === "pages";
 
 export const LAB_ICON: Record<LabId, (size?: number) => ReactNode> = {
   android: (s = 16) => <AndroidLogoIcon size={s} />,
@@ -51,12 +53,13 @@ export const LAB_ICON: Record<LabId, (size?: number) => ReactNode> = {
 /** Where a section id leads. Pages are static files, so every section is a plain href. */
 export function sectionHref(id: string): string {
   const localized = (path: string) => localePath(path, typeof window === "undefined" ? "en" : localeFromPath(window.location.pathname));
-  if (id === "host") return localized("/");
+  if (id === "host") return PUBLIC_PAGES ? `${import.meta.env.BASE_URL.replace(/\/$/, "")}/` : localized("/");
   if (id === "jobs") return localized("/jobs/");
   if (id === "repo") return REPO_URL;
   if (id === "health") return localized("/health/");
   if (id === "legal") return localized("/legal/");
   if (id === "contribute") return localized("/contribute/");
+  if (id === "feedback") return localized("/feedback/");
   if (id === "content") return localized("/content/");
   if (id === "firewall") {
     const locale = typeof window === "undefined" ? "en" : localeFromPath(window.location.pathname);
@@ -92,6 +95,14 @@ function labShown(labs: LabStatus[] | undefined, id: LabId, activeId: string): b
 }
 
 function buildGroups(labs: LabStatus[] | undefined, running: Set<string>, androidRunning: boolean, locale: FirewallLocale, activeId: string): SidebarGroup[] {
+  if (PUBLIC_PAGES) return [
+    { label: "os-lab", items: [
+      { id: "host", label: "Home", icon: <DesktopTowerIcon size={16} /> },
+      { id: "firewall", label: copy[locale].lab, icon: <FireIcon size={16} /> },
+      { id: "feedback", label: "Feedback", icon: <ChatCircleTextIcon size={16} /> },
+      { id: "repo", label: "Repository", icon: <BookOpenIcon size={16} /> }
+    ] }
+  ];
   const lab = (id: LabId) => labs?.find((l) => l.id === id);
   const labItem = (id: LabId, label: string) => ({
     id: `lab-${id}`,
@@ -153,6 +164,7 @@ function buildGroups(labs: LabStatus[] | undefined, running: Set<string>, androi
           ]
         },
         { id: "contribute", label: "Contribute", icon: <GitPullRequestIcon size={16} /> },
+        { id: "feedback", label: "Feedback", icon: <ChatCircleTextIcon size={16} /> },
         { id: "repo", label: "Repository", icon: <BookOpenIcon size={16} /> }
       ]
     }
@@ -177,6 +189,7 @@ function buildMeta(): Record<string, SpotlightMeta> {
     firewall: { description: "BGT207 dream-company firewall designs — branches, segmentation, products and rule sets", aliases: ["firewall", "bgt207", "ufw", "rules", "vlan", "dmz", "company"] },
     health: { description: "GET /api/health", aliases: ["status", "api"] },
     contribute: { description: "How to set up, test, rebuild, open a pull request and view roadmap TODOs", aliases: ["contribute", "contributing", "pull request", "pr", "development", "tests", "todos", "roadmap", "pentesting", "firewall", "tasks"] },
+    feedback: { description: "Report issues, suggest features, and share feedback", aliases: ["feedback", "bug", "issue", "request", "suggestion", "help"] },
     "legal-terms": { description: "Licence, authorized use, OS licences, no warranty", aliases: ["legal", "terms", "license", "warranty", "liability"] },
     "legal-acceptable-use": { description: "Supported and unsupported use, responsible disclosure", aliases: ["legal", "aup", "policy", "disclosure"] },
     "legal-privacy": { description: "Local-only console, browser storage, network connections, analytics", aliases: ["legal", "privacy", "gdpr", "kvkk", "telemetry", "cookies"] },
@@ -227,7 +240,7 @@ function Brand({ compact = false, action }: { compact?: boolean; action?: ReactN
           : "flex h-14 shrink-0 items-center gap-2.5 border-b border-(--iux-border) pr-2 pl-4"
       }
     >
-      <img src="/favicon.svg" alt="os-lab" width={28} height={28} className="iux-logo" />
+      <img src={localePath("/favicon.svg", "en")} alt="os-lab" width={28} height={28} className="iux-logo" />
       {!compact && (
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm leading-5 font-semibold tracking-tight">os-lab</div>
@@ -306,14 +319,14 @@ export function AppShell({
   const allCommands = useMemo<SpotlightCommand[]>(
     () => [
       ...commands,
-      {
+      ...(!PUBLIC_PAGES ? [{
         id: "refresh",
         label: "Re-detect this computer",
         description: "Refresh OS, tools and lab availability",
         aliases: ["refresh", "detect", "rescan"],
         icon: <ArrowClockwiseIcon size={16} />,
         run: () => void hostStore.refresh()
-      },
+      }] : []),
       {
         id: "theme",
         label: "Toggle theme",
@@ -336,10 +349,10 @@ export function AppShell({
   const connected = health?.status === "ok" && !healthError;
   const footer = () => (
     <div className="flex items-center justify-between border-t border-(--iux-border) px-4 py-3 text-[10px] text-(--iux-muted-foreground)/70">
-      <span className="inline-flex items-center gap-1.5">
+      {!PUBLIC_PAGES && <span className="inline-flex items-center gap-1.5">
         <CircleIcon size={7} weight="fill" className={connected ? "text-(--iux-success)" : "text-(--iux-danger)"} />
         {connected ? "Lab engine connected" : healthError ? "Lab engine offline" : "Connecting…"}
-      </span>
+      </span>}
       <span>{host ? `${host.host.os} · ${host.host.arch}` : "os-lab"}</span>
     </div>
   );
@@ -372,8 +385,8 @@ export function AppShell({
         groups={groups}
         meta={meta}
         commands={allCommands}
-        records={records}
-        tips={[
+        records={PUBLIC_PAGES ? [] : records}
+        tips={PUBLIC_PAGES ? [] : [
           { scope: "jobs", description: "Search recent jobs", icon: <ListChecksIcon size={16} /> },
           ...(labShown(host?.labs, "windows", activeId) ? [{ scope: "windows", description: "Windows Lab actions", icon: <WindowsLogoIcon size={16} /> }] : []),
           { scope: "android", description: "Android Lab pages and actions", icon: <AndroidLogoIcon size={16} /> },

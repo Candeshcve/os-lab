@@ -58,9 +58,12 @@ remove them separately.
 
 ## Release checks
 
-The release workflows verify package contents and hashes. Linux CI also installs the Debian
-package, launches it under a virtual display, and uninstalls it. Windows CI does the same for the
-MSI. The macOS release script verifies code signatures, notarization and stapling before upload.
-Windows CI checks Authenticode when
-SignPath is configured. These checks do not replace a human first-run test on each operating
-system, especially for virtualization, container engines and hardware-backed labs.
+Releases are built and published locally on the matching host with the scripts in
+`app/scripts/`, not by CI; the GitHub workflows are kept but disabled. The scripts verify package
+contents, hashes and signatures before upload. `release-deb.sh` builds the Debian, RPM and
+AppImage packages for the host architecture, checks the bundled runtime and dashboard and that no
+secret-looking file is included, and signs each bundle with the Tauri updater key. The macOS
+script verifies code signatures, notarization and stapling, and the Windows script checks
+Authenticode when a certificate is configured. These checks do not replace a human first-run test
+on each operating system, especially for virtualization, container engines and hardware-backed
+labs.

@@ -28,9 +28,19 @@ test("launcher grants each Tauri command it calls", () => {
   const launcher = readFileSync(join(base, "ui", "launcher.js"), "utf8");
   const capability = JSON.parse(readFileSync(join(base, "src-tauri", "capabilities", "launcher.json"), "utf8"));
   const manifest = readFileSync(join(base, "src-tauri", "build.rs"), "utf8");
+  const declared = readFileSync(join(base, "src-tauri", "permissions", "app_updates.toml"), "utf8");
   const commands = [...launcher.matchAll(/invoke\("([a-z_]+)"/g)].map((match) => match[1]);
   for (const command of commands) {
     assert.ok(capability.permissions.includes(`allow-${command.replaceAll("_", "-")}`), command);
-    assert.ok(manifest.includes(`"${command}"`), `build.rs: ${command}`);
+    assert.ok(manifest.includes(`"${command}"`) || declared.includes(`"${command}"`), command);
   }
+});
+
+test("the container warning has an explicit, persistent opt-out", () => {
+  const base = join(import.meta.dirname, "..");
+  const html = readFileSync(join(base, "ui", "index.html"), "utf8");
+  const launcher = readFileSync(join(base, "ui", "launcher.js"), "utf8");
+  assert.match(html, /id="dont-show-row"[^>]*hidden/);
+  assert.match(launcher, /container_warning_hidden/);
+  assert.match(launcher, /container_warning_set_hidden/);
 });

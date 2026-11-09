@@ -325,50 +325,59 @@ function Monitor({ lab }: { lab: LabId }) {
 
 function Configuration({ lab, ready, onProfile }: { lab: LabId; ready: boolean; onProfile: (profile: string) => void }) {
   const { data, error } = usePoll(() => api.config(lab), 0, [lab]);
-  if (error) return <Section title="Configuration"><Status value={{ ok: false, text: error }} /></Section>;
-  if (!data) return <Section title="Configuration"><Skeleton rows={2} /></Section>;
   return (
-    <>
-      {ready && data.endpoints.length ? (
-        <Section icon={<PlayIcon size={16} />} title="Endpoints" description="Addresses from the lab's configuration; they answer once the lab is running.">
-          <EndpointList items={data.endpoints} />
-        </Section>
-      ) : null}
-      <Section
-        icon={<GearSixIcon size={16} />}
-        title="Configuration"
-        description={
-          <>
-            <code>{data.path}</code> {data.exists ? "" : "(not created yet — defaults from the example file)"}. Secrets are masked.
-          </>
-        }
-      >
-        <div className="flex flex-col gap-4">
-          {data.profiles.length ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-medium">Profiles</span>
-              {data.profiles.map((p) => (
-                <button key={p} type="button" className="iux-btn" data-variant="outline" onClick={() => onProfile(p)} title={`Preview applying ${p}`}>
-                  {p}
-                </button>
-              ))}
+    <details className="iux-card group p-5">
+      <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold [&::-webkit-details-marker]:hidden">
+        <GearSixIcon size={16} className="text-[#f36c21]" />
+        Advanced settings
+        <span aria-hidden="true" className="ml-auto text-(--iux-muted-foreground) transition-transform group-open:rotate-90">›</span>
+      </summary>
+      <div className="mt-4 flex flex-col gap-4">
+        {error ? <Status value={{ ok: false, text: error }} /> : null}
+        {!data && !error ? <Skeleton rows={2} /> : null}
+        {data && ready && data.endpoints.length ? (
+          <Section icon={<PlayIcon size={16} />} title="Endpoints" description="Addresses from the lab's configuration; they answer once the lab is running.">
+            <EndpointList items={data.endpoints} />
+          </Section>
+        ) : null}
+        {data ? (
+          <Section
+            icon={<GearSixIcon size={16} />}
+            title="Configuration"
+            description={
+              <>
+                <code>{data.path}</code> {data.exists ? "" : "(not created yet — defaults from the example file)"}. Secrets are masked.
+              </>
+            }
+          >
+            <div className="flex flex-col gap-4">
+              {data.profiles.length ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-medium">Profiles</span>
+                  {data.profiles.map((p) => (
+                    <button key={p} type="button" className="iux-btn" data-variant="outline" onClick={() => onProfile(p)} title={`Preview applying ${p}`}>
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              <details>
+                <summary className="cursor-pointer text-sm">{data.fields.length} settings</summary>
+                <ul className="mt-3 max-h-80 overflow-y-auto text-xs">
+                  {data.fields.map((f) => (
+                    <li key={f.key} className="flex gap-3 border-b border-(--iux-border) py-1.5">
+                      <span className="w-48 shrink-0 truncate font-mono">{f.key}</span>
+                      <span className="min-w-0 flex-1 truncate font-mono text-(--iux-muted-foreground)">{f.value || "—"}</span>
+                      {f.local ? <Badge>.env</Badge> : null}
+                    </li>
+                  ))}
+                </ul>
+              </details>
             </div>
-          ) : null}
-          <details>
-            <summary className="cursor-pointer text-sm">{data.fields.length} settings</summary>
-            <ul className="mt-3 max-h-80 overflow-y-auto text-xs">
-              {data.fields.map((f) => (
-                <li key={f.key} className="flex gap-3 border-b border-(--iux-border) py-1.5">
-                  <span className="w-48 shrink-0 truncate font-mono">{f.key}</span>
-                  <span className="min-w-0 flex-1 truncate font-mono text-(--iux-muted-foreground)">{f.value || "—"}</span>
-                  {f.local ? <Badge>.env</Badge> : null}
-                </li>
-              ))}
-            </ul>
-          </details>
-        </div>
-      </Section>
-    </>
+          </Section>
+        ) : null}
+      </div>
+    </details>
   );
 }
 
@@ -502,7 +511,7 @@ export default function LabPage({ lab: labId }: { lab: LabId }) {
                       title="Dependencies"
                       description="What this lab needs on this computer."
                       action={
-                        actions.has("setup") ? (
+                        lab.requirements.some((r) => r.required && !r.found) && actions.has("setup") ? (
                           <button
                             type="button"
                             className={lab.state === "needs-setup" ? "iux-btn bg-[#f36c21] text-white hover:bg-[#fa7b32]" : "iux-btn"}

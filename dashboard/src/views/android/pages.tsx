@@ -181,9 +181,13 @@ export function ProvidersPage() {
             </ul>
           )}
         </Section>
-        <Section icon={<CpuIcon size={16} />} title="Emulator stack endpoints" description={<>Published when the dynamic stack runs (<a className="underline" href={labHref("android")}>Runtime &amp; setup</a>).</>}>
-          <EndpointList items={ANDROID_ENDPOINTS} />
-        </Section>
+        <details className="iux-card p-5">
+          <summary className="flex cursor-pointer items-center gap-2 text-sm font-semibold">
+            <CpuIcon size={16} className="text-[#f36c21]" /> Emulator stack endpoints
+          </summary>
+          <p className="mt-2 text-sm text-(--iux-muted-foreground)">Published when the dynamic stack runs (<a className="underline" href={labHref("android")}>Runtime &amp; setup</a>).</p>
+          <div className="mt-4"><EndpointList items={ANDROID_ENDPOINTS} /></div>
+        </details>
       </div>
       <Section icon={<UploadSimpleIcon size={16} />} title="Target APK" description="Upload a package or enter a path on disk.">
         <ApkTarget />

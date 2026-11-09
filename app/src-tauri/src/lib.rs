@@ -31,6 +31,7 @@ use runtime::Source;
 const STORE: &str = "settings.json";
 const ROOT_KEY: &str = "root";
 const FILES_DIR_KEY: &str = "files_dir";
+const CONTAINER_WARNING_KEY: &str = "container_warning_hidden";
 
 fn data_dir(app: &AppHandle) -> Result<PathBuf, String> {
     let default = app.path().app_data_dir().map_err(|e| e.to_string())?;
@@ -143,8 +144,9 @@ async fn console_start(app: AppHandle, state: State<'_, Console>) -> Result<Star
         .unwrap_or(data_dir(&app)?.join("content"));
     let log = console::log_path(&log_dir(&app)?);
     let data = data_dir(&app)?;
+    let version = app.package_info().version.to_string();
     let console = state.inner().clone();
-    tauri::async_runtime::spawn_blocking(move || console.start(&root, source, &log, &data, &content))
+    tauri::async_runtime::spawn_blocking(move || console.start(&root, source, &log, &data, &content, &version))
         .await
         .map_err(|e| e.to_string())?
 }
@@ -191,6 +193,27 @@ async fn python_install(app: AppHandle) -> Result<String, String> {
 async fn container_status() -> Result<container_runtime::Status, String> {
     tauri::async_runtime::spawn_blocking(container_runtime::status)
         .await.map_err(|e| e.to_string())
+}
+
+/// The launcher's "don't show this warning next time" preference. Only the automatic start reads
+/// it; an explicit retry or the File menu still shows the current status.
+#[tauri::command]
+fn container_warning_hidden(app: AppHandle) -> Result<bool, String> {
+    let store = app.store(STORE).map_err(|e| e.to_string())?;
+    Ok(store.get(CONTAINER_WARNING_KEY).and_then(|value| value.as_bool()).unwrap_or(false))
+}
+
+/// Persist the launcher preference. Removing the key when unchecked keeps settings.json clean and
+/// makes the default visible.
+#[tauri::command]
+fn container_warning_set_hidden(app: AppHandle, hidden: bool) -> Result<(), String> {
+    let store = app.store(STORE).map_err(|e| e.to_string())?;
+    if hidden {
+        store.set(CONTAINER_WARNING_KEY, true);
+    } else {
+        store.delete(CONTAINER_WARNING_KEY);
+    }
+    store.save().map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -325,6 +348,7 @@ fn build_window(app: &AppHandle, settings: Option<&str>) -> tauri::Result<()> {
     let page = match settings {
         Some("files") => "index.html?settings=files",
         Some("updates") => "index.html?settings=updates",
+        Some("container") => "index.html?settings=container",
         _ => "index.html",
     };
     WebviewWindowBuilder::new(app, "main", WebviewUrl::App(page.into()))
@@ -374,6 +398,9 @@ pub fn run() {
             if event.id().as_ref() == "files_settings" {
                 app.state::<Console>().stop();
                 let _ = build_window(app, Some("files"));
+            } else if event.id().as_ref() == "container_settings" {
+                app.state::<Console>().stop();
+                let _ = build_window(app, Some("container"));
             } else if event.id().as_ref() == "check_updates" {
                 app.state::<Console>().stop();
                 let _ = build_window(app, Some("updates"));
@@ -390,6 +417,8 @@ pub fn run() {
             console_choose_files_dir,
             python_install,
             container_status,
+            container_warning_hidden,
+            container_warning_set_hidden,
             container_recover,
             container_get,
             app_update_check,
@@ -398,6 +427,7 @@ pub fn run() {
         .setup(|app| {
             let file_menu = SubmenuBuilder::new(app, "File")
                 .text("files_settings", "Files folder…")
+                .text("container_settings", "Container setup…")
                 .text("check_updates", "Check for app updates…")
                 .separator()
                 .quit()

@@ -169,3 +169,10 @@ def test_content_posts_need_the_oslab_header_and_respect_the_offline_switch(web_
     assert _content_post(f"{web_server}/api/content/update").code == 403
     resp = _content_post(f"{web_server}/api/content/check", headers={"X-OSLab": "1"})
     assert resp.code == 400 and b"switched off" in resp.read()
+
+
+def test_app_update_status_is_reported_without_network(web_server):
+    data = json.load(urllib.request.urlopen(f"{web_server}/api/app/update"))
+    assert "supported" in data and "updateAvailable" in data
+    assert data["install"] is None
+
