@@ -240,7 +240,7 @@ function Brand({ compact = false, action }: { compact?: boolean; action?: ReactN
           : "flex h-14 shrink-0 items-center gap-2.5 border-b border-(--iux-border) pr-2 pl-4"
       }
     >
-      <img src="/favicon.svg" alt="os-lab" width={28} height={28} className="iux-logo" />
+      <img src={localePath("/favicon.svg", "en")} alt="os-lab" width={28} height={28} className="iux-logo" />
       {!compact && (
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm leading-5 font-semibold tracking-tight">os-lab</div>

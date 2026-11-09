@@ -76,4 +76,7 @@ if (locale !== "en") {
   const key = `./generated/${locale}.json`;
   const load = dictionaries[key];
   if (load) void load().then((module) => start(module.default, locale));
+} else if (import.meta.env.PUBLIC_SITE_MODE === "pages") {
+  // Public pages are served below the repository base path even in English.
+  start({}, "en");
 }
