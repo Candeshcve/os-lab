@@ -75,7 +75,10 @@ launcher also offers **Get Docker Desktop** when no working engine is available;
 is optional. The download action fetches Docker Desktop 4.98.0 for the host architecture, verifies the SHA-256
 published in Docker's release notes, and opens the installer. The user completes Docker's
 interactive installation and licensing, enables host virtualization if needed, then retries.
-**Continue to dashboard** remains available for labs that do not need containers. On Linux, the
+**Continue to dashboard** remains available for labs that do not need containers. Tick **Don't
+show this warning next time** to skip the page on later automatic starts; **File → Container
+setup…** reopens it, where clearing the tick restores the warning. An explicit **Retry** always
+rechecks the engine and shows the page again if it is still unavailable. On Linux, the
 dashboard's existing lab setup actions install Docker Engine and the lab scripts pull their
 container images when started. VM guest media is fetched by the relevant lab workflow or supplied
 by the operator; it is never redistributed by the app.
