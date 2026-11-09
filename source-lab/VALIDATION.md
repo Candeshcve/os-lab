@@ -497,3 +497,19 @@ browser tests and the **112-route** public smoke passed. All six bonus cards
 were confirmed available with their exact reservation links and no hydration
 errors. Rust runtime **5**, staging/helper **7**, model **4** and portable
 acceptance **6** checks passed. `lat check` and whitespace checks passed.
+
+## Published 0.3.0
+
+PR #103 merged at `687893e3`; immutable tag `app-v0.3.0` points to that commit.
+All tagged Linux, macOS and Windows builds passed. All ten packages and their
+20 SHA-256/signature sidecars were verified; the macOS job additionally passed
+Developer ID signing, notarization/stapling and platform verification. Windows
+MSI install/launch/uninstall passed, with Authenticode status `NotSigned`. The
+owner explicitly approved publishing these Windows installers with valid Tauri
+updater signatures and the SmartScreen limitation stated in the release notes.
+
+The release and verified five-platform updater feed were published on 2026-11-09.
+PR #105 fixes post-build Pages filtering; its final artifact passed all 112
+Source/guide routes across eight locales, with no engine requests/actions or
+hydration errors. Both integration PRs passed all platform and browser checks.
+Native/manual/live Source acceptance remains open in SRC-B01–SRC-B06.
