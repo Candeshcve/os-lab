@@ -308,3 +308,15 @@ Typecheck, **2,041**-key/seven-locale check, 409-route local/Pages builds, publi
 EN/TR smoke and full browser suite **33 passed**. Rotation/environment/invalid-URL
 controls have a dedicated browser check; existing console tests verify actual key
 writes, modes, signatures and precedence. No secret is delivered to the UI.
+
+## SRC-040: Crawler controls and joins
+
+Added typed retry/time/rate-wait/tree/AST/map bounds, offline bounded list parsing
+with selected-workspace and credential guards, and previewed private CSV joins.
+Catalog browsing distinguishes resource inputs from generated output.
+
+Source console **35 passed**; list/retry/stop/stage-failure engine checks **5
+passed**, plus both existing CSV tests. The fault injection preserves unrelated
+manifest/tree artifacts. Dashboard types, **2,051**-key locales and both builds
+passed. Browser run: 32 passed plus an unrelated Persian hydration check that
+passed its focused rerun; public 16-route EN/TR smoke passed. No data imported.

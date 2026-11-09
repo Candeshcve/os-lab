@@ -97,7 +97,7 @@ test("Source Overview and catalogs report loading, empty and failed requests", a
   await expect(page.locator('[aria-busy="true"]')).toBeVisible();
   await expect(page.getByRole("alert")).toHaveText("Invalid private artifact");
   await expect(page.getByRole("button", { name: "Retry" })).toBeVisible();
-  await page.route("**/api/source/sources", route => route.fulfill({ json: { stats: {}, files: [], mergedExtensions: [], curated: [], monitored: [] } }));
+  await page.route("**/api/source/sources*", route => route.fulfill({ json: { stats: {}, files: [], mergedExtensions: [], curated: [], monitored: [] } }));
   await page.goto("/source/sources/");
   await expect(page.getByText("No matching sources.")).toBeVisible();
 });

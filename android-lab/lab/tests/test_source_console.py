@@ -416,3 +416,41 @@ def test_crawler_lists_are_private_bounded_and_link_safe(console):
     files = {item["name"] for item in result["sourceFiles"]}
     assert "owned.txt" in files and "not-a-list.json" not in files and "linked.txt" not in files
     assert result["sourceFilesTruncated"] is False
+
+
+def test_crawler_tuning_and_catalog_join(console):
+    options = {"repos": ["owned/sample"], "retries": 2, "cloneTimeout": 10, "apiMaxWait": 1,
+               "maxTreeEntries": 10, "maxAstFiles": 2, "noMap": True}
+    plan = source_control.build_plan(web_ui.REPO_ROOT, {"lab": "source", "action": "crawl", "options": options})
+    assert "--retries" in plan["engineArgs"] and "--no-map" in plan["engineArgs"]
+    for field, value in [("retries", 6), ("cloneTimeout", 601), ("mapDetail", "shell"), ("maxAstFiles", -1)]:
+        with pytest.raises(ArtifactError):
+            source_control.build_plan(web_ui.REPO_ROOT, {"lab": "source", "action": "crawl", "options": {**options, field: value}})
+    source = console[1] / "resources/sources"
+    source.mkdir(parents=True, exist_ok=True)
+    for name, content in [("browser-extensions.csv", "Category,Extension,Repo Link,Description\n"),
+                          ("browser-extension-repos.csv", "repo_url,repo_name,category\nhttps://github.com/owned/sample,sample,Testing\n")]:
+        (source / name).write_text(content)
+    before = {p.name: p.read_bytes() for p in source.glob("*.csv")}
+    # Any preexisting hostile list link must be refused before a worker starts.
+    link = source / "linked.txt"
+    if link.is_symlink():
+        assert call(console, "/api/source/sources", {"options": {}, "preview": True})[0] == 400
+        link.unlink()
+    job = confirmed(console, "/api/source/sources", {})
+    assert job.state == "succeeded", job.lines
+    assert before == {p.name: p.read_bytes() for p in source.glob("*.csv")}
+    assert call(console, "/api/source/sources?origin=generated")[1]["stats"]["totalMerged"] == 1
+    assert call(console, "/api/source/sources?origin=generated&download=browser-extensions-merged.csv")[0] == 200
+
+
+def test_source_list_entries_cannot_escape_workspace(console):
+    sources = console[1] / "resources/sources"
+    sources.mkdir(parents=True, exist_ok=True)
+    file = sources / "guarded.txt"
+    for value in ("/etc", "../../outside", "https://user:private@github.com/owned/sample", "https://github.com/owned/sample?token=private"):
+        file.write_text(value + "\n")
+        assert call(console, "/api/source/analyzer", {"options": {"sourceFile": "guarded.txt"}, "preview": True})[0] == 400
+    file.write_text("https://github.com/owned/sample.git\n")
+    status, preview = call(console, "/api/source/analyzer", {"options": {"sourceFile": "guarded.txt"}, "preview": True})
+    assert status == 200 and "owned/sample" in preview["plan"]["engineArgs"]

@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Empty, Field, Section, Skeleton, Status } from "../../components/ui";
+import { hostStore } from "../../lib/api";
+import { SourceAction } from "./action";
 import { useSource } from "./client";
 import { sourceHref } from "./pages";
 
@@ -70,7 +72,10 @@ export function SourceOverview() {
 }
 interface SourceData { stats: Record<string, number>; files: { name: string; type: string; size: number }[]; mergedExtensions: Record<string, unknown>[]; curated: Record<string, unknown>[]; monitored: Record<string, unknown>[] }
 export function SourceCatalogs() {
-  const { data, error, loading, refresh } = useSource<SourceData>("sources");
+  const [origin, setOrigin] = useState("resources");
+  const { data: host, error: hostError } = hostStore.use();
+  const { data, error, loading, refresh } = useSource<SourceData>(`sources?origin=${origin}`);
+  const joined = useCallback(() => { setOrigin("generated"); refresh(); }, [refresh]);
   const [tab, setTab] = useState<"mergedExtensions" | "curated" | "monitored">("mergedExtensions");
   const [filter, setFilter] = useState("");
   if (loading) return <Skeleton />;
@@ -78,7 +83,9 @@ export function SourceCatalogs() {
   const rows = (data?.[tab] ?? []).filter(row => JSON.stringify(row).toLowerCase().includes(filter.toLowerCase()));
   const keys = [...new Set(rows.flatMap(row => Object.keys(row)))];
   return <Section title="Source catalogs" description="Only operator-provided catalogs are shown. No dataset is bundled.">
-    <div className="mb-4 flex flex-wrap gap-3">{data?.files.map(file => <a className="underline" key={file.name} href={`/api/source/sources?download=${encodeURIComponent(file.name)}`} data-no-translate>{file.name} ({file.size} B)</a>)}</div>
+    <Field label="Source"><select className="iux-input" value={origin} onChange={e => setOrigin(e.target.value)}><option value="resources">Resources</option><option value="generated">Generated catalogs</option></select></Field>
+    <SourceAction endpoint="sources" options={{}} ready={Boolean(!hostError && host?.labs.find(l => l.id === "source")?.state === "ready" && ["browser-extensions.csv", "browser-extension-repos.csv"].every(name => data?.files.some(f => f.name === name)))} onFinished={joined} />
+    <div className="mb-4 flex flex-wrap gap-3">{data?.files.map(file => <a className="underline" key={file.name} href={`/api/source/sources?origin=${origin}&download=${encodeURIComponent(file.name)}`} data-no-translate>{file.name} ({file.size} B)</a>)}</div>
     <div className="mb-3 flex flex-wrap gap-2">{(["mergedExtensions", "curated", "monitored"] as const).map(key => <button className="iux-btn" aria-pressed={tab === key} key={key} onClick={() => setTab(key)} data-no-translate>{key} ({data?.[key].length ?? 0})</button>)}</div>
     <Field label="Filter sources"><input className={input} value={filter} onChange={e => setFilter(e.target.value)} /></Field>
     <div className="mt-4 overflow-x-auto">{rows.length ? <table className={table}><thead><tr>{keys.map(key => <th key={key} data-no-translate>{key}</th>)}</tr></thead><tbody>{rows.map((row, i) => <tr key={i}>{keys.map(key => <td key={key} data-no-translate>{String(row[key] ?? "")}</td>)}</tr>)}</tbody></table> : <Empty>No matching sources.</Empty>}</div>

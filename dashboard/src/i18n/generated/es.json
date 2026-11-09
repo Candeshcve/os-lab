@@ -2039,5 +2039,15 @@
   "Selected session": "Sesión seleccionada",
   "Signing key": "Clave de firma",
   "Static analysis": "Análisis estático",
-  "The environment owns this key. Change it outside the dashboard.": "El entorno controla esta clave. Cámbiela fuera del panel."
+  "The environment owns this key. Change it outside the dashboard.": "El entorno controla esta clave. Cámbiela fuera del panel.",
+  "Retries": "Reintentos",
+  "Clone timeout": "Tiempo límite de clonación",
+  "Rate-limit wait": "Espera por límite de tasa",
+  "Tree entry limit": "Límite de entradas del árbol",
+  "AST file limit": "Límite de archivos AST",
+  "Map file limit": "Límite de archivos del mapa",
+  "Map budget": "Presupuesto del mapa",
+  "Source": "Fuente",
+  "Resources": "Recursos",
+  "Generated catalogs": "Catálogos generados"
 }

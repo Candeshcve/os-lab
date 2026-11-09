@@ -2039,5 +2039,15 @@
   "Selected session": "Seçili oturum",
   "Signing key": "İmza anahtarı",
   "Static analysis": "Statik analiz",
-  "The environment owns this key. Change it outside the dashboard.": "Bu anahtar ortama aittir. Panonun dışında değiştirin."
+  "The environment owns this key. Change it outside the dashboard.": "Bu anahtar ortama aittir. Panonun dışında değiştirin.",
+  "Retries": "Yeniden denemeler",
+  "Clone timeout": "Klon zaman aşımı",
+  "Rate-limit wait": "Hız sınırı beklemesi",
+  "Tree entry limit": "Ağaç girdi sınırı",
+  "AST file limit": "AST dosya sınırı",
+  "Map file limit": "Harita dosya sınırı",
+  "Map budget": "Harita bütçesi",
+  "Source": "Kaynak",
+  "Resources": "Kaynak dosyaları",
+  "Generated catalogs": "Oluşturulan kataloglar"
 }

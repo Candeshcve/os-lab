@@ -2039,5 +2039,15 @@
   "Selected session": "نشست انتخاب‌شده",
   "Signing key": "کلید امضا",
   "Static analysis": "تحلیل ایستا",
-  "The environment owns this key. Change it outside the dashboard.": "این کلید متعلق به محیط است. آن را خارج از داشبورد تغییر دهید."
+  "The environment owns this key. Change it outside the dashboard.": "این کلید متعلق به محیط است. آن را خارج از داشبورد تغییر دهید.",
+  "Retries": "تلاش‌های مجدد",
+  "Clone timeout": "مهلت کلون",
+  "Rate-limit wait": "انتظار محدودیت نرخ",
+  "Tree entry limit": "حد ورودی درخت",
+  "AST file limit": "حد فایل AST",
+  "Map file limit": "حد فایل نقشه",
+  "Map budget": "بودجه نقشه",
+  "Source": "منبع",
+  "Resources": "منابع",
+  "Generated catalogs": "فهرست‌های تولیدشده"
 }

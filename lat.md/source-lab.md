@@ -107,3 +107,13 @@ children and stops the process group if the console connection closes.
 [[source-lab/API.md]] records all retained methods and intentional contract
 adaptations. [[android-lab/lab/tests/test_source_console.py]] exercises real
 engine jobs, guards, credential handling, conflicts and interrupted recovery.
+
+## Crawler input boundaries
+
+[[source-lab/list_inputs.py]] parses bounded operator CSV/TXT/XLSX lists offline
+in a separate process.
+
+Console previews normalize only GitHub identifiers or available private
+directories. Typed retry/wait/file/map caps bound worker work.
+Catalog joins reuse the confirmed jobs service and write private output, keeping
+operator resource catalogs unchanged.

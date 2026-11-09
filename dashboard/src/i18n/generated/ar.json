@@ -2039,5 +2039,15 @@
   "Selected session": "الجلسة المحددة",
   "Signing key": "مفتاح التوقيع",
   "Static analysis": "التحليل الساكن",
-  "The environment owns this key. Change it outside the dashboard.": "البيئة تتحكم بهذا المفتاح. غيّره خارج لوحة التحكم."
+  "The environment owns this key. Change it outside the dashboard.": "البيئة تتحكم بهذا المفتاح. غيّره خارج لوحة التحكم.",
+  "Retries": "المحاولات",
+  "Clone timeout": "مهلة الاستنساخ",
+  "Rate-limit wait": "انتظار حد المعدل",
+  "Tree entry limit": "حد إدخالات الشجرة",
+  "AST file limit": "حد ملفات AST",
+  "Map file limit": "حد ملفات الخريطة",
+  "Map budget": "ميزانية الخريطة",
+  "Source": "المصدر",
+  "Resources": "الموارد",
+  "Generated catalogs": "الفهارس المُنشأة"
 }

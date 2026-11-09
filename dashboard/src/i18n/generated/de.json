@@ -2039,5 +2039,15 @@
   "Selected session": "Ausgewählte Sitzung",
   "Signing key": "Signierschlüssel",
   "Static analysis": "Statische Analyse",
-  "The environment owns this key. Change it outside the dashboard.": "Die Umgebung verwaltet diesen Schlüssel. Ändern Sie ihn außerhalb des Dashboards."
+  "The environment owns this key. Change it outside the dashboard.": "Die Umgebung verwaltet diesen Schlüssel. Ändern Sie ihn außerhalb des Dashboards.",
+  "Retries": "Wiederholungen",
+  "Clone timeout": "Klon-Zeitlimit",
+  "Rate-limit wait": "Wartezeit bei Ratenlimit",
+  "Tree entry limit": "Baumeintragslimit",
+  "AST file limit": "AST-Dateilimit",
+  "Map file limit": "Map-Dateilimit",
+  "Map budget": "Map-Zeitbudget",
+  "Source": "Quelle",
+  "Resources": "Ressourcen",
+  "Generated catalogs": "Generierte Kataloge"
 }

@@ -115,6 +115,7 @@ LABCTL_ACTIONS = ["status", "doctor", "urls", "logs", "monitor", "start", "stop"
 MAC_ACTIONS = ["status", "doctor", "setup", "start", "stop", "appium-install", "appium-start", "appium-stop"]
 
 ACTION_INFO = {
+    "csv-merge": ("Join catalogs", "Join operator catalogs into private storage."),
     "detect": ("Detect", "Analyze a selected local target."),
     "crawl": ("Crawl", "Analyze explicitly selected repositories."),
     "merge": ("Merge", "Plan or build selected authorized extensions."),

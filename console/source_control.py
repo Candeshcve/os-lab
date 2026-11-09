@@ -149,6 +149,43 @@ def source_lists(root: str) -> tuple[list[dict], bool]:
     return sorted(files, key=lambda item: item["name"]), truncated
 
 
+def list_targets(root: str, path: Path) -> list[str]:
+    result = subprocess.run([python(), str(Path(root) / "source-lab/list_inputs.py"), str(path)],
+                            capture_output=True, text=True, timeout=10)
+    if result.returncode != 0 or len(result.stdout) > 65536:
+        raise ArtifactError(400, "Invalid or oversized source list")
+    try:
+        values = json.loads(result.stdout)
+    except ValueError:
+        raise ArtifactError(400, "Invalid source list") from None
+    if not isinstance(values, list) or not 1 <= len(values) <= 100:
+        raise ArtifactError(400, "Choose 1–100 source targets")
+    base = storage(root)
+    local = {}
+    for item in candidates(root):
+        if item["kind"] == "directory":
+            candidate = checked(base, item["key"], exists=True)
+            local[str(candidate)] = candidate
+            local[item["key"]] = candidate
+    normalized = []
+    for value in values:
+        if not isinstance(value, str):
+            raise ArtifactError(400, "Invalid source target")
+        if value in local:
+            safe_tree(local[value])
+            normalized.append(str(local[value]))
+            continue
+        if value.startswith("https://github.com/"):
+            url = urllib.parse.urlsplit(value)
+            if url.query or url.fragment or url.username or url.password:
+                raise ArtifactError(400, "Credentials and URL parameters are not permitted")
+            value = url.path.strip("/").removesuffix(".git")
+        if not REPO.fullmatch(value) or any(p in (".", "..") for p in value.split("/")):
+            raise ArtifactError(400, "Source lists may contain GitHub slugs or available private targets only")
+        normalized.append(value)
+    return list(dict.fromkeys(normalized))
+
+
 def _integer(options: dict, key: str, default: int, maximum: int) -> int:
     value = options.get(key, default)
     if type(value) is not int or not 1 <= value <= maximum:
@@ -220,8 +257,9 @@ def build_plan(root: str, request: dict) -> dict:
     allowed = {
         "status": set(), "doctor": set(), "setup": set(),
         "detect": {"target", "platform", "runCanary", "testUrl", "session"},
-        "crawl": {"repos", "sourceFile", "workers", "depth", "noAst", "noMetadata", "resume", "keepWorkspace"},
+        "crawl": {"repos", "sourceFile", "workers", "depth", "noAst", "noMetadata", "resume", "keepWorkspace", "retries", "cloneTimeout", "apiMaxWait", "maxTreeEntries", "maxAstFiles", "noMap", "mapDetail", "mapMaxFiles", "mapBudgetMs"},
         "merge": {"slugs", "name", "includeFlagged", "allowClone", "mv", "plan"},
+        "csv-merge": set(),
         "runtime": {"action", "rotate", "testUrl", "slug", "session"},
     }
     if not isinstance(action, str) or action not in allowed or set(options) - allowed[action]:
@@ -279,8 +317,19 @@ def build_plan(root: str, request: dict) -> dict:
             resource = Path(os.environ.get("SOURCE_LAB_RESOURCES", str(base / "resources"))).expanduser().resolve()
             if not isinstance(source, str) or "/" in source or Path(source).suffix.lower() not in (".csv", ".txt", ".xlsx"):
                 raise ArtifactError(400, "Choose an available source list")
-            args += ["--input", str(checked(resource, "sources/" + source, exists=True))]
+            args += list_targets(root, checked(resource, "sources/" + source, exists=True))
         args += ["--workers", str(_integer(options, "workers", 1, 8)), "--depth", str(_integer(options, "depth", 1, 10))]
+        for key, flag, default, cap in (("retries", "--retries", 3, 5), ("cloneTimeout", "--clone-timeout", 300, 600),
+                ("apiMaxWait", "--api-max-wait", 90, 120), ("maxTreeEntries", "--max-tree-entries", 50000, 50000),
+                ("maxAstFiles", "--max-ast-files", 200, 1000), ("mapMaxFiles", "--map-max-files", 4000, 10000),
+                ("mapBudgetMs", "--map-budget-ms", 30000, 120000)):
+            args += [flag, str(_integer(options, key, default, cap))]
+        if _boolean(options, "noMap"):
+            args.append("--no-map")
+        if "mapDetail" in options:
+            if options["mapDetail"] not in ("files", "symbols", "full"):
+                raise ArtifactError(400, "Invalid map detail")
+            args += ["--map-detail", options["mapDetail"]]
         for key, flag, default in (("noAst", "--no-ast", True), ("noMetadata", "--no-metadata", True),
                                    ("resume", "--resume", False), ("keepWorkspace", "--keep-workspace", True)):
             if _boolean(options, key, default):
@@ -290,6 +339,21 @@ def build_plan(root: str, request: dict) -> dict:
             path = checked(base, folder)
             if path.exists():
                 safe_tree(path)
+    elif action == "csv-merge":
+        resources = Path(os.environ.get("SOURCE_LAB_RESOURCES", str(base / "resources"))).expanduser().resolve()
+        source = checked(resources, "sources", exists=True)
+        safe_tree(source)
+        for name in ("browser-extensions.csv", "browser-extension-repos.csv"):
+            file = checked(source, name, exists=True)
+            if file.stat().st_size > MAX_JSON:
+                raise ArtifactError(413, "Catalog exceeds the input limit")
+        for folder in ("analysis", "catalogs"):
+            path = checked(base, folder)
+            if path.exists():
+                safe_tree(path)
+        args += ["merge-csvs", "--sources", str(source), "--analysis-dir", str(checked(base, "analysis")),
+                 "--output-dir", str(checked(base, "catalogs"))]
+        effects = ["Joins operator catalogs with private analysis metadata into private catalogs/. Resource inputs remain unchanged. No network access."]
     elif action == "merge":
         slugs = options.get("slugs")
         if not isinstance(slugs, list) or not 1 <= len(slugs) <= 100:

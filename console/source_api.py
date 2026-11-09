@@ -125,17 +125,21 @@ class SourceAPI:
             return {"run": runs[0] if runs else None, "report": report, "summaryCount": len(rows), "summaryRows": rows[:50],
                     "sourceFiles": files, "sourceFilesTruncated": truncated}
         if endpoint == "sources":
-            q = self._query(query, ("download",))
-            reader = self._resource_reader()
+            q = self._query(query, ("download", "origin"))
+            if q.get("origin") not in (None, "resources", "generated"):
+                raise ArtifactError(400, "Invalid catalog origin")
+            generated = q.get("origin") == "generated"
+            reader = self.reader if generated else self._resource_reader()
+            folder = "catalogs" if generated else "sources"
             filenames = ("browser-extensions-merged.csv", "browser-extensions.csv", "browser-extension-repos.csv")
             if "download" in q:
                 if q["download"] not in filenames:
                     raise ArtifactError(400, "Unknown catalog download")
-                raw = reader._read(("sources", q["download"]), MAX_JSON)
+                raw = reader._read((folder, q["download"]), MAX_JSON)
                 return Download(redact(self.root, raw.decode("utf-8")).encode(), "text/csv; charset=utf-8", q["download"])
             lists, files = [], []
             for name in filenames:
-                raw = reader._read(("sources", name), MAX_JSON, optional=True)
+                raw = reader._read((folder, name), MAX_JSON, optional=True)
                 lists.append(list(csv.DictReader(io.StringIO(raw.decode("utf-8")))) if raw else [])
                 if raw is not None:
                     files.append({"name": name, "type": "CSV", "size": len(raw)})
@@ -245,7 +249,7 @@ class SourceAPI:
         raise ArtifactError(404, "Source Lab endpoint not found")
 
     def mutate(self, path: str, data: dict, method: str = "POST"):
-        actions = {"/api/source/detection": "detect", "/api/source/analyzer": "crawl",
+        actions = {"/api/source/sources": "csv-merge", "/api/source/detection": "detect", "/api/source/analyzer": "crawl",
                    "/api/source/deep-analysis": "crawl", "/api/source/deep-analysis/merge": "merge",
                    "/api/source/settings/runtime": "runtime"}
         if path not in actions or (method == "DELETE" and path != "/api/source/detection"):

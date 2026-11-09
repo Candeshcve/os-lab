@@ -88,3 +88,18 @@ hello-world stub remains retired. Explicit session verification uses a confirmed
 Runtime settings writes are atomic, use private modes where supported and never
 contact the configured URL. Rotation warns during preview that earlier sessions
 need the original key. No keys, journals or generated outputs are committed.
+
+## Crawler tuning and catalog joins
+
+Crawl options also accept bounded `retries` (1–5), `cloneTimeout` (1–600 seconds),
+`apiMaxWait` (1–120 seconds), `maxTreeEntries` (1–50,000), `maxAstFiles` (1–1,000),
+`noMap`, `mapDetail` (files/symbols/full), `mapMaxFiles` (1–10,000) and
+`mapBudgetMs` (1–120,000). Source lists are parsed offline with size/workbook caps
+before preview; only clean GitHub repository identifiers and available private
+directories are accepted. The plan binds the normalized targets.
+
+A new `POST /api/source/sources` uses the ordinary preview/confirmation envelope
+with empty options to join the two operator catalogs and analysis metadata into
+private `catalogs/`. Inputs remain unchanged. This adds one method beyond the
+19 retained upstream adapters. GET sources accepts `origin=resources|generated`
+for browsing/downloads. No catalog is bundled or fetched by this action.
