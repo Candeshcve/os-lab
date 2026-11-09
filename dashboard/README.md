@@ -11,9 +11,11 @@ backend: host detection, lab plans and jobs live in `console/oslab.py`.
 
 ## Pages
 
-The GitHub Pages build has a separate public home and publishes only Firewall
-Lab routes. `scripts/deploy-page.sh --dry-run` stages that artifact in
-`build-pages/`. The console-backed routes below remain local.
+The GitHub Pages build has a separate public home and retains Firewall Lab,
+informational Source Lab/workflow guides, Contribute, feedback and legal routes
+in all eight locales. `scripts/deploy-page.sh --dry-run` stages the final filtered
+artifact in `build-pages/`; run the Source Pages smoke against that directory,
+not only the raw Astro output. Console-backed lab controls remain local.
 
 | Route | What it shows |
 |-------|---------------|

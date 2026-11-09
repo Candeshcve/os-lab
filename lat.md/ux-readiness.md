@@ -30,3 +30,7 @@ legal prose is excluded from client translation.
 [[dashboard/scripts/source-pages-smoke.mjs]] checks every Source route and guide
 across all eight locales below `/os-lab/`, including query-preserving language
 switches. Public pages must issue no engine calls or operation controls.
+
+[[scripts/deploy-page.sh]] must retain public Source guides and community/legal
+links in every locale while filtering console-only routes. Test its final
+post-processed artifact, not only the raw Astro Pages output.
