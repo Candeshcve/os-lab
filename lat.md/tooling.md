@@ -32,6 +32,10 @@ Contribution flow, coding conventions and the authorization stance.
 They are in [[CONTRIBUTING.md]], step by step from setup to pull request, and
 the [[dashboard]] renders the same file at `/contribute/`. Contributions must not
 add vendor binaries or proprietary media (see [[legal#Google platform-tools]]).
+The proposed Source Lab migration is tracked in [[source-lab/README.md]],
+with its plan, task queue and pinned source inventory. These are planning
+documents; Source Lab has no implemented runtime yet.
+
 Issue and PR templates are in
 [[.github/ISSUE_TEMPLATE]] and [[.github/PULL_REQUEST_TEMPLATE.md]]; behavior
 expectations in [[CODE_OF_CONDUCT.md]].
