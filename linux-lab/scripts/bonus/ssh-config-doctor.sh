@@ -40,6 +40,7 @@ problems=0
 hosts=0
 
 # Expand a leading ~ in an IdentityFile path for the existence check.
+# shellcheck disable=SC2088  # the "~/" here is a literal glob pattern, not an expansion
 expand() { case "$1" in "~/"*) printf '%s/%s' "$HOME" "${1#~/}" ;; *) printf '%s' "$1" ;; esac; }
 
 # Mode check without stat's incompatible flags across macOS/Linux: a key must

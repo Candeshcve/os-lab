@@ -16,6 +16,9 @@ pipeline.
 | `env-doctor.sh` | Compares a lab `.env` against its `.env.example`: missing keys, empty values, unknown/extra keys, duplicate keys. | Labs ship `.env.example` but nothing verifies a copied `.env` still matches — a silent drift that breaks `docker compose` with a confusing error. |
 | `port-check.sh` | Reports whether a lab's host ports (`WEB_PORT`/`SSH_PORT` or ports you pass) are free on `127.0.0.1`, using only bash `/dev/tcp`. | "port is already allocated" is the most common lab-start failure; this catches it before `make up`, with no `nc`/`lsof`/`ss` dependency. |
 | `ssh-config-doctor.sh` | Summarises each `~/.ssh/config` Host block and flags a missing `HostName`, an `IdentityFile` that is absent on disk, or a key with group/other-readable permissions. | Remote-SSH (OS-02/OS-17/OS-20) breaks constantly on these three faults; a key with loose permissions is silently ignored by `ssh`. |
+| `shell-lint.sh` | Runs `bash -n` (the repo's required gate) over the `*.sh` you touched, plus `shellcheck` advisories when it is installed. | `run-tests.sh` checks the whole repo; there was no quick, scoped syntax check for just your change before a PR. |
+| `md-linkcheck.sh` | Checks that local (non-http) links in Markdown resolve on disk, resolving each relative to the file it appears in. | PRs add `VERIFY.md`/`REPORT.md` with relative links; a typo'd path is caught by nothing and only shows up as a dead link later. |
+| `secret-scan.sh` | Scans for known credential signatures (PEM/OpenSSH keys, AWS/GitHub/Slack/Google tokens, bearer assignments) and reports `file:line` + rule with the value **redacted**; `--staged` for pre-commit. | The release scripts only refuse *tracked* keys; contributors had nothing to catch a pasted token/key *before* committing. |
 
 ## Usage
 
@@ -32,6 +35,10 @@ scripts/bonus/port-check.sh --lab ../win-lab
 scripts/bonus/ssh-config-doctor.sh               # ~/.ssh/config
 scripts/bonus/ssh-config-doctor.sh --host lab    # one Host block
 scripts/bonus/ssh-config-doctor.sh --file ./ssh_config
+
+scripts/bonus/shell-lint.sh linux-lab/scripts    # bash -n (+ shellcheck if present)
+scripts/bonus/md-linkcheck.sh linux-lab          # local Markdown links resolve?
+scripts/bonus/secret-scan.sh --staged            # scan your staged changes
 ```
 
 Every tool supports `-h`/`--help`.
