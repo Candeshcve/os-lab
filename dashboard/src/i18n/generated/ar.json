@@ -2065,5 +2065,16 @@
   "Statistics": "الإحصاءات",
   "Structural map": "الخريطة الهيكلية",
   "Structural map is unavailable. Run the crawler with map generation enabled.": "الخريطة غير متاحة. شغّل الزاحف مع إنشاء الخريطة.",
-  "Symbols": "الرموز"
+  "Symbols": "الرموز",
+  "Console controls use guarded options. This reference also describes the engine CLI.": "تستخدم وحدة التحكم خيارات محمية. يصف المرجع أيضًا واجهة أوامر المحرك.",
+  "Dependency manifests": "بيانات التبعيات",
+  "Flow steps": "خطوات التدفق",
+  "GitHub requests": "طلبات GitHub",
+  "Inputs": "المدخلات",
+  "Manifest candidates": "البيانات المرشحة",
+  "Outputs": "المخرجات",
+  "Pinned architecture reference; no live run or automatic regeneration is implied.": "مرجع معماري مثبت؛ لا يعني تشغيلًا حيًا أو إعادة إنشاء تلقائية.",
+  "Pipeline reference": "مرجع مسار المعالجة",
+  "Risk rules": "قواعد المخاطر",
+  "Signatures": "التواقيع"
 }

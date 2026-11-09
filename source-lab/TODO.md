@@ -75,7 +75,7 @@ Keep structural maps distinct from evidence and expose snapshot provenance.
 **SRC-042 — skipped by owner.** Do not implement further merger planning/run/
 cancel/download UI or require merger UI parity for release. Existing engine/API
 functionality is retained; this task is neither open nor completed.
-- [ ] SRC-043 (SRC-030, SRC-040): Port Pipeline API/flowchart/stages/network/heuristics/candidates and bundled fallback. Accept: stage details match the pinned snapshot and its date is visible; no claim of automatic regeneration.
+- [x] SRC-043 (SRC-030, SRC-040): Port Pipeline API/flowchart/stages/network/heuristics/candidates and bundled fallback. Accept: stage details match the pinned snapshot and its date is visible; no claim of automatic regeneration.
 - [ ] SRC-044 (SRC-003, SRC-030): Prototype Brain's data/provider hooks and React/Astro embedding. Accept: documented feasibility for each inventory subview, dependency licenses checked and snapshot/API roots portable.
 - [ ] SRC-045 (SRC-044): Port Brain graph/tabs/filter/legend/usages/source/history/diff/flowchart/sequence/AI-rules/complexity/risk/stress/export and virtual store behavior. Accept: each usable upstream view has a fixture-backed check; absent providers show explicit unavailable states.
 
@@ -89,7 +89,7 @@ Skills, databases or an OpenAPI reference.
 ## Slice 7: Distribution, import and release
 
 SRC-070 implementation is delivered; native macOS/Windows acceptance remains
-pending. Linux staged-runtime and update-preservation evidence is in VALIDATION.md.
+on hold by owner until the final step. Linux staged-runtime and update-preservation evidence is in VALIDATION.md.
 
 Release only after both installed-console and public-site behavior is verified.
 

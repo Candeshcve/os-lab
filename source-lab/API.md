@@ -50,7 +50,7 @@ omitted. Other labs retain their existing in-memory lifecycle.
 | `/sources` | GET | Three operator-provided CSV catalogs with counts and actual available files. `download` names one of those catalogs. No hardcoded dataset counts. |
 | `/brain` | GET | Operator-supplied `storage/brain-data/manifest.json`, with namespaced graph links. Missing data returns 404. |
 | `/brain/files/{path}` | GET | Bounded JSON under that Brain root. |
-| `/pipeline` | GET | Optional `storage/snapshots/pipeline.json`; absent data has `available=false`, `data=null` and an explicit message. No claim of regeneration. |
+| `/pipeline` | GET | Operator `storage/snapshots/pipeline.json` or the pinned first-party architecture reference. `source`, `date`, `revision` identify provenance; neither is a live run. |
 | `/spotlight` | GET | `q`, optional `section` (evidence/deep-analysis/sources), `limit` (1–25); file-backed results only. |
 
 POST analyzer/deep-analysis/merge may also use `{action: "cancel", jobId}`;
@@ -81,8 +81,7 @@ file-backed bundles. Overview adds pinned migration annotations, dependency cate
 MV2/MV3 counts, background grouping and permission risk labels. Counts deduplicate
 a target within each matrix row. CSV includes annotations and protects formula cells.
 Annotations describe the imported snapshot; check vendor guidance before migration. Deep crawler tuning beyond these bounded
-options remains SRC-040. Snapshot data and richer Brain/Pipeline surfaces remain
-SRC-043–045. No database or Skills-backed Spotlight search is retained. The
+options remains SRC-040. Pipeline reference UI is available; Brain migration remains tracked separately. No database or Skills-backed Spotlight search is retained. The
 hello-world stub remains retired. Explicit session verification uses a confirmed runtime job; read endpoints continue to label integrity as unverified.
 
 Runtime settings writes are atomic, use private modes where supported and never

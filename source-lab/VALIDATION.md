@@ -350,3 +350,19 @@ Node or virtualization. No app build/publication was performed.
 Native macOS/Windows fresh install/update and PowerShell parser acceptance are
 not verified on this Linux host; SRC-070 stays unchecked until that evidence is
 available. The implementation is committed for review and later host testing.
+
+## SRC-043: Pipeline reference
+
+Ported the authorized first-party Pipeline architecture descriptors (12 stages,
+3 request descriptions, 9 signatures) from pinned source code, with provenance
+and fixed import date. These are code metadata, not third-party datasets or
+private generated outputs. Stage flow/details, inputs/outputs/network/failures,
+heuristics/candidates/dependencies and flow steps are available. Operator snapshots
+take precedence and are validated; neither source claims live regeneration.
+
+Dashboard types, **2,078**-key locales, local/Pages builds and **35 browser tests**
+passed; two console tests cover fallback provenance and invalid/operator
+snapshots. Public EN/TR smoke passed. Source packaging requires the metadata.
+
+Native macOS/Windows installer acceptance is explicitly **on hold by owner until
+the last step**; remaining implementation continues before requesting those runs.

@@ -2065,5 +2065,16 @@
   "Statistics": "آمار",
   "Structural map": "نقشه ساختاری",
   "Structural map is unavailable. Run the crawler with map generation enabled.": "نقشه در دسترس نیست. خزنده را با تولید نقشه اجرا کنید.",
-  "Symbols": "نمادها"
+  "Symbols": "نمادها",
+  "Console controls use guarded options. This reference also describes the engine CLI.": "کنسول از گزینه‌های محافظت‌شده استفاده می‌کند. این مرجع CLI موتور را نیز شرح می‌دهد.",
+  "Dependency manifests": "مانیفست‌های وابستگی",
+  "Flow steps": "گام‌های جریان",
+  "GitHub requests": "درخواست‌های GitHub",
+  "Inputs": "ورودی‌ها",
+  "Manifest candidates": "نامزدهای مانیفست",
+  "Outputs": "خروجی‌ها",
+  "Pinned architecture reference; no live run or automatic regeneration is implied.": "مرجع معماری ثابت؛ به معنای اجرای زنده یا تولید خودکار نیست.",
+  "Pipeline reference": "مرجع خط پردازش",
+  "Risk rules": "قواعد ریسک",
+  "Signatures": "امضاها"
 }

@@ -2065,5 +2065,16 @@
   "Statistics": "Statistiques",
   "Structural map": "Carte structurelle",
   "Structural map is unavailable. Run the crawler with map generation enabled.": "Carte indisponible. Lancez l’explorateur avec la génération de carte.",
-  "Symbols": "Symboles"
+  "Symbols": "Symboles",
+  "Console controls use guarded options. This reference also describes the engine CLI.": "La console utilise des options protégées. Cette référence décrit aussi la CLI du moteur.",
+  "Dependency manifests": "Manifestes de dépendances",
+  "Flow steps": "Étapes du flux",
+  "GitHub requests": "Requêtes GitHub",
+  "Inputs": "Entrées",
+  "Manifest candidates": "Manifestes candidats",
+  "Outputs": "Sorties",
+  "Pinned architecture reference; no live run or automatic regeneration is implied.": "Référence d’architecture figée ; aucune exécution en direct ni régénération automatique.",
+  "Pipeline reference": "Référence du pipeline",
+  "Risk rules": "Règles de risque",
+  "Signatures": "Signatures"
 }

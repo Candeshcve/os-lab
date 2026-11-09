@@ -225,3 +225,14 @@ test("Deep analysis preserves source links, legacy AST and structural map covera
   await map.getByRole("button", { name: "main.js", exact: true }).click();
   await expect(page).toHaveURL(/repo=owned%2Fsample&file=main.js/);
 });
+
+test("Pipeline labels its pinned fallback and exposes stage inputs and network details", async ({ page }) => {
+  await sourceShell(page);
+  await page.route("**/api/source/pipeline", route => route.fulfill({ status: 404, json: { error: "No operator snapshot" } }));
+  await page.goto("/source/pipeline/");
+  await expect(page.getByText("Pinned architecture reference; no live run or automatic regeneration is implied.")).toBeVisible();
+  await page.getByRole("button", { name: /Shallow clone repository/ }).click();
+  await page.getByText("Network", { exact: true }).first().click();
+  await expect(page.getByRole("main").getByText(/github.com/, { exact: false }).first()).toBeVisible();
+  await expect(page.getByText(/2026-11-09/)).toBeVisible();
+});

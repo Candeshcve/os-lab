@@ -89,7 +89,7 @@ def test_retained_read_routes_and_absent_snapshots(console):
     (brain / "fixture.json").write_text('{"nodes":[]}')
     assert call(console, "/api/source/brain")[1]["data"]["tabs"][0]["graph"] == "/api/source/brain/files/fixture.json"
     assert call(console, "/api/source/brain/files/fixture.json")[1] == {"nodes": []}
-    assert call(console, "/api/source/pipeline")[1]["available"] is False
+    assert call(console, "/api/source/pipeline")[1]["source"] == "bundled-reference"
     assert call(console, "/api/source")[0] == 404
     assert call(console, "/api/source/skills")[0] == 404
 
@@ -475,3 +475,20 @@ def test_source_requires_supported_python(monkeypatch):
     status = source_control.lab_status(web_ui.REPO_ROOT, "linux")
     assert status["state"] == "unavailable"
     assert not status["requirements"][0]["found"]
+
+
+def test_pipeline_reference_and_snapshot_provenance(console):
+    status, reference = call(console, "/api/source/pipeline")
+    assert status == 200 and reference["source"] == "bundled-reference"
+    assert reference["date"] == "2026-11-09" and len(reference["data"]["stages"]) == 12
+    folder = console[1] / "snapshots"
+    folder.mkdir(exist_ok=True)
+    path = folder / "pipeline.json"
+    try:
+        path.write_text(json.dumps({"date": "2026-01-01", "revision": "owned", "stages": []}))
+        result = call(console, "/api/source/pipeline")[1]
+        assert result["source"] == "operator-snapshot" and result["date"] == "2026-01-01"
+        path.write_text("[]")
+        assert call(console, "/api/source/pipeline")[0] == 400
+    finally:
+        path.unlink()

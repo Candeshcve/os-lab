@@ -117,3 +117,12 @@ Console previews normalize only GitHub identifiers or available private
 directories. Typed retry/wait/file/map caps bound worker work.
 Catalog joins reuse the confirmed jobs service and write private output, keeping
 operator resource catalogs unchanged.
+
+## Pipeline reference
+
+[[console/source_pipeline.json]] contains pinned first-party architecture
+descriptors with an explicit import date, not repository results or a live run.
+
+[[dashboard/src/views/source/pipeline.tsx]] renders stage flow and details,
+network requests, signatures, risk rules, manifest candidates and flow steps.
+An operator snapshot takes precedence; provenance stays visible in either case.

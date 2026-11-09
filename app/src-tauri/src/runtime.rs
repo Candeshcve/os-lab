@@ -34,6 +34,7 @@ const BUNDLE_FILES: &[&str] = &[
     "console/source_artifacts.py",
     "console/source_overview.py",
     "console/source_manifest_specs.json",
+    "console/source_pipeline.json",
     "console/content.py",
     "dashboard/dist/index.html",
     "docs/legal/PRIVACY.md",

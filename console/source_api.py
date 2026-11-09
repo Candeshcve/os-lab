@@ -236,8 +236,17 @@ class SourceAPI:
         if endpoint == "pipeline":
             self._query(query)
             data = self.reader._json(("snapshots", "pipeline.json"), optional=True)
-            return {"data": data, "available": data is not None, "source": "operator-snapshot" if data else "unavailable",
-                    "message": None if data else "No first-party Pipeline snapshot has been configured."}
+            if data is not None:
+                if not isinstance(data, dict) or not isinstance(data.get("stages"), list):
+                    raise ArtifactError(400, "Invalid Pipeline snapshot")
+                for stage in data["stages"]:
+                    if not isinstance(stage, dict) or any(not isinstance(stage.get(key), str) for key in ("id", "label", "phase", "description", "failure")) or type(stage.get("order")) is not int or any(not isinstance(stage.get(key), list) or any(not isinstance(item, str) for item in stage[key]) for key in ("reads", "writes", "network")):
+                        raise ArtifactError(400, "Invalid Pipeline stage")
+                return {"data": data, "available": True, "source": "operator-snapshot", "date": str(data.get("date", "unknown")),
+                        "revision": str(data.get("revision", "unknown")), "message": "Operator-provided snapshot; not a live run."}
+            reference = json.loads((Path(__file__).with_name("source_pipeline.json")).read_text())
+            return {"data": reference["data"], "available": True, "source": "bundled-reference", "date": reference["date"],
+                    "revision": reference["revision"], "message": "Pinned architecture reference; no run was performed."}
         if endpoint == "spotlight":
             q = self._query(query, ("q", "section", "limit"))
             text = q.get("q", "").strip().lower()

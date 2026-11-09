@@ -658,6 +658,13 @@
       "source_sha256": "f480d714b2b62c27f5391088328205c543e71a75f30c012a7cc5ff7723a6b7d2",
       "local_sha256": "687faeb38a2b594e4a0db43a57ade644ab2d5a499c532166e12ac1c545647102",
       "adaptation": "Extracted first-party manifest annotation metadata only; snapshot guidance, no dataset or browser policy freshness claim."
+    },
+    {
+      "source": "ui/src/brain/data/pipeline.ts",
+      "destination": "console/source_pipeline.json",
+      "source_sha256": "005338c96abbde9e0e2e25cec40e46ea44aebed012c1b36aa21e3afbc9a3274a",
+      "local_sha256": "c1756136af3f80275b9beb6ee0f895a1921c81152476f80e3c26044fc1409bd5",
+      "adaptation": "First-party architecture descriptors only; fixed import date, no third-party dataset, repository output or live snapshot imported."
     }
   ],
   "publication": {
