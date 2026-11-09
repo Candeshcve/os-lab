@@ -2133,5 +2133,18 @@
   "Verify cancellation, restart, locks and filesystem protections on native hosts.": "تحقق من الإلغاء وإعادة التشغيل والأقفال وحماية نظام الملفات على المضيفات الأصلية.",
   "Bonus: large workspace browsing": "إضافي: تصفح مساحات العمل الكبيرة",
   "Add bounded pagination and summaries for workspaces beyond current read limits.": "أضف صفحات محدودة وملخصات لمساحات العمل التي تتجاوز حدود القراءة الحالية.",
-  "Document results and required patches in source-lab/VALIDATION.md.": "وثق النتائج والتصحيحات المطلوبة في source-lab/VALIDATION.md."
+  "Document results and required patches in source-lab/VALIDATION.md.": "وثق النتائج والتصحيحات المطلوبة في source-lab/VALIDATION.md.",
+  "How to use": "كيفية الاستخدام",
+  "Describe your task and copy a prompt for any LLM to guide you through os-lab.": "صِف مهمتك وانسخ موجّهًا لأي نموذج لغوي ليرشدك في os-lab.",
+  "Built in your browser. No request is sent to an LLM or saved by this page. Review the prompt before sharing it; leave out secrets and private data.": "يُنشأ في متصفحك. لا تحفظ هذه الصفحة الطلب ولا ترسله إلى نموذج لغوي. راجع الموجّه قبل مشاركته واحذف الأسرار والبيانات الخاصة.",
+  "What do you want to do?": "ماذا تريد أن تفعل؟",
+  "The prompt includes the shipped capability catalog, platform limits, lab workflows, documentation links and your task. It does not include live host data. Generated guidance context is in English; the LLM is asked to answer in your task language.": "يتضمن الموجّه كتالوج القدرات وحدود المنصات وسير عمل المختبرات وروابط التوثيق ومهمتك، دون بيانات حية للجهاز. السياق بالإنجليزية ويُطلب من النموذج الإجابة بلغة مهمتك.",
+  "Generate and copy prompt": "إنشاء الموجّه ونسخه",
+  "Copying prompt…": "جارٍ نسخ الموجّه…",
+  "Prompt copied. Paste it into your preferred LLM.": "نُسخ الموجّه. الصقه في النموذج اللغوي الذي تفضله.",
+  "Clipboard unavailable. Select the generated prompt and copy it manually, or try again.": "الحافظة غير متاحة. حدد الموجّه وانسخه يدويًا أو حاول مجددًا.",
+  "Generated prompt": "الموجّه المُنشأ",
+  "Copy prompt again": "نسخ الموجّه مجددًا",
+  "Select prompt": "تحديد الموجّه",
+  "Create a task prompt with os-lab capabilities for any LLM": "إنشاء موجّه بقدرات os-lab لأي نموذج لغوي"
 }

@@ -2133,5 +2133,18 @@
   "Verify cancellation, restart, locks and filesystem protections on native hosts.": "Yerel ana makinelerde iptal, yeniden başlatma, kilit ve dosya sistemi korumalarını doğrulayın.",
   "Bonus: large workspace browsing": "Bonus: büyük çalışma alanlarını inceleme",
   "Add bounded pagination and summaries for workspaces beyond current read limits.": "Mevcut okuma sınırlarını aşan çalışma alanları için sınırlı sayfalama ve özetler ekleyin.",
-  "Document results and required patches in source-lab/VALIDATION.md.": "Sonuçları ve gereken yamaları source-lab/VALIDATION.md içinde belgeleyin."
+  "Document results and required patches in source-lab/VALIDATION.md.": "Sonuçları ve gereken yamaları source-lab/VALIDATION.md içinde belgeleyin.",
+  "How to use": "Nasıl kullanılır",
+  "Describe your task and copy a prompt for any LLM to guide you through os-lab.": "Görevinizi açıklayın ve os-lab için herhangi bir LLM’ye gönderebileceğiniz bir istem kopyalayın.",
+  "Built in your browser. No request is sent to an LLM or saved by this page. Review the prompt before sharing it; leave out secrets and private data.": "Tarayıcınızda oluşturulur. Bu sayfa isteği kaydetmez veya LLM’ye göndermez. Paylaşmadan önce istemi inceleyin; sırları ve özel verileri eklemeyin.",
+  "What do you want to do?": "Ne yapmak istiyorsunuz?",
+  "The prompt includes the shipped capability catalog, platform limits, lab workflows, documentation links and your task. It does not include live host data. Generated guidance context is in English; the LLM is asked to answer in your task language.": "İstem; yetenek kataloğu, platform sınırları, laboratuvar akışları, belge bağlantıları ve görevinizi içerir. Canlı ana makine verilerini içermez. Bağlam İngilizcedir; LLM’den görevinizin dilinde yanıt vermesi istenir.",
+  "Generate and copy prompt": "İstem oluştur ve kopyala",
+  "Copying prompt…": "İstem kopyalanıyor…",
+  "Prompt copied. Paste it into your preferred LLM.": "İstem kopyalandı. Tercih ettiğiniz LLM’ye yapıştırın.",
+  "Clipboard unavailable. Select the generated prompt and copy it manually, or try again.": "Panoya erişilemiyor. Oluşturulan istemi seçip elle kopyalayın veya tekrar deneyin.",
+  "Generated prompt": "Oluşturulan istem",
+  "Copy prompt again": "İstemi tekrar kopyala",
+  "Select prompt": "İstemi seç",
+  "Create a task prompt with os-lab capabilities for any LLM": "Herhangi bir LLM için os-lab yetenekleriyle görev istemi oluşturun"
 }

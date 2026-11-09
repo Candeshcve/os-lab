@@ -120,3 +120,15 @@ rendered. [[source-lab/RUNBOOK.md]] records operation/recovery and native bonus 
 
 [[dashboard/src/views/source-bonus-tasks.tsx]] adds six open, reservable Source
 verification/patch tasks to Contribute. They preserve explicit native/live limits.
+
+## Task prompt builder
+
+[[dashboard/src/views/how-to-use-page.tsx]] adds How to use under Workspace in
+both navigation modes, with localized `/how-to-use/` routes.
+
+[[dashboard/src/lib/how-to-use.ts]] combines the user task with the shipped
+[[console/capabilities.json]] catalog, platform limits, workflow guidance and
+repository/legal references. It never reads a live host report or calls an LLM.
+Submit generates and copies the prompt; clipboard failures retain a selectable
+preview with retry. Tasks remain in browser memory, without URL/storage persistence.
+[[scripts/deploy-page.sh]] retains these routes in every public locale.

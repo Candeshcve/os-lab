@@ -63,3 +63,19 @@ npm run build                                 # refresh dist/ before committing
 ```
 
 Run the console with `./labctl ui` (or `--port N`).
+
+### How to use
+
+Workspace → **How to use** (`/how-to-use/`, including all locale routes) works
+in the local console and public Pages. Describe a task and submit to generate
+and copy an LLM-ready prompt with the shipped capability catalog, platform
+constraints, workflows and guide/legal links. No LLM API, live host inventory or
+request persistence is used. Review the prompt before sharing; clipboard errors
+keep a read-only preview available for manual selection or retry.
+
+Verify the final public artifact from the repository root with
+`bash scripts/deploy-page.sh --dry-run`, then
+`node dashboard/scripts/how-to-use-pages-smoke.mjs dashboard/build-pages`.
+Set `HOW_TO_USE_ORIGIN=https://keyvanarasteh.github.io` for the same check on
+the live site. Run the existing Source Pages smoke against the same filtered
+artifact as well.

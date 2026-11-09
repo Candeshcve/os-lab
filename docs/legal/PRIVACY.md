@@ -55,6 +55,14 @@ appear in the local page URL and browser history. No graph or provider snapshot
 is saved to browser storage by Source Lab. Clear browser history to remove those
 URL records.
 
+The **How to use** page builds a prompt in browser memory from your task and
+public project context. It does not save the task, include live host data, call an
+LLM or send the task to a server. Submitting copies the generated prompt to your
+system clipboard if permission allows; it remains there according to your
+system/clipboard-history settings. Clear it there if needed. If you paste it into
+an external LLM, that provider handles it under its own policies; review the
+prompt and remove private data before sharing.
+
 ## 4. Network connections made on your behalf
 
 Installing, updating and running the labs contacts third parties. Each one

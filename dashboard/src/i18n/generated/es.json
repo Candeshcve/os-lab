@@ -2133,5 +2133,18 @@
   "Verify cancellation, restart, locks and filesystem protections on native hosts.": "Verificar cancelación, reinicio, bloqueos y protección del sistema de archivos en equipos nativos.",
   "Bonus: large workspace browsing": "Extra: explorar espacios grandes",
   "Add bounded pagination and summaries for workspaces beyond current read limits.": "Añadir paginación acotada y resúmenes para espacios que superen los límites de lectura.",
-  "Document results and required patches in source-lab/VALIDATION.md.": "Documentar resultados y parches necesarios en source-lab/VALIDATION.md."
+  "Document results and required patches in source-lab/VALIDATION.md.": "Documentar resultados y parches necesarios en source-lab/VALIDATION.md.",
+  "How to use": "Cómo usar",
+  "Describe your task and copy a prompt for any LLM to guide you through os-lab.": "Describe tu tarea y copia un prompt para que cualquier LLM te guíe en os-lab.",
+  "Built in your browser. No request is sent to an LLM or saved by this page. Review the prompt before sharing it; leave out secrets and private data.": "Se genera en tu navegador. Esta página no guarda ni envía la solicitud a un LLM. Revisa el prompt antes de compartirlo; omite secretos y datos privados.",
+  "What do you want to do?": "¿Qué quieres hacer?",
+  "The prompt includes the shipped capability catalog, platform limits, lab workflows, documentation links and your task. It does not include live host data. Generated guidance context is in English; the LLM is asked to answer in your task language.": "El prompt incluye el catálogo de capacidades, límites de plataforma, flujos de laboratorio, enlaces y tu tarea. No incluye datos actuales del equipo. El contexto está en inglés; se pide al LLM responder en el idioma de tu tarea.",
+  "Generate and copy prompt": "Generar y copiar prompt",
+  "Copying prompt…": "Copiando prompt…",
+  "Prompt copied. Paste it into your preferred LLM.": "Prompt copiado. Pégalo en tu LLM preferido.",
+  "Clipboard unavailable. Select the generated prompt and copy it manually, or try again.": "Portapapeles no disponible. Selecciona el prompt y cópialo manualmente o inténtalo de nuevo.",
+  "Generated prompt": "Prompt generado",
+  "Copy prompt again": "Copiar prompt de nuevo",
+  "Select prompt": "Seleccionar prompt",
+  "Create a task prompt with os-lab capabilities for any LLM": "Crear un prompt con las capacidades os-lab para cualquier LLM"
 }
