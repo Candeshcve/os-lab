@@ -2110,5 +2110,15 @@
   "Guide": "Guía",
   "Collectors": "Recolectores",
   "Legacy import": "Importación heredada",
-  "Runbook": "Manual operativo"
+  "Runbook": "Manual operativo",
+  "Analyzed targets": "Objetivos analizados",
+  "Manifest properties": "Propiedades del manifiesto",
+  "Service workers": "Service workers",
+  "Background scripts": "Scripts de fondo",
+  "Background pages": "Páginas de fondo",
+  "No background": "Sin fondo",
+  "Merged": "Combinado",
+  "Curated": "Seleccionado",
+  "Monitored": "Supervisado",
+  "Privileges": "Privilegios"
 }

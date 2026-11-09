@@ -2110,5 +2110,15 @@
   "Guide": "Anleitung",
   "Collectors": "Kollektoren",
   "Legacy import": "Legacy-Import",
-  "Runbook": "Betriebshandbuch"
+  "Runbook": "Betriebshandbuch",
+  "Analyzed targets": "Analysierte Ziele",
+  "Manifest properties": "Manifest-Eigenschaften",
+  "Service workers": "Service Worker",
+  "Background scripts": "Hintergrundskripte",
+  "Background pages": "Hintergrundseiten",
+  "No background": "Kein Hintergrund",
+  "Merged": "Zusammengeführt",
+  "Curated": "Kuratiert",
+  "Monitored": "Überwacht",
+  "Privileges": "Berechtigungen"
 }

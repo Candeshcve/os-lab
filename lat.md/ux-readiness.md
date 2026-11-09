@@ -26,3 +26,7 @@ legal prose is excluded from client translation.
 ## Verification
 
 [[dashboard/e2e/health-and-content.spec.ts]] covers dependency actions, advanced details, run failures, and hydration across page types. Dashboard type, translation, and static build checks complement browser tests. Public Pages links and locale switching are checked under `/os-lab/`.
+
+[[dashboard/scripts/source-pages-smoke.mjs]] checks every Source route and guide
+across all eight locales below `/os-lab/`, including query-preserving language
+switches. Public pages must issue no engine calls or operation controls.

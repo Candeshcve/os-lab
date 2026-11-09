@@ -79,7 +79,7 @@ export function SourceCrawler({ targetKey }: { targetKey?: string }) {
         {state.data?.sourceFilesTruncated && <p role="status">Source lists are capped.</p>}
         <div className="mt-4 flex flex-wrap gap-2"><button className="iux-btn" disabled={!ready || !valid || !tuningValid || busy || Boolean(conflict)} onClick={() => void act("preview")}>Preview crawl</button>{preview && <button className="iux-btn" disabled={!ready || busy || Boolean(conflict)} onClick={() => void act("run")}>Confirm and run</button>}{job?.state === "running" && <button className="iux-btn" disabled={busy} onClick={() => void act("cancel")}>Cancel crawl</button>}</div>
         {conflict && <p role="status">A Source job is running. Wait or cancel it before starting another.</p>}
-        {preview && <section className="mt-4 space-y-2 rounded border border-(--iux-border) p-3" aria-label="Crawl preview"><pre className="overflow-auto text-xs">{preview.plan.display}</pre><ul>{preview.plan.effects.map(effect => <li key={effect} data-no-translate>{effect}</li>)}</ul><p>Timeout <span data-no-translate>{preview.plan.timeoutSec}s</span></p></section>}
+        {preview && <section className="mt-4 space-y-2 rounded border border-(--iux-border) p-3" aria-label="Crawl preview"><pre className="overflow-auto text-xs">{preview.plan.display}</pre><ul>{preview.plan.effects.map(effect => <li key={effect} data-no-translate>{effect}</li>)}</ul><p>Privileges <span data-no-translate>{String(preview.plan.privileged)}</span></p><p>Timeout <span data-no-translate>{preview.plan.timeoutSec}s</span></p></section>}
       </>}
       <div className="mt-3"><Status value={error || pollError ? { ok: false, text: error ?? pollError! } : null} /></div>
     </Section>

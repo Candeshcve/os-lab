@@ -424,3 +424,17 @@ Dashboard types, **2,112**-key locales, **457-route** local/Pages builds, **39 b
 tests**, four graph-model tests, public EN/TR smoke and `lat check` passed. A
 dedicated browser test checks local guide links and Turkish navigation while
 retaining the English article language.
+
+## SRC-072: Locales and Pages acceptance
+
+All active catalogs contain **2,122** matching keys. Overview summaries/background
+groups/catalog tabs now use readable translated labels; preview privilege flags
+are explicit. Technical artifact data and English first-party guide prose remain
+identified as such. No private snapshot is in the public build.
+
+Dashboard types/i18n/build passed, local/Pages builds each produced **457 routes**,
+and the **39-test** browser suite passed with one worker. The committed reusable
+`source-pages-smoke.mjs` verified **112** Source/guide routes across English plus
+all seven catalogs, locale/base/query links and language switches, with **zero
+engine API requests, operation buttons or hydration errors**. New npm commands
+expose model and Pages acceptance checks.

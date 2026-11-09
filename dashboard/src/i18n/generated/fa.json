@@ -2110,5 +2110,15 @@
   "Guide": "راهنما",
   "Collectors": "گردآورنده‌ها",
   "Legacy import": "درون‌ریزی قدیمی",
-  "Runbook": "راهنمای عملیات"
+  "Runbook": "راهنمای عملیات",
+  "Analyzed targets": "هدف‌های تحلیل‌شده",
+  "Manifest properties": "ویژگی‌های مانیفست",
+  "Service workers": "سرویس‌ورکرها",
+  "Background scripts": "اسکریپت‌های پس‌زمینه",
+  "Background pages": "صفحات پس‌زمینه",
+  "No background": "بدون پس‌زمینه",
+  "Merged": "ادغام‌شده",
+  "Curated": "گزینش‌شده",
+  "Monitored": "پایش‌شده",
+  "Privileges": "امتیازها"
 }

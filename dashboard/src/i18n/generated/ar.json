@@ -2110,5 +2110,15 @@
   "Guide": "الدليل",
   "Collectors": "المجمّعات",
   "Legacy import": "الاستيراد القديم",
-  "Runbook": "دليل التشغيل"
+  "Runbook": "دليل التشغيل",
+  "Analyzed targets": "الأهداف المحللة",
+  "Manifest properties": "خصائص البيان",
+  "Service workers": "عمال الخدمة",
+  "Background scripts": "برامج الخلفية",
+  "Background pages": "صفحات الخلفية",
+  "No background": "بلا خلفية",
+  "Merged": "مدمج",
+  "Curated": "منتقى",
+  "Monitored": "مراقَب",
+  "Privileges": "الصلاحيات"
 }

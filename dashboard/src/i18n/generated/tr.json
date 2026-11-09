@@ -2110,5 +2110,15 @@
   "Guide": "Kılavuz",
   "Collectors": "Toplayıcılar",
   "Legacy import": "Eski çıktı içe aktarma",
-  "Runbook": "İşletim kılavuzu"
+  "Runbook": "İşletim kılavuzu",
+  "Analyzed targets": "Analiz edilen hedefler",
+  "Manifest properties": "Manifest özellikleri",
+  "Service workers": "Servis çalışanları",
+  "Background scripts": "Arka plan betikleri",
+  "Background pages": "Arka plan sayfaları",
+  "No background": "Arka plan yok",
+  "Merged": "Birleştirilmiş",
+  "Curated": "Seçilmiş",
+  "Monitored": "İzlenen",
+  "Privileges": "Ayrıcalıklar"
 }

@@ -8,6 +8,9 @@ import { sourceHref } from "./pages";
 interface MatrixRow { name: string; count: number; slugs: string[]; category?: string; mvStatus?: string; mv2?: number; mv3?: number; specNote?: string; migrationNote?: string; risk?: string; sections?: string[] }
 interface Extension { slug: string; repo: string; name: string; manifestVersion: string; version: string; description: string; riskLevel: string; heuristicScore: number | null; backgroundType: string; dependenciesCount: number; permissions: string[] }
 interface OverviewData { stats: Record<string, number>; propsMatrix: MatrixRow[]; depsMatrix: MatrixRow[]; permsMatrix: MatrixRow[]; swGroups: Record<string, string[]>; extensions: Extension[]; truncated: boolean }
+const statLabels: Record<string, string> = { totalAnalyzed: "Analyzed targets", mv2Count: "MV2", mv3Count: "MV3", uniquePropsCount: "Manifest properties", uniqueDepsCount: "Dependencies", uniquePermsCount: "Permissions", serviceWorkerCount: "Service workers", persistentScriptCount: "Background scripts", backgroundPageCount: "Background pages", noneCount: "No background" };
+const backgroundLabels: Record<string, string> = { serviceWorker: "Service workers", persistentScript: "Background scripts", backgroundPage: "Background pages", none: "No background" };
+const catalogLabels = { mergedExtensions: "Merged", curated: "Curated", monitored: "Monitored" };
 const tabs = { props: "Properties", workers: "Backgrounds", deps: "Dependencies", perms: "Permissions", inspector: "Inspector" };
 type Tab = keyof typeof tabs;
 const input = "iux-input w-full";
@@ -20,8 +23,8 @@ function useQueryValue(key: string, value: string) {
   }, [key, value]);
 }
 function Links({ slugs }: { slugs: string[] }) {
-  return <ul className="flex flex-col gap-2">{slugs.map(slug => <li key={slug} data-no-translate>
-    <a className="underline" href={sourceHref("deep-analysis", `?repo=${encodeURIComponent(slug.replace("__", "/"))}`)}>{slug}</a>{" · "}
+  return <ul className="flex flex-col gap-2">{slugs.map(slug => <li key={slug}>
+    <a className="underline" data-no-translate href={sourceHref("deep-analysis", `?repo=${encodeURIComponent(slug.replace("__", "/"))}`)}>{slug}</a>{" · "}
     <a className="underline" href={sourceHref("evidence", `?slug=${encodeURIComponent(slug)}`)}>Evidence</a>
   </li>)}</ul>;
 }
@@ -46,7 +49,7 @@ export function SourceOverview() {
   const targets = data.extensions.filter(ext => matchingSlugs.has(ext.slug) && JSON.stringify(ext).toLowerCase().includes(filter.toLowerCase()));
   return <>
     <Section title="Analysis summary" action={<button className="iux-btn" onClick={refresh}>Refresh</button>}>
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">{Object.entries(data.stats).map(([key, value]) => <div key={key}><dt className="break-words text-xs" data-no-translate>{key}</dt><dd className="text-xl font-semibold">{value}</dd></div>)}</dl>
+      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">{Object.entries(data.stats).map(([key, value]) => <div key={key}><dt className="break-words text-xs" >{statLabels[key] ?? key}</dt><dd className="text-xl font-semibold">{value}</dd></div>)}</dl>
       {data.truncated && <p role="status">Results are capped. Refine the private workspace before comparing totals.</p>}
       <div className="mt-3 flex flex-wrap gap-3"><a className="underline" href="/api/source/analyzer/merged?export=csv">Download CSV</a><a className="underline" href="/api/source/analyzer/merged?export=json" download="source-overview.json">Download JSON</a><a className="underline" href={sourceHref("sources")}>Sources</a></div>
     </Section>
@@ -61,7 +64,7 @@ export function SourceOverview() {
         <Field label="Category or risk"><select className={input} value={category} onChange={e => setCategory(e.target.value)}><option value="">All</option>{categories.map(value => <option key={value} value={value}>{value}</option>)}</select></Field>
         <Field label="Manifest version"><select className={input} value={version} onChange={e => setVersion(e.target.value)}><option value="">All</option><option value="2">MV2</option><option value="3">MV3</option></select></Field></div>
       <div id="source-matrix-panel" role="tabpanel" aria-labelledby={`source-tab-${tab}`} className="overflow-x-auto">
-        {tab === "workers" ? Object.entries(data.swGroups).map(([group, slugs]) => <details className="mb-3 rounded border border-(--iux-border) p-3" key={group}><summary data-no-translate>{group} ({slugs.filter(s => targets.some(t => t.slug === s)).length})</summary><Links slugs={slugs.filter(s => targets.some(t => t.slug === s))} /></details>) : tab === "inspector" ? targets.length ? <table className={table}><thead><tr><th>Target</th><th>Manifest version</th><th>Risk</th><th>Details</th></tr></thead><tbody>{targets.map(ext => <tr key={ext.slug}><td data-no-translate>{ext.name}<br />{ext.repo}</td><td>{ext.manifestVersion}</td><td data-no-translate>{ext.riskLevel}</td><td><button className="iux-btn" onClick={() => setSelected(ext)}>Inspect</button></td></tr>)}</tbody></table> : <Empty>No matching targets.</Empty> : visible.length ? <table className={table}><thead><tr><th>Name</th><th>Category or risk</th><th>Count</th>{tab === "props" && <th>MV2 / MV3</th>}<th>Details</th></tr></thead><tbody>{visible.map(row => <tr key={row.name}><td data-no-translate>{row.name}</td><td data-no-translate>{row.category ?? row.risk}</td><td>{row.count}</td>{tab === "props" && <td>{row.mv2} / {row.mv3}</td>}<td><button className="iux-btn" onClick={() => setSelected(row)}>Inspect</button></td></tr>)}</tbody></table> : <Empty>No matching results. Add authorized targets or adjust filters.</Empty>}
+        {tab === "workers" ? Object.entries(data.swGroups).map(([group, slugs]) => <details className="mb-3 rounded border border-(--iux-border) p-3" key={group}><summary><span>{backgroundLabels[group] ?? group}</span> ({slugs.filter(s => targets.some(t => t.slug === s)).length})</summary><Links slugs={slugs.filter(s => targets.some(t => t.slug === s))} /></details>) : tab === "inspector" ? targets.length ? <table className={table}><thead><tr><th>Target</th><th>Manifest version</th><th>Risk</th><th>Details</th></tr></thead><tbody>{targets.map(ext => <tr key={ext.slug}><td data-no-translate>{ext.name}<br />{ext.repo}</td><td>{ext.manifestVersion}</td><td data-no-translate>{ext.riskLevel}</td><td><button className="iux-btn" onClick={() => setSelected(ext)}>Inspect</button></td></tr>)}</tbody></table> : <Empty>No matching targets.</Empty> : visible.length ? <table className={table}><thead><tr><th>Name</th><th>Category or risk</th><th>Count</th>{tab === "props" && <th>MV2 / MV3</th>}<th>Details</th></tr></thead><tbody>{visible.map(row => <tr key={row.name}><td data-no-translate>{row.name}</td><td data-no-translate>{row.category ?? row.risk}</td><td>{row.count}</td>{tab === "props" && <td>{row.mv2} / {row.mv3}</td>}<td><button className="iux-btn" onClick={() => setSelected(row)}>Inspect</button></td></tr>)}</tbody></table> : <Empty>No matching results. Add authorized targets or adjust filters.</Empty>}
       </div>
     </Section>
     <dialog ref={dialog} className="iux iux-dialog max-h-[80dvh] w-full max-w-2xl overflow-auto p-5" aria-label="Source inspector" onClose={() => setSelected(undefined)}>
@@ -86,7 +89,7 @@ export function SourceCatalogs() {
     <Field label="Source"><select className="iux-input" value={origin} onChange={e => setOrigin(e.target.value)}><option value="resources">Resources</option><option value="generated">Generated catalogs</option></select></Field>
     <SourceAction endpoint="sources" options={{}} ready={Boolean(!hostError && host?.labs.find(l => l.id === "source")?.state === "ready" && ["browser-extensions.csv", "browser-extension-repos.csv"].every(name => data?.files.some(f => f.name === name)))} onFinished={joined} />
     <div className="mb-4 flex flex-wrap gap-3">{data?.files.map(file => <a className="underline" key={file.name} href={`/api/source/sources?origin=${origin}&download=${encodeURIComponent(file.name)}`} data-no-translate>{file.name} ({file.size} B)</a>)}</div>
-    <div className="mb-3 flex flex-wrap gap-2">{(["mergedExtensions", "curated", "monitored"] as const).map(key => <button className="iux-btn" aria-pressed={tab === key} key={key} onClick={() => setTab(key)} data-no-translate>{key} ({data?.[key].length ?? 0})</button>)}</div>
+    <div className="mb-3 flex flex-wrap gap-2">{(["mergedExtensions", "curated", "monitored"] as const).map(key => <button className="iux-btn" aria-pressed={tab === key} key={key} onClick={() => setTab(key)}><span>{catalogLabels[key]}</span> ({data?.[key].length ?? 0})</button>)}</div>
     <Field label="Filter sources"><input className={input} value={filter} onChange={e => setFilter(e.target.value)} /></Field>
     <div className="mt-4 overflow-x-auto">{rows.length ? <table className={table}><thead><tr>{keys.map(key => <th key={key} data-no-translate>{key}</th>)}</tr></thead><tbody>{rows.map((row, i) => <tr key={i}>{keys.map(key => <td key={key} data-no-translate>{String(row[key] ?? "")}</td>)}</tr>)}</tbody></table> : <Empty>No matching sources.</Empty>}</div>
   </Section>;
