@@ -50,9 +50,24 @@ The engine foundation validation completed on 2026-11-09:
   and no tracked excluded assets. The staged credential scanner found no
   credential signatures (synthetic test/example paths are skipped by that tool
   and were reviewed separately). `git diff --cached --check` passes.
-- A separate Pages build under `/os-lab/` and browser smoke verify the updated
-  legal notices in English/Turkish on local and public routes without hydration
-  errors, with Pages internal links retaining their base prefix.
+- The separate Pages build and browser smoke rendered all 12 English/Turkish
+  legal routes without hydration errors, but found that Markdown cross-links
+  escaped the Pages base. That check was initially recorded as passing before
+  its final result returned. The following navigation fix adds regression
+  coverage and reruns this check before publication.
 
 Console endpoints and Source Lab UI pages are not implemented by this milestone;
 their tasks remain open. No claim of full migration parity is made.
+
+## Legal navigation follow-up
+
+The follow-up fixes Markdown cross-links and legal navigation to preserve locale
+and Pages base paths. It changes navigation only; the legal terms are unchanged.
+Regression tests cover English/Turkish document links and following a terms link.
+The initial Turkish assertion used an English label that the UI translates; the
+assertion now uses the active-link semantics while still checking its exact URL.
+
+Follow-up results: dashboard check, translation check and local build pass; all
+17 browser tests pass. The separate Pages build passes. Browser smoke verifies
+12 English/Turkish local/Pages legal routes, both language-switch directions,
+following the terms link, correct Pages prefixes and no hydration errors.

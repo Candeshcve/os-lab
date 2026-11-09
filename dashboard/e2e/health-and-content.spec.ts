@@ -171,3 +171,16 @@ test("every local page type hydrates without a browser error", async ({ page }) 
     expect(errors, route).toEqual([]);
   }
 });
+
+for (const locale of ["", "/tr"]) {
+  test(`legal document links preserve ${locale || "English"} routing`, async ({ page }) => {
+    await mockApi(page);
+    await page.goto(`${locale}/legal/privacy/`);
+    const article = page.locator("article.legal-doc");
+    await expect(article.getByRole("link", { name: "Third-Party Notices" })).toHaveAttribute("href", `${locale}/legal/third-party/`);
+    await expect(article.getByRole("link", { name: "Terms of Use" })).toHaveAttribute("href", `${locale}/legal/terms/`);
+    await expect(page.locator("main nav a[aria-current=page]")).toHaveAttribute("href", `${locale}/legal/privacy/`);
+    await article.getByRole("link", { name: "Terms of Use" }).click();
+    await expect(page).toHaveURL(new RegExp(`${locale}/legal/terms/$`));
+  });
+}
