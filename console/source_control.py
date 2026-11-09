@@ -257,7 +257,7 @@ def build_plan(root: str, request: dict) -> dict:
     allowed = {
         "status": set(), "doctor": set(), "setup": set(),
         "detect": {"target", "platform", "runCanary", "testUrl", "session"},
-        "crawl": {"repos", "sourceFile", "workers", "depth", "noAst", "noMetadata", "resume", "keepWorkspace", "retries", "cloneTimeout", "apiMaxWait", "maxTreeEntries", "maxAstFiles", "noMap", "mapDetail", "mapMaxFiles", "mapBudgetMs"},
+        "crawl": {"target", "repos", "sourceFile", "workers", "depth", "noAst", "noMetadata", "resume", "keepWorkspace", "retries", "cloneTimeout", "apiMaxWait", "maxTreeEntries", "maxAstFiles", "noMap", "mapDetail", "mapMaxFiles", "mapBudgetMs"},
         "merge": {"slugs", "name", "includeFlagged", "allowClone", "mv", "plan"},
         "csv-merge": set(),
         "runtime": {"action", "rotate", "testUrl", "slug", "session"},
@@ -307,9 +307,17 @@ def build_plan(root: str, request: dict) -> dict:
         args += ["crawl"]
         repos = options.get("repos")
         source = options.get("sourceFile")
-        if bool(repos) == bool(source):
-            raise ArtifactError(400, "Choose repositories or one source list")
-        if repos:
+        candidate_key = options.get("target")
+        if sum(bool(v) for v in (repos, source, candidate_key)) != 1:
+            raise ArtifactError(400, "Choose repositories, a source list or an available private target")
+        if candidate_key:
+            target = next((item for item in candidates(root) if item["key"] == candidate_key and item["kind"] == "directory"), None)
+            if target is None:
+                raise ArtifactError(400, "Choose an available private directory")
+            path = checked(base, target["key"], exists=True)
+            safe_tree(path)
+            args += [str(path)]
+        elif repos:
             if not isinstance(repos, list) or not 1 <= len(repos) <= 100 or any(not isinstance(r, str) or not REPO.fullmatch(r) or any(p in (".", "..") for p in r.split("/")) for r in repos):
                 raise ArtifactError(400, "Use GitHub owner/repo identifiers")
             args += repos
@@ -334,7 +342,7 @@ def build_plan(root: str, request: dict) -> dict:
                                    ("resume", "--resume", False), ("keepWorkspace", "--keep-workspace", True)):
             if _boolean(options, key, default):
                 args.append(flag)
-        effects.append("Contacts GitHub for explicitly selected sources; may clone repositories. No credentials are accepted in requests or command arguments.")
+        effects.append("Reads the selected private directory; GitHub metadata is optional." if candidate_key else "Contacts GitHub for explicitly selected sources; may clone repositories. No credentials are accepted in requests or command arguments.")
         for folder in ("analysis", "cloned-repos"):
             path = checked(base, folder)
             if path.exists():

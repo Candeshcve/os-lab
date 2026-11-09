@@ -103,3 +103,10 @@ with empty options to join the two operator catalogs and analysis metadata into
 private `catalogs/`. Inputs remain unchanged. This adds one method beyond the
 19 retained upstream adapters. GET sources accepts `origin=resources|generated`
 for browsing/downloads. No catalog is bundled or fetched by this action.
+
+Deep analysis GET accepts `view=ast` with `repo` and `file`. Only the matching
+AST-index entry under that bundle's `ast/` directory can be read; source/private
+path and read-cap protections still apply. Missing AST artifacts return 404.
+Crawl adapters additionally accept `target`, an available private directory key,
+instead of repositories or a source list. Local runs use the CLI's `local__`
+output naming and do not clone repositories.

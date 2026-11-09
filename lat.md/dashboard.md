@@ -84,3 +84,10 @@ generation/rotation, configured canary URL and explicit session verification.
 Environment-owned keys are read-only; rotation needs acknowledgement and command
 confirmation. Evidence collection modes distinguish static, canary and selected
 sessions; optional browser tooling never blocks static analysis.
+
+[[dashboard/src/views/source/deep.tsx]] browses bundles, source and indexed AST
+artifacts through repo/file deep links. Its structural map dialog filters files
+by role/language and shows stats, targets, coverage, symbols and imports.
+
+Map navigation is distinct from evidence. Available private targets have a
+bound crawler action; missing maps/workspaces are explicit unavailable states.

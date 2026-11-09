@@ -2049,5 +2049,21 @@
   "Map budget": "Budget mappa",
   "Source": "Sorgente",
   "Resources": "Risorse",
-  "Generated catalogs": "Cataloghi generati"
+  "Generated catalogs": "Cataloghi generati",
+  "A structural map describes source structure, not observed behavior.": "Una mappa strutturale descrive il codice, non il comportamento osservato.",
+  "AST": "AST",
+  "AST index": "Indice AST",
+  "Entrypoints": "Punti di ingresso",
+  "File": "File",
+  "Imports": "Importazioni",
+  "Language": "Lingua",
+  "Manifest": "Manifest",
+  "Metadata": "Metadati",
+  "Next": "Avanti",
+  "Previous": "Indietro",
+  "Role": "Ruolo",
+  "Statistics": "Statistiche",
+  "Structural map": "Mappa strutturale",
+  "Structural map is unavailable. Run the crawler with map generation enabled.": "Mappa non disponibile. Esegui il crawler con generazione della mappa.",
+  "Symbols": "Simboli"
 }

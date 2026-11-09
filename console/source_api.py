@@ -148,13 +148,26 @@ class SourceAPI:
                     "categories": sorted({r.get("category", "") for r in merged} - {""}), "files": files,
                     "stats": {"totalMerged": len(merged), "totalCurated": len(curated), "totalMonitored": len(monitored)}}
         if endpoint == "deep-analysis":
-            q = self._query(query, ("repo", "file"))
+            q = self._query(query, ("repo", "file", "view"))
+            if q.get("view") not in (None, "ast") or ("view" in q and "file" not in q):
+                raise ArtifactError(400, "Invalid source view")
             if "file" in q and "repo" not in q:
                 raise ArtifactError(400, "A file requires a repository")
             if "repo" in q:
                 repo = q["repo"]
                 slug = repo.replace("/", "__")
                 SourceArtifacts._slug(slug)
+                if "file" in q and q.get("view") == "ast":
+                    if any(part.startswith(".") or oslab.is_secret(part) or part.lower().endswith((".key", ".pem", ".p12", ".db", ".sqlite")) for part in q["file"].split("/")):
+                        raise ArtifactError(403, "Private file is not available")
+                    index = self.reader._json(("analysis", slug, "ast-index.json"), optional=True) or []
+                    if not isinstance(index, list):
+                        raise ArtifactError(400, "Invalid AST index")
+                    match = next((item for item in index if isinstance(item, dict) and item.get("path") == q["file"]), None)
+                    if not match or not isinstance(match.get("file"), str) or not match["file"].startswith("ast/") or not match["file"].endswith(".json"):
+                        raise ArtifactError(404, "AST artifact not available")
+                    control.checked(self.reader.storage, "analysis/" + slug + "/" + match["file"], exists=True)
+                    return {"repo": repo, "file": q["file"], "ast": self.reader._json(("analysis", slug, *match["file"].split("/")))}
                 if "file" in q:
                     parts = q["file"].split("/")
                     if any(part.startswith(".") or oslab.is_secret(part) or part.lower().endswith((".key", ".pem", ".p12", ".db", ".sqlite")) for part in parts):

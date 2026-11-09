@@ -2049,5 +2049,21 @@
   "Map budget": "بودجه نقشه",
   "Source": "منبع",
   "Resources": "منابع",
-  "Generated catalogs": "فهرست‌های تولیدشده"
+  "Generated catalogs": "فهرست‌های تولیدشده",
+  "A structural map describes source structure, not observed behavior.": "نقشه ساختاری ساختار منبع را توصیف می‌کند، نه رفتار مشاهده‌شده.",
+  "AST": "AST",
+  "AST index": "نمایه AST",
+  "Entrypoints": "نقاط ورود",
+  "File": "فایل",
+  "Imports": "واردسازی‌ها",
+  "Language": "زبان",
+  "Manifest": "مانیفست",
+  "Metadata": "فراداده",
+  "Next": "بعدی",
+  "Previous": "قبلی",
+  "Role": "نقش",
+  "Statistics": "آمار",
+  "Structural map": "نقشه ساختاری",
+  "Structural map is unavailable. Run the crawler with map generation enabled.": "نقشه در دسترس نیست. خزنده را با تولید نقشه اجرا کنید.",
+  "Symbols": "نمادها"
 }

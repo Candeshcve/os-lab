@@ -201,3 +201,27 @@ test("Runtime rotation requires acknowledgement and environment keys stay read-o
   await page.getByLabel("Configured canary URL").fill("https://user:secret@example.test/?secret=fixture");
   await expect(page.getByRole("button", { name: "Preview action" })).toBeDisabled();
 });
+
+test("Deep analysis preserves source links, legacy AST and structural map coverage", async ({ page }) => {
+  await sourceShell(page);
+  const bundle = { repo: "owned/sample", slug: "owned__sample", manifestAnalysis: {}, metadata: {}, dependencies: {}, fileTree: [{ path: "main.js", type: "blob" }], astIndex: [], repoMap: {
+    schema_version: 1, stats: { files: 1 }, targets: [], coverage: { limitations: ["Partial owned map"] }, entrypoints: [],
+    files: { "main.js": { lang: "javascript", parser: "regex", role: { kind: "entry", confidence: 0.8 }, symbols: [{ name: "owned" }], imports: [] } }
+  } };
+  await page.route("**/api/source/deep-analysis*", route => {
+    const url = new URL(route.request().url());
+    const json = url.searchParams.has("file") ? url.searchParams.get("view") === "ast" ? { ast: { parser: "legacy", nodes: ["owned"] } } : { content: "console.log('owned source');" } : url.searchParams.has("repo") ? bundle : { analyzedRepos: [bundle], availableRepos: [], truncated: false };
+    return route.fulfill({ json });
+  });
+  await page.goto("/source/deep-analysis/?repo=owned/sample&file=main.js");
+  await expect(page.getByText("console.log('owned source');", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "AST", exact: true }).click();
+  await page.getByText("AST", { exact: true }).last().click();
+  await expect(page.getByText(/legacy/)).toBeVisible();
+  await page.getByRole("button", { name: "Structural map", exact: true }).click();
+  const map = page.getByRole("dialog", { name: "Structural map" });
+  await map.getByText("Coverage", { exact: true }).click();
+  await expect(map.getByText(/Partial owned map/)).toBeVisible();
+  await map.getByRole("button", { name: "main.js", exact: true }).click();
+  await expect(page).toHaveURL(/repo=owned%2Fsample&file=main.js/);
+});

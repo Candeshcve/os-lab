@@ -71,7 +71,7 @@ Use os-lab's static pages, existing shell and locale/base-path helpers.
 Keep structural maps distinct from evidence and expose snapshot provenance.
 
 - [x] SRC-040 (SRC-011, SRC-022): Import crawler/list parsing/CSV merge and route adapters, worker/depth/cap/resume/rate-limit controls. Accept: fault-isolated stages, interrupt artifacts and selected-target workspace/token guards pass tests.
-- [ ] SRC-041 (SRC-015, SRC-030, SRC-040): Port Deep analysis bundle/source/AST browsing and Map dialog (stats/roles/targets/coverage/symbols/imports/entrypoints). Accept: `?repo=`/`&file=` deep links and legacy AST behavior work; missing artifacts show useful states.
+- [x] SRC-041 (SRC-015, SRC-030, SRC-040): Port Deep analysis bundle/source/AST browsing and Map dialog (stats/roles/targets/coverage/symbols/imports/entrypoints). Accept: `?repo=`/`&file=` deep links and legacy AST behavior work; missing artifacts show useful states.
 **SRC-042 — skipped by owner.** Do not implement further merger planning/run/
 cancel/download UI or require merger UI parity for release. Existing engine/API
 functionality is retained; this task is neither open nor completed.

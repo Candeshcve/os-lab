@@ -2049,5 +2049,21 @@
   "Map budget": "ميزانية الخريطة",
   "Source": "المصدر",
   "Resources": "الموارد",
-  "Generated catalogs": "الفهارس المُنشأة"
+  "Generated catalogs": "الفهارس المُنشأة",
+  "A structural map describes source structure, not observed behavior.": "تصف الخريطة بنية المصدر، لا السلوك المرصود.",
+  "AST": "AST",
+  "AST index": "فهرس AST",
+  "Entrypoints": "نقاط الدخول",
+  "File": "الملف",
+  "Imports": "الاستيرادات",
+  "Language": "اللغة",
+  "Manifest": "البيان",
+  "Metadata": "البيانات الوصفية",
+  "Next": "التالي",
+  "Previous": "السابق",
+  "Role": "الدور",
+  "Statistics": "الإحصاءات",
+  "Structural map": "الخريطة الهيكلية",
+  "Structural map is unavailable. Run the crawler with map generation enabled.": "الخريطة غير متاحة. شغّل الزاحف مع إنشاء الخريطة.",
+  "Symbols": "الرموز"
 }

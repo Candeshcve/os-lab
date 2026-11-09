@@ -2049,5 +2049,21 @@
   "Map budget": "Harita bütçesi",
   "Source": "Kaynak",
   "Resources": "Kaynak dosyaları",
-  "Generated catalogs": "Oluşturulan kataloglar"
+  "Generated catalogs": "Oluşturulan kataloglar",
+  "A structural map describes source structure, not observed behavior.": "Yapısal harita kaynak yapısını gösterir; gözlemlenen davranışı göstermez.",
+  "AST": "AST",
+  "AST index": "AST dizini",
+  "Entrypoints": "Giriş noktaları",
+  "File": "Dosya",
+  "Imports": "İçe aktarmalar",
+  "Language": "Dil",
+  "Manifest": "Manifest",
+  "Metadata": "Üst veri",
+  "Next": "Sonraki",
+  "Previous": "Önceki",
+  "Role": "Rol",
+  "Statistics": "İstatistikler",
+  "Structural map": "Yapısal harita",
+  "Structural map is unavailable. Run the crawler with map generation enabled.": "Yapısal harita yok. Harita oluşturmayı etkinleştirip tarayıcıyı çalıştırın.",
+  "Symbols": "Semboller"
 }

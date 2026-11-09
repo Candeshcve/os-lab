@@ -320,3 +320,14 @@ passed**, plus both existing CSV tests. The fault injection preserves unrelated
 manifest/tree artifacts. Dashboard types, **2,051**-key locales and both builds
 passed. Browser run: 32 passed plus an unrelated Persian hydration check that
 passed its focused rerun; public 16-route EN/TR smoke passed. No data imported.
+
+## SRC-041: Deep analysis
+
+Added bundle/manifest/threat/dependency/metadata/file browsing, repo/file deep
+links, legacy AST-index reads, a structural map dialog with stats, roles, targets,
+coverage, symbols/imports and entrypoints, and selected private-target crawling.
+AST reads require an index match and retain private-path/read-budget guards.
+
+Dashboard types, **2,067**-key locales, local/Pages builds and **34 browser tests**
+passed. Source console suite **36 passed**; the AST/local-target test was rerun
+after the private-name guard. Public EN/TR smoke passed without engine calls.

@@ -2049,5 +2049,21 @@
   "Map budget": "Budget de carte",
   "Source": "Source",
   "Resources": "Ressources",
-  "Generated catalogs": "Catalogues générés"
+  "Generated catalogs": "Catalogues générés",
+  "A structural map describes source structure, not observed behavior.": "Une carte structurelle décrit le code, pas le comportement observé.",
+  "AST": "AST",
+  "AST index": "Index AST",
+  "Entrypoints": "Points d’entrée",
+  "File": "Fichier",
+  "Imports": "Imports",
+  "Language": "Langue",
+  "Manifest": "Manifeste",
+  "Metadata": "Métadonnées",
+  "Next": "Suivant",
+  "Previous": "Précédent",
+  "Role": "Rôle",
+  "Statistics": "Statistiques",
+  "Structural map": "Carte structurelle",
+  "Structural map is unavailable. Run the crawler with map generation enabled.": "Carte indisponible. Lancez l’explorateur avec la génération de carte.",
+  "Symbols": "Symboles"
 }

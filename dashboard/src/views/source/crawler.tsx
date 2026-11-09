@@ -4,7 +4,7 @@ import { Empty, Field, Section, Skeleton, Status } from "../../components/ui";
 import { sourceRequest, useSource } from "./client";
 interface AnalyzerData { sourceFiles: { name: string; format: string }[]; sourceFilesTruncated: boolean; run: LabJob | null; summaryCount: number; summaryRows: Record<string, unknown>[]; report: unknown }
 interface Preview { plan: LabPlan; token: string }
-export function SourceCrawler() {
+export function SourceCrawler({ targetKey }: { targetKey?: string }) {
   const state = useSource<AnalyzerData>("analyzer");
   const { data: host, error: hostError } = hostStore.use();
   const { data: jobs } = jobsStore.use();
@@ -17,13 +17,13 @@ export function SourceCrawler() {
   const [busy, setBusy] = useState(false); const [error, setError] = useState<string>();
   const [pollError, setPollError] = useState<string>();
   const lab = host?.labs.find(lab => lab.id === "source");
-  const ready = lab?.state === "ready" && !hostError && !lab.requirements?.some(r => r.id === "git" && !r.found);
+  const ready = lab?.state === "ready" && !hostError && (Boolean(targetKey) || !lab.requirements?.some(r => r.id === "git" && !r.found));
   const conflict = (jobs ?? []).some(j => j.lab === "source" && j.state === "running") || job?.state === "running";
-  const options = useMemo(() => ({ ...(mode === "repos" ? { repos: repos.split(/[\s,]+/).filter(Boolean) } : { sourceFile }), workers, depth, noAst, noMetadata, resume, keepWorkspace, ...tuning }), [tuning, mode, repos, sourceFile, workers, depth, noAst, noMetadata, resume, keepWorkspace]);
+  const options = useMemo(() => ({ ...(targetKey ? { target: targetKey } : mode === "repos" ? { repos: repos.split(/[\s,]+/).filter(Boolean) } : { sourceFile }), workers, depth, noAst, noMetadata, resume, keepWorkspace, ...tuning }), [targetKey, tuning, mode, repos, sourceFile, workers, depth, noAst, noMetadata, resume, keepWorkspace]);
   const tuningCaps: Record<string, number> = { retries: 5, cloneTimeout: 600, apiMaxWait: 120, maxTreeEntries: 50000, maxAstFiles: 1000, mapMaxFiles: 10000, mapBudgetMs: 120000 };
   const tuningValid = Object.entries(tuning).every(([key, value]) => Number.isInteger(value) && value >= 1 && value <= tuningCaps[key]);
   const repoList = "repos" in options ? options.repos : [];
-  const valid = Number.isInteger(workers) && workers >= 1 && workers <= 8 && Number.isInteger(depth) && depth >= 1 && depth <= 10 && (mode === "repos" ? repoList!.length > 0 && repoList!.length <= 100 && repoList!.every(r => /^[A-Za-z0-9_.-]{1,100}\/[A-Za-z0-9_.-]{1,100}$/.test(r) && !r.split("/").some(p => p === "." || p === "..")) : Boolean(state.data?.sourceFiles.some(f => f.name === sourceFile)));
+  const valid = Number.isInteger(workers) && workers >= 1 && workers <= 8 && Number.isInteger(depth) && depth >= 1 && depth <= 10 && (Boolean(targetKey) || (mode === "repos" ? repoList!.length > 0 && repoList!.length <= 100 && repoList!.every(r => /^[A-Za-z0-9_.-]{1,100}\/[A-Za-z0-9_.-]{1,100}$/.test(r) && !r.split("/").some(p => p === "." || p === "..")) : Boolean(state.data?.sourceFiles.some(f => f.name === sourceFile))));
   useEffect(() => { setPreview(undefined); setError(undefined); }, [options]);
   useEffect(() => {
     if (!state.data?.run) return;
@@ -60,8 +60,9 @@ export function SourceCrawler() {
       {state.loading ? <Skeleton /> : state.error ? <><Status value={{ ok: false, text: state.error }} /><button className="iux-btn" onClick={state.refresh}>Retry</button></> : <>
         {!ready && <p role="status">Crawler needs live Source Lab readiness and Git. Check Readiness & setup for missing requirements.</p>}
         <fieldset disabled={busy || Boolean(conflict)} className="grid gap-3 sm:grid-cols-2">
-          <Field label="Input mode"><select className="iux-input" value={mode} onChange={e => setMode(e.target.value)}><option value="repos">Repositories</option><option value="source">Source list</option></select></Field>
-          {mode === "repos" ? <Field label="GitHub repositories" hint="One owner/repo per line; at most 100. Credentials come from the operator environment."><textarea className="iux-input" rows={3} value={repos} onChange={e => setRepos(e.target.value)} /></Field> : <Field label="Source list"><select className="iux-input" value={sourceFile} onChange={e => setSourceFile(e.target.value)}><option value="">Select a source list</option>{state.data?.sourceFiles.map(file => <option value={file.name} key={file.name}>{file.name} ({file.format})</option>)}</select></Field>}
+          {!targetKey && <Field label="Input mode"><select className="iux-input" value={mode} onChange={e => setMode(e.target.value)}><option value="repos">Repositories</option><option value="source">Source list</option></select></Field>}
+          {!targetKey && (mode === "repos" ? <Field label="GitHub repositories" hint="One owner/repo per line; at most 100. Credentials come from the operator environment."><textarea className="iux-input" rows={3} value={repos} onChange={e => setRepos(e.target.value)} /></Field> : <Field label="Source list"><select className="iux-input" value={sourceFile} onChange={e => setSourceFile(e.target.value)}><option value="">Select a source list</option>{state.data?.sourceFiles.map(file => <option value={file.name} key={file.name}>{file.name} ({file.format})</option>)}</select></Field>)}
+          {targetKey && <p data-no-translate>{targetKey}</p>}
           <Field label="Workers"><input className="iux-input" type="number" min={1} max={8} value={workers} onChange={e => setWorkers(Number(e.target.value))} /></Field>
           <Field label="Clone depth"><input className="iux-input" type="number" min={1} max={10} value={depth} onChange={e => setDepth(Number(e.target.value))} /></Field>
           <label><input type="checkbox" checked={noAst} onChange={e => setNoAst(e.target.checked)} /> Skip AST</label>

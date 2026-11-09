@@ -454,3 +454,17 @@ def test_source_list_entries_cannot_escape_workspace(console):
     file.write_text("https://github.com/owned/sample.git\n")
     status, preview = call(console, "/api/source/analyzer", {"options": {"sourceFile": "guarded.txt"}, "preview": True})
     assert status == 200 and "owned/sample" in preview["plan"]["engineArgs"]
+
+
+def test_deep_ast_and_selected_private_crawl(console):
+    base = console[1] / "analysis/local__sample"
+    (base / "ast").mkdir(exist_ok=True)
+    (base / "ast-index.json").write_text(json.dumps([{"path": "content.js", "file": "ast/content.js.json", "parser": "regex"}]))
+    (base / "ast/content.js.json").write_text(json.dumps({"nodes": [{"name": "owned"}], "parser": "regex"}))
+    status, data = call(console, "/api/source/deep-analysis?repo=local/sample&file=content.js&view=ast")
+    assert status == 200 and data["ast"]["parser"] == "regex"
+    assert call(console, "/api/source/deep-analysis?repo=local/sample&file=absent.js&view=ast")[0] == 404
+    assert call(console, "/api/source/deep-analysis?repo=local/sample&view=ast")[0] == 400
+    job = confirmed(console, "/api/source/deep-analysis", {"target": "targets/sample", "noMetadata": True, "noAst": True})
+    assert job.state == "succeeded", job.lines
+    assert call(console, "/api/source/deep-analysis", {"options": {"target": "../../outside"}, "preview": True})[0] == 400
