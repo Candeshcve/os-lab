@@ -174,3 +174,13 @@ def test_bundle_trust_boundaries(tmp_path, kind):
         (session / "manifest.json").write_bytes(content)
         (session / "manifest.sig").write_text(hmac.new(load_hmac_key(), content, hashlib.sha256).hexdigest())
     assert not SessionBundleReader(session).verify_integrity()["valid"]
+
+
+def test_legacy_windows_manifest_newlines_verify_without_weakening_hashes(tmp_path):
+    bundle = _write_bundle(tmp_path)
+    manifest = bundle / "manifest.json"
+    original = manifest.read_bytes()
+    manifest.write_bytes(original.replace(b"\n", b"\r\n"))
+    assert SessionBundleReader(bundle).verify_integrity()["signature_verified"]
+    (bundle / "events.jsonl").write_text("tampered")
+    assert not SessionBundleReader(bundle).verify_integrity()["valid"]

@@ -29,6 +29,7 @@ requests of its own.
 | APKs you upload | `android-lab/lab/apks/` | Until you delete them |
 | Analysis results, reports, traffic captures | `android-lab/lab/artifacts/` and each lab's folders | Until you delete them (`make clean` for Android) |
 | Source Lab analysis reports, cloned workspaces, merged lab extensions and runtime sessions | `source-lab/storage/` by default, or the operator-configured storage root | Until you delete them; the project does not receive them |
+| Source Lab opt-in import journals and rollback backups | Private storage `control/imports/` and `control/import-backups/` | Retained after import/rollback until the operator removes them |
 | Source Lab input catalogs and local targets | Operator-provided resource/target paths; no third-party datasets are bundled | Managed by the operator |
 | Lab configuration, including passwords you set | Each lab's `.env` | Until you change it; shown masked in the console |
 | VM disks, backups and shared folders | Each lab's `storage/`, `backups/`, `shared/` | Until you delete them |
@@ -48,6 +49,11 @@ preferences in your browser's local storage, which never leave your browser:
 | `oslab.workflow` | The selected workflow tab (classic console) |
 
 Clearing your browser's site data removes them.
+
+Source Lab page selections (target, repository, file, tab, node and filters) can
+appear in the local page URL and browser history. No graph or provider snapshot
+is saved to browser storage by Source Lab. Clear browser history to remove those
+URL records.
 
 ## 4. Network connections made on your behalf
 

@@ -23,6 +23,7 @@ pub fn is_root(dir: &Path) -> bool {
 }
 
 const BUNDLE_FILES: &[&str] = &[
+    "source-lab/engine/source_lab/import_legacy.py",
     "source-lab/run.py",
     "source-lab/list_inputs.py",
     "source-lab/engine/source_lab/cli/run_detection.py",

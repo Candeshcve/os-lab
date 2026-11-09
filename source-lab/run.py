@@ -33,7 +33,7 @@ def status() -> dict:
                      "tree_sitter": importlib.util.find_spec("tree_sitter") is not None,
                      "playwright": importlib.util.find_spec("playwright") is not None},
         "capabilities": ["static-detection", "structural-map", "crawler", "merge", "csv-merge"],
-        "actions": ["doctor", "setup", "status", "contracts", "detect", "map", "crawl", "merge", "merge-csvs"],
+        "actions": ["doctor", "setup", "status", "contracts", "detect", "map", "crawl", "merge", "merge-csvs", "import-legacy"],
     }
 
 
@@ -50,7 +50,8 @@ def main(argv: list[str] | None = None) -> int:
               "  map [options]           Generate/query a structural source map\n"
               "  crawl [options]         Analyze explicitly selected repositories (may contact GitHub)\n"
               "  merge [options]         Preview/build a merged extension (may acquire selected sources)\n"
-              "  merge-csvs [options]    Join operator-provided catalogs\n\n"
+              "  merge-csvs [options]    Join operator-provided catalogs\n"
+              "  import-legacy [options] Dry-run/copy authorized analysis artifacts\n\n"
               "SOURCE_LAB_STORAGE and SOURCE_LAB_RESOURCES override local data roots.\n"
               "No third-party archives, datasets or binaries are bundled.")
         return 0
@@ -89,6 +90,7 @@ def main(argv: list[str] | None = None) -> int:
         "crawl": ("source_lab.pipeline.ext_repo_analyzer", ["--out-dir", str(paths.analysis), "--workspace", str(paths.workspace)]),
         "merge": ("source_lab.pipeline.ext_merger", ["--analysis-dir", str(paths.analysis), "--workspace", str(paths.workspace), "--out", str(paths.storage / "merged")]),
         "merge-csvs": ("source_lab.pipeline.merge_csvs", []),
+        "import-legacy": ("source_lab.import_legacy", []),
     }
     if command not in commands:
         print(f"Unsupported Source Lab command: {command}. Run labctl source --help.", file=sys.stderr)

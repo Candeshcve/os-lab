@@ -216,7 +216,7 @@ class SessionBundleWriter:
 
         manifest_file = self.session_dir / "manifest.json"
         manifest_data = json.dumps(manifest, indent=2, sort_keys=True)
-        manifest_file.write_text(manifest_data, encoding="utf-8")
+        manifest_file.write_text(manifest_data, encoding="utf-8", newline="\n")
 
         # Sign manifest
         sig = hmac.new(self.hmac_key, manifest_data.encode("utf-8"), hashlib.sha256).hexdigest()
@@ -273,6 +273,11 @@ class SessionBundleReader:
                 raise ValueError("Manifest must cover session.json and events.jsonl")
             signature = read("manifest.sig", 128).decode("ascii").strip()
             signature_valid = hmac.compare_digest(signature, hmac.new(self.hmac_key, content, hashlib.sha256).hexdigest())
+            # Legacy Windows writers signed LF text before write_text emitted CRLF.
+            # JSON whitespace canonicalization preserves those existing bundles.
+            if not signature_valid and b"\r\n" in content:
+                canonical = content.replace(b"\r\n", b"\n")
+                signature_valid = hmac.compare_digest(signature, hmac.new(self.hmac_key, canonical, hashlib.sha256).hexdigest())
             if not signature_valid:
                 return {**failure, "error": "Manifest signature not verified"}
             mismatches = []

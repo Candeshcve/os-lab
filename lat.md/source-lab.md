@@ -126,3 +126,12 @@ descriptors with an explicit import date, not repository results or a live run.
 [[dashboard/src/views/source/pipeline.tsx]] renders stage flow and details,
 network requests, signatures, risk rules, manifest candidates and flow steps.
 An operator snapshot takes precedence; provenance stays visible in either case.
+
+## Authorized legacy import
+
+[[source-lab/engine/source_lab/import_legacy.py]] supplies an opt-in dry run,
+hash-bound copy, private backups/journal and conflict-protected rollback.
+
+[[source-lab/IMPORT.md]] documents positive artifact allowlists, signed-session
+verification, root relocation and excluded archives/datasets/binaries/keys.
+Original inputs remain unchanged; copy shares the Source job lock.

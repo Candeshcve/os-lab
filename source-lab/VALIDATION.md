@@ -392,3 +392,21 @@ Four model tests, types, **2,106**-key locales, local/Pages builds and a full
 every available subview, missing providers, keyboard selection and a 250-node
 owned snapshot: only 100 nodes render, while the download contains all 250.
 Public EN/TR smoke passed. No graph/provider dataset or new dependency imported.
+
+## SRC-071: Authorized legacy import
+
+Added CLI dry-run/default preview, explicit root/slug mapping, fingerprint-bound
+`--copy --authorized`, positive artifact/settings allowlists, contract/hash/HMAC
+checks, private backups/journals and conflict-protected rollback. Existing signed
+session IDs cannot be overwritten; private/binary-containing bundles are held
+out whole. Keys, databases, Skills, catalogs/datasets, archives and app binaries
+are excluded. Originals are unchanged; import never contacts a network service.
+
+Eleven import tests cover no-write dry run, copy/backups/hashes, changed inputs,
+rollback conflicts, signed/tampered sessions, exclusions, settings, job locks,
+CLI attestation and injected partial failure. A legacy Windows CRLF-signature
+regression is fixed without weakening event hash checks. Full engine: **175
+passed**. Dashboard types/i18n/build, **38 browser tests**, Pages build and public
+EN/TR smoke passed after updating privacy retention/URL-history disclosure.
+Six staging tests and 12 launcher foundation checks passed. No real legacy data
+was imported; all tests used owned temporary fixtures.
