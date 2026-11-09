@@ -47,12 +47,12 @@ Establish a usable static analysis path independently of optional runtime tools.
 Integrate with the existing console protections, readiness model and jobs.
 
 - [ ] SRC-020 (SRC-012, SRC-013): Add `source` to console lab metadata/order, host reports, capability/action models and frontend LabId maps. Accept: required/optional readiness and unavailable hosts are correct without KVM/Docker.
-- [ ] SRC-021 (SRC-020): Implement namespaced handler adapters for each retained inventory API method, query/body and response/error contract. Accept: method-by-method contract tests and intentional deviations documented; hello-world stub retired explicitly.
+- [ ] SRC-021 (SRC-020): Implement namespaced handler adapters for each retained inventory API method, query/body and response/error contract. Accept: method-by-method contract tests and intentional deviations documented; hello-world stub retired explicitly. Progress: evidence/report GET routes are implemented; other retained handlers remain.
 - [ ] SRC-022 (SRC-021): Integrate exact-option previews, background logs/progress, conflict handling, timeout/cancel/process-tree cleanup and interrupted-on-restart reporting. Accept: two runs cannot corrupt the same output and cancelled/interrupted jobs cannot show success.
-- [ ] SRC-023 (SRC-021): Enforce localhost/mutation guards, allowlisted target/resource/session paths, symlink/traversal rejection, read caps and secret redaction. Accept: hostile-request regression tests pass and logs/responses disclose no credentials.
+- [ ] SRC-023 (SRC-021): Enforce localhost/mutation guards, allowlisted target/resource/session paths, symlink/traversal rejection, read caps and secret redaction. Accept: hostile-request regression tests pass and logs/responses disclose no credentials. Progress: read-only artifact path/size/Host boundaries are implemented; mutating and other route guards remain.
 - [ ] SRC-024 (SRC-021, SRC-023): Port managed runtime settings/key generation/rotation/default canary URL and integrity verification. Accept: environment ownership/precedence, mode 0600, rotation warnings and tampered/missing-signature cases tested; key values never reach UI.
 - [ ] SRC-025 (SRC-024): Preserve browser canary and all four native importer libraries. Accept: signed sessions can be reviewed/correlated, synthetic events are clearly marked and cannot masquerade as live proof; absent native collector workflows stay explicit.
-- [ ] SRC-026 (SRC-021, SRC-023): Serve bounded findings/coverage/events and allowlisted report downloads. Accept: source five HTTP formats work, CLI STIX remains available, and adding HTTP STIX is tracked explicitly if chosen.
+- [x] SRC-026 (SRC-012, SRC-013): Serve bounded findings/coverage/events and allowlisted report downloads. Accept: source five HTTP formats work, CLI STIX remains available, and adding HTTP STIX is tracked explicitly if chosen.
 
 ## Slice 3: Dashboard shell, overview and evidence
 

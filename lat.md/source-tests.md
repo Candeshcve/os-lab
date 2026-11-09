@@ -628,3 +628,39 @@ The fixture generator must produce valid contracts, a verifiable synthetic sessi
 ### Existing workspace preserved
 
 Fixture generation must refuse an existing workspace without overwriting operator files.
+
+## Artifact API
+
+Console tests exercise the read-only evidence routes over localhost HTTP with generated first-party workspace data.
+
+### Evidence and session review
+
+Evidence listing/detail and session timelines return generated fixture data with no-store headers and explicit unverified session-integrity labels.
+
+### Report allowlist
+
+Only the five planned HTTP report formats may download with safe attachment names; session seals and CLI-only STIX stay inaccessible.
+
+### Host and parameter boundaries
+
+Foreign Host headers, traversal, duplicate or unknown parameters and missing targets must fail; excluded integrations have no endpoints.
+
+### Symlinks and nonregular files refused
+
+Directory/file symlinks and named pipes must be refused without following outside paths or blocking a request.
+
+### Bounded and malformed artifacts
+
+Oversized JSON/reports, malformed shapes, non-finite values and unsupported evidence versions must return explicit errors instead of successful empty results.
+
+### Event timeline truncation
+
+Session responses cap events at 500 and distinguish an exactly-full timeline from a truncated one.
+
+### Aggregate response budget
+
+Multiple individually small artifact files must still fail when their combined bytes exceed the per-request response budget.
+
+### Directory listing cap
+
+Target listings must stop at the configured cap and report truncation without reading every workspace directory.

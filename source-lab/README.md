@@ -1,7 +1,8 @@
 # Source Lab
 
-Source Lab brings iQ-SourceContol into os-lab. The local Python engine and CLI
-are implemented; dashboard and console integration remain in the task queue.
+Source Lab brings iQ-SourceContol into os-lab. The Python engine, CLI
+and read-only evidence/report console routes are implemented; dashboard and
+mutating console integration remain in the task queue.
 Only first-party source code and synthetic fixtures are included. Third-party
 archives, datasets and binaries are excluded. Skills, database-backed repository
 management, and OpenAPI integration are also outside the requested scope.
@@ -61,3 +62,18 @@ prints frontend types generated from the same models. Regenerate committed files
 
 The validator supports the schema vocabulary emitted by this engine, including
 unsupported-version rejection; it is not a general-purpose JSON Schema library.
+
+## Review local artifacts
+
+With `./labctl ui` running, read-only console routes expose existing outputs:
+
+- `/api/source/evidence` lists bounded target summaries.
+- `/api/source/evidence?slug=owner__target` returns findings, coverage and sessions.
+- `/api/source/evidence?slug=owner__target&session=ses_id` returns up to 500 events.
+- `/api/source/evidence/report?slug=owner__target&file=summary.md` downloads an
+  allowlisted report (JSON artifacts, Markdown or SARIF; STIX stays CLI-only).
+
+They do not start analyses or expose keys/seals. Session integrity is explicitly
+unverified in these read-only responses. Errors distinguish missing, malformed
+and oversized data; responses are not cached. Target files stay under the
+configured private storage root, with symlink and path-traversal checks.

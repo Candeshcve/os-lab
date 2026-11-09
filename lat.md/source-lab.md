@@ -20,6 +20,23 @@ Source Lab provides local source/package analysis through a namespaced Python en
 
 [[source-lab/engine/source_lab/cli/run_detection.py#_verified_events]] excludes synthetic sessions and target/platform mismatches from correlation. Missing keys or failed integrity leave the static findings and an explicit coverage limitation. Live canary collection requires operator-installed Playwright and Chromium; setup does not install them.
 
+## Read-only artifact API
+
+[[console/source_artifacts.py#SourceArtifacts]] serves existing findings, coverage, session metadata/events and five allowlisted report formats through [[android-lab/lab/web_ui.py#LabHttpHandler#_source_get]]. It never imports or starts the engine.
+
+`GET /api/source/evidence` lists target summaries or reads `slug` detail and an
+optional `session` timeline. `GET /api/source/evidence/report` downloads an
+allowlisted report named by `slug` and `file`. The existing localhost Host guard
+still applies; responses are no-store and nosniff. Unknown routes and duplicate
+or unexpected parameters fail explicitly.
+
+Reads reject symlinks and nonregular files. Limits are 5 MB per JSON/events file,
+10 MB per report, 16 MB aggregate, 100 targets/sessions and 500 returned events.
+Descriptor-relative no-follow traversal is used where supported, with checked
+paths on other hosts. Session integrity is labeled not verified by this reader;
+signature verification remains the engine's responsibility. No key or session
+seal is downloadable. STIX remains CLI-only.
+
 ## Pipeline
 
 [[source-lab/engine/source_lab/pipeline]] contains the crawler, extension merger and CSV joiner. [[source-lab/run.py#main]] supplies storage defaults for the crawler and merger; the CSV CLI writes joined catalogs into mutable storage.
@@ -44,7 +61,7 @@ Adapters cover Python, JS/TS, PHP, Rust, Swift, Objective-C, Kotlin, Java and ma
 
 No third-party archives, datasets or binaries are imported. Skills, database
 integration and OpenAPI are outside the requested migration scope; artifact
-readers and engine contracts remain file-backed. The Python package is `source_lab`, so its modules do not shadow the existing Android engine. No source UI, server route or remote deployment is activated by this foundation.
+readers and engine contracts remain file-backed. The Python package is `source_lab`, so its modules do not shadow the existing Android engine. Source UI, mutating console operations and remote deployment remain unimplemented.
 
 ## Regression tests
 

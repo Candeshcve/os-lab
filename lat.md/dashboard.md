@@ -36,6 +36,10 @@ cancellation, and reports container state. Privileged setup runs through
 pkexec when a graphical agent exists; otherwise the plan returns a `sudo`
 command to run in a terminal.
 
+The read-only Source Lab evidence/report routes in
+[[console/source_artifacts.py]] reuse the console's localhost Host guard without
+starting analyses or changing state. See [[source-lab#Read-only artifact API]].
+
 ## Serving and builds
 
 [[android-lab/lab/web_ui.py]] serves the newest of `dashboard/build` (local)

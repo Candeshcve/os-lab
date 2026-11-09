@@ -43,6 +43,10 @@ try:
     import app_update as app_updates  # noqa: E402  (console/app_update.py: signed app releases)
 except ImportError:
     app_updates = None
+try:
+    import source_artifacts  # noqa: E402  (console/source_artifacts.py: read-only Source Lab output)
+except ImportError:
+    source_artifacts = None
 ARTIFACTS_DIR = os.path.join(SCRIPT_DIR, "artifacts")
 SCRIPTS_DIR = os.path.join(SCRIPT_DIR, "scripts")
 
@@ -169,6 +173,9 @@ class LabHttpHandler(BaseHTTPRequestHandler):
             return
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
+        if path == "/api/source" or path.startswith("/api/source/"):
+            self._source_get(path, urllib.parse.parse_qs(parsed.query, keep_blank_values=True))
+            return
         if path.startswith("/api/content"):
             self._content_get(path, urllib.parse.parse_qs(parsed.query))
             return
@@ -192,6 +199,36 @@ class LabHttpHandler(BaseHTTPRequestHandler):
             self._serve_dashboard(root, path)
             return
         self._android_get()
+
+    def _source_get(self, path: str, query: dict):
+        if source_artifacts is None:
+            self._json(501, {"error": "The Source Lab artifact reader is not installed"})
+            return
+        try:
+            if any(len(values) != 1 for values in query.values()):
+                raise source_artifacts.ArtifactError(400, "Duplicate query parameters")
+            reader = source_artifacts.SourceArtifacts(REPO_ROOT)
+            if path == "/api/source/evidence":
+                if set(query) - {"slug", "session"}:
+                    raise source_artifacts.ArtifactError(400, "Unknown evidence parameters")
+                data = reader.evidence(query.get("slug", [None])[0], query.get("session", [None])[0])
+                self._send_bytes(200, json.dumps(data).encode("utf-8"), "application/json; charset=utf-8", cache="no-store")
+            elif path == "/api/source/evidence/report":
+                if set(query) != {"slug", "file"}:
+                    raise source_artifacts.ArtifactError(400, "A target slug and report file are required")
+                body, content_type, filename = reader.report(query["slug"][0], query["file"][0])
+                self.send_response(200)
+                self.send_header("Content-Type", content_type)
+                self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("X-Content-Type-Options", "nosniff")
+                self.end_headers()
+                self.wfile.write(body)
+            else:
+                raise source_artifacts.ArtifactError(404, "Source Lab endpoint not found")
+        except source_artifacts.ArtifactError as exc:
+            self._send_bytes(exc.status, json.dumps({"error": str(exc)}).encode("utf-8"), "application/json; charset=utf-8", cache="no-store")
 
     def _send_bytes(self, status: int, body: bytes, content_type: str, cache: str = "no-cache"):
         self.send_response(status)

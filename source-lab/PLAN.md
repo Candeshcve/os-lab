@@ -3,7 +3,8 @@
 Bring the in-scope engine capabilities and user-facing pages in the pinned
 [parity inventory](INVENTORY.md) into os-lab as `source-lab`, with navigation in
 the existing dashboard and operations through the existing local console.
-The engine/CLI foundation is implemented; console and UI routes remain planned.
+The engine/CLI and read-only evidence routes are implemented; other console
+routes and the UI remain planned.
 See README and the task queue for current behavior.
 
 ## Scope and rules

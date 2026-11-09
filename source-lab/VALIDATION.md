@@ -112,3 +112,32 @@ No third-party data is acquired, no generated binaries/archives are committed,
 and the ephemeral session key is supplied explicitly rather than stored. Existing
 workspace files are preserved by refusing an existing destination. Validation:
 143 engine tests, graph, import/exclusion and whitespace checks pass.
+
+## Read-only evidence endpoints
+
+SRC-026 is complete: the existing localhost console serves evidence summaries,
+detail, bounded session timelines and the five planned report download formats.
+The reader is standard-library code and never imports or starts the engine.
+Session integrity is explicitly not verified by this display endpoint; the
+reader does not expose keys or session seals. CLI-only STIX remains unchanged.
+
+This also completes the evidence GET subset of SRC-021 and the read-only path,
+size, Host and response-header subset of SRC-023; those broader tasks remain
+open for the remaining routes/mutations. The tests cover generated workspace
+responses, five-format downloads, foreign Host headers, traversal/duplicate/
+unknown parameters, excluded endpoints, symlinks, named pipes, malformed data,
+unsupported versions, per-file/aggregate byte budgets and event/directory caps.
+
+Publication review: no new dependencies, outbound requests, hosted listeners,
+third-party data, binaries or credentials are added. Existing privacy/terms
+already describe these local reports and the localhost console. No dashboard
+source or legal-page content changes, so dashboard rebuild/browser checks are
+not required for this backend patch.
+
+Final backend patch results on Linux: `scripts/run-tests.sh --no-venv` passes
+with Android 112 passed/2 skipped, Source Lab 143 passed, sample-analysis smoke,
+shell syntax and graph checks. Dashboard checking is skipped by that runner
+because dependencies are absent in this worktree; no dashboard files changed.
+The eight focused artifact API tests, import/exclusion check, staged secret scan
+and whitespace checks pass. Windows fallback host coverage remains part of the
+platform/distribution tasks rather than a claim of this Linux test run.
