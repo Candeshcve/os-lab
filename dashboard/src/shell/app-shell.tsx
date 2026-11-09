@@ -15,6 +15,7 @@ import {
   CpuIcon,
   DesktopTowerIcon,
   FireIcon,
+  ChatCircleTextIcon,
   GitPullRequestIcon,
   HeartbeatIcon,
   ScalesIcon,
@@ -58,6 +59,7 @@ export function sectionHref(id: string): string {
   if (id === "health") return localized("/health/");
   if (id === "legal") return localized("/legal/");
   if (id === "contribute") return localized("/contribute/");
+  if (id === "feedback") return localized("/feedback/");
   if (id === "content") return localized("/content/");
   if (id === "firewall") {
     const locale = typeof window === "undefined" ? "en" : localeFromPath(window.location.pathname);
@@ -97,6 +99,7 @@ function buildGroups(labs: LabStatus[] | undefined, running: Set<string>, androi
     { label: "os-lab", items: [
       { id: "host", label: "Home", icon: <DesktopTowerIcon size={16} /> },
       { id: "firewall", label: copy[locale].lab, icon: <FireIcon size={16} /> },
+      { id: "feedback", label: "Feedback", icon: <ChatCircleTextIcon size={16} /> },
       { id: "repo", label: "Repository", icon: <BookOpenIcon size={16} /> }
     ] }
   ];
@@ -161,6 +164,7 @@ function buildGroups(labs: LabStatus[] | undefined, running: Set<string>, androi
           ]
         },
         { id: "contribute", label: "Contribute", icon: <GitPullRequestIcon size={16} /> },
+        { id: "feedback", label: "Feedback", icon: <ChatCircleTextIcon size={16} /> },
         { id: "repo", label: "Repository", icon: <BookOpenIcon size={16} /> }
       ]
     }
@@ -185,6 +189,7 @@ function buildMeta(): Record<string, SpotlightMeta> {
     firewall: { description: "BGT207 dream-company firewall designs — branches, segmentation, products and rule sets", aliases: ["firewall", "bgt207", "ufw", "rules", "vlan", "dmz", "company"] },
     health: { description: "GET /api/health", aliases: ["status", "api"] },
     contribute: { description: "How to set up, test, rebuild, open a pull request and view roadmap TODOs", aliases: ["contribute", "contributing", "pull request", "pr", "development", "tests", "todos", "roadmap", "pentesting", "firewall", "tasks"] },
+    feedback: { description: "Report issues, suggest features, and share feedback", aliases: ["feedback", "bug", "issue", "request", "suggestion", "help"] },
     "legal-terms": { description: "Licence, authorized use, OS licences, no warranty", aliases: ["legal", "terms", "license", "warranty", "liability"] },
     "legal-acceptable-use": { description: "Supported and unsupported use, responsible disclosure", aliases: ["legal", "aup", "policy", "disclosure"] },
     "legal-privacy": { description: "Local-only console, browser storage, network connections, analytics", aliases: ["legal", "privacy", "gdpr", "kvkk", "telemetry", "cookies"] },

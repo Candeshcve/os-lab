@@ -1919,5 +1919,17 @@
   "Opening installer…": "Abriendo el instalador…",
   "Update again": "Actualizar de nuevo",
   "Downloading and verifying the update…": "Descargando y verificando la actualización…",
-  "The new AppImage was saved beside your current one. Replace the running file with it, then start os-lab again.": "El nuevo AppImage se guardó junto a su archivo actual. Sustituya el archivo en ejecución por él y vuelva a iniciar os-lab."
+  "The new AppImage was saved beside your current one. Replace the running file with it, then start os-lab again.": "El nuevo AppImage se guardó junto a su archivo actual. Sustituya el archivo en ejecución por él y vuelva a iniciar os-lab.",
+  "Advanced settings": "Configuración avanzada",
+  "Feedback": "Comentarios",
+  "Report a problem, request a feature, or tell us what could work better.": "Informa de un problema, solicita una función o propón una mejora.",
+  "Report a security concern": "Informar de un problema de seguridad",
+  "Report an issue": "Informar de un problema",
+  "Report issues, suggest features, and share feedback": "Informar de problemas, sugerir funciones y compartir comentarios",
+  "Request a feature": "Solicitar una función",
+  "Send a vulnerability report privately through the repository security page.": "Informa de una vulnerabilidad en privado desde la página de seguridad del repositorio.",
+  "Share feedback or ask a question": "Compartir comentarios o hacer una pregunta",
+  "Start a discussion about your experience, setup, or idea.": "Inicia una conversación sobre tu experiencia, configuración o idea.",
+  "Suggest a new capability or an improvement to an existing workflow.": "Sugiere una función nueva o una mejora de un flujo existente.",
+  "Tell us what broke, which lab or page you used, and how to reproduce it.": "Describe qué falló, qué laboratorio o página usaste y cómo reproducirlo."
 }
