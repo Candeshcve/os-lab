@@ -84,7 +84,7 @@ functionality is retained; this task is neither open nor completed.
 Document implemented file-backed workflows and configuration without adding
 Skills, databases or an OpenAPI reference.
 
-- [ ] SRC-062 (SRC-014, SRC-015, SRC-045): Publish portable Source Lab docs and graph links, update README/setup/labctl/dashboard/tooling graph nodes as features ship. Accept: docs describe retained workflows and scope exclusions, links resolve and `lat check` passes.
+- [x] SRC-062 (SRC-014, SRC-015, SRC-045): Publish portable Source Lab docs and graph links, update README/setup/labctl/dashboard/tooling graph nodes as features ship. Accept: docs describe retained workflows and scope exclusions, links resolve and `lat check` passes.
 
 ## Slice 7: Distribution, import and release
 

@@ -2104,5 +2104,11 @@
   "Snapshot relationships are not a runtime trace.": "Snapshot-Beziehungen sind keine Laufzeitspur.",
   "This provider is unavailable. Configure an authorized local snapshot.": "Dieser Anbieter ist nicht verfügbar. Konfigurieren Sie einen autorisierten lokalen Snapshot.",
   "edges ·": "Kanten ·",
-  "Diff is capped at 1,000 lines per revision.": "Der Vergleich ist auf 1.000 Zeilen pro Revision begrenzt."
+  "Diff is capped at 1,000 lines per revision.": "Der Vergleich ist auf 1.000 Zeilen pro Revision begrenzt.",
+  "Source documentation": "Source-Dokumentation",
+  "Technical documentation is in English. Navigation follows your selected language.": "Die technische Dokumentation ist auf Englisch. Die Navigation folgt Ihrer Sprache.",
+  "Guide": "Anleitung",
+  "Collectors": "Kollektoren",
+  "Legacy import": "Legacy-Import",
+  "Runbook": "Betriebshandbuch"
 }

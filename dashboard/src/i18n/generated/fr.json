@@ -2104,5 +2104,11 @@
   "Snapshot relationships are not a runtime trace.": "Les relations du graphe ne sont pas une trace d’exécution.",
   "This provider is unavailable. Configure an authorized local snapshot.": "Fournisseur indisponible. Configurez un instantané local autorisé.",
   "edges ·": "arêtes ·",
-  "Diff is capped at 1,000 lines per revision.": "Le diff est limité à 1 000 lignes par révision."
+  "Diff is capped at 1,000 lines per revision.": "Le diff est limité à 1 000 lignes par révision.",
+  "Source documentation": "Documentation Source",
+  "Technical documentation is in English. Navigation follows your selected language.": "La documentation technique est en anglais. La navigation suit votre langue.",
+  "Guide": "Guide",
+  "Collectors": "Collecteurs",
+  "Legacy import": "Import ancien",
+  "Runbook": "Guide d’exploitation"
 }

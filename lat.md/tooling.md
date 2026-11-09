@@ -36,7 +36,8 @@ the [[dashboard]] renders the same file at `/contribute/`. Contributions must no
 add vendor binaries or proprietary media (see [[legal#Google platform-tools]]).
 The Source Lab migration is tracked in [[source-lab/README.md]], with its plan,
 task queue and pinned source inventory. [[source-lab]] records the implemented
-engine foundation; UI and console integration remain in the task queue.
+engine, console and file-backed dashboard workflows. Native acceptance and
+release finalization remain tracked in its task queue.
 
 Issue and PR templates are in
 [[.github/ISSUE_TEMPLATE]] and [[.github/PULL_REQUEST_TEMPLATE.md]]; behavior
@@ -49,3 +50,7 @@ Private vulnerability reporting and the authorization-only scope.
 These are defined in [[SECURITY.md]]; the project is Apache-2.0 ([[LICENSE]]).
 The VM base images (`dockur/windows`, `qemux/qemu`, `dockurr/macos`) are MIT and
 do not distribute OS media; users are responsible for valid licences.
+
+[[dashboard/scripts/source-brain-model.test.mjs]] validates provider paths, graph
+limits/windows and bounded revision diff without a browser.
+[[source-lab/RUNBOOK.md]] records the portable release/rollback workflow.

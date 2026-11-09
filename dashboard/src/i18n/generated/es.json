@@ -2104,5 +2104,11 @@
   "Snapshot relationships are not a runtime trace.": "Las relaciones de la instantánea no son una traza de ejecución.",
   "This provider is unavailable. Configure an authorized local snapshot.": "Proveedor no disponible. Configure una instantánea local autorizada.",
   "edges ·": "aristas ·",
-  "Diff is capped at 1,000 lines per revision.": "El diff está limitado a 1.000 líneas por revisión."
+  "Diff is capped at 1,000 lines per revision.": "El diff está limitado a 1.000 líneas por revisión.",
+  "Source documentation": "Documentación Source",
+  "Technical documentation is in English. Navigation follows your selected language.": "La documentación técnica está en inglés. La navegación sigue su idioma.",
+  "Guide": "Guía",
+  "Collectors": "Recolectores",
+  "Legacy import": "Importación heredada",
+  "Runbook": "Manual operativo"
 }

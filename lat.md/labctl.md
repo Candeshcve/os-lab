@@ -40,3 +40,7 @@ The CLI branches on the lab for container names, endpoints, URLs and resize
 semantics (SSH for linux, RDP for win, VNC for ios), and normalizes RAM units
 per lab. The matching Makefiles are [[win-lab/Makefile]], [[linux-lab/Makefile]],
 [[ios-lab/Makefile]] and [[android-lab/lab/Makefile]].
+
+Source CLI verbs also include evidence contracts, detection, maps, crawler/CSV
+operations and explicit [[source-lab/IMPORT.md]] dry-run/copy/rollback.
+[[source-lab/RUNBOOK.md]] explains local operation and release gates.

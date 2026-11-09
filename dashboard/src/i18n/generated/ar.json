@@ -2104,5 +2104,11 @@
   "Snapshot relationships are not a runtime trace.": "علاقات اللقطة ليست تتبعًا لوقت التشغيل.",
   "This provider is unavailable. Configure an authorized local snapshot.": "الموفر غير متاح. أعدّ لقطة محلية مصرحًا بها.",
   "edges ·": "حواف ·",
-  "Diff is capped at 1,000 lines per revision.": "المقارنة محدودة بألف سطر لكل مراجعة."
+  "Diff is capped at 1,000 lines per revision.": "المقارنة محدودة بألف سطر لكل مراجعة.",
+  "Source documentation": "توثيق المصدر",
+  "Technical documentation is in English. Navigation follows your selected language.": "التوثيق التقني بالإنجليزية. تتبع التنقلات لغتك المحددة.",
+  "Guide": "الدليل",
+  "Collectors": "المجمّعات",
+  "Legacy import": "الاستيراد القديم",
+  "Runbook": "دليل التشغيل"
 }

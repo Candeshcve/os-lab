@@ -151,7 +151,7 @@ function buildGroups(labs: LabStatus[] | undefined, running: Set<string>, androi
             { id: "source-analyzer", label: "Crawler" }, { id: "source-evidence", label: "Evidence" },
             { id: "source-deep-analysis", label: "Deep analysis" }, { id: "source-pipeline", label: "Pipeline" },
             { id: "source-brain", label: "Brain" }, { id: "source-sources", label: "Sources" },
-            { id: "source-settings/runtime", label: "Runtime settings" }
+            { id: "source-settings/runtime", label: "Runtime settings" }, { id: "source-docs", label: "Documentation" }
           ] },
         ...(labShown(labs, "ios", activeId) ? [labItem("ios", "iOS Lab")] : []),
         ...(labShown(labs, "windows", activeId) ? [labItem("windows", "Windows Lab")] : []),

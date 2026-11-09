@@ -27,6 +27,7 @@ export default function SourcePage({ page = "" }: { page?: SourcePageId }) {
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-5 p-4 sm:p-6">
       <nav aria-label="Source Lab pages" className="flex flex-wrap gap-2">
         {SOURCE_PAGES.map(id => <a key={id} className="iux-btn" data-variant={id === page ? "default" : "outline"} aria-current={id === page ? "page" : undefined} href={sourceHref(id)}>{sourceTitles[id]}</a>)}
+        <a className="iux-btn" data-variant="outline" href={sourceHref("docs")}>Documentation</a>
         <a className="iux-btn" data-variant="outline" href={localePath("/labs/source/", typeof window === "undefined" ? "en" : localeFromPath(window.location.pathname))}>Readiness & setup</a>
       </nav>
       <h2 className="text-xl font-semibold">{sourceTitles[page]}</h2>

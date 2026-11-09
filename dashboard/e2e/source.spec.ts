@@ -315,3 +315,14 @@ test("Brain virtual window filters locally and exports the complete owned graph"
   const { readFileSync } = await import("node:fs");
   expect(JSON.parse(readFileSync((await download.path())!, "utf8")).nodes.length).toBe(250);
 });
+
+test("Source workflow docs render and keep internal guide links local", async ({ page }) => {
+  await sourceShell(page);
+  await page.goto("/source/docs/runbook/");
+  await expect(page.getByRole("article").getByRole("heading", { name: "Source Lab operator and release runbook", exact: true })).toBeVisible();
+  await expect(page.getByRole("article").getByRole("link", { name: "Legacy import", exact: true })).toHaveAttribute("href", "/source/docs/import/");
+  await page.goto("/tr/source/docs/import/");
+  await expect(page.locator("html")).toHaveAttribute("lang", "tr");
+  await expect(page.getByRole("article")).toHaveAttribute("lang", "en");
+  await expect(page.locator('main nav a[href="/tr/source/docs/runbook/"]')).toBeVisible();
+});

@@ -2104,5 +2104,11 @@
   "Snapshot relationships are not a runtime trace.": "روابط تصویر، ردگیری زمان اجرا نیستند.",
   "This provider is unavailable. Configure an authorized local snapshot.": "ارائه‌دهنده در دسترس نیست. یک تصویر محلی مجاز تنظیم کنید.",
   "edges ·": "یال ·",
-  "Diff is capped at 1,000 lines per revision.": "تفاوت به ۱۰۰۰ خط در هر بازبینی محدود است."
+  "Diff is capped at 1,000 lines per revision.": "تفاوت به ۱۰۰۰ خط در هر بازبینی محدود است.",
+  "Source documentation": "مستندات منبع",
+  "Technical documentation is in English. Navigation follows your selected language.": "مستندات فنی به انگلیسی است. ناوبری از زبان انتخابی پیروی می‌کند.",
+  "Guide": "راهنما",
+  "Collectors": "گردآورنده‌ها",
+  "Legacy import": "درون‌ریزی قدیمی",
+  "Runbook": "راهنمای عملیات"
 }

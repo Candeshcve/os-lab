@@ -108,3 +108,12 @@ AI-rule review, recorded-metric rankings and full snapshot JSON export.
 
 Absent providers, including live application stress testing, stay explicitly
 unavailable. Snapshot relationships never claim to be runtime traces.
+
+## Source workflow documentation
+
+[[dashboard/src/views/source/docs.tsx]] renders trusted first-party guides from
+[[dashboard/src/lib/source-docs.ts]] in local and public localized routes.
+
+The English technical prose is labeled; navigation and internal guide/legal
+links preserve locale/base paths. No private artifact or OpenAPI reference is
+rendered. [[source-lab/RUNBOOK.md]] records operation/recovery and held native gates.

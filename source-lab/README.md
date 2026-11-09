@@ -1,9 +1,9 @@
 # Source Lab
 
 Source Lab brings iQ-SourceContol into os-lab. The Python engine, CLI and guarded console API are implemented. The local
-dashboard provides navigation, Overview matrices, inspectors, source catalogs and
-a previewed crawler runner. Remaining analysis views and distribution work stay
-in the task queue.
+dashboard provides Overview, crawler, Evidence/runtime, Deep analysis, Pipeline
+and Brain snapshot views. Distribution code is implemented; native platform
+acceptance and final release audit remain in the task queue.
 Only first-party source code and synthetic fixtures are included. Third-party
 archives, datasets and binaries are excluded. Skills, database-backed repository
 management, and OpenAPI integration are also outside the requested scope.
@@ -90,3 +90,13 @@ settings and explicit signed-session verification are available through the
 console API. See [API.md](API.md) and [COLLECTORS.md](COLLECTORS.md). Remaining UI
 and distribution work is tracked in [TODO.md](TODO.md); the public Source routes
 are informational and never read local targets or start jobs.
+
+## Workflow documentation
+
+- [Operator/release runbook](RUNBOOK.md) covers readiness, operation, recovery and release gates.
+- [Collectors](COLLECTORS.md) distinguishes imported/synthetic sessions from live proof.
+- [Brain providers](BRAIN.md) describes bounded snapshots and unavailable application providers.
+- [Legacy import](IMPORT.md) documents opt-in dry runs, exclusions, hashes and rollback.
+
+The installed and public dashboard documentation routes render these first-party
+guides. They do not expose private output or integrate an OpenAPI reference.

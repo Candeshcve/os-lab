@@ -410,3 +410,17 @@ passed**. Dashboard types/i18n/build, **38 browser tests**, Pages build and publ
 EN/TR smoke passed after updating privacy retention/URL-history disclosure.
 Six staging tests and 12 launcher foundation checks passed. No real legacy data
 was imported; all tests used owned temporary fixtures.
+
+## SRC-062: Workflow documentation and graph
+
+Added the operator/release runbook and local/public `/source/docs/` guide,
+collectors, Brain providers, import and runbook routes. Trusted English technical
+prose is labeled; UI navigation and internal guide/legal links preserve locale
+and base paths. No OpenAPI/API-reference integration or private output is added.
+README and setup/labctl/dashboard/overview/tooling graph nodes describe implemented
+workflows and the held native platform gates.
+
+Dashboard types, **2,112**-key locales, **457-route** local/Pages builds, **39 browser
+tests**, four graph-model tests, public EN/TR smoke and `lat check` passed. A
+dedicated browser test checks local guide links and Turkish navigation while
+retaining the English article language.

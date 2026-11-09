@@ -2104,5 +2104,11 @@
   "Snapshot relationships are not a runtime trace.": "Anlık görüntü ilişkileri çalışma zamanı izi değildir.",
   "This provider is unavailable. Configure an authorized local snapshot.": "Bu sağlayıcı kullanılamıyor. Yetkili bir yerel görüntü yapılandırın.",
   "edges ·": "kenar ·",
-  "Diff is capped at 1,000 lines per revision.": "Fark, sürüm başına 1.000 satırla sınırlıdır."
+  "Diff is capped at 1,000 lines per revision.": "Fark, sürüm başına 1.000 satırla sınırlıdır.",
+  "Source documentation": "Kaynak belgeleri",
+  "Technical documentation is in English. Navigation follows your selected language.": "Teknik belgeler İngilizcedir. Gezinti seçtiğiniz dili kullanır.",
+  "Guide": "Kılavuz",
+  "Collectors": "Toplayıcılar",
+  "Legacy import": "Eski çıktı içe aktarma",
+  "Runbook": "İşletim kılavuzu"
 }

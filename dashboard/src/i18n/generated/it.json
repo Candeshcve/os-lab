@@ -2104,5 +2104,11 @@
   "Snapshot relationships are not a runtime trace.": "Le relazioni dello snapshot non sono una traccia runtime.",
   "This provider is unavailable. Configure an authorized local snapshot.": "Provider non disponibile. Configura uno snapshot locale autorizzato.",
   "edges ·": "archi ·",
-  "Diff is capped at 1,000 lines per revision.": "Il confronto è limitato a 1.000 righe per revisione."
+  "Diff is capped at 1,000 lines per revision.": "Il confronto è limitato a 1.000 righe per revisione.",
+  "Source documentation": "Documentazione Source",
+  "Technical documentation is in English. Navigation follows your selected language.": "La documentazione tecnica è in inglese. La navigazione segue la lingua scelta.",
+  "Guide": "Guida",
+  "Collectors": "Raccoglitori",
+  "Legacy import": "Importazione legacy",
+  "Runbook": "Manuale operativo"
 }
