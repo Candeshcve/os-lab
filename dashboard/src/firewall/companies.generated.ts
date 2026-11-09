@@ -8163,7 +8163,7 @@ export const COMPANIES: Company[] = [
       "course": "BGT207",
       "github": "GvnTech-cmd"
     },
-    "summary": "A 370-person technology company with an Istanbul HQ (ERP, mail, database), an Ankara operations branch and an Izmir R&D office holding all source code. Each office has its own /16 and FortiGate; offices are joined by IPsec VPN, default-deny everywhere, a guest VLAN that only reaches the internet, and FortiAnalyzer logs in Istanbul.",
+    "summary": "A 370-person technology company with an Istanbul HQ (ERP, mail, database), an Ankara operations branch and an Izmir R&D office holding all source code. Each office has its own /16 and FortiGate; offices are joined by IPsec VPN with MFA and Role-Based access, default-deny everywhere with a catch-all drop rule, a guest VLAN strictly inside each branch's subnet that only reaches the internet, isolated management VLANs, and FortiAnalyzer logs in Istanbul retained for 6 months.",
     "branches": [
       {
         "id": "istanbul-hq",
@@ -8177,6 +8177,12 @@ export const COMPANIES: Company[] = [
           "cidr": "10.10.0.0/16",
           "dmz": false,
           "vlans": [
+            {
+              "id": 5,
+              "name": "management",
+              "cidr": "10.10.5.0/24",
+              "note": "Isolated Management VLAN for device admin access (Firewall, switch, iDRAC)."
+            },
             {
               "id": 10,
               "name": "admin",
@@ -8198,8 +8204,8 @@ export const COMPANIES: Company[] = [
             {
               "id": 99,
               "name": "guest",
-              "cidr": "192.168.99.0/24",
-              "note": "Same guest range at every office; internet only."
+              "cidr": "10.10.99.0/24",
+              "note": "Guest VLAN correctly subnetted inside the HQ /16 block; internet only."
             }
           ]
         },
@@ -8210,7 +8216,8 @@ export const COMPANIES: Company[] = [
             "ERP",
             "mail",
             "VPN",
-            "SIEM logs"
+            "SIEM logs",
+            "SD-WAN backup"
           ]
         },
         "firewalls": [
@@ -8219,7 +8226,8 @@ export const COMPANIES: Company[] = [
             "chosen": {
               "product": "FortiGate 100F (HA)",
               "vendor": "Fortinet",
-              "reason": "Sized for 350 Mbps of calculated need on a 500 Mbps fiber line, HA because the ERP and mail servers live here."
+              "priceUsd": 6000,
+              "reason": "Sized for 350 Mbps of calculated need on a 500 Mbps fiber line + 100 Mbps SD-WAN backup, HA because the ERP and mail servers live here."
             },
             "alternatives": [
               {
@@ -8244,6 +8252,42 @@ export const COMPANIES: Company[] = [
               }
             ],
             "rules": [
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67,68",
+                "from": "internal-vlans",
+                "to": "any",
+                "note": "DHCP allocation."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "tcp",
+                "port": "53",
+                "from": "internal-vlans",
+                "to": "any",
+                "note": "DNS resolution."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "53",
+                "from": "internal-vlans",
+                "to": "any",
+                "note": "DNS resolution."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "123",
+                "from": "internal-vlans",
+                "to": "any",
+                "note": "NTP time sync."
+              },
               {
                 "action": "allow",
                 "direction": "in",
@@ -8284,7 +8328,7 @@ export const COMPANIES: Company[] = [
                 "proto": "any",
                 "from": "any",
                 "to": "any",
-                "note": "Default Deny: everything not explicitly allowed is dropped and logged."
+                "note": "Any-Any-Drop (Catch-all Deny): Explicit default deny at the bottom of the list."
               }
             ]
           }
@@ -8303,6 +8347,12 @@ export const COMPANIES: Company[] = [
           "dmz": false,
           "vlans": [
             {
+              "id": 5,
+              "name": "management",
+              "cidr": "10.20.5.0/24",
+              "note": "Isolated Management VLAN for device admin access."
+            },
+            {
               "id": 10,
               "name": "sales-ops",
               "cidr": "10.20.10.0/24",
@@ -8317,8 +8367,8 @@ export const COMPANIES: Company[] = [
             {
               "id": 99,
               "name": "guest",
-              "cidr": "192.168.99.0/24",
-              "note": "Same guest range at every office; internet only."
+              "cidr": "10.20.99.0/24",
+              "note": "Guest VLAN correctly subnetted inside the branch /16 block; internet only."
             }
           ]
         },
@@ -8337,7 +8387,8 @@ export const COMPANIES: Company[] = [
             "chosen": {
               "product": "FortiGate 60F",
               "vendor": "Fortinet",
-              "reason": "175 Mbps calculated need on a 200 Mbps fiber line for 100 staff."
+              "priceUsd": 1000,
+              "reason": "175 Mbps calculated need on a 200 Mbps fiber line + 5G/LTE Backup for 100 staff."
             },
             "alternatives": [
               {
@@ -8362,6 +8413,42 @@ export const COMPANIES: Company[] = [
               }
             ],
             "rules": [
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67,68",
+                "from": "internal-vlans",
+                "to": "any",
+                "note": "DHCP allocation."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "tcp",
+                "port": "53",
+                "from": "internal-vlans",
+                "to": "any",
+                "note": "DNS resolution."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "53",
+                "from": "internal-vlans",
+                "to": "any",
+                "note": "DNS resolution."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "123",
+                "from": "internal-vlans",
+                "to": "any",
+                "note": "NTP time sync."
+              },
               {
                 "action": "deny",
                 "direction": "in",
@@ -8393,7 +8480,7 @@ export const COMPANIES: Company[] = [
                 "proto": "any",
                 "from": "any",
                 "to": "any",
-                "note": "Default Deny: everything not explicitly allowed is dropped and logged."
+                "note": "Any-Any-Drop (Catch-all Deny): Explicit default deny at the bottom of the list."
               }
             ]
           }
@@ -8412,6 +8499,12 @@ export const COMPANIES: Company[] = [
           "dmz": false,
           "vlans": [
             {
+              "id": 5,
+              "name": "management",
+              "cidr": "10.30.5.0/24",
+              "note": "Isolated Management VLAN for device admin access."
+            },
+            {
               "id": 10,
               "name": "rnd-software",
               "cidr": "10.30.10.0/24",
@@ -8420,8 +8513,8 @@ export const COMPANIES: Company[] = [
             {
               "id": 99,
               "name": "guest",
-              "cidr": "192.168.99.0/24",
-              "note": "Same guest range at every office; internet only."
+              "cidr": "10.30.99.0/24",
+              "note": "Guest VLAN correctly subnetted inside the branch /16 block; internet only."
             }
           ]
         },
@@ -8440,7 +8533,8 @@ export const COMPANIES: Company[] = [
             "chosen": {
               "product": "FortiGate 200F",
               "vendor": "Fortinet",
-              "reason": "787 Mbps calculated need on a 1 Gbps line; all source code lives here."
+              "priceUsd": 4500,
+              "reason": "787 Mbps calculated need on a 1 Gbps fiber line + 200 Mbps SD-WAN backup; all source code lives here."
             },
             "alternatives": [
               {
@@ -8466,6 +8560,42 @@ export const COMPANIES: Company[] = [
             ],
             "rules": [
               {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "67,68",
+                "from": "internal-vlans",
+                "to": "any",
+                "note": "DHCP allocation."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "tcp",
+                "port": "53",
+                "from": "internal-vlans",
+                "to": "any",
+                "note": "DNS resolution."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "53",
+                "from": "internal-vlans",
+                "to": "any",
+                "note": "DNS resolution."
+              },
+              {
+                "action": "allow",
+                "direction": "in",
+                "proto": "udp",
+                "port": "123",
+                "from": "internal-vlans",
+                "to": "any",
+                "note": "NTP time sync."
+              },
+              {
                 "action": "deny",
                 "direction": "in",
                 "proto": "any",
@@ -8479,7 +8609,7 @@ export const COMPANIES: Company[] = [
                 "proto": "any",
                 "from": "vlan10-rnd",
                 "to": "internet",
-                "note": "Outbound data from R&D is under strict DLP rules to stop code leakage."
+                "note": "Direct internet blocked. Outbound data from R&D is through a secure Proxy under strict DLP rules to stop code leakage."
               },
               {
                 "action": "deny",
@@ -8495,7 +8625,7 @@ export const COMPANIES: Company[] = [
                 "proto": "any",
                 "from": "any",
                 "to": "any",
-                "note": "Default Deny: everything not explicitly allowed is dropped and logged."
+                "note": "Any-Any-Drop (Catch-all Deny): Explicit default deny at the bottom of the list."
               }
             ]
           }
@@ -8504,13 +8634,13 @@ export const COMPANIES: Company[] = [
     ],
     "remoteAccess": {
       "type": "site-to-site-vpn",
-      "note": "All offices reach the internet locally and are connected to each other by IPsec VPN."
+      "note": "All offices reach the internet locally and are connected to each other by IPsec VPN. Remote workers use MFA (Multi-Factor Authentication), LDAP/SSO integrated, and Role-Based Client VPN."
     },
     "monitoring": {
-      "siem": "All FortiGate logs go to a FortiAnalyzer (SIEM) server in the Istanbul HQ; Grafana-style NOC/SOC screens.",
+      "siem": "All FortiGate logs go to a FortiAnalyzer (SIEM) server in the Istanbul HQ; Grafana-style NOC/SOC screens. Logs are retained for a minimum of 6 months for legal compliance.",
       "owner": "The IT and Security team in Istanbul during 09:00-18:00; an on-call IT staff member gets SMS for critical out-of-hours alerts.",
       "alertSink": "Automatic e-mail (CPU over 80%, VPN down, critical IPS rule) and SMS to the on-call engineer.",
-      "appVsSecurity": "Not separated in the original; NOC screens show traffic while IPS/antivirus events come from FortiAnalyzer."
+      "appVsSecurity": "Weekly automatic config exports. Monthly scheduled firmware patching. Common vulnerabilities (CVE) tracked monthly with tools like Nessus."
     },
     "slug": "guventek-bilisim"
   },
@@ -11791,7 +11921,7 @@ export const COMPANIES: Company[] = [
     "sector": "Technology / Higher Education",
     "author": {
       "name": "Mevlit Kaan Öztürk",
-      "studentId": "230207001",
+      "studentId": "2520191003",
       "course": "BGT207",
       "github": "kkaanozturk"
     },
