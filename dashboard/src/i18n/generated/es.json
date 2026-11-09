@@ -2024,5 +2024,20 @@
   "Operation logs": "Registros de operación",
   "Select a target to inspect evidence.": "Seleccione un objetivo para revisar evidencias.",
   "Signatures are not verified by browsing. Synthetic events cannot establish live behavior.": "La navegación no verifica firmas. Los eventos sintéticos no prueban comportamiento real.",
-  "No findings.": "Sin hallazgos."
+  "No findings.": "Sin hallazgos.",
+  "Action": "Acción",
+  "Browser canary": "Canario del navegador",
+  "Canary URL": "URL del canario",
+  "Configured canary URL": "URL del canario configurada",
+  "I understand that rotation prevents verification of old sessions with the new key.": "Entiendo que la nueva clave no verificará sesiones anteriores.",
+  "Key status": "Estado de la clave",
+  "Keys are never displayed. Rotation requires the original key to verify older sessions.": "Las claves nunca se muestran. Las sesiones anteriores requieren la clave original.",
+  "Playwright is optional. Without live browser tooling, canary events are synthetic and cannot establish live behavior.": "Playwright es opcional. Sin herramientas de navegador, los eventos sintéticos no prueban comportamiento real.",
+  "Runtime mode": "Modo de ejecución",
+  "Select": "Seleccionar",
+  "Select a session belonging to the detection target.": "Seleccione una sesión del objetivo analizado.",
+  "Selected session": "Sesión seleccionada",
+  "Signing key": "Clave de firma",
+  "Static analysis": "Análisis estático",
+  "The environment owns this key. Change it outside the dashboard.": "El entorno controla esta clave. Cámbiela fuera del panel."
 }

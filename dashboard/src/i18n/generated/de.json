@@ -2024,5 +2024,20 @@
   "Operation logs": "Aktionsprotokolle",
   "Select a target to inspect evidence.": "Wählen Sie ein Ziel zur Evidenzprüfung.",
   "Signatures are not verified by browsing. Synthetic events cannot establish live behavior.": "Beim Durchsuchen werden Signaturen nicht geprüft. Synthetische Ereignisse belegen kein Live-Verhalten.",
-  "No findings.": "Keine Befunde."
+  "No findings.": "Keine Befunde.",
+  "Action": "Aktion",
+  "Browser canary": "Browser-Canary",
+  "Canary URL": "Canary-URL",
+  "Configured canary URL": "Konfigurierte Canary-URL",
+  "I understand that rotation prevents verification of old sessions with the new key.": "Ich verstehe, dass alte Sitzungen mit dem neuen Schlüssel nicht prüfbar sind.",
+  "Key status": "Schlüsselstatus",
+  "Keys are never displayed. Rotation requires the original key to verify older sessions.": "Schlüssel werden nie angezeigt. Alte Sitzungen benötigen den ursprünglichen Schlüssel.",
+  "Playwright is optional. Without live browser tooling, canary events are synthetic and cannot establish live behavior.": "Playwright ist optional. Ohne Browserwerkzeuge sind Ereignisse synthetisch und belegen kein Live-Verhalten.",
+  "Runtime mode": "Laufzeitmodus",
+  "Select": "Auswählen",
+  "Select a session belonging to the detection target.": "Wählen Sie eine Sitzung des Erkennungsziels.",
+  "Selected session": "Ausgewählte Sitzung",
+  "Signing key": "Signierschlüssel",
+  "Static analysis": "Statische Analyse",
+  "The environment owns this key. Change it outside the dashboard.": "Die Umgebung verwaltet diesen Schlüssel. Ändern Sie ihn außerhalb des Dashboards."
 }

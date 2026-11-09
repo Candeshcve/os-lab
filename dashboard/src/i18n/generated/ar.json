@@ -2024,5 +2024,20 @@
   "Operation logs": "سجلات العملية",
   "Select a target to inspect evidence.": "اختر هدفًا لفحص الأدلة.",
   "Signatures are not verified by browsing. Synthetic events cannot establish live behavior.": "التصفح لا يتحقق من التواقيع. الأحداث الاصطناعية لا تثبت سلوكًا حيًا.",
-  "No findings.": "لا توجد نتائج."
+  "No findings.": "لا توجد نتائج.",
+  "Action": "الإجراء",
+  "Browser canary": "اختبار المتصفح",
+  "Canary URL": "رابط الاختبار",
+  "Configured canary URL": "رابط الاختبار المُعدّ",
+  "I understand that rotation prevents verification of old sessions with the new key.": "أفهم أن المفتاح الجديد لا يتحقق من الجلسات القديمة.",
+  "Key status": "حالة المفتاح",
+  "Keys are never displayed. Rotation requires the original key to verify older sessions.": "لا تُعرض المفاتيح. الجلسات القديمة تتطلب المفتاح الأصلي.",
+  "Playwright is optional. Without live browser tooling, canary events are synthetic and cannot establish live behavior.": "Playwright اختياري. دون أدوات المتصفح، الأحداث اصطناعية ولا تثبت سلوكًا حيًا.",
+  "Runtime mode": "وضع التشغيل",
+  "Select": "اختيار",
+  "Select a session belonging to the detection target.": "اختر جلسة تخص هدف الكشف.",
+  "Selected session": "الجلسة المحددة",
+  "Signing key": "مفتاح التوقيع",
+  "Static analysis": "التحليل الساكن",
+  "The environment owns this key. Change it outside the dashboard.": "البيئة تتحكم بهذا المفتاح. غيّره خارج لوحة التحكم."
 }

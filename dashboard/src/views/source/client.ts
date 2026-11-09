@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 export const PUBLIC_SOURCE = import.meta.env.PUBLIC_SITE_MODE === "pages";
 export async function sourceRequest<T>(path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
   const response = await fetch(`/api/source/${path}`, {
@@ -11,6 +11,7 @@ export async function sourceRequest<T>(path: string, body?: unknown, signal?: Ab
   return data as T;
 }
 export function useSource<T>(path: string) {
+  const previousPath = useRef(path);
   const [data, setData] = useState<T>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
@@ -19,7 +20,9 @@ export function useSource<T>(path: string) {
   useEffect(() => {
     if (PUBLIC_SOURCE || !path) { setLoading(false); return; }
     const controller = new AbortController();
-    setLoading(true); setError(undefined); setData(undefined);
+    setLoading(true); setError(undefined);
+    if (previousPath.current !== path) setData(undefined);
+    previousPath.current = path;
     void sourceRequest<T>(path, undefined, controller.signal).then(setData).catch(e => {
       if (!controller.signal.aborted) setError(String(e.message));
     }).finally(() => { if (!controller.signal.aborted) setLoading(false); });

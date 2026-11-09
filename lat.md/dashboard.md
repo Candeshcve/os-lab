@@ -78,3 +78,9 @@ for output, cancellation and conflicts. No progress percentage is invented.
 scorecards, sessions/events and report links. Detection uses the shared
 [[dashboard/src/views/source/action.tsx]] preview/job component. Evidence states,
 partial coverage and browsing-without-verification remain explicit.
+
+[[dashboard/src/views/source/runtime.tsx]] manages key status and previewed
+generation/rotation, configured canary URL and explicit session verification.
+Environment-owned keys are read-only; rotation needs acknowledgement and command
+confirmation. Evidence collection modes distinguish static, canary and selected
+sessions; optional browser tooling never blocks static analysis.

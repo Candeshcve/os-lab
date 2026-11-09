@@ -64,7 +64,7 @@ Use os-lab's static pages, existing shell and locale/base-path helpers.
 - [x] SRC-031 (SRC-021, SRC-030): Port Overview matrices (properties/backgrounds/dependencies/permissions), inspector, annotations, counts, filters, sources and CSV downloads. Accept: fixture results match the source UI and all tabs have loading/empty/error states.
 - [x] SRC-032 (SRC-022, SRC-031): Port source-list crawler runner/options/progress/logs and H1-H5 reference. Accept: configured inputs validated, preview/run/cancel workflow works and failures render beside actions.
 - [x] SRC-033 (SRC-025, SRC-026, SRC-030): Port Evidence findings/state/severity/scorecard/spans/coverage/verification, target/platform runner, polling/cancel, session list/timeline and reports. Accept: five-platform fixture journeys preserve evidence levels and explain partial coverage.
-- [ ] SRC-034 (SRC-024, SRC-033): Port runtime key controls, two-step rotation, canary URL/default/toggle, Playwright warning and session selection. Accept: missing-required versus optional tooling, synthetic mode and environment-owned keys render correctly.
+- [x] SRC-034 (SRC-024, SRC-033): Port runtime key controls, two-step rotation, canary URL/default/toggle, Playwright warning and session selection. Accept: missing-required versus optional tooling, synthetic mode and environment-owned keys render correctly.
 
 ## Slice 4: Deep analysis, pipeline, merger and Brain
 

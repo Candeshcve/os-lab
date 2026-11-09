@@ -2024,5 +2024,20 @@
   "Operation logs": "گزارش عملیات",
   "Select a target to inspect evidence.": "برای بررسی شواهد هدفی انتخاب کنید.",
   "Signatures are not verified by browsing. Synthetic events cannot establish live behavior.": "مرور، امضاها را تأیید نمی‌کند. رویدادهای مصنوعی رفتار زنده را ثابت نمی‌کنند.",
-  "No findings.": "یافته‌ای نیست."
+  "No findings.": "یافته‌ای نیست.",
+  "Action": "عملیات",
+  "Browser canary": "قناری مرورگر",
+  "Canary URL": "نشانی قناری",
+  "Configured canary URL": "نشانی تنظیم‌شده قناری",
+  "I understand that rotation prevents verification of old sessions with the new key.": "می‌دانم کلید جدید نشست‌های قدیمی را تأیید نمی‌کند.",
+  "Key status": "وضعیت کلید",
+  "Keys are never displayed. Rotation requires the original key to verify older sessions.": "کلیدها نمایش داده نمی‌شوند. نشست‌های قدیمی به کلید اصلی نیاز دارند.",
+  "Playwright is optional. Without live browser tooling, canary events are synthetic and cannot establish live behavior.": "Playwright اختیاری است. بدون ابزار مرورگر، رویدادهای مصنوعی رفتار زنده را ثابت نمی‌کنند.",
+  "Runtime mode": "حالت اجرا",
+  "Select": "انتخاب",
+  "Select a session belonging to the detection target.": "نشست متعلق به هدف تشخیص را انتخاب کنید.",
+  "Selected session": "نشست انتخاب‌شده",
+  "Signing key": "کلید امضا",
+  "Static analysis": "تحلیل ایستا",
+  "The environment owns this key. Change it outside the dashboard.": "این کلید متعلق به محیط است. آن را خارج از داشبورد تغییر دهید."
 }

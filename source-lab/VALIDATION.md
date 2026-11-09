@@ -295,3 +295,16 @@ Dashboard typecheck/i18n/build passed; full browser suite **32 passed**, includi
 five platform journeys with partial coverage and preserved evidence states. Local
 and Pages builds emitted 409 routes; public smoke preserves EN/TR routes without
 engine calls. Existing engine five-platform tests supply parser acceptance.
+
+## SRC-034: Runtime controls
+
+Runtime settings expose status only, managed key actions, rotation acknowledgement
+plus command confirmation, configured URL and explicit verification jobs.
+Environment-owned keys cannot be changed. Evidence runner modes gate session
+matching and explain optional Playwright/synthetic behavior. Refresh retains
+verification results and logs.
+
+Typecheck, **2,041**-key/seven-locale check, 409-route local/Pages builds, public
+EN/TR smoke and full browser suite **33 passed**. Rotation/environment/invalid-URL
+controls have a dedicated browser check; existing console tests verify actual key
+writes, modes, signatures and precedence. No secret is delivered to the UI.

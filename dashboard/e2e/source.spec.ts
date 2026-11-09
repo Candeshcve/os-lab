@@ -7,6 +7,7 @@ async function sourceShell(page: Page) {
     if (path === "/api/host") json = { host: { os: "linux", arch: "x86_64" }, labs: [{ id: "source", label: "Source Lab", state: "ready", actions: [] }] };
     if (path === "/api/jobs") json = { jobs: [] };
     if (path === "/api/logs") json = { logs: [] };
+    if (path === "/api/source/settings/runtime") json = { key: { configured: false, source: "none", problem: null }, canary: { testUrl: "https://example.test" }, playwright: false };
     if (path === "/api/source/detection") json = { targets: [{ key: "targets/sample", name: "sample", slug: "owned__sample" }], runner: { ready: true }, run: null };
     if (path === "/api/source/evidence") json = new URL(route.request().url()).searchParams.has("slug") ? { slug: "owned__sample", findings: [], coverage: { limitations: ["Static only"] }, scorecard: {}, sessions: [], reports: [] } : { targets: [{ slug: "owned__sample", platform: "browser-extension" }], truncated: false };
     if (path === "/api/source/analyzer") json = { run: null, report: null, summaryCount: 0, summaryRows: [], sourceFiles: [{ name: "owned.txt", format: "TXT" }], sourceFilesTruncated: false };
@@ -182,3 +183,21 @@ for (const platform of ["browser-extension", "windows-app", "macos-app", "androi
     await expect(page.getByText("Owned fixture hypothesis")).not.toBeVisible();
   });
 }
+
+test("Runtime rotation requires acknowledgement and environment keys stay read-only", async ({ page }) => {
+  await sourceShell(page);
+  const runtime = { key: { configured: true, source: "managed-file", problem: null }, canary: { testUrl: "https://example.test" }, playwright: false };
+  await page.route("**/api/source/settings/runtime", route => route.fulfill({ json: runtime }));
+  await page.goto("/source/settings/runtime/");
+  await expect(page.getByRole("button", { name: "Preview action" })).toBeDisabled();
+  await page.getByRole("checkbox").check();
+  await expect(page.getByRole("button", { name: "Preview action" })).toBeEnabled();
+  runtime.key.source = "env";
+  await page.getByRole("button", { name: "Refresh", exact: true }).click();
+  await expect(page.getByText("The environment owns this key. Change it outside the dashboard.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Preview action" })).toBeDisabled();
+  await page.getByRole("combobox", { name: /^Action/ }).selectOption("set-canary");
+  await expect(page.getByLabel("Configured canary URL")).toHaveValue("https://example.test");
+  await page.getByLabel("Configured canary URL").fill("https://user:secret@example.test/?secret=fixture");
+  await expect(page.getByRole("button", { name: "Preview action" })).toBeDisabled();
+});

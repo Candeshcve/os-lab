@@ -2024,5 +2024,20 @@
   "Operation logs": "İşlem günlükleri",
   "Select a target to inspect evidence.": "Kanıtları incelemek için hedef seçin.",
   "Signatures are not verified by browsing. Synthetic events cannot establish live behavior.": "Göz atma imzaları doğrulamaz. Sentetik olaylar canlı davranışı kanıtlayamaz.",
-  "No findings.": "Bulgu yok."
+  "No findings.": "Bulgu yok.",
+  "Action": "İşlem",
+  "Browser canary": "Tarayıcı kanaryası",
+  "Canary URL": "Kanarya URL",
+  "Configured canary URL": "Yapılandırılmış kanarya URL",
+  "I understand that rotation prevents verification of old sessions with the new key.": "Anahtar değişiminin eski oturumların yeni anahtarla doğrulanmasını engellediğini anlıyorum.",
+  "Key status": "Anahtar durumu",
+  "Keys are never displayed. Rotation requires the original key to verify older sessions.": "Anahtarlar gösterilmez. Eski oturumlar için özgün anahtar gerekir.",
+  "Playwright is optional. Without live browser tooling, canary events are synthetic and cannot establish live behavior.": "Playwright isteğe bağlıdır. Canlı tarayıcı araçları olmadan olaylar sentetiktir ve canlı davranışı kanıtlayamaz.",
+  "Runtime mode": "Çalışma zamanı modu",
+  "Select": "Seç",
+  "Select a session belonging to the detection target.": "Tespit hedefine ait bir oturum seçin.",
+  "Selected session": "Seçili oturum",
+  "Signing key": "İmza anahtarı",
+  "Static analysis": "Statik analiz",
+  "The environment owns this key. Change it outside the dashboard.": "Bu anahtar ortama aittir. Panonun dışında değiştirin."
 }
