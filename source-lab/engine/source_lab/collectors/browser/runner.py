@@ -110,6 +110,8 @@ class BrowserCanaryRunner:
                             )
                     browser.close()
             except Exception as e:
+                meta.collector.profile_mode = "collection_failed"
+                meta.limitations.append("Browser collection failed; partial events are excluded from correlation.")
                 writer.append_event(
                     t_ms=10.0,
                     event_type="collector_error",

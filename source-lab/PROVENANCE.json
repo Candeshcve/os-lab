@@ -122,7 +122,7 @@
       "source": "engine/cli/run_detection.py",
       "destination": "source-lab/engine/source_lab/cli/run_detection.py",
       "source_sha256": "2cd796e0d865409de6efd90396b2b1f5062b466d7c3f1de1888bd7d271ad8e18",
-      "local_sha256": "cf408bf2dda39ecffa6d1693c4309659215abe93df9f9ddccf2674e1197050e9"
+      "local_sha256": "eaa50a51d865b968e6d95b800677069daf555866503054adac225f015d4abe59"
     },
     {
       "source": "engine/collectors/__init__.py",
@@ -140,7 +140,7 @@
       "source": "engine/collectors/android/importer.py",
       "destination": "source-lab/engine/source_lab/collectors/android/importer.py",
       "source_sha256": "ea3ea54445578f6e2d7483ad74a6782f67b68c025b6ede59442c5ec11f6cb9b6",
-      "local_sha256": "bc90808daa9b9c881086a0c110d99cad20c0ff0890c362da026d3a64da9e1c71"
+      "local_sha256": "4db972050fb9e2c45d04af6e2dfbd392087f52bef73ff257a0fa31dfa4590c46"
     },
     {
       "source": "engine/collectors/browser/canary.js",
@@ -152,7 +152,7 @@
       "source": "engine/collectors/browser/runner.py",
       "destination": "source-lab/engine/source_lab/collectors/browser/runner.py",
       "source_sha256": "eab7bc6158749a396c3358134f14c6ec91ec1c42e9a393f1caf35bca32c8efb6",
-      "local_sha256": "a002f29353fef8d8b00c1e28bf2faa5e549d5bce2c8b2e3c1c429abe3d360dad"
+      "local_sha256": "f1c63db193ec6dbb8c51927c33fae35cc44e4073f2e007366ddf43050806abde"
     },
     {
       "source": "engine/collectors/ios/__init__.py",
@@ -164,7 +164,7 @@
       "source": "engine/collectors/ios/importer.py",
       "destination": "source-lab/engine/source_lab/collectors/ios/importer.py",
       "source_sha256": "d588fc3cd5f513e2be471f9d67ad0dc64ae9135950cda1f10289693dd04aaf00",
-      "local_sha256": "d8b661b11e2638ff9878698287f6924279318921a8baf1d7b6724cc36ddb6f17"
+      "local_sha256": "97df8e5a2d46d16ebb7f131857739eb7fb8e531953b83d960847b2af507d1d07"
     },
     {
       "source": "engine/collectors/macos/__init__.py",
@@ -176,7 +176,7 @@
       "source": "engine/collectors/macos/importer.py",
       "destination": "source-lab/engine/source_lab/collectors/macos/importer.py",
       "source_sha256": "f553d5b9c53478d493d4040406a71d0f765ea86acadd5ea19bcd0cbd06393ad0",
-      "local_sha256": "00012b6a796f832122bc3d8d87d403d0e5b606a6e8d91f6677858b3c6a76bee0"
+      "local_sha256": "927797c5c52fb52b5e80d72753792ba090adec8744b1c5147d4ed27e9bba2c2a"
     },
     {
       "source": "engine/collectors/windows/__init__.py",
@@ -188,7 +188,7 @@
       "source": "engine/collectors/windows/importer.py",
       "destination": "source-lab/engine/source_lab/collectors/windows/importer.py",
       "source_sha256": "c342739bb0905322ab5f0f190895dbd9eeb37908ff6a7d43e886e4144aa9084c",
-      "local_sha256": "62e494a7d3e7969ab6f7dd17fb5e77407ea55183dc191f9a3163baec942d528b"
+      "local_sha256": "90c178dde1b501c84d9c5e9099f307dd0f8d5fb837d5166ee89e123ddc2803cb"
     },
     {
       "source": "engine/evidence/__init__.py",
@@ -530,7 +530,7 @@
       "source": "engine/tests/test_collectors.py",
       "destination": "source-lab/engine/tests/test_collectors.py",
       "source_sha256": "996f36479e384ceebe3881fe33a9cd834d6abc31b77e7850b1b42f6c10afc400",
-      "local_sha256": "e7c2136d5c83d8ef887412c7911bdb52035cd0eee1709e98c25bb82d8df7ec20"
+      "local_sha256": "9811809eeefa1d9cf09fb9564057e90322e5952c53bcbe2d7649aff9cee52546"
     },
     {
       "source": "engine/tests/test_correlator.py",

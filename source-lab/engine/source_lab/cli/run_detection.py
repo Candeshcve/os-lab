@@ -122,6 +122,9 @@ def _verified_events(reader: SessionBundleReader, coverage: Coverage) -> list:
     if metadata.collector.profile_mode == "synthetic":
         coverage.limitations.append("Synthetic session: simulated events are excluded from runtime correlation.")
         return []
+    if metadata.collector.profile_mode == "collection_failed":
+        coverage.limitations.append("Browser collection failed; events are excluded from runtime correlation.")
+        return []
     if metadata.platform != coverage.platform or metadata.target.identifier != coverage.target.identifier:
         coverage.limitations.append("Runtime session does not match the analyzed target and platform; events ignored.")
         return []

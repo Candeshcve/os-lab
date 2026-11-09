@@ -143,3 +143,43 @@ class TestCollectorsAndImporters(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+import pytest
+from source_lab.cli.run_detection import _verified_events
+from source_lab.evidence.schema import Coverage
+
+
+@pytest.mark.parametrize("importer,platform,options", [
+    (WindowsTelemetryImporter, PlatformType.WINDOWS_APP, {"pe_sieve_data": {"hooks": [{"module": "owned.dll", "function": "Owned"}]}}),
+    (MacOSTelemetryImporter, PlatformType.MACOS_APP, {"dyld_images": ["/owned/Hook.dylib"]}),
+    (AndroidTelemetryImporter, PlatformType.ANDROID_APP, {"threads": ["gum-js-loop"]}),
+    (IOSTelemetryImporter, PlatformType.IOS_APP, {"loaded_dylibs": ["/owned/MobileSubstrate/Tweak.dylib"]}),
+])
+@pytest.mark.parametrize("synthetic", [False, True])
+def test_signed_native_import_review_and_correlation(tmp_path, importer, platform, options, synthetic):
+    target = TargetIdentity(identifier="owned/sample")
+    path = importer(tmp_path, target).import_session(**options, synthetic=synthetic)
+    reader = SessionBundleReader(path)
+    assert reader.verify_integrity()["signature_verified"]
+    meta = reader.get_metadata()
+    assert meta.platform == platform
+    assert "no native collector was launched" in meta.limitations[0]
+    coverage = Coverage(platform=platform, target=target)
+    events = _verified_events(reader, coverage)
+    assert bool(events) is not synthetic
+    if synthetic:
+        assert any("Synthetic" in text for text in coverage.limitations)
+    else:
+        mismatch = Coverage(platform=platform, target=TargetIdentity(identifier="other/target"))
+        assert _verified_events(reader, mismatch) == []
+
+
+def test_browser_synthetic_bundle_cannot_supply_live_proof(tmp_path):
+    target = TargetIdentity(identifier="owned/browser")
+    path = BrowserCanaryRunner(tmp_path, target).run_session(duration_sec=0)
+    reader = SessionBundleReader(path)
+    assert reader.verify_integrity()["valid"]
+    assert reader.get_metadata().collector.profile_mode == "synthetic"
+    coverage = Coverage(platform=PlatformType.BROWSER_EXTENSION, target=target)
+    assert not _verified_events(reader, coverage)

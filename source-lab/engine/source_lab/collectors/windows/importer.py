@@ -36,6 +36,7 @@ class WindowsTelemetryImporter:
         pe_sieve_data: Optional[Dict[str, Any]] = None,
         etw_events: Optional[List[Dict[str, Any]]] = None,
         session_id_suffix: str = "win",
+        *, synthetic: bool = False,
     ) -> Path:
         session_id = f"ses_{int(time.time())}_{uuid4().hex[:8]}_{session_id_suffix}"
         session_dir = self.output_root / "runtime-sessions" / session_id
@@ -48,8 +49,10 @@ class WindowsTelemetryImporter:
                 engine="windows-telemetry-importer",
                 version="2.0.0",
                 host_os="windows",
-                profile_mode="target_isolated",
+                profile_mode="synthetic" if synthetic else "target_isolated",
             ),
+            limitations=["Imported operator telemetry; no native collector was launched."] +
+                         (["Simulated events only; excluded from runtime correlation."] if synthetic else []),
             scope=SessionScope(
                 process_name=self.target.package_name or self.target.identifier,
                 duration_ms=5000,

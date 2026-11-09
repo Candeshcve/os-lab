@@ -204,3 +204,14 @@ missing signatures, invalid manifests and wrong keys with bounded reads.
 Validation: focused console runtime tests **5 passed**; engine session/collector
 tests **20 passed**. Fixtures use temporary keys and owned generated inputs only.
 No browser installation, third-party assets or credentials were published.
+
+## Next batch: SRC-025 collector acceptance
+
+All four native importer libraries now accept explicit synthetic labeling and
+record that they do not launch native collectors. Browser collection failure
+excludes partial events from correlation. Owned, generated telemetry exercises
+signed review and matching-target correlation for all four platforms; synthetic
+and target-mismatched events are rejected. Browser simulation stays synthetic.
+
+Validation: session/collector suite **29 passed**. Actual native collection and
+live browser tooling are not claimed; see [COLLECTORS.md](COLLECTORS.md).

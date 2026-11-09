@@ -19,6 +19,8 @@ The console reports native Python readiness; analysis pages remain in [[source-l
 ## Runtime evidence
 
 [[source-lab/engine/source_lab/evidence/session.py]] signs and verifies session bundles. [[source-lab/engine/source_lab/collectors]] provides the browser canary and four platform telemetry importer libraries.
+[[source-lab/COLLECTORS.md]] documents input provenance, synthetic mode and
+explicitly unavailable native collection workflows.
 
 [[source-lab/engine/source_lab/cli/run_detection.py#_verified_events]] excludes synthetic sessions and target/platform mismatches from correlation. Missing keys or failed integrity leave the static findings and an explicit coverage limitation. Explicit console verification uses a previewed runtime job. Signed manifests must
 cover both metadata and events; unsafe paths, missing signatures and oversized
