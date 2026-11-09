@@ -80,8 +80,9 @@ Collections and matrices use normalized `{name, slugs, count}` entries and raw
 file-backed bundles. Overview adds pinned migration annotations, dependency categories/sections,
 MV2/MV3 counts, background grouping and permission risk labels. Counts deduplicate
 a target within each matrix row. CSV includes annotations and protects formula cells.
-Annotations describe the imported snapshot; check vendor guidance before migration. Deep crawler tuning beyond these bounded
-options remains SRC-040. Pipeline reference UI is available; Brain migration remains tracked separately. No database or Skills-backed Spotlight search is retained. The
+Annotations describe the imported snapshot; check vendor guidance before migration.
+Additional bounded crawler tuning is documented below. Pipeline reference and
+optional file-backed Brain views are available. No database or Skills-backed Spotlight search is retained. The
 hello-world stub remains retired. Explicit session verification uses a confirmed runtime job; read endpoints continue to label integrity as unverified.
 
 Runtime settings writes are atomic, use private modes where supported and never

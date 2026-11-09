@@ -57,7 +57,7 @@ def lab_status(root: str, os_name: str) -> dict:
 import re
 import stat
 import urllib.parse
-from source_artifacts import SourceArtifacts, ArtifactError, SLUG, MAX_JSON
+from source_artifacts import SourceArtifacts, ArtifactError, SLUG, MAX_JSON, redirected
 
 NAME = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_.-]{0,199}\Z", re.ASCII)
 REPO = re.compile(r"[A-Za-z0-9_.-]{1,100}/[A-Za-z0-9_.-]{1,100}\Z", re.ASCII)
@@ -77,7 +77,7 @@ def checked(base: Path, relative: str, *, exists: bool = False) -> Path:
     target = base
     for part in parts:
         target = target / part
-        if target.is_symlink():
+        if redirected(target):
             raise ArtifactError(400, "Symlinks are not allowed")
         if target.exists() and not (target.is_dir() or target.is_file()):
             raise ArtifactError(400, "Only regular files and directories are allowed")
@@ -95,8 +95,9 @@ def safe_tree(path: Path) -> None:
             child = Path(parent) / name
             if count > 100000:
                 raise ArtifactError(413, "Source tree exceeds the validation limit")
-            mode = child.lstat().st_mode
-            if not (stat.S_ISDIR(mode) or stat.S_ISREG(mode)):
+            info = child.lstat()
+            mode = info.st_mode
+            if redirected(child, info) or not (stat.S_ISDIR(mode) or stat.S_ISREG(mode)):
                 raise ArtifactError(400, "Source tree contains a link or special file")
 
 
@@ -119,7 +120,7 @@ def candidates(root: str) -> list[dict]:
             for index, item in enumerate(entries):
                 if index >= 1000:
                     break
-                if not NAME.fullmatch(item.name) or item.is_symlink():
+                if not NAME.fullmatch(item.name) or item.is_symlink() or redirected(Path(item.path)):
                     continue
                 if item.is_dir(follow_symlinks=False) or (item.is_file(follow_symlinks=False) and Path(item.name).suffix.lower() in
                         {".apk", ".xapk", ".apks", ".aab", ".ipa", ".exe", ".dll", ".sys", ".node"}):
@@ -146,7 +147,7 @@ def source_lists(root: str) -> tuple[list[dict], bool]:
                 truncated = True
                 break
             suffix = Path(entry.name).suffix.lower()
-            if NAME.fullmatch(entry.name) and entry.is_file(follow_symlinks=False) and suffix in (".csv", ".txt", ".xlsx"):
+            if NAME.fullmatch(entry.name) and entry.is_file(follow_symlinks=False) and not redirected(Path(entry.path)) and suffix in (".csv", ".txt", ".xlsx"):
                 files.append({"name": entry.name, "format": suffix[1:].upper()})
     return sorted(files, key=lambda item: item["name"]), truncated
 

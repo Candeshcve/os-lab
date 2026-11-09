@@ -23,6 +23,15 @@ SLUG = re.compile(r"[A-Za-z0-9_.-]+__[A-Za-z0-9_.-]+\Z", re.ASCII)
 SESSION = re.compile(r"ses_[A-Za-z0-9_.-]+\Z", re.ASCII)
 
 
+def redirected(path: Path, info=None) -> bool:
+    """Reject POSIX links and Windows reparse points, including directory junctions."""
+    try:
+        info = path.lstat() if info is None else info
+    except FileNotFoundError:
+        return False
+    return stat.S_ISLNK(info.st_mode) or bool(getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400))
+
+
 def _reject_constant(_value):
     raise ValueError("Non-finite number")
 
@@ -46,7 +55,7 @@ class SourceArtifacts:
             if not part or part in (".", "..") or any(c in part for c in ("/", "\\", "\0")):
                 raise ArtifactError(400, "Invalid artifact path")
             path /= part
-            if path.is_symlink():
+            if redirected(path):
                 raise ArtifactError(404, "Artifact not found")
         return path
 

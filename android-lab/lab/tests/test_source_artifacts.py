@@ -161,3 +161,11 @@ def test_directory_listing_cap(tmp_path, monkeypatch):
     monkeypatch.setattr(source_artifacts, "MAX_TARGETS", 1)
     result = source_artifacts.SourceArtifacts(REPO_ROOT).evidence()
     assert len(result["targets"]) == 1 and result["truncated"]
+
+
+def test_windows_reparse_points_are_redirects_even_when_directory_mode():
+    from types import SimpleNamespace
+    import stat
+    from source_artifacts import redirected
+    assert redirected(Path("unused"), SimpleNamespace(st_mode=stat.S_IFDIR, st_file_attributes=0x400))
+    assert not redirected(Path("unused"), SimpleNamespace(st_mode=stat.S_IFDIR, st_file_attributes=0))

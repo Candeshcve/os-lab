@@ -66,7 +66,8 @@ IP address through ipinfo.io. The image honours the opt-out variable
 
 ## Source Lab code and excluded material
 
-`source-lab/engine/source_lab/` and its retained tests were ported from the
+`source-lab/engine/source_lab/`, its retained tests, and first-party manifest
+annotations/Pipeline architecture metadata in `console/source_*.json` were ported from the
 maintainer's iQ-SourceContol code with the owner's explicit authorization for
 publication in os-lab under Apache-2.0. This is a first-party contribution, not
 a claim that the private source repository declared an open-source license.

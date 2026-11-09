@@ -438,3 +438,43 @@ and the **39-test** browser suite passed with one worker. The committed reusable
 all seven catalogs, locale/base/query links and language switches, with **zero
 engine API requests, operation buttons or hydration errors**. New npm commands
 expose model and Pages acceptance checks.
+
+## SRC-073: Portable final regression
+
+`bash scripts/run-tests.sh` passed all seven required stages: **153 Android/console
+tests passed, two optional tests skipped**, **176 Source engine tests passed**,
+sample analysis/report smoke, shell parsing, graph validation, dashboard types
+and committed build freshness. Shell discovery included the ignored staged runtime.
+The actual Rust runtime module passed **five** offline Cargo tests, including
+private Source state preservation; staging/Python helper tests passed **seven**.
+The Brain model suite passed **four**.
+
+`python source-lab/acceptance.py` passed read-only status/setup and all five
+owned-fixture analyzers with PATH empty and Python site packages disabled:
+zero runtime/correlated claims. Its portable JSON report exposes counts and a
+source fingerprint, without private paths or keys. A staged-runtime invocation
+can require that same fingerprint with `--installed-only`.
+
+Path review adds Windows reparse-point/junction rejection to console targets,
+artifact reads and legacy imports, and key/session reads. Twenty focused
+path/import regressions passed. These portable tests do not replace native
+Windows filesystem/process/installer or macOS GUI acceptance.
+
+Dashboard types/i18n and local/Pages builds passed (**457 routes**). All **39**
+browser tests passed with one worker; reusable public smoke verified **112**
+Source/guide routes across all eight locales, no API calls/actions/hydration
+errors. Real localhost console smoke used the owned workspace for Overview,
+inspector and exact crawler preview; preview started no job/acquisition.
+The staged runtime passed all six portable checks with the identical source
+fingerprint and no checkout marker. Native GUI/install checks remain unclaimed.
+
+## SRC-074: Inventory and publication audit
+
+[AUDIT.md](AUDIT.md) accounts for every retained page/subview and all 13
+routes/19 upstream methods plus catalog-join POST, including absent providers,
+CLI-only STIX, skipped merger UI and explicit Skills/database/OpenAPI exclusions.
+All 110 provenance hashes match. First-party manifest/Pipeline metadata notices
+and stale intermediate UI status text were corrected. No new production
+dependency, third-party archive/dataset/binary, actual session or key is added.
+The import policy, Terms, Acceptable Use, Privacy, notices, contribution/security
+rules and staged paths were reviewed; `lat check` and `git diff --check` passed.

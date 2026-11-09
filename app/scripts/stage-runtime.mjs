@@ -24,6 +24,7 @@ export const INCLUDE = ["labctl", "console", "source-lab", "android-lab", "linux
 // These are the entry points used by the installed console and every supported lab path.
 export const REQUIRED = [
   "source-lab/engine/source_lab/import_legacy.py",
+  "source-lab/acceptance.py",
   "source-lab/run.py", "source-lab/list_inputs.py", "source-lab/contracts/schema.json",
   "source-lab/engine/source_lab/cli/run_detection.py", "source-lab/engine/source_lab/paths.py",
   "source-lab/engine/source_lab/collectors/browser/canary.js", "console/source_api.py",

@@ -55,6 +55,9 @@ def load_hmac_key() -> bytes:
     if file_value:
         key_path = Path(file_value)
         try:
+            info = key_path.lstat()
+            if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400):
+                raise OSError("Linked key file")
             fd = os.open(key_path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0))
             with os.fdopen(fd, "rb") as stream:
                 if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
@@ -251,11 +254,11 @@ class SessionBundleReader:
                 if not parts or any(not part or part in (".", "..") or ":" in part for part in parts):
                     raise ValueError("Invalid manifest path")
                 path = self.session_dir
-                if path.is_symlink():
+                if path.is_symlink() or getattr(path.lstat(), "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400):
                     raise ValueError("Linked bundle")
                 for part in parts:
                     path = path / part
-                    if path.is_symlink():
+                    if path.is_symlink() or getattr(path.lstat(), "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400):
                         raise ValueError("Linked bundle member")
                 fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0))
                 with os.fdopen(fd, "rb") as stream:

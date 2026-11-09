@@ -29,7 +29,7 @@ def digest(data):
 
 
 def read(path: Path, cap=MAX_FILE):
-    if path.is_symlink():
+    if control.redirected(path):
         raise ValueError("Linked import files are not allowed")
     fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0))
     with os.fdopen(fd, "rb") as stream:
@@ -75,7 +75,7 @@ def valid_destination(relative):
 
 
 def plan(source: Path, slugs: list[str], settings: Path | None = None):
-    if source.is_symlink() or not source.is_dir():
+    if control.redirected(source) or not source.is_dir():
         raise ValueError("Choose an explicit regular analysis directory")
     source = source.resolve()
     destination = control.storage(str(ROOT))
@@ -116,7 +116,7 @@ def plan(source: Path, slugs: list[str], settings: Path | None = None):
             if entry.name in REPORTS:
                 add(entry, f"analysis/{slug}/{entry.name}")
             elif entry.name == "ast":
-                if entry.is_symlink() or not entry.is_dir():
+                if control.redirected(entry) or not entry.is_dir():
                     raise ValueError("Invalid AST directory")
                 for ast in entries(entry):
                     if ast.suffix == ".json" and control.NAME.fullmatch(ast.name):
@@ -124,10 +124,10 @@ def plan(source: Path, slugs: list[str], settings: Path | None = None):
                     else:
                         excluded.append(f"{slug}/ast/{ast.name}")
             elif entry.name == "runtime-sessions":
-                if entry.is_symlink() or not entry.is_dir():
+                if control.redirected(entry) or not entry.is_dir():
                     raise ValueError("Invalid session directory")
                 for session in entries(entry):
-                    if not SESSION.fullmatch(session.name) or session.is_symlink() or not session.is_dir():
+                    if not SESSION.fullmatch(session.name) or control.redirected(session) or not session.is_dir():
                         raise ValueError("Invalid session directory")
                     control.safe_tree(session)
                     members = []

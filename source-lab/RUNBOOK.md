@@ -76,6 +76,17 @@ checks. Verify local app routes and a Pages build below `/os-lab/`, including
 non-English switching and absence of public engine requests/actions. Check
 provenance, legal retention/network descriptions and the retained inventory.
 
+The portable owned-fixture check can run on this checkout or an installed runtime:
+
+```bash
+python source-lab/acceptance.py --out source-acceptance.json
+python source-lab/acceptance.py --root /path/to/installed/runtime --installed-only --out source-acceptance.json
+```
+
+It runs all five static analyzers with site packages disabled and an empty PATH,
+checks no false runtime claims, and emits counts/fingerprints without private
+paths or keys. It does not establish GUI/installer/live-collector acceptance.
+
 On native macOS and Windows, verify a fresh packaged/minimal install, restart,
 update with existing private state, Python 3.11+ readiness, static detection,
 previews/jobs/cancellation, report/source browsing and the documented optional

@@ -3,7 +3,7 @@
 Source Lab brings iQ-SourceContol into os-lab. The Python engine, CLI and guarded console API are implemented. The local
 dashboard provides Overview, crawler, Evidence/runtime, Deep analysis, Pipeline
 and Brain snapshot views. Distribution code is implemented; native platform
-acceptance and final release audit remain in the task queue.
+acceptance remains separately tracked; [AUDIT.md](AUDIT.md) records the final scope review.
 Only first-party source code and synthetic fixtures are included. Third-party
 archives, datasets and binaries are excluded. Skills, database-backed repository
 management, and OpenAPI integration are also outside the requested scope.
@@ -11,6 +11,7 @@ Analysis and browsing remain file-backed; engine schemas and generated types sta
 
 - [Plan](PLAN.md): integration design, sequence, migration and release criteria.
 - [TODO](TODO.md): ordered tasks, dependencies and completion evidence.
+- [Scope audit](AUDIT.md): delivered surfaces, exclusions and verification limits.
 - [Inventory](INVENTORY.md): pinned source snapshot, every page/API route and
   engine/data capabilities, with known gaps separated from shipped features.
 
@@ -81,15 +82,13 @@ configured private storage root, with symlink and path-traversal checks.
 
 The installed console now provides all retained namespaced route adapters, exact
 previews and shared Source jobs. See [API.md](API.md) for methods, bounds, explicit
-contract adaptations and restart/cancellation behavior. Analysis UI pages remain
-in the migration queue.
+contract adaptations and restart/cancellation behavior.
 
-The local dashboard now includes Source Lab navigation, Overview matrices and
-inspectors, operator source catalogs and a previewed crawler runner. Runtime
-settings and explicit signed-session verification are available through the
-console API. See [API.md](API.md) and [COLLECTORS.md](COLLECTORS.md). Remaining UI
-and distribution work is tracked in [TODO.md](TODO.md); the public Source routes
-are informational and never read local targets or start jobs.
+The local dashboard includes Overview matrices/inspectors, catalogs and crawler,
+Evidence/runtime settings and verification, Deep analysis/source/maps, Pipeline
+reference and bounded Brain snapshot views. See [AUDIT.md](AUDIT.md) for each
+retained surface and its limits. Public Source routes are informational and
+never read local targets or start jobs.
 
 ## Workflow documentation
 

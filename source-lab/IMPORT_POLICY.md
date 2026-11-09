@@ -5,7 +5,7 @@ The source owner explicitly authorized porting their first-party iQ-SourceContol
 code into os-lab on 2026-11-09 after the public distribution and licensing
 question was raised. This does not grant rights to other authors' material.
 
-## Included in the engine foundation
+## Included first-party material
 
 Only tracked first-party Python modules, the browser probe, readable synthetic
 source fixtures and engine tests are imported from the pinned revision in
@@ -32,6 +32,11 @@ User-provided targets and catalogs stay on the operator's machine. Default
 outputs are gitignored; only the explicitly reviewed synthetic fixtures belong
 in the repository. Do not copy private reports into screenshots or public Pages.
 New UI dependencies and assets require their own license/provenance review.
+
+The integration also derives manifest migration annotations and Pipeline
+architecture metadata from the owner's pinned UI source. These two code-owned
+references are recorded in PROVENANCE.json. Dashboard views are adapted to the
+existing shell; no private Brain export or external source catalog is bundled.
 
 ## Review before each commit
 
