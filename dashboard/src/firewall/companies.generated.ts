@@ -11921,7 +11921,7 @@ export const COMPANIES: Company[] = [
     "sector": "Technology / Higher Education",
     "author": {
       "name": "Mevlit Kaan Öztürk",
-      "studentId": "230207001",
+      "studentId": "2520191003",
       "course": "BGT207",
       "github": "kkaanozturk"
     },
