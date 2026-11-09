@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AppShell, REPO_URL } from "../shell/app-shell";
 import { TopBar } from "../shell/top-bar";
+import { localeFromPath, localePath } from "../i18n/paths";
 
 type Asset = { name: string; browser_download_url: string };
 type Release = { tag_name: string; html_url: string; assets: Asset[] };
@@ -19,6 +20,7 @@ const commands = [
 ];
 
 export default function PublicHome() {
+  const firewallHref = localePath("/firewall/", localeFromPath(window.location.pathname));
   const [release, setRelease] = useState<Release | null>(null);
   useEffect(() => {
     const controller = new AbortController();
@@ -35,7 +37,7 @@ export default function PublicHome() {
         <p className="text-sm font-semibold uppercase tracking-widest text-[#f36c21]">Open source security labs</p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">Build, run, and study isolated security labs.</h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-(--iux-muted-foreground)">os-lab brings Android, iOS, Windows, Linux, macOS, and firewall exercises into one local console. Install it on your own machine, then choose a lab.</p>
-        <div className="mt-7 flex flex-wrap gap-3"><a className="iux-btn" data-variant="primary" href="#download">Download</a><a className="iux-btn" data-variant="outline" href="/firewall/">Explore Firewall Lab</a><a className="iux-btn" data-variant="outline" href={REPO_URL}>Source code</a></div>
+        <div className="mt-7 flex flex-wrap gap-3"><a className="iux-btn" data-variant="primary" href="#download">Download</a><a className="iux-btn" data-variant="outline" href={firewallHref}>Explore Firewall Lab</a><a className="iux-btn" data-variant="outline" href={REPO_URL}>Source code</a></div>
       </header>
       <section id="download" className="space-y-4">
         <div><h2 className="text-2xl font-bold">Desktop downloads</h2><p className="mt-1 text-sm text-(--iux-muted-foreground)">Latest published release {release?.tag_name ? `· ${release.tag_name}` : "· checking GitHub"}</p></div>
@@ -48,7 +50,7 @@ export default function PublicHome() {
       <section className="space-y-4"><h2 className="text-2xl font-bold">One-line setup</h2><p className="text-sm text-(--iux-muted-foreground)">These commands install prerequisites, fetch the checkout, and launch the local web console. Review the script before running it.</p>
         {commands.map(({ label, command }) => <div key={label} className="iux-card p-4"><div className="mb-2 flex items-center justify-between"><strong>{label}</strong><button className="iux-btn" data-variant="outline" type="button" onClick={() => void navigator.clipboard.writeText(command)}>Copy</button></div><code className="block overflow-x-auto whitespace-nowrap text-xs sm:text-sm">{command}</code></div>)}
       </section>
-      <section className="grid gap-3 sm:grid-cols-2"><a className="iux-card p-5 hover:border-[#f36c21]" href="/firewall/"><strong>Firewall Lab</strong><p className="mt-2 text-sm text-(--iux-muted-foreground)">Explore student company networks, firewalls, and rule sets.</p></a><a className="iux-card p-5 hover:border-[#f36c21]" href={`${REPO_URL}/blob/master/README.md`}><strong>Documentation</strong><p className="mt-2 text-sm text-(--iux-muted-foreground)">Requirements, installation, and lab guides.</p></a></section>
+      <section className="grid gap-3 sm:grid-cols-2"><a className="iux-card p-5 hover:border-[#f36c21]" href={firewallHref}><strong>Firewall Lab</strong><p className="mt-2 text-sm text-(--iux-muted-foreground)">Explore student company networks, firewalls, and rule sets.</p></a><a className="iux-card p-5 hover:border-[#f36c21]" href={`${REPO_URL}/blob/master/README.md`}><strong>Documentation</strong><p className="mt-2 text-sm text-(--iux-muted-foreground)">Requirements, installation, and lab guides.</p></a></section>
     </main>
   </AppShell>;
 }

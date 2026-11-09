@@ -1919,5 +1919,17 @@
   "Opening installer…": "Yükleyici açılıyor…",
   "Update again": "Yeniden güncelle",
   "Downloading and verifying the update…": "Güncelleme indiriliyor ve doğrulanıyor…",
-  "The new AppImage was saved beside your current one. Replace the running file with it, then start os-lab again.": "Yeni AppImage mevcut dosyanızın yanına kaydedildi. Çalışan dosyayı bununla değiştirin, ardından os-lab'ı yeniden başlatın."
+  "The new AppImage was saved beside your current one. Replace the running file with it, then start os-lab again.": "Yeni AppImage mevcut dosyanızın yanına kaydedildi. Çalışan dosyayı bununla değiştirin, ardından os-lab'ı yeniden başlatın.",
+  "Advanced settings": "Gelişmiş ayarlar",
+  "Feedback": "Geri bildirim",
+  "Report a problem, request a feature, or tell us what could work better.": "Bir sorunu bildirin, özellik isteyin veya nelerin geliştirilebileceğini anlatın.",
+  "Report a security concern": "Güvenlik sorununu bildir",
+  "Report an issue": "Sorun bildir",
+  "Report issues, suggest features, and share feedback": "Sorun bildir, özellik öner ve geri bildirim paylaş",
+  "Request a feature": "Özellik iste",
+  "Send a vulnerability report privately through the repository security page.": "Güvenlik açığını depo güvenlik sayfasından gizli olarak bildirin.",
+  "Share feedback or ask a question": "Geri bildirim paylaş veya soru sor",
+  "Start a discussion about your experience, setup, or idea.": "Deneyiminiz, kurulumunuz veya fikriniz hakkında bir tartışma başlatın.",
+  "Suggest a new capability or an improvement to an existing workflow.": "Yeni bir özellik veya mevcut iş akışında iyileştirme önerin.",
+  "Tell us what broke, which lab or page you used, and how to reproduce it.": "Neyin bozulduğunu, hangi laboratuvarı veya sayfayı kullandığınızı ve sorunun nasıl tekrarlanacağını anlatın."
 }

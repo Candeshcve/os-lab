@@ -1919,5 +1919,17 @@
   "Opening installer…": "در حال باز کردن نصب‌کننده…",
   "Update again": "به‌روزرسانی مجدد",
   "Downloading and verifying the update…": "دانلود و بررسی به‌روزرسانی…",
-  "The new AppImage was saved beside your current one. Replace the running file with it, then start os-lab again.": "AppImage جدید در کنار فایل فعلی شما ذخیره شد. فایل در حال اجرا را با آن جایگزین کنید، سپس os-lab را دوباره راه‌اندازی کنید."
+  "The new AppImage was saved beside your current one. Replace the running file with it, then start os-lab again.": "AppImage جدید در کنار فایل فعلی شما ذخیره شد. فایل در حال اجرا را با آن جایگزین کنید، سپس os-lab را دوباره راه‌اندازی کنید.",
+  "Advanced settings": "تنظیمات پیشرفته",
+  "Feedback": "بازخورد",
+  "Report a problem, request a feature, or tell us what could work better.": "مشکلی را گزارش کنید، قابلیتی درخواست کنید یا پیشنهادی برای بهبود بدهید.",
+  "Report a security concern": "گزارش نگرانی امنیتی",
+  "Report an issue": "گزارش مشکل",
+  "Report issues, suggest features, and share feedback": "گزارش مشکلات، پیشنهاد قابلیت‌ها و ارائه بازخورد",
+  "Request a feature": "درخواست قابلیت",
+  "Send a vulnerability report privately through the repository security page.": "آسیب‌پذیری را به‌صورت خصوصی از صفحه امنیت مخزن گزارش کنید.",
+  "Share feedback or ask a question": "بازخورد بدهید یا سؤال بپرسید",
+  "Start a discussion about your experience, setup, or idea.": "درباره تجربه، راه‌اندازی یا ایده خود گفت‌وگو کنید.",
+  "Suggest a new capability or an improvement to an existing workflow.": "قابلیتی تازه یا بهبودی در روند فعلی پیشنهاد دهید.",
+  "Tell us what broke, which lab or page you used, and how to reproduce it.": "شرح دهید چه چیزی خراب شده، از کدام آزمایشگاه یا صفحه استفاده کرده‌اید و چگونه می‌توان مشکل را تکرار کرد."
 }

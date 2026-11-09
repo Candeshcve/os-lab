@@ -21,11 +21,11 @@ each a reproducible, isolated guest driven by `make` and a shared management CLI
 
 | Platform | Installer | Also available |
 |:--|:--|:--|
-| **macOS** — Apple Silicon & Intel | [`os-lab_0.2.8_macos_universal.dmg`](https://github.com/keyvanarasteh/os-lab/releases/download/app-v0.2.8/os-lab_0.2.8_macos_universal.dmg) | [`.app.tar.gz`](https://github.com/keyvanarasteh/os-lab/releases/download/app-v0.2.8/os-lab_0.2.8_macos_universal.app.tar.gz) |
-| **Windows x64** | [`os-lab_0.2.8_windows_x64-setup.exe`](https://github.com/keyvanarasteh/os-lab/releases/download/app-v0.2.8/os-lab_0.2.8_windows_x64-setup.exe) | [`.msi`](https://github.com/keyvanarasteh/os-lab/releases/download/app-v0.2.8/os-lab_0.2.8_windows_x64.msi) |
-| **Linux amd64** | [`os-lab_0.2.8_linux_amd64.deb`](https://github.com/keyvanarasteh/os-lab/releases/download/app-v0.2.8/os-lab_0.2.8_linux_amd64.deb) | [`.rpm`](https://github.com/keyvanarasteh/os-lab/releases/download/app-v0.2.8/os-lab_0.2.8_linux_amd64.rpm) · [`.AppImage`](https://github.com/keyvanarasteh/os-lab/releases/download/app-v0.2.8/os-lab_0.2.8_linux_amd64.AppImage) |
+| **macOS** — Apple Silicon & Intel | [`os-lab_0.2.9_macos_universal.dmg`](https://github.com/keyvanarasteh/os-lab/releases/download/app-v0.2.9/os-lab_0.2.9_macos_universal.dmg) | [`.app.tar.gz`](https://github.com/keyvanarasteh/os-lab/releases/download/app-v0.2.9/os-lab_0.2.9_macos_universal.app.tar.gz) |
+| **Windows x64** | [`os-lab_0.2.9_windows_x64-setup.exe`](https://github.com/keyvanarasteh/os-lab/releases/download/app-v0.2.9/os-lab_0.2.9_windows_x64-setup.exe) | [`.msi`](https://github.com/keyvanarasteh/os-lab/releases/download/app-v0.2.9/os-lab_0.2.9_windows_x64.msi) |
+| **Linux amd64** | [`os-lab_0.2.9_linux_amd64.deb`](https://github.com/keyvanarasteh/os-lab/releases/download/app-v0.2.9/os-lab_0.2.9_linux_amd64.deb) | [`.rpm`](https://github.com/keyvanarasteh/os-lab/releases/download/app-v0.2.9/os-lab_0.2.9_linux_amd64.rpm) · [`.AppImage`](https://github.com/keyvanarasteh/os-lab/releases/download/app-v0.2.9/os-lab_0.2.9_linux_amd64.AppImage) |
 
-<sub>Latest **0.2.8** · [all files, checksums & signatures](https://github.com/keyvanarasteh/os-lab/releases/tag/app-v0.2.8) · [install & uninstall](app/INSTALL.md) · [release notes](docs/RELEASES.md). Every asset has a `.sha256` and detached `.sig`; in-app updates use the signed feed published by the `updater-manifest` workflow.</sub>
+<sub>Latest **0.2.9** · [all files, checksums & signatures](https://github.com/keyvanarasteh/os-lab/releases/tag/app-v0.2.9) · [install & uninstall](app/INSTALL.md) · [release notes](docs/RELEASES.md). Every asset has a `.sha256` and detached `.sig`; in-app updates use the signed feed published by the `updater-manifest` workflow.</sub>
 
 ## Labs
 

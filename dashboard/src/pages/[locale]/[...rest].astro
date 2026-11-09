@@ -5,6 +5,7 @@ import JobsPage from "../../views/jobs-page";
 import LabPage from "../../views/lab-page";
 import HealthPage from "../../views/health-page";
 import ContributePage from "../../views/contribute-page";
+import FeedbackPage from "../../views/feedback-page";
 import { ContentInfoPage } from "../../views/content-info-page";
 import { LegalDocPage, LegalIndexPage } from "../../views/legal-page";
 import { OverviewPage, AnalyticsPage, ConsolePage, ProvidersPage, SitemapPage, WorkflowsPage } from "../../views/android/pages";
@@ -18,7 +19,7 @@ const labs = ["android", "windows", "linux", "ios", "macos"] as const;
 export function getStaticPaths() {
   const labs = ["android", "windows", "linux", "ios", "macos"];
   const androidPages = ["", "analytics", "console", "providers", "sitemap", "workflows"];
-  const routes = ["", "jobs", "contribute", "content", "health", "legal", ...LEGAL_DOCS.map((doc) => `legal/${doc.slug}`), ...labs.map((lab) => `labs/${lab}`), ...androidPages.map((page) => page ? `android/${page}` : "android")];
+  const routes = ["", "jobs", "contribute", "feedback", "content", "health", "legal", ...LEGAL_DOCS.map((doc) => `legal/${doc.slug}`), ...labs.map((lab) => `labs/${lab}`), ...androidPages.map((page) => page ? `android/${page}` : "android")];
   return FIREWALL_LOCALES.filter((locale) => locale !== "en").flatMap((locale) =>
     routes.map((rest) => ({ params: { locale, rest } }))
   );
@@ -35,12 +36,13 @@ const contentHtml = rest === "content" ? rewriteLinks(await Object.values(conten
 const lab = rest.startsWith("labs/") ? rest.slice(5) as typeof labs[number] : null;
 const labTitle: Record<typeof labs[number], string> = { android: "Android Lab · Runtime & setup", windows: "Windows Lab", linux: "Linux Lab", ios: "iOS Lab", macos: "macOS Lab" };
 const androidTitle: Record<string, string> = { android: "Android Lab", "android/analytics": "Android Lab · Analytics", "android/console": "Android Lab · Console", "android/providers": "Android Lab · Providers", "android/sitemap": "Android Lab · Sitemap", "android/workflows": "Android Lab · Workflows" };
-const title = rest === "" ? "This computer" : rest === "jobs" ? "Jobs" : rest === "contribute" ? "Contribute" : rest === "content" ? "Content updates" : rest === "health" ? "Health check" : doc ? doc.title : rest === "legal" ? "Legal" : lab ? labTitle[lab] : androidTitle[rest] ?? "os-lab";
+const title = rest === "" ? "This computer" : rest === "jobs" ? "Jobs" : rest === "contribute" ? "Contribute" : rest === "feedback" ? "Feedback" : rest === "content" ? "Content updates" : rest === "health" ? "Health check" : doc ? doc.title : rest === "legal" ? "Legal" : lab ? labTitle[lab] : androidTitle[rest] ?? "os-lab";
 ---
 <Base title={title} description={doc?.description} lang={locale}>
   {rest === "" && <HostPage client:only="react" />}
   {rest === "jobs" && <JobsPage client:only="react" />}
   {rest === "contribute" && <ContributePage html={contributeHtml} client:only="react" />}
+  {rest === "feedback" && <FeedbackPage client:only="react" />}
   {rest === "content" && <ContentInfoPage html={contentHtml} client:only="react" />}
   {rest === "health" && <HealthPage client:only="react" />}
   {rest === "legal" && <LegalIndexPage client:only="react" />}
