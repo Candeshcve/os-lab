@@ -185,3 +185,11 @@ now exist, but SRC-024/025 remain open for full integrity/settings/importer work
 acceptance. Five analysis UI pages and native Windows/macOS host verification
 remain outside this P0 milestone. Linux tests exercise portable validation and
 POSIX lifecycle behavior; they do not establish native Windows host acceptance.
+
+## Owner scope update: skip remaining merger work
+
+SRC-042 is explicitly skipped, removed from release dependencies and listed with
+owner-excluded work. Existing merger engine/API functionality is retained. The
+remaining active queue has 18 tasks; this skip is not recorded as completed work.
+This ledger-only change uses Markdown/graph/whitespace checks; runtime validation
+above applies to the preceding implementation milestone.

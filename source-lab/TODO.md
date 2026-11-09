@@ -11,7 +11,9 @@ Foundation work is tracked in draft PR #103. Acceptance evidence is recorded in
 The owner excludes Skills/agent catalogs, database-backed repository management
 (including sync, taxonomy and notes), and OpenAPI/API-reference integration.
 Engine JSON Schema/generated TypeScript, file-backed target and bundle browsing,
-and ordinary project documentation remain in scope. Excluded items are neither
+and ordinary project documentation remain in scope. The owner also skips further
+merger UI/parity work (SRC-042); the merger engine and console API already
+implemented in this PR remain available. Excluded items are neither
 open tasks nor completed implementation. Stable task IDs are preserved.
 
 ## Planning baseline
@@ -70,7 +72,9 @@ Keep structural maps distinct from evidence and expose snapshot provenance.
 
 - [ ] SRC-040 (SRC-011, SRC-022): Import crawler/list parsing/CSV merge and route adapters, worker/depth/cap/resume/rate-limit controls. Accept: fault-isolated stages, interrupt artifacts and selected-target workspace/token guards pass tests.
 - [ ] SRC-041 (SRC-015, SRC-030, SRC-040): Port Deep analysis bundle/source/AST browsing and Map dialog (stats/roles/targets/coverage/symbols/imports/entrypoints). Accept: `?repo=`/`&file=` deep links and legacy AST behavior work; missing artifacts show useful states.
-- [ ] SRC-042 (SRC-040, SRC-041): Port merge planning/eligibility/exclusions/flagged override/run/cancel, ZIP/report downloads and output markers. Accept: generated benign MV3 bundle smoke, optional Node syntax gate warning and overwrite protections verified.
+**SRC-042 — skipped by owner.** Do not implement further merger planning/run/
+cancel/download UI or require merger UI parity for release. Existing engine/API
+functionality is retained; this task is neither open nor completed.
 - [ ] SRC-043 (SRC-030, SRC-040): Port Pipeline API/flowchart/stages/network/heuristics/candidates and bundled fallback. Accept: stage details match the pinned snapshot and its date is visible; no claim of automatic regeneration.
 - [ ] SRC-044 (SRC-003, SRC-030): Prototype Brain's data/provider hooks and React/Astro embedding. Accept: documented feasibility for each inventory subview, dependency licenses checked and snapshot/API roots portable.
 - [ ] SRC-045 (SRC-044): Port Brain graph/tabs/filter/legend/usages/source/history/diff/flowchart/sequence/AI-rules/complexity/risk/stress/export and virtual store behavior. Accept: each usable upstream view has a fixture-backed check; absent providers show explicit unavailable states.
@@ -88,7 +92,7 @@ Release only after both installed-console and public-site behavior is verified.
 
 - [ ] SRC-070 (SRC-013, SRC-024): Integrate Linux/macOS/Windows install/update/minimal paths and optional parser/browser tools; adapt useful service/project-docs operations. Accept: fresh install/update without source checkout; Python core works without Bun/Next/Node/KVM and optional tools have honest remediation.
 - [ ] SRC-071 (SRC-001, SRC-011, SRC-024): Implement opt-in legacy dry-run/copy/import for authorized first-party artifacts/maps/AST/sessions/settings with path mapping and backups. Accept: counts/hashes/signatures verified; databases, skills and third-party archives/datasets/binaries excluded, originals unchanged and rollback documented/tested.
-- [ ] SRC-072 (SRC-030, SRC-031, SRC-032, SRC-033, SRC-034, SRC-041, SRC-042, SRC-043, SRC-045, SRC-062): Complete all active locale catalogs and Pages equivalents. Accept: `/os-lab/` links, English/non-English switching, docs/samples/deep routes work; local-only actions/engine polling/private outputs are absent from public build.
+- [ ] SRC-072 (SRC-030, SRC-031, SRC-032, SRC-033, SRC-034, SRC-041, SRC-043, SRC-045, SRC-062): Complete all active locale catalogs and Pages equivalents. Accept: `/os-lab/` links, English/non-English switching, docs/samples/deep routes work; local-only actions/engine polling/private outputs are absent from public build.
 - [ ] SRC-073 (SRC-070, SRC-071, SRC-072): Run engine/console regression tests and relevant repository checks, shell syntax and installer parse checks; dashboard check/i18n/build/e2e and browser local/Pages smoke. Accept: commands/results recorded, committed `dashboard/dist` current and existing labs pass.
 - [ ] SRC-074 (SRC-002, SRC-062, SRC-073): Audit every retained inventory row/subfeature and API method, finalize attribution/legal notices and release/runbook/rollback docs. Accept: no silent omissions, all exceptions reviewed and each claimed capability has validation evidence.
 
@@ -98,6 +102,7 @@ These task IDs are retired from the active queue rather than marked complete.
 
 | Former task | Excluded work |
 |---|---|
+| SRC-042 | Further merger UI/parity work; existing engine/API retained. |
 | SRC-050 | SQLite compatibility spike. |
 | SRC-051 | Database migrations, repository-index sync and automatic classification. |
 | SRC-052 | Database-backed repository/taxonomy APIs. |
