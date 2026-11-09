@@ -383,6 +383,17 @@ function Configuration({ lab, ready, onProfile }: { lab: LabId; ready: boolean; 
 }
 
 export default function LabPage({ lab: labId }: { lab: LabId }) {
+  if (import.meta.env.PUBLIC_SITE_MODE === "pages" && labId === "source") {
+    return <AppShell activeId="lab-source"><TopBar title="Source Lab" icon={LAB_ICON.source(20)} />
+      <main className="mx-auto max-w-4xl p-8"><PageHead icon={LAB_ICON.source(22)} title="Source Lab"
+        description="Runs locally with Python 3.11+. Open the installed console to check readiness and run analyses." />
+        <a className="iux-btn mt-6" href="https://github.com/keyvanarasteh/os-lab/tree/master/source-lab">Repository</a>
+      </main></AppShell>;
+  }
+  return <LiveLabPage lab={labId} />;
+}
+
+function LiveLabPage({ lab: labId }: { lab: LabId }) {
   const { data: hostData, error: hostError, refresh: refreshHost } = hostStore.use();
   const { data: allJobs } = jobsStore.use();
   const lab = hostData?.labs.find((l) => l.id === labId);

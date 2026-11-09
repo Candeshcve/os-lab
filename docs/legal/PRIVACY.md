@@ -24,7 +24,7 @@ requests of its own.
 | Data | Where | How long |
 |------|-------|----------|
 | Host report: OS, CPU, memory, disk, KVM, WSL distributions, installed tools | Console memory | Recomputed every few seconds; not written to disk |
-| Lab jobs: command, output (secrets from lab `.env` files are redacted), exit status | Console memory | The 50 most recent, until the console stops |
+| Lab jobs: command, output (configured credentials are redacted), exit status | Console memory; Source Lab also journals under private storage `control/jobs.json` | The 50 most recent; Source records remain until the operator removes them |
 | Android workbench log | Console memory | Last 1,000 lines, until cleared or the console stops |
 | APKs you upload | `android-lab/lab/apks/` | Until you delete them |
 | Analysis results, reports, traffic captures | `android-lab/lab/artifacts/` and each lab's folders | Until you delete them (`make clean` for Android) |
@@ -97,3 +97,11 @@ The maintainers do not receive or hold data from your installation. Questions
 about this notice: [GitHub issues](https://github.com/keyvanarasteh/os-lab/issues).
 If you contact the project through GitHub, GitHub's privacy statement applies
 to that communication.
+
+Source Lab runtime settings and its managed session signing key stay in private
+storage under `control/`. Key files use mode 0600 where supported. Keys never
+appear in API responses. Environment-owned keys remain operator-managed.
+Changing a signing key prevents verification of prior sessions with that key;
+retain originals securely if earlier evidence must remain verifiable. Source
+jobs report interrupted work after a console restart; partial outputs remain
+local for review. Explicit browser canary runs contact the selected test URL.

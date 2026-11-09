@@ -1931,5 +1931,9 @@
   "Share feedback or ask a question": "Geri bildirim paylaş veya soru sor",
   "Start a discussion about your experience, setup, or idea.": "Deneyiminiz, kurulumunuz veya fikriniz hakkında bir tartışma başlatın.",
   "Suggest a new capability or an improvement to an existing workflow.": "Yeni bir özellik veya mevcut iş akışında iyileştirme önerin.",
-  "Tell us what broke, which lab or page you used, and how to reproduce it.": "Neyin bozulduğunu, hangi laboratuvarı veya sayfayı kullandığınızı ve sorunun nasıl tekrarlanacağını anlatın."
+  "Tell us what broke, which lab or page you used, and how to reproduce it.": "Neyin bozulduğunu, hangi laboratuvarı veya sayfayı kullandığınızı ve sorunun nasıl tekrarlanacağını anlatın.",
+  "Runs locally with Python 3.11+. Open the installed console to check readiness and run analyses.": "Python 3.11+ ile yerel olarak çalışır. Hazırlığı kontrol etmek ve analiz çalıştırmak için kurulu konsolu açın.",
+  "Source Lab": "Source Lab",
+  "The 50 most recent lab jobs. Source Lab keeps private restart records and marks unfinished work as interrupted.": "En son 50 laboratuvar işi. Source Lab özel yeniden başlatma kayıtları tutar ve tamamlanmamış işleri kesintiye uğramış olarak işaretler.",
+  "interrupted": "kesintiye uğradı"
 }

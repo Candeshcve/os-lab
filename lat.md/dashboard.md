@@ -36,9 +36,12 @@ cancellation, and reports container state. Privileged setup runs through
 pkexec when a graphical agent exists; otherwise the plan returns a `sudo`
 command to run in a terminal.
 
-The read-only Source Lab evidence/report routes in
+The Source Lab evidence/report readers in
 [[console/source_artifacts.py]] reuse the console's localhost Host guard without
-starting analyses or changing state. See [[source-lab#Read-only artifact API]].
+starting analyses or changing state. Additional [[console/source_api.py]] handlers
+use the shared preview and jobs service for explicit actions. Source readiness
+runs natively through Python, and public Source routes show information without
+polling a local engine. See [[source-lab#Console operations]].
 
 ## Serving and builds
 

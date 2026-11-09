@@ -44,6 +44,7 @@ try:
 except ImportError:
     app_updates = None
 try:
+    import source_api  # noqa: E402
     import source_artifacts  # noqa: E402  (console/source_artifacts.py: read-only Source Lab output)
 except ImportError:
     source_artifacts = None
@@ -160,7 +161,7 @@ class LabHttpHandler(BaseHTTPRequestHandler):
 
     def _read_json(self):
         length = int(self.headers.get("Content-Length", 0) or 0)
-        if length > 1_000_000:
+        if length < 0 or length > 1_000_000:
             raise ValueError("Request too large")
         body = self.rfile.read(length) if length else b"{}"
         data = json.loads(body.decode("utf-8") or "{}")
@@ -200,35 +201,66 @@ class LabHttpHandler(BaseHTTPRequestHandler):
             return
         self._android_get()
 
+    def _source_reply(self, status, data, confirmation=False):
+        if isinstance(data, source_api.Download):
+            self.send_response(status)
+            self.send_header("Content-Type", data.mime)
+            self.send_header("Content-Disposition", f'attachment; filename="{data.name}"')
+            self.send_header("Content-Length", str(len(data.content)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.end_headers()
+            self.wfile.write(data.content)
+        else:
+            safe = source_api.redact(REPO_ROOT, data)
+            if confirmation and isinstance(data, dict) and "token" in data:
+                safe["token"] = data["token"]
+            body = json.dumps(safe, allow_nan=False).encode("utf-8")
+            if len(body) > source_artifacts.MAX_TOTAL:
+                raise source_artifacts.ArtifactError(413, "Source response exceeds the read limit")
+            self._send_bytes(status, body, "application/json; charset=utf-8", cache="no-store")
+
     def _source_get(self, path: str, query: dict):
-        if source_artifacts is None:
-            self._json(501, {"error": "The Source Lab artifact reader is not installed"})
+        if source_artifacts is None or not oslab:
+            self._json(501, {"error": "Source Lab console support is not installed"})
             return
         try:
-            if any(len(values) != 1 for values in query.values()):
-                raise source_artifacts.ArtifactError(400, "Duplicate query parameters")
-            reader = source_artifacts.SourceArtifacts(REPO_ROOT)
-            if path == "/api/source/evidence":
-                if set(query) - {"slug", "session"}:
-                    raise source_artifacts.ArtifactError(400, "Unknown evidence parameters")
-                data = reader.evidence(query.get("slug", [None])[0], query.get("session", [None])[0])
-                self._send_bytes(200, json.dumps(data).encode("utf-8"), "application/json; charset=utf-8", cache="no-store")
-            elif path == "/api/source/evidence/report":
-                if set(query) != {"slug", "file"}:
-                    raise source_artifacts.ArtifactError(400, "A target slug and report file are required")
-                body, content_type, filename = reader.report(query["slug"][0], query["file"][0])
-                self.send_response(200)
-                self.send_header("Content-Type", content_type)
-                self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
-                self.send_header("Content-Length", str(len(body)))
-                self.send_header("Cache-Control", "no-store")
-                self.send_header("X-Content-Type-Options", "nosniff")
-                self.end_headers()
-                self.wfile.write(body)
-            else:
-                raise source_artifacts.ArtifactError(404, "Source Lab endpoint not found")
+            self._source_reply(200, source_api.SourceAPI(REPO_ROOT, JOBS, SIGNER).get(path, query))
         except source_artifacts.ArtifactError as exc:
-            self._send_bytes(exc.status, json.dumps({"error": str(exc)}).encode("utf-8"), "application/json; charset=utf-8", cache="no-store")
+            self._source_reply(exc.status, {"error": str(exc)})
+        except (OSError, ValueError, TypeError, KeyError, RecursionError):
+            self._source_reply(400, {"error": "Invalid or unavailable Source Lab artifact"})
+
+    def _source_mutate(self, path: str, method="POST"):
+        if source_artifacts is None or not oslab:
+            self._json(501, {"error": "Source Lab console support is not installed"})
+            return
+        try:
+            lengths = self.headers.get_all("Content-Length", [])
+            if self.headers.get("Transfer-Encoding") or len(lengths) > 1:
+                raise source_artifacts.ArtifactError(400, "Invalid request framing")
+            length = int(lengths[0]) if lengths else 0
+            if not 0 <= length <= 65536:
+                raise source_artifacts.ArtifactError(413, "Source request exceeds the size limit")
+            data = self._read_json()
+            if urllib.parse.urlparse(self.path).query:
+                raise source_artifacts.ArtifactError(400, "Mutation parameters belong in the JSON body")
+            status, result = source_api.SourceAPI(REPO_ROOT, JOBS, SIGNER).mutate(path, data, method)
+            self._source_reply(status, result, confirmation=True)
+        except source_artifacts.ArtifactError as exc:
+            self._source_reply(exc.status, {"error": str(exc)})
+        except oslab.PlanError as exc:
+            self._source_reply(409, {"error": str(exc)})
+        except (OSError, ValueError, TypeError, KeyError, RecursionError):
+            self._source_reply(400, {"error": "Invalid Source Lab request or unavailable private storage"})
+
+    def do_DELETE(self):
+        if not self._host_ok():
+            return
+        if self.headers.get("X-OSLab") != "1":
+            self._json(403, {"error": "Missing X-OSLab header"})
+            return
+        self._source_mutate(urllib.parse.urlparse(self.path).path, "DELETE")
 
     def _send_bytes(self, status: int, body: bytes, content_type: str, cache: str = "no-cache"):
         self.send_response(status)
@@ -287,6 +319,9 @@ class LabHttpHandler(BaseHTTPRequestHandler):
             self._json(403, {"error": "Missing X-OSLab header"})
             return
         path = urllib.parse.urlparse(self.path).path
+        if path == "/api/source" or path.startswith("/api/source/"):
+            self._source_mutate(path)
+            return
         if path.startswith("/api/content"):
             self._content_post(path)
             return
@@ -374,11 +409,13 @@ class LabHttpHandler(BaseHTTPRequestHandler):
         if path == "/api/labs/plan":
             request = self._read_json().get("request") or {}
             plan = oslab.plan(REPO_ROOT, request, cached_host())
-            self._json(200, {"plan": plan, "token": SIGNER.sign(request)})
+            self._json(200, {"plan": plan, "token": SIGNER.sign({"request": request, "plan": plan} if request.get("lab") == "source" else request)})
         elif path == "/api/labs/start":
             data = self._read_json()
             request = data.get("request") or {}
-            if not SIGNER.verify(request, data.get("token")):
+            plan = oslab.plan(REPO_ROOT, request, cached_host())
+            signed = {"request": request, "plan": plan} if request.get("lab") == "source" else request
+            if not SIGNER.verify(signed, data.get("token")):
                 self._json(409, {"error": "Preview this action before running it"})
                 return
             plan = oslab.plan(REPO_ROOT, request, cached_host())

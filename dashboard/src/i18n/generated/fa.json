@@ -1931,5 +1931,9 @@
   "Share feedback or ask a question": "بازخورد بدهید یا سؤال بپرسید",
   "Start a discussion about your experience, setup, or idea.": "درباره تجربه، راه‌اندازی یا ایده خود گفت‌وگو کنید.",
   "Suggest a new capability or an improvement to an existing workflow.": "قابلیتی تازه یا بهبودی در روند فعلی پیشنهاد دهید.",
-  "Tell us what broke, which lab or page you used, and how to reproduce it.": "شرح دهید چه چیزی خراب شده، از کدام آزمایشگاه یا صفحه استفاده کرده‌اید و چگونه می‌توان مشکل را تکرار کرد."
+  "Tell us what broke, which lab or page you used, and how to reproduce it.": "شرح دهید چه چیزی خراب شده، از کدام آزمایشگاه یا صفحه استفاده کرده‌اید و چگونه می‌توان مشکل را تکرار کرد.",
+  "Runs locally with Python 3.11+. Open the installed console to check readiness and run analyses.": "به‌صورت محلی با پایتون ۳٫۱۱ یا جدیدتر اجرا می‌شود. برای بررسی آمادگی و اجرای تحلیل‌ها کنسول نصب‌شده را باز کنید.",
+  "Source Lab": "Source Lab",
+  "The 50 most recent lab jobs. Source Lab keeps private restart records and marks unfinished work as interrupted.": "۵۰ کار اخیر آزمایشگاه. Source Lab سوابق خصوصی راه‌اندازی مجدد را نگه می‌دارد و کارهای ناتمام را قطع‌شده علامت می‌زند.",
+  "interrupted": "قطع‌شده"
 }

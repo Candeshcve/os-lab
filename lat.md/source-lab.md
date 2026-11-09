@@ -1,6 +1,8 @@
 # Source Lab
 
-Source Lab provides local source/package analysis through a namespaced Python engine and [[labctl]]. It needs no VM, KVM, Docker or Node for static detection. The console registers its native Python readiness independently of VM labs; analysis pages remain in [[source-lab/TODO.md]].
+Source Lab provides local source/package analysis through a namespaced Python engine and [[labctl]]. It needs no VM, KVM, Docker or Node for static detection.
+
+The console reports native Python readiness; analysis pages remain in [[source-lab/TODO.md]].
 
 ## Detection
 
@@ -61,7 +63,7 @@ Adapters cover Python, JS/TS, PHP, Rust, Swift, Objective-C, Kotlin, Java and ma
 
 No third-party archives, datasets or binaries are imported. Skills, database
 integration and OpenAPI are outside the requested migration scope; artifact
-readers and engine contracts remain file-backed. The Python package is `source_lab`, so its modules do not shadow the existing Android engine. Source UI, mutating console operations and remote deployment remain unimplemented.
+readers and engine contracts remain file-backed. The Python package is `source_lab`, so its modules do not shadow the existing Android engine. Analysis UI pages and remote deployment remain unimplemented. Console action adapters now use shared previews and jobs.
 
 ## Regression tests
 
@@ -77,6 +79,23 @@ The repository test runner executes this suite in a separate Python process from
 
 [[console/source_control.py#lab_status]] probes the selected Python interpreter in
 an isolated process and reports core storage/Python requirements separately from
-optional Git, Node, grammar and browser tools. [[console/oslab.py#provider_for]]
+optional Git, Node, grammar and browser tools.
+
+[[console/oslab.py#provider_for]]
 selects native Python on Linux, macOS and Windows, without WSL or virtualization.
 The dashboard lab types and localized readiness routes include Source Lab.
+
+## Console operations
+
+[[console/source_api.py#SourceAPI]] adapts retained file-backed endpoints to
+bounded artifact readers and the shared job service. [[console/source_control.py#build_plan]]
+validates typed options and produces exact previews.
+
+[[console/source_jobs.py]] journals Source jobs privately and locks all Source
+writes across console processes. [[console/source_worker.py]] supervises engine
+children and stops the process group if the console connection closes.
+
+
+[[source-lab/API.md]] records all retained methods and intentional contract
+adaptations. [[android-lab/lab/tests/test_source_console.py]] exercises real
+engine jobs, guards, credential handling, conflicts and interrupted recovery.

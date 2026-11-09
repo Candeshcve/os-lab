@@ -1931,5 +1931,9 @@
   "Share feedback or ask a question": "Compartir comentarios o hacer una pregunta",
   "Start a discussion about your experience, setup, or idea.": "Inicia una conversación sobre tu experiencia, configuración o idea.",
   "Suggest a new capability or an improvement to an existing workflow.": "Sugiere una función nueva o una mejora de un flujo existente.",
-  "Tell us what broke, which lab or page you used, and how to reproduce it.": "Describe qué falló, qué laboratorio o página usaste y cómo reproducirlo."
+  "Tell us what broke, which lab or page you used, and how to reproduce it.": "Describe qué falló, qué laboratorio o página usaste y cómo reproducirlo.",
+  "Runs locally with Python 3.11+. Open the installed console to check readiness and run analyses.": "Se ejecuta localmente con Python 3.11+. Abra la consola instalada para comprobar los requisitos y ejecutar análisis.",
+  "Source Lab": "Source Lab",
+  "The 50 most recent lab jobs. Source Lab keeps private restart records and marks unfinished work as interrupted.": "Los 50 trabajos de laboratorio más recientes. Source Lab guarda registros privados de reinicio y marca el trabajo sin terminar como interrumpido.",
+  "interrupted": "interrumpido"
 }

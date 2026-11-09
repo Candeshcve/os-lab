@@ -10,6 +10,7 @@ const TONE: Record<LabJob["state"], "success" | "warning" | "danger" | undefined
   running: "warning",
   succeeded: "success",
   failed: "danger",
+  interrupted: "danger",
   "timed-out": "danger",
   cancelled: undefined
 };
@@ -82,7 +83,7 @@ export default function JobsPage() {
           <PageHead
             icon={<ListChecksIcon size={22} />}
             title="Lab jobs"
-            description="Every lab action started from this console. Jobs keep running when the page is closed; the 50 most recent are kept until the console restarts."
+            description="The 50 most recent lab jobs. Source Lab keeps private restart records and marks unfinished work as interrupted."
           />
           {error && !jobs ? (
             <Empty>Could not load jobs: {error}</Empty>

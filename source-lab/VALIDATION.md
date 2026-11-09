@@ -150,3 +150,38 @@ a capability entry; static detection does not depend on Docker, KVM or WSL.
 
 Validation: console/web tests 46 passed, 1 skipped; dashboard type and i18n checks
 passed; local build 345 pages; browser suite 17 passed.
+
+## Console handlers, guards and jobs (SRC-021/022/023)
+
+All 13 retained namespaced routes / 19 methods now have adapters. [API.md](API.md)
+records the preview/job envelope, bounded option set, normalized file-backed DTOs,
+absent snapshot behavior and deliberate departures from the source application's
+memory-only API. Rich UI parity and deeper crawler controls remain separate tasks.
+
+Linux validation for this milestone:
+
+- Repository runner: all **7 stages passed**; Android/console **143 passed, 2 skipped**,
+  Source engine **143 passed**, generated sample reports, 70 shell scripts, graph,
+  dashboard types and committed-build freshness. Subsequent Source boundary
+  checks cover the final HTTP report redaction/read-budget refinements.
+- New Source console suite: **30 passed**, including real detection, both offline
+  crawler POST adapters, merger planning/build/download, managed settings jobs,
+  credential redaction, private ZIP refusal, typed hostile options, exact-preview
+  binding, cross-console conflicts, cancellation, timeout escalation and a real
+  abrupt-console-crash test proving the engine stops and its job is interrupted.
+- Together with the existing artifact reader tests: **38 passed**.
+- Dashboard type check and **1937 keys across seven locale catalogs** pass. Local
+  build: **345 pages**; browser suite: **19 passed**, including native Source
+  readiness with missing optional tooling and interrupted-job display.
+- Separate Pages build under `/os-lab`: English/Turkish Source readiness pages,
+  switching locale both ways, internal base paths, no API polling/run controls or
+  hydration errors. Twelve local/Pages legal routes and legal locale links pass.
+- `lat check`, whitespace, all **108** original import hashes/exclusion checks and
+  a staged credential-signature review pass. First-party adapter code only; no
+  external catalog, Brain dataset, binary, credential or generated output added.
+
+Source job retention is documented in the privacy page. Runtime API foundations
+now exist, but SRC-024/025 remain open for full integrity/settings/importer workflow
+acceptance. Five analysis UI pages and native Windows/macOS host verification
+remain outside this P0 milestone. Linux tests exercise portable validation and
+POSIX lifecycle behavior; they do not establish native Windows host acceptance.

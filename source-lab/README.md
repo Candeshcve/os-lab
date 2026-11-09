@@ -77,3 +77,8 @@ They do not start analyses or expose keys/seals. Session integrity is explicitly
 unverified in these read-only responses. Errors distinguish missing, malformed
 and oversized data; responses are not cached. Target files stay under the
 configured private storage root, with symlink and path-traversal checks.
+
+The installed console now provides all retained namespaced route adapters, exact
+previews and shared Source jobs. See [API.md](API.md) for methods, bounds, explicit
+contract adaptations and restart/cancellation behavior. Analysis UI pages remain
+in the migration queue.

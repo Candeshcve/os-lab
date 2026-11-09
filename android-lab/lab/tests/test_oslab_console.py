@@ -355,7 +355,7 @@ def test_host_report_leaves_out_tools_and_providers_from_other_platforms(monkeyp
     ids = {t["id"] for t in mac["tools"]}
     assert {"xcrun", "brew"} <= ids and not ids & {"wsl", "apt-get", "pkexec"}
     assert all(p["candidate"] for p in mac["providers"])
-    assert {p["id"] for p in mac["providers"]} == {"android-container", "native-macos"}
+    assert {p["id"] for p in mac["providers"]} == {"android-container", "native-macos", "native-python"}
     assert oslab.tools_for_host("windows") and {t for t, _ in oslab.tools_for_host("windows")} >= {"wsl", "docker", "bash"}
     win = {t for t, _ in oslab.tools_for_host("windows")}
     assert not win & {"xcrun", "brew", "apt-get", "pkexec", "sudo"}

@@ -1,0 +1,89 @@
+# Source Lab console API
+
+The installed localhost console serves these routes. GET requests never launch
+engine jobs. POST and DELETE require a localhost `Host` and `X-OSLab: 1`.
+Third-party archives/datasets/binaries, Skills, databases and OpenAPI remain
+excluded. No source data, Brain export or external catalog is bundled here.
+
+## Confirmation and jobs
+
+For any operation below, POST `{"options": {...}, "preview": true}` to receive
+`{plan, token}`. Review the exact supervisor command, engine arguments, effects,
+network access and timeout. POST the same options with `token` to start the job;
+the response is HTTP 202 `{job}`. Changed options or configured paths/interpreter
+invalidate the token. The token is a confirmation capability, never an engine
+credential. Tokens from a previous console process are invalid.
+
+Poll `/api/jobs/{id}` for state, bounded logs, line count and truncation, or use
+`/api/jobs`. Progress follows actual engine output; no invented percentage is
+reported. `/api/jobs/{id}/cancel` accepts the existing console POST contract.
+Source jobs share one lock across actions and console processes. Conflicts return
+409. A job remains exclusive through process cleanup. Timeouts and cancellation
+terminate the process tree, escalating on POSIX after two seconds. Engine
+supervisors stop their process group when the console's input pipe closes.
+
+Source records are journaled privately under `control/jobs.json`, with up to 50
+records and a 4 MB journal cap. Unfinished records with no live lock become
+`interrupted` on restart; partial engine outputs require review before retrying.
+A second live console can inspect another console's job but cannot cancel it.
+Source logs are limited to 4,000 lines and 1 MB; individual lines over 8 KB are
+omitted. Other labs retain their existing in-memory lifecycle.
+
+## Retained methods
+
+| Route under `/api/source` | Methods | Contract |
+|---|---|---|
+| `/detection` | GET | Available private `targets/` and `cloned-repos/` candidates, runner readiness and latest `run`. |
+| `/detection` | POST | `target` candidate key, optional `platform` (auto or five platform IDs), `runCanary`, `testUrl`, `session`. Output uses the candidate's fixed analysis slug. |
+| `/detection` | DELETE | `{jobId}` cancels a matching Source detection job. |
+| `/evidence` | GET | Existing target summaries, `slug` detail or `slug` + `session` events. Session integrity remains explicitly unverified by the reader. |
+| `/evidence/report` | GET | `slug`, `file`: the five allowlisted formats; STIX remains CLI-only. JSON downloads are parsed and scrubbed before serialization. |
+| `/analyzer` | GET | Latest crawl `run`, report, CSV summary count and first 50 rows. |
+| `/analyzer` | POST | `sourceFile` basename from configured resources/sources or explicit `repos` owner/repo list. Optional `workers` (1–8), `depth` (1–10), `noAst`, `noMetadata`, `resume`, `keepWorkspace`. |
+| `/analyzer/merged` | GET | File-backed extension bundles, property/dependency/permission matrices and background groups; `export=json` or `csv`. |
+| `/deep-analysis` | GET | Available and analyzed bundles; `repo=owner/name` or slug selects a bundle; optional `file` reads bounded UTF-8 workspace source. |
+| `/deep-analysis` | POST | Same bounded crawler options as analyzer; no client-chosen workspace or credential fields. |
+| `/deep-analysis/merge` | GET | Jobs and output reports; `download=folder` downloads an inspected ZIP; `plan=1&slugs=a__b,...` returns an exact read-only job preview, without launching the engine. |
+| `/deep-analysis/merge` | POST | Explicit `slugs`, optional `name` (60 chars), `includeFlagged`, `allowClone` (default false), `mv` (2/3), `plan` (manifest-only background check). |
+| `/settings/runtime` | GET | Key source/configuration/problem, default canary URL, optional Playwright availability and rotation warning. Never returns a key. |
+| `/settings/runtime` | POST | Options `action=generate-key` with explicit `rotate=true` to replace an existing managed key, or `action=set-canary` and `testUrl`. Both use preview/confirmation jobs. |
+| `/sources` | GET | Three operator-provided CSV catalogs with counts and actual available files. `download` names one of those catalogs. No hardcoded dataset counts. |
+| `/brain` | GET | Operator-supplied `storage/brain-data/manifest.json`, with namespaced graph links. Missing data returns 404. |
+| `/brain/files/{path}` | GET | Bounded JSON under that Brain root. |
+| `/pipeline` | GET | Optional `storage/snapshots/pipeline.json`; absent data has `available=false`, `data=null` and an explicit message. No claim of regeneration. |
+| `/spotlight` | GET | `q`, optional `section` (evidence/deep-analysis/sources), `limit` (1–25); file-backed results only. |
+
+POST analyzer/deep-analysis/merge may also use `{action: "cancel", jobId}`;
+`stop` is accepted as a cancellation alias. Unknown routes, unsupported methods,
+fields, query parameters and duplicate query parameters fail explicitly. Body
+size is capped at 64 KB. Artifact reads retain the per-file and 16 MB aggregate
+limits documented in README. Private workspace files and binary source display
+are refused. ZIP downloads are bounded, inspected for private filenames and
+configured credentials, and refused when credential review is required.
+
+## Intentional adaptations from the source application
+
+All 13 retained routes and 19 methods have adapters. The original memory-only run
+objects become shared os-lab jobs; errors and cancellation use job IDs. Mutations
+require the additional explicit preview round trip. GET merge planning returns a
+command preview; execute `options.plan=true` through POST to run the manifest
+check and read its JSON from the job log. Defaults prohibit clone during merge.
+
+Private data roots replace deployment paths and fixture fallbacks. Input keys
+are stable relative candidates; the API never accepts arbitrary absolute paths,
+client tokens, output roots or workspace overrides. Credentials come only from
+operator environment/private key storage. URLs cannot contain credentials,
+queries or fragments. Environment keys and key files are checked for conflicting
+values; managed key changes are refused when the environment owns the key.
+
+Collections and matrices use normalized `{name, slugs, count}` entries and raw
+file-backed bundles. Rich Overview migration annotations, dependency categories,
+and all UI presentation remain SRC-031. Deep crawler tuning beyond these bounded
+options remains SRC-040. Snapshot data and richer Brain/Pipeline surfaces remain
+SRC-043–045. No database or Skills-backed Spotlight search is retained. The
+hello-world stub remains retired. Key/session verification workflow acceptance
+continues under SRC-024/025; existing read endpoints do not claim verification.
+
+Runtime settings writes are atomic, use private modes where supported and never
+contact the configured URL. Rotation warns during preview that earlier sessions
+need the original key. No keys, journals or generated outputs are committed.
