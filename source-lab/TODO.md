@@ -46,7 +46,7 @@ Establish a usable static analysis path independently of optional runtime tools.
 
 Integrate with the existing console protections, readiness model and jobs.
 
-- [ ] SRC-020 (SRC-012, SRC-013): Add `source` to console lab metadata/order, host reports, capability/action models and frontend LabId maps. Accept: required/optional readiness and unavailable hosts are correct without KVM/Docker.
+- [x] SRC-020 (SRC-012, SRC-013): Add `source` to console lab metadata/order, host reports, capability/action models and frontend LabId maps. Accept: required/optional readiness and unavailable hosts are correct without KVM/Docker.
 - [ ] SRC-021 (SRC-020): Implement namespaced handler adapters for each retained inventory API method, query/body and response/error contract. Accept: method-by-method contract tests and intentional deviations documented; hello-world stub retired explicitly. Progress: evidence/report GET routes are implemented; other retained handlers remain.
 - [ ] SRC-022 (SRC-021): Integrate exact-option previews, background logs/progress, conflict handling, timeout/cancel/process-tree cleanup and interrupted-on-restart reporting. Accept: two runs cannot corrupt the same output and cancelled/interrupted jobs cannot show success.
 - [ ] SRC-023 (SRC-021): Enforce localhost/mutation guards, allowlisted target/resource/session paths, symlink/traversal rejection, read caps and secret redaction. Accept: hostile-request regression tests pass and logs/responses disclose no credentials. Progress: read-only artifact path/size/Host boundaries are implemented; mutating and other route guards remain.

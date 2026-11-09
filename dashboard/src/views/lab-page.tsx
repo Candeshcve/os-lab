@@ -44,6 +44,7 @@ const REFERENCE: Record<LabId, { check: string; setup: string; where: string }> 
   windows: { check: "./labctl win status", setup: "./labctl win profile use development\n./labctl win start --wait", where: "win-lab" },
   linux: { check: "./labctl linux status", setup: "./labctl linux profile use development\n./labctl linux start --wait", where: "linux-lab" },
   ios: { check: "./labctl ios status", setup: "./labctl ios profile use development\n./labctl ios start --wait", where: "ios-lab" },
+  source: { check: "./labctl source doctor", setup: "./labctl source setup", where: "source-lab" },
   macos: { check: "make -C ios-lab mac-doctor", setup: "make -C ios-lab mac-setup mac-sim mac-appium", where: "ios-lab/mac" }
 };
 

@@ -8,7 +8,7 @@
 import { useEffect, useReducer } from "react";
 import type { CapabilityCatalog } from "../health/capabilities";
 
-export type LabId = "android" | "windows" | "linux" | "ios" | "macos";
+export type LabId = "android" | "windows" | "linux" | "ios" | "macos" | "source";
 export type LabState = "ready" | "needs-setup" | "unavailable";
 
 export interface HostTool {

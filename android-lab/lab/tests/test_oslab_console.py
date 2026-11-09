@@ -32,7 +32,7 @@ def states(host):
 
 def test_linux_kvm_host_runs_container_labs_but_not_native_mac():
     assert states(make_host()) == {
-        "android": "ready", "windows": "ready", "linux": "ready", "ios": "ready", "macos": "unavailable",
+        "android": "ready", "windows": "ready", "linux": "ready", "ios": "ready", "macos": "unavailable", "source": "ready",
     }
 
 
@@ -382,3 +382,18 @@ def test_a_lab_with_missing_requirements_offers_only_ways_to_fix_or_diagnose_it(
     mac = oslab.lab_status("ios", make_host(os_name="macos", kvm=False, tools=("xcrun", "brew"),
                                             xcode={"installed": False, "iosRuntime": False, "iosDevice": False}))
     assert mac["state"] == "needs-setup" and not {"start", "stop"} & {a["id"] for a in mac["actions"]}
+
+
+def test_source_is_native_without_vm_dependencies(monkeypatch):
+    import source_control
+    monkeypatch.setattr(source_control, "readiness", lambda root: {
+        "python": {"version": "3.11"}, "storage": {"writable": True}, "optional": {},
+        "capabilities": ["static-detection"]})
+    for system in ("linux", "macos", "windows"):
+        source = oslab.lab_status("source", make_host(system, kvm=False, runtime=None))
+        assert source["state"] == "ready"
+        assert source["provider"] == "native-python"
+        assert not any(r["id"] in ("kvm", "runtime", "wsl") for r in source["requirements"])
+        assert all(not a["privileged"] for a in source["actions"])
+    monkeypatch.setattr(source_control, "readiness", lambda root: {})
+    assert oslab.lab_status("source", make_host())["state"] == "unavailable"

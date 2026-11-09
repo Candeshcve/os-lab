@@ -141,3 +141,12 @@ because dependencies are absent in this worktree; no dashboard files changed.
 The eight focused artifact API tests, import/exclusion check, staged secret scan
 and whitespace checks pass. Windows fallback host coverage remains part of the
 platform/distribution tasks rather than a claim of this Linux test run.
+
+## Console readiness (SRC-020)
+
+Native Python readiness, optional tools and unavailable interpreter coverage were
+added to the console suite. Source Lab has a readiness route in every locale and
+a capability entry; static detection does not depend on Docker, KVM or WSL.
+
+Validation: console/web tests 46 passed, 1 skipped; dashboard type and i18n checks
+passed; local build 345 pages; browser suite 17 passed.

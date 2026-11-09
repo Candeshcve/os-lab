@@ -14,10 +14,10 @@ import { FIREWALL_LOCALES, type FirewallLocale } from "../../firewall/locale";
 import * as contributing from "../../../../CONTRIBUTING.md";
 
 const files = import.meta.glob<{ compiledContent: () => Promise<string> }>("../../../../docs/legal/*.md", { eager: true });
-const labs = ["android", "windows", "linux", "ios", "macos"] as const;
+const labs = ["android", "windows", "linux", "ios", "macos", "source"] as const;
 
 export function getStaticPaths() {
-  const labs = ["android", "windows", "linux", "ios", "macos"];
+  const labs = ["android", "windows", "linux", "ios", "macos", "source"];
   const androidPages = ["", "analytics", "console", "providers", "sitemap", "workflows"];
   const routes = ["", "jobs", "contribute", "feedback", "content", "health", "legal", ...LEGAL_DOCS.map((doc) => `legal/${doc.slug}`), ...labs.map((lab) => `labs/${lab}`), ...androidPages.map((page) => page ? `android/${page}` : "android")];
   return FIREWALL_LOCALES.filter((locale) => locale !== "en").flatMap((locale) =>
@@ -34,7 +34,7 @@ const contributeHtml = rest === "contribute" ? rewriteLinks(await contributing.c
 const contentFiles = import.meta.glob<{ compiledContent: () => Promise<string> }>("../../../../docs/CONTENT.md", { eager: true });
 const contentHtml = rest === "content" ? rewriteLinks(await Object.values(contentFiles)[0].compiledContent(), "docs", locale) : "";
 const lab = rest.startsWith("labs/") ? rest.slice(5) as typeof labs[number] : null;
-const labTitle: Record<typeof labs[number], string> = { android: "Android Lab · Runtime & setup", windows: "Windows Lab", linux: "Linux Lab", ios: "iOS Lab", macos: "macOS Lab" };
+const labTitle: Record<typeof labs[number], string> = { android: "Android Lab · Runtime & setup", windows: "Windows Lab", linux: "Linux Lab", ios: "iOS Lab", macos: "macOS Lab", source: "Source Lab" };
 const androidTitle: Record<string, string> = { android: "Android Lab", "android/analytics": "Android Lab · Analytics", "android/console": "Android Lab · Console", "android/providers": "Android Lab · Providers", "android/sitemap": "Android Lab · Sitemap", "android/workflows": "Android Lab · Workflows" };
 const title = rest === "" ? "This computer" : rest === "jobs" ? "Jobs" : rest === "contribute" ? "Contribute" : rest === "feedback" ? "Feedback" : rest === "content" ? "Content updates" : rest === "health" ? "Health check" : doc ? doc.title : rest === "legal" ? "Legal" : lab ? labTitle[lab] : androidTitle[rest] ?? "os-lab";
 ---

@@ -1,6 +1,6 @@
 # Source Lab
 
-Source Lab provides local source/package analysis through a namespaced Python engine and [[labctl]]. It needs no VM, KVM, Docker or Node for static detection. Dashboard integration remains in [[source-lab/TODO.md]].
+Source Lab provides local source/package analysis through a namespaced Python engine and [[labctl]]. It needs no VM, KVM, Docker or Node for static detection. The console registers its native Python readiness independently of VM labs; analysis pages remain in [[source-lab/TODO.md]].
 
 ## Detection
 
@@ -72,3 +72,11 @@ owned, offline workspace for detection, crawl/merge, map, synthetic signed sessi
 and future UI tests. Generated output and signing keys are never committed.
 
 The repository test runner executes this suite in a separate Python process from Android tests. Static analysis remains usable without optional browser, grammar or VM dependencies.
+
+## Console readiness
+
+[[console/source_control.py#lab_status]] probes the selected Python interpreter in
+an isolated process and reports core storage/Python requirements separately from
+optional Git, Node, grammar and browser tools. [[console/oslab.py#provider_for]]
+selects native Python on Linux, macOS and Windows, without WSL or virtualization.
+The dashboard lab types and localized readiness routes include Source Lab.

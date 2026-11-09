@@ -47,6 +47,7 @@ export const LAB_ICON: Record<LabId, (size?: number) => ReactNode> = {
   windows: (s = 16) => <WindowsLogoIcon size={s} />,
   linux: (s = 16) => <TerminalWindowIcon size={s} />,
   ios: (s = 16) => <AppleLogoIcon size={s} />,
+  source: (s = 16) => <TerminalWindowIcon size={s} />,
   macos: (s = 16) => <LaptopIcon size={s} />
 };
 

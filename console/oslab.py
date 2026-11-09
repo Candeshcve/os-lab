@@ -34,9 +34,11 @@ import uuid
 
 # ── Static lab model ─────────────────────────────────────────────────────────
 
-LAB_ORDER = ["android", "windows", "linux", "ios", "macos"]
+LAB_ORDER = ["android", "windows", "linux", "ios", "macos", "source"]
 
 LABS = {
+    "source": {"label": "Source Lab", "dir": "source-lab", "labctl": "source", "containers": [],
+               "summary": "Local source and package analysis across five platforms."},
     "android": {
         "label": "Android Lab",
         "dir": "android-lab/lab",
@@ -329,6 +331,8 @@ def _req(id_: str, label: str, found: bool, required: bool = True, hint: str = "
 
 
 def provider_for(lab: str, os_name: str) -> str | None:
+    if lab == "source":
+        return "native-python" if os_name in ("linux", "macos", "windows") else None
     if lab == "macos":
         return "native-macos" if os_name == "macos" else None
     if os_name == "macos":
@@ -346,6 +350,9 @@ def provider_for(lab: str, os_name: str) -> str | None:
 
 def lab_status(lab: str, host: dict) -> dict:
     """Availability of one lab on this host: ready, needs-setup or unavailable, with the reasons."""
+    if lab == "source":
+        import source_control
+        return source_control.lab_status(host["root"], host["os"])
     meta = LABS[lab]
     os_name, arch = host["os"], host["arch"]
     tools = {t["id"]: t["found"] for t in host["tools"]}
@@ -585,6 +592,9 @@ def _scoped(root: str, *parts: str) -> str:
 
 def plan(root: str, request: dict, host: dict | None = None) -> dict:
     """Validate a lab request and build the exact command to run. Raises PlanError."""
+    if request.get("lab") == "source":
+        import source_control
+        return source_control.plan(root, request)
     allowed = {"lab", "action", "profile", "cpus", "ram", "disk", "device", "wslDistro", "backup"}
     unknown = set(request) - allowed
     if unknown:
@@ -955,6 +965,10 @@ def monitor(root: str, lab: str, host: dict | None = None) -> dict:
     """Container state and resource use for a lab (docker or podman on this host)."""
     if lab not in LABS:
         raise PlanError("Unknown lab")
+    if lab == "source":
+        import source_control
+        return {"lab": lab, "state": source_control.readiness(root)["state"], "containers": [],
+                "note": "Native Python analysis; no containers."}
     host = host or host_info(root)
     names = LABS[lab]["containers"]
     runtime = host["runtime"]
