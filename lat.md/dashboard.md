@@ -91,3 +91,13 @@ by role/language and shows stats, targets, coverage, symbols and imports.
 
 Map navigation is distinct from evidence. Available private targets have a
 bound crawler action; missing maps/workspaces are explicit unavailable states.
+
+## Brain providers
+
+[[source-lab/BRAIN.md]] records embedding/provider decisions for every retained
+Brain subview. The prototype runs in the existing React island without new
+packages or a live Laravel service.
+
+[[dashboard/src/views/source/brain-model.ts]] validates bounded graph windows and
+[[dashboard/src/views/source/brain-data.ts]] reads only validated private JSON
+provider paths. Duplicate nodes, oversized graphs and unsafe paths fail clearly.

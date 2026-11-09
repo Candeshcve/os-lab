@@ -2076,5 +2076,9 @@
   "Pinned architecture reference; no live run or automatic regeneration is implied.": "مرجع معماري مثبت؛ لا يعني تشغيلًا حيًا أو إعادة إنشاء تلقائية.",
   "Pipeline reference": "مرجع مسار المعالجة",
   "Risk rules": "قواعد المخاطر",
-  "Signatures": "التواقيع"
+  "Signatures": "التواقيع",
+  "No graph provider is available.": "لا يوجد موفر رسوم بيانية.",
+  "Operator-provided graph snapshots stay local. No live application provider is configured automatically.": "تبقى لقطات الرسوم محلية. لا يُعدّ موفر تطبيق حي تلقائيًا.",
+  "edges": "حواف",
+  "nodes ·": "عقد ·"
 }

@@ -2076,5 +2076,9 @@
   "Pinned architecture reference; no live run or automatic regeneration is implied.": "Sabitlenmiş mimari başvurusu; canlı çalıştırma veya otomatik yenileme anlamına gelmez.",
   "Pipeline reference": "İşlem hattı başvurusu",
   "Risk rules": "Risk kuralları",
-  "Signatures": "İmzalar"
+  "Signatures": "İmzalar",
+  "No graph provider is available.": "Graf sağlayıcısı yok.",
+  "Operator-provided graph snapshots stay local. No live application provider is configured automatically.": "Operatörün graf anlık görüntüleri yerel kalır. Canlı uygulama sağlayıcısı otomatik yapılandırılmaz.",
+  "edges": "kenar",
+  "nodes ·": "düğüm ·"
 }

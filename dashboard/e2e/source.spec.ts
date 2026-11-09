@@ -236,3 +236,12 @@ test("Pipeline labels its pinned fallback and exposes stage inputs and network d
   await expect(page.getByRole("main").getByText(/github.com/, { exact: false }).first()).toBeVisible();
   await expect(page.getByText(/2026-11-09/)).toBeVisible();
 });
+
+test("Brain prototype loads an owned tab and refuses malformed graphs", async ({ page }) => {
+  await sourceShell(page);
+  await page.route("**/api/source/brain", route => route.fulfill({ json: { data: { manifest: { tabs: [{ id: "owned", label: "Owned graph", file: "owned.json" }] } } } }));
+  await page.route("**/api/source/brain/files/owned.json", route => route.fulfill({ json: { nodes: [{ id: "owned", label: "Owned", type: "service" }], edges: [] } }));
+  await page.goto("/source/brain/");
+  await expect(page.getByRole("button", { name: "Owned graph" })).toBeVisible();
+  await expect(page.getByText(/1 nodes/)).toBeVisible();
+});

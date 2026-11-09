@@ -2076,5 +2076,9 @@
   "Pinned architecture reference; no live run or automatic regeneration is implied.": "Référence d’architecture figée ; aucune exécution en direct ni régénération automatique.",
   "Pipeline reference": "Référence du pipeline",
   "Risk rules": "Règles de risque",
-  "Signatures": "Signatures"
+  "Signatures": "Signatures",
+  "No graph provider is available.": "Aucun fournisseur de graphe disponible.",
+  "Operator-provided graph snapshots stay local. No live application provider is configured automatically.": "Les graphes fournis restent locaux. Aucun fournisseur d’application en direct n’est configuré automatiquement.",
+  "edges": "arêtes",
+  "nodes ·": "nœuds ·"
 }

@@ -366,3 +366,15 @@ snapshots. Public EN/TR smoke passed. Source packaging requires the metadata.
 
 Native macOS/Windows installer acceptance is explicitly **on hold by owner until
 the last step**; remaining implementation continues before requesting those runs.
+
+## SRC-044: Brain feasibility and provider prototype
+
+The existing React/Astro shell embeds a file-backed Brain tab prototype.
+BRAIN.md maps all retained subviews to snapshot data or explicitly absent
+providers, with no new dependencies. Source/history/flow/sequence/AI-rule provider
+paths and unique tab IDs are guarded; graphs reject duplicate/oversized nodes
+and report dangling edges. Virtual windows bound rendering to at most 200 nodes.
+
+Three model tests, two manifest/API guard tests, dashboard types/i18n/build,
+**36 browser tests** and public EN/TR smoke passed. All graph fixtures are owned
+and generated in tests; no upstream graph export or application data was copied.

@@ -221,10 +221,21 @@ class SourceAPI:
                 manifest = self.reader._json(("brain-data", "manifest.json"))
                 if not isinstance(manifest, dict) or not isinstance(manifest.get("tabs", []), list):
                     raise ArtifactError(400, "Invalid Brain manifest")
+                providers = manifest.get("providers", {})
+                if not isinstance(providers, dict) or len(manifest.get("tabs", [])) > 100:
+                    raise ArtifactError(400, "Invalid Brain providers or tabs")
+                for kind, file in providers.items():
+                    if kind not in ("source", "history", "flow", "sequence", "aiRules") or not isinstance(file, str) or not file.endswith(".json"):
+                        raise ArtifactError(400, "Invalid Brain provider")
+                    control.checked(self.reader.storage, "brain-data/" + file)
                 tabs = []
+                ids = set()
                 for tab in manifest.get("tabs", []):
                     if not isinstance(tab, dict) or not isinstance(tab.get("file"), str):
                         raise ArtifactError(400, "Invalid Brain tab")
+                    if not isinstance(tab.get("id"), str) or not tab["id"] or tab["id"] in ids or not isinstance(tab.get("label"), str) or not tab["file"].endswith(".json"):
+                        raise ArtifactError(400, "Invalid or duplicate Brain tab")
+                    ids.add(tab["id"])
                     control.checked(self.reader.storage, "brain-data/" + tab["file"])
                     tabs.append({**tab, "graph": "/api/source/brain/files/" + tab["file"]})
                 return {"data": {"manifest": manifest, "tabs": tabs}}

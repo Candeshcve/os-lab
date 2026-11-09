@@ -76,7 +76,7 @@ Keep structural maps distinct from evidence and expose snapshot provenance.
 cancel/download UI or require merger UI parity for release. Existing engine/API
 functionality is retained; this task is neither open nor completed.
 - [x] SRC-043 (SRC-030, SRC-040): Port Pipeline API/flowchart/stages/network/heuristics/candidates and bundled fallback. Accept: stage details match the pinned snapshot and its date is visible; no claim of automatic regeneration.
-- [ ] SRC-044 (SRC-003, SRC-030): Prototype Brain's data/provider hooks and React/Astro embedding. Accept: documented feasibility for each inventory subview, dependency licenses checked and snapshot/API roots portable.
+- [x] SRC-044 (SRC-003, SRC-030): Prototype Brain's data/provider hooks and React/Astro embedding. Accept: documented feasibility for each inventory subview, dependency licenses checked and snapshot/API roots portable.
 - [ ] SRC-045 (SRC-044): Port Brain graph/tabs/filter/legend/usages/source/history/diff/flowchart/sequence/AI-rules/complexity/risk/stress/export and virtual store behavior. Accept: each usable upstream view has a fixture-backed check; absent providers show explicit unavailable states.
 
 ## Slice 6: Project documentation

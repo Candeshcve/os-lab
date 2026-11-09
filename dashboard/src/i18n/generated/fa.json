@@ -2076,5 +2076,9 @@
   "Pinned architecture reference; no live run or automatic regeneration is implied.": "مرجع معماری ثابت؛ به معنای اجرای زنده یا تولید خودکار نیست.",
   "Pipeline reference": "مرجع خط پردازش",
   "Risk rules": "قواعد ریسک",
-  "Signatures": "امضاها"
+  "Signatures": "امضاها",
+  "No graph provider is available.": "ارائه‌دهنده گراف در دسترس نیست.",
+  "Operator-provided graph snapshots stay local. No live application provider is configured automatically.": "تصویرهای گراف اپراتور محلی می‌مانند. ارائه‌دهنده برنامه زنده خودکار تنظیم نمی‌شود.",
+  "edges": "یال",
+  "nodes ·": "گره ·"
 }

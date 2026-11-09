@@ -492,3 +492,21 @@ def test_pipeline_reference_and_snapshot_provenance(console):
         assert call(console, "/api/source/pipeline")[0] == 400
     finally:
         path.unlink()
+
+
+def test_brain_manifest_guards_providers_and_duplicate_tabs(console):
+    path = console[1] / "brain-data/manifest.json"
+    original = path.read_bytes() if path.exists() else None
+    path.parent.mkdir(exist_ok=True)
+    tab = {"id": "owned", "label": "Owned", "file": "owned.json"}
+    try:
+        for manifest in ({"tabs": [tab, tab]}, {"tabs": [tab], "providers": {"source": "../control/runtime-settings.json"}},
+                         {"tabs": [tab], "providers": {"source": "https://example.test/owned.json"}},
+                         {"tabs": [tab], "providers": {"source": "source.js"}}):
+            path.write_text(json.dumps(manifest))
+            assert call(console, "/api/source/brain")[0] == 400
+    finally:
+        if original is None:
+            path.unlink()
+        else:
+            path.write_bytes(original)
