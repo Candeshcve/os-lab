@@ -132,3 +132,10 @@ repository/legal references. It never reads a live host report or calls an LLM.
 Submit generates and copies the prompt; clipboard failures retain a selectable
 preview with retry. Tasks remain in browser memory, without URL/storage persistence.
 [[scripts/deploy-page.sh]] retains these routes in every public locale.
+
+The prompt embeds the complete [[docs/HOW_TO_USE_CHEATSHEET.md]] and
+[[docs/HOW_TO_USE_COMMANDS.md]], including requirements, operations and recovery
+for every lab. [[scripts/build-how-to-use-reference.py]] extracts exact parser,
+Make target, PowerShell parameter and configuration-name references from an
+explicit source allowlist without executing code or reading private state.
+Regenerate it after those sources change; `--check` detects stale output.

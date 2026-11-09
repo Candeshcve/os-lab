@@ -79,3 +79,15 @@ Verify the final public artifact from the repository root with
 Set `HOW_TO_USE_ORIGIN=https://keyvanarasteh.github.io` for the same check on
 the live site. Run the existing Source Pages smoke against the same filtered
 artifact as well.
+
+The full prompt embeds `docs/HOW_TO_USE_CHEATSHEET.md` (requirements, setup,
+workflows, API contracts, endpoints, state, recovery and limitations) and
+`docs/HOW_TO_USE_COMMANDS.md` (generated exact CLI/Make/PowerShell syntax,
+configuration key names, dependency pins and developer scripts). Every task gets
+the complete references; there is no keyword selection or silent truncation.
+Neither document reads real `.env` files or private state.
+
+After changing an allowlisted CLI, Makefile, example configuration, dependency
+list or npm script, run `python3 scripts/build-how-to-use-reference.py` from the
+repository root. Verify freshness with the same command plus `--check`. Review
+and update the operational cheatsheet whenever prerequisites or behavior change.
