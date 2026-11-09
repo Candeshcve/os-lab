@@ -60,6 +60,7 @@ export function sectionHref(id: string): string {
   if (id === "health") return localized("/health/");
   if (id === "legal") return localized("/legal/");
   if (id === "contribute") return localized("/contribute/");
+  if (id === "how-to-use") return localized("/how-to-use/");
   if (id === "feedback") return localized("/feedback/");
   if (id === "content") return localized("/content/");
   if (id === "firewall") {
@@ -104,6 +105,9 @@ function buildGroups(labs: LabStatus[] | undefined, running: Set<string>, androi
       { id: "source-overview", label: "Source Lab", icon: LAB_ICON.source() },
       { id: "feedback", label: "Feedback", icon: <ChatCircleTextIcon size={16} /> },
       { id: "repo", label: "Repository", icon: <BookOpenIcon size={16} /> }
+    ] },
+    { label: "Workspace", items: [
+      { id: "how-to-use", label: "How to use", icon: <BookOpenIcon size={16} /> }
     ] }
   ];
   const lab = (id: LabId) => labs?.find((l) => l.id === id);
@@ -118,6 +122,7 @@ function buildGroups(labs: LabStatus[] | undefined, running: Set<string>, androi
       label: "Workspace",
       items: [
         { id: "host", label: "This computer", icon: <DesktopTowerIcon size={16} /> },
+        { id: "how-to-use", label: "How to use", icon: <BookOpenIcon size={16} /> },
         {
           id: "jobs",
           label: "Jobs",
@@ -201,6 +206,7 @@ function buildMeta(): Record<string, SpotlightMeta> {
     firewall: { description: "BGT207 dream-company firewall designs — branches, segmentation, products and rule sets", aliases: ["firewall", "bgt207", "ufw", "rules", "vlan", "dmz", "company"] },
     health: { description: "GET /api/health", aliases: ["status", "api"] },
     contribute: { description: "How to set up, test, rebuild, open a pull request and view roadmap TODOs", aliases: ["contribute", "contributing", "pull request", "pr", "development", "tests", "todos", "roadmap", "pentesting", "firewall", "tasks"] },
+    "how-to-use": { description: "Create a task prompt with os-lab capabilities for any LLM", aliases: ["how to", "guide", "prompt", "llm", "help", "task"] },
     feedback: { description: "Report issues, suggest features, and share feedback", aliases: ["feedback", "bug", "issue", "request", "suggestion", "help"] },
     "legal-terms": { description: "Licence, authorized use, OS licences, no warranty", aliases: ["legal", "terms", "license", "warranty", "liability"] },
     "legal-acceptable-use": { description: "Supported and unsupported use, responsible disclosure", aliases: ["legal", "aup", "policy", "disclosure"] },

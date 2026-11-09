@@ -63,3 +63,12 @@ npm run build                                 # refresh dist/ before committing
 ```
 
 Run the console with `./labctl ui` (or `--port N`).
+
+### How to use
+
+Workspace → **How to use** (`/how-to-use/`, including all locale routes) works
+in the local console and public Pages. Describe a task and submit to generate
+and copy an LLM-ready prompt with the shipped capability catalog, platform
+constraints, workflows and guide/legal links. No LLM API, live host inventory or
+request persistence is used. Review the prompt before sharing; clipboard errors
+keep a read-only preview available for manual selection or retry.
