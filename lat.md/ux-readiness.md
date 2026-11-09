@@ -34,3 +34,8 @@ switches. Public pages must issue no engine calls or operation controls.
 [[scripts/deploy-page.sh]] must retain public Source guides and community/legal
 links in every locale while filtering console-only routes. Test its final
 post-processed artifact, not only the raw Astro Pages output.
+
+[[dashboard/scripts/how-to-use-pages-smoke.mjs]] checks the Workspace task
+prompt builder across all eight public locales, including clipboard output,
+language switching, mobile layout and absence of engine calls. Run both public
+smoke scripts after applying the deployment filters.
