@@ -3,6 +3,7 @@ import { AppShell } from "../../shell/app-shell";
 import { TopBar } from "../../shell/top-bar";
 import { Empty, Section } from "../../components/ui";
 import { localeFromPath, localePath } from "../../i18n/paths";
+import { SourceOverview, SourceCatalogs } from "./overview";
 import { PUBLIC_SOURCE } from "./client";
 
 export const SOURCE_PAGES = ["", "analyzer", "evidence", "deep-analysis", "pipeline", "brain", "sources", "settings/runtime"] as const;
@@ -25,7 +26,7 @@ export default function SourcePage({ page = "" }: { page?: SourcePageId }) {
       <h2 className="text-xl font-semibold">{sourceTitles[page]}</h2>
       {PUBLIC_SOURCE ? <Section title="Local Source Lab" description="Run the installed console to inspect private source artifacts and launch analyses.">
         <p>Public pages do not connect to your local engine. No targets, catalogs or sessions are published.</p>
-      </Section> : <Section title={sourceTitles[page]}><Empty>This view is queued for implementation. Existing engine and console API workflows remain available.</Empty></Section>}
+      </Section> : page === "" ? <SourceOverview /> : page === "sources" ? <SourceCatalogs /> : <Section title={sourceTitles[page]}><Empty>This view is queued for implementation. Existing engine and console API workflows remain available.</Empty></Section>}
     </main>
   </AppShell>;
 }

@@ -63,3 +63,8 @@ results only while the local palette is open.
 
 Public Source pages are informational, make no engine requests, and preserve
 locale/base/query links. Unimplemented analysis views say so explicitly.
+
+[[dashboard/src/views/source/overview.tsx]] renders file-backed Overview matrices,
+inspector notes, filters, CSV/JSON links and operator source catalogs.
+[[console/source_overview.py]] adapts raw and flattened crawler manifests and
+per-package dependency sections without importing private datasets.

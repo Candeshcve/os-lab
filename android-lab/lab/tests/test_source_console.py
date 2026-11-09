@@ -377,3 +377,26 @@ def test_runtime_verification_and_default_canary(console):
     plan = source_control.build_plan(web_ui.REPO_ROOT, {"lab": "source", "action": "detect", "options": {
         "target": source_control.candidates(web_ui.REPO_ROOT)[0]["key"], "runCanary": True}})
     assert call(console, route)[1]["canary"]["testUrl"] in plan["engineArgs"]
+
+
+def test_overview_pinned_crawler_formats(console):
+    path = console[1] / "analysis/owned__matrix"
+    path.mkdir()
+    (path / "manifest-analysis.json").write_text(json.dumps({"name": "Owned fixture", "manifest_version": 2,
+        "manifest_keys": ["background", "browser_action", "permissions"], "background": "scripts: background.js",
+        "permissions": ["tabs", "tabs", "nativeMessaging"], "heuristic_score": 3}))
+    (path / "dependencies.json").write_text(json.dumps({"package.json": {"deps": {
+        "dependencies": {"react": "1"}, "devDependencies": {"react": "1", "vite": "1"}}}}))
+    status, data = call(console, "/api/source/analyzer/merged")
+    assert status == 200
+    prop = next(row for row in data["propsMatrix"] if row["name"] == "browser_action")
+    assert prop["mv2"] == 1 and prop["mv3"] == 0 and prop["migrationNote"]
+    assert "owned__matrix" in data["swGroups"]["persistentScript"]
+    dep = next(row for row in data["depsMatrix"] if row["name"] == "react")
+    assert dep["count"] == 1 and dep["category"] == "UI / Framework"
+    assert set(dep["sections"]) == {"dependencies", "devDependencies"}
+    perm = next(row for row in data["permsMatrix"] if row["name"] == "nativeMessaging")
+    assert perm["risk"] == "high"
+    status, csv = call(console, "/api/source/analyzer/merged?export=csv")
+    assert status == 200 and b"migration" in csv and b"browser_action" in csv
+    assert call(console, "/api/source/analyzer/merged?export=json")[0] == 200

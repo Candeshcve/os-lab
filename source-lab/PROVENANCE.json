@@ -651,6 +651,13 @@
       "destination": "source-lab/engine/tests/test_sourcemap_vfs.py",
       "source_sha256": "8a5f4363bca24222557f9ba0ba78a7fcb4fcd848192678432abe973c5107d25e",
       "local_sha256": "ca255cdfe0c01a12629272961235a09875badd0b7aeb68b4e3ce1c962e1479c3"
+    },
+    {
+      "source": "ui/src/app/api/analyzer/merged/route.ts",
+      "destination": "console/source_manifest_specs.json",
+      "source_sha256": "f480d714b2b62c27f5391088328205c543e71a75f30c012a7cc5ff7723a6b7d2",
+      "local_sha256": "687faeb38a2b594e4a0db43a57ade644ab2d5a499c532166e12ac1c545647102",
+      "adaptation": "Extracted first-party manifest annotation metadata only; snapshot guidance, no dataset or browser policy freshness claim."
     }
   ],
   "publication": {

@@ -168,37 +168,18 @@ class SourceAPI:
                 raise ArtifactError(400, "Unknown export format")
             names, truncated = self._repos()
             extensions = [self._bundle(slug) for slug in names]
-            matrices = {"propsMatrix": {}, "depsMatrix": {}, "permsMatrix": {}}
-            groups = {"serviceWorker": [], "persistentScript": [], "backgroundPage": [], "none": []}
-            for extension in extensions:
-                analysis = extension.get("manifestAnalysis") or {}
-                manifest = analysis.get("manifest", analysis.get("raw_manifest", {}))
-                if not isinstance(manifest, dict):
-                    manifest = {}
-                slug = extension["slug"]
-                for key in manifest:
-                    matrices["propsMatrix"].setdefault(key, []).append(slug)
-                permissions = manifest.get("permissions", []) + manifest.get("host_permissions", [])
-                for permission in permissions:
-                    if isinstance(permission, str):
-                        matrices["permsMatrix"].setdefault(permission, []).append(slug)
-                dependencies = extension.get("dependencies") or {}
-                if isinstance(dependencies, dict):
-                    for key in ("dependencies", "devDependencies"):
-                        for dependency in (dependencies.get(key) or {}):
-                            matrices["depsMatrix"].setdefault(dependency, []).append(slug)
-                bg = manifest.get("background") or {}
-                group = "serviceWorker" if bg.get("service_worker") else "backgroundPage" if bg.get("page") else "persistentScript" if bg.get("scripts") else "none"
-                groups[group].append(slug)
-            result = {"success": True, "extensions": extensions, "swGroups": groups, "truncated": truncated,
-                      "stats": {"totalAnalyzed": len(extensions)},
-                      **{key: [{"name": name, "slugs": values, "count": len(values)} for name, values in sorted(matrix.items())] for key, matrix in matrices.items()}}
+            from source_overview import overview
+            result = overview(extensions, truncated)
             if q.get("export") == "csv":
                 output = io.StringIO()
                 writer = csv.writer(output)
-                writer.writerow(["property", "count", "slugs"])
-                writer.writerows([row["name"], row["count"], " ".join(row["slugs"])] for row in result["propsMatrix"])
-                return Download(output.getvalue().encode(), "text/csv; charset=utf-8", "extension-manifest-props-mapping.csv")
+                writer.writerow(["property", "category", "status", "count", "mv2", "mv3", "specification", "migration", "slugs"])
+                def cell(value):
+                    value = str(value)
+                    return "'" + value if value.lstrip().startswith(("=", "+", "-", "@")) else value
+                writer.writerows([cell(value) for value in [row["name"], row["category"], row["mvStatus"], row["count"], row["mv2"], row["mv3"],
+                                 row["specNote"], row["migrationNote"], " ".join(row["slugs"])]] for row in result["propsMatrix"])
+                return Download(redact(self.root, output.getvalue()).encode(), "text/csv; charset=utf-8", "extension-manifest-props-mapping.csv")
             return result
         if endpoint == "deep-analysis/merge":
             q = self._query(query, ("download", "plan", "slugs", "includeFlagged"))

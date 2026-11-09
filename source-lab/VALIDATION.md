@@ -228,3 +228,23 @@ Pages builds; existing/browser navigation suite 21 passed initially and the
 hydration-timing correction for Spotlight passed its focused rerun. Public smoke
 checks 16 EN/TR destinations, locale/query/base links and absence of engine
 requests/actions. No private artifact or third-party dataset enters the build.
+
+## Next batch: SRC-031 Overview acceptance
+
+The Overview compares properties, background execution, dependencies, permissions
+and target inspectors. Filters, pinned migration annotations, per-target counts,
+source catalog browsing and CSV/JSON downloads use private file-backed API data.
+Property annotations were extracted from the authorized pinned first-party route;
+provenance records the source hash and transformed JSON hash. No catalogs copied.
+
+Validation includes a console fixture for flattened crawler manifests and nested
+package dependency sections, deduplicated counts, background groups, high-risk
+permissions and annotated CSV export. Browser tests cover matrix tabs/keyboard,
+filters, inspector notes/deep links, loading, empty and error states.
+
+SRC-031 results: dashboard typecheck and seven-locale catalog check passed; local
+and Pages builds each emitted 409 routes. Source-focused browser checks **7
+passed** after updating navigation mocks to return the new Overview DTO; the
+other 17 checks in the full run passed. Public smoke again passed all 16 EN/TR
+Source routes without engine requests. Combined Source console/artifact tests
+**40 passed**; full engine suite **158 passed**.
