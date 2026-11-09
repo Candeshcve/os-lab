@@ -50,4 +50,8 @@ readers and engine contracts remain file-backed. The Python package is `source_l
 
 [[source-tests]] preserves the engine's bound test specifications, including generated binary fixtures and launcher/evidence regressions. Run `python3 -m pytest -q` in [[source-lab/engine]].
 
+[[source-lab/engine/tests/fixture_workspace.py#build_workspace]] generates an
+owned, offline workspace for detection, crawl/merge, map, synthetic signed session
+and future UI tests. Generated output and signing keys are never committed.
+
 The repository test runner executes this suite in a separate Python process from Android tests. Static analysis remains usable without optional browser, grammar or VM dependencies.

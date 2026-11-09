@@ -616,3 +616,15 @@ Generated structural maps must satisfy the V1 contract and reject evidence-contr
 ### Generated contracts stay current
 
 Committed JSON Schema and frontend TypeScript must match regeneration from the engine models without manual duplicate definitions.
+
+## Workspace fixtures
+
+Owned scenarios generate reports, maps, merge output and synthetic signed sessions in temporary folders without remote acquisition.
+
+### Offline integration workspace
+
+The fixture generator must produce valid contracts, a verifiable synthetic session, a loadable-format MV3 archive and matching provenance hashes without persisting the ephemeral signing key.
+
+### Existing workspace preserved
+
+Fixture generation must refuse an existing workspace without overwriting operator files.

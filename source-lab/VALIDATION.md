@@ -102,3 +102,13 @@ This update changes planning documents only. Validation covers Markdown links,
 task/dependency references, scope counts, `lat check`, provenance/exclusion checks
 and whitespace. Previous runtime test results above are historical; they are not
 reported as rerun for this scope-only update.
+
+## Reusable workspace fixtures
+
+SRC-003 is complete: the owned browser fixture now generates detection reports,
+a crawler bundle, structural map, planned/built MV3 merge, a signed synthetic
+session, UI response data and output SHA-256 manifest in a fresh temporary root.
+No third-party data is acquired, no generated binaries/archives are committed,
+and the ephemeral session key is supplied explicitly rather than stored. Existing
+workspace files are preserved by refusing an existing destination. Validation:
+143 engine tests, graph, import/exclusion and whitespace checks pass.

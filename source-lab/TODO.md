@@ -29,7 +29,7 @@ Finish these before copying the affected source code or data.
 
 - [x] SRC-001 (no dependency): Resolve source code license and archive redistribution rights; list permitted/excluded assets and dependency notices. Accept: documented origin/license evidence compatible with os-lab, with unlicensed material held out pending resolution.
 - [x] SRC-002 (no dependency): Reconcile inventory with source at import time, including seven pages, docs/API, every method, shell and Brain subviews. Accept: pinned revision, upstream-to-destination parity ledger and explicit dispositions for stubs and unavailable data.
-- [ ] SRC-003 (SRC-001, SRC-002): Create sanitized detection/crawler/merge/map/session/UI fixtures and provenance/relocation manifest. Accept: reproducible fixtures without proprietary media, keys or personal metadata; checksums and upstream file mapping retained.
+- [x] SRC-003 (SRC-001, SRC-002): Create sanitized detection/crawler/merge/map/session/UI fixtures and provenance/relocation manifest. Accept: reproducible fixtures without proprietary media, keys or personal metadata; checksums and upstream file mapping retained.
 
 ## Slice 1: Portable engine and lab foundation
 
