@@ -91,11 +91,11 @@
     "companies": 19,
     "branches": 80,
     "firewalls": 97,
-    "rules": 1717,
+    "rules": 1729,
     "priceUsd": {
       "min": 0,
       "max": 205357,
-      "total": 1808436.0899999999
+      "total": 1819936.0899999999
     },
     "chosenByVendor": {
       "Fortinet": 71,
@@ -1537,10 +1537,10 @@
       "product": "FortiGate 100F (HA)",
       "vendor": "Fortinet",
       "throughputGbps": null,
-      "priceUsd": null,
-      "ruleCount": 5,
+      "priceUsd": 6000,
+      "ruleCount": 9,
       "actions": {
-        "allow": 2,
+        "allow": 6,
         "deny": 3,
         "reject": 0,
         "limit": 0
@@ -1586,10 +1586,10 @@
       "product": "FortiGate 60F",
       "vendor": "Fortinet",
       "throughputGbps": null,
-      "priceUsd": null,
-      "ruleCount": 4,
+      "priceUsd": 1000,
+      "ruleCount": 8,
       "actions": {
-        "allow": 1,
+        "allow": 5,
         "deny": 3,
         "reject": 0,
         "limit": 0
@@ -1635,10 +1635,10 @@
       "product": "FortiGate 200F",
       "vendor": "Fortinet",
       "throughputGbps": null,
-      "priceUsd": null,
-      "ruleCount": 4,
+      "priceUsd": 4500,
+      "ruleCount": 8,
       "actions": {
-        "allow": 0,
+        "allow": 4,
         "deny": 3,
         "reject": 0,
         "limit": 1

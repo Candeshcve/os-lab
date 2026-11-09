@@ -70,7 +70,7 @@
           "chosen": {
             "product": "FortiGate 100F (HA)",
             "vendor": "Fortinet",
-            "price": "~$3,000 x 2",
+            "priceUsd": 6000,
             "reason": "Sized for 350 Mbps of calculated need on a 500 Mbps fiber line + 100 Mbps SD-WAN backup, HA because the ERP and mail servers live here."
           },
           "alternatives": [
@@ -108,7 +108,16 @@
             {
               "action": "allow",
               "direction": "in",
-              "proto": "tcp,udp",
+              "proto": "tcp",
+              "port": "53",
+              "from": "internal-vlans",
+              "to": "any",
+              "note": "DNS resolution."
+            },
+            {
+              "action": "allow",
+              "direction": "in",
+              "proto": "udp",
               "port": "53",
               "from": "internal-vlans",
               "to": "any",
@@ -222,7 +231,7 @@
           "chosen": {
             "product": "FortiGate 60F",
             "vendor": "Fortinet",
-            "price": "~$1,000",
+            "priceUsd": 1000,
             "reason": "175 Mbps calculated need on a 200 Mbps fiber line + 5G/LTE Backup for 100 staff."
           },
           "alternatives": [
@@ -260,7 +269,16 @@
             {
               "action": "allow",
               "direction": "in",
-              "proto": "tcp,udp",
+              "proto": "tcp",
+              "port": "53",
+              "from": "internal-vlans",
+              "to": "any",
+              "note": "DNS resolution."
+            },
+            {
+              "action": "allow",
+              "direction": "in",
+              "proto": "udp",
               "port": "53",
               "from": "internal-vlans",
               "to": "any",
@@ -359,7 +377,7 @@
           "chosen": {
             "product": "FortiGate 200F",
             "vendor": "Fortinet",
-            "price": "~$4,500",
+            "priceUsd": 4500,
             "reason": "787 Mbps calculated need on a 1 Gbps fiber line + 200 Mbps SD-WAN backup; all source code lives here."
           },
           "alternatives": [
@@ -397,7 +415,16 @@
             {
               "action": "allow",
               "direction": "in",
-              "proto": "tcp,udp",
+              "proto": "tcp",
+              "port": "53",
+              "from": "internal-vlans",
+              "to": "any",
+              "note": "DNS resolution."
+            },
+            {
+              "action": "allow",
+              "direction": "in",
+              "proto": "udp",
               "port": "53",
               "from": "internal-vlans",
               "to": "any",
