@@ -110,15 +110,29 @@ if [ -z "${TAURI_SIGNING_PRIVATE_KEY:-}" ] && [ -f "$REPO/secrets/updater/os-lab
 fi
 [ -n "${TAURI_SIGNING_PRIVATE_KEY:-}" ] || die "updater signing key is missing (TAURI_SIGNING_PRIVATE_KEY)"
 say "building ($TARGET) — Tauri signs the app with hardened runtime and notarizes it when the API key is set"
-npx tauri build --target "$TARGET" --bundles app,dmg
+npx tauri build --target "$TARGET" --bundles app
 
 BUNDLE="${CARGO_TARGET_DIR:-$APP_DIR/src-tauri/target}/$TARGET/release/bundle"
 ARCH_LABEL="${TARGET%%-apple-darwin}"
 APP="$BUNDLE/macos/os-lab.app"
 DMG="$BUNDLE/dmg/os-lab_${VERSION}_${ARCH_LABEL}.dmg"
 UPDATE="$BUNDLE/macos/os-lab.app.tar.gz"
-[ -d "$APP" ] && [ -f "$DMG" ] && [ -f "$UPDATE" ] && [ -f "$UPDATE.sig" ] \
-  || die "build produced no app, version-matched DMG or signed updater bundle"
+[ -d "$APP" ] && [ -f "$UPDATE" ] && [ -f "$UPDATE.sig" ] \
+  || die "build produced no app or signed updater bundle"
+
+# Package the DMG ourselves. Tauri's bundle_dmg.sh mounts a read-write volume and runs
+# Finder to lay out icons, then frequently cannot unmount it ("hdiutil: Resource busy"),
+# which failed every macOS release on the build host. Create a compressed DMG straight
+# from the signed, notarized .app with no interstitial read-write mount to get stuck.
+say "packaging the DMG from the signed app"
+mkdir -p "$(dirname "$DMG")"
+rm -f "$DMG"
+DMG_STAGE="$(mktemp -d)"
+cp -R "$APP" "$DMG_STAGE/"
+ln -s /Applications "$DMG_STAGE/Applications"
+hdiutil create -volname "os-lab" -srcfolder "$DMG_STAGE" -fs HFS+ -format UDZO -ov "$DMG"
+rm -rf "$DMG_STAGE"
+[ -f "$DMG" ] || die "DMG packaging failed"
 
 # ── 4. Sign + notarize the DMG itself (Tauri notarizes the .app) ────────────────────────────────
 say "signing the DMG"
