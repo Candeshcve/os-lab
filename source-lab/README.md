@@ -82,3 +82,10 @@ The installed console now provides all retained namespaced route adapters, exact
 previews and shared Source jobs. See [API.md](API.md) for methods, bounds, explicit
 contract adaptations and restart/cancellation behavior. Analysis UI pages remain
 in the migration queue.
+
+The local dashboard now includes Source Lab navigation, Overview matrices and
+inspectors, operator source catalogs and a previewed crawler runner. Runtime
+settings and explicit signed-session verification are available through the
+console API. See [API.md](API.md) and [COLLECTORS.md](COLLECTORS.md). Remaining UI
+and distribution work is tracked in [TODO.md](TODO.md); the public Source routes
+are informational and never read local targets or start jobs.

@@ -2,7 +2,8 @@
 
 Source Lab provides local source/package analysis through a namespaced Python engine and [[labctl]]. It needs no VM, KVM, Docker or Node for static detection.
 
-The console reports native Python readiness; analysis pages remain in [[source-lab/TODO.md]].
+The console reports native Python readiness. Overview, source catalogs and the
+crawler UI are available; remaining analysis views are in [[source-lab/TODO.md]].
 
 ## Detection
 
@@ -69,7 +70,8 @@ Adapters cover Python, JS/TS, PHP, Rust, Swift, Objective-C, Kotlin, Java and ma
 
 No third-party archives, datasets or binaries are imported. Skills, database
 integration and OpenAPI are outside the requested migration scope; artifact
-readers and engine contracts remain file-backed. The Python package is `source_lab`, so its modules do not shadow the existing Android engine. Analysis UI pages and remote deployment remain unimplemented. Console action adapters now use shared previews and jobs.
+readers and engine contracts remain file-backed. The Python package is `source_lab`, so its modules do not shadow the existing Android engine. The Overview and crawler pages use shared previews and jobs; remaining analysis
+views and remote deployment stay in the task queue.
 
 ## Regression tests
 

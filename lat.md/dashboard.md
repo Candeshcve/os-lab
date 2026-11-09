@@ -68,3 +68,8 @@ locale/base/query links. Unimplemented analysis views say so explicitly.
 inspector notes, filters, CSV/JSON links and operator source catalogs.
 [[console/source_overview.py]] adapts raw and flattened crawler manifests and
 per-package dependency sections without importing private datasets.
+
+[[dashboard/src/views/source/crawler.tsx]] validates selected source lists or
+repository slugs, workers/depth and crawler options. Live Source readiness and
+Git gate actions; previews invalidate on edits. Runs use the existing jobs API
+for output, cancellation and conflicts. No progress percentage is invented.

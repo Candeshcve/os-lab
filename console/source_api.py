@@ -121,7 +121,9 @@ class SourceAPI:
             raw = self.reader._read(("analysis", "summary.csv"), MAX_JSON, optional=True)
             rows = list(csv.DictReader(io.StringIO(raw.decode("utf-8")))) if raw else []
             runs = self.runs("crawl")
-            return {"run": runs[0] if runs else None, "report": report, "summaryCount": len(rows), "summaryRows": rows[:50]}
+            files, truncated = control.source_lists(self.root)
+            return {"run": runs[0] if runs else None, "report": report, "summaryCount": len(rows), "summaryRows": rows[:50],
+                    "sourceFiles": files, "sourceFilesTruncated": truncated}
         if endpoint == "sources":
             q = self._query(query, ("download",))
             reader = self._resource_reader()

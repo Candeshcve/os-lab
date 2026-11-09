@@ -248,3 +248,38 @@ passed** after updating navigation mocks to return the new Overview DTO; the
 other 17 checks in the full run passed. Public smoke again passed all 16 EN/TR
 Source routes without engine requests. Combined Source console/artifact tests
 **40 passed**; full engine suite **158 passed**.
+
+## Next batch: SRC-032 crawler acceptance
+
+The crawler page offers operator source lists or up to 100 explicit GitHub slugs,
+workers/depth and AST/metadata/resume/workspace options. Source readiness and Git
+gate actions. Exact previews are invalidated by edits; confirmation starts a
+shared Source job. Logs, conflicts, cancellation, failures and completed summaries
+remain visible, with H1–H5 weights labeled as review heuristics rather than proof.
+
+Source-list discovery caps scanned entries/results, accepts only supported file
+types and never follows links. The public build stays informational. The owner
+requested ignoring `dashboard/.check-source-pages/`; the rule was verified with
+`git check-ignore`, and no generated files under that directory are tracked.
+
+Focused console/artifact regression: **41 passed**, including real offline
+crawler jobs from the earlier P0 suite and source-list discovery boundaries.
+
+Final batch results:
+
+- Repository runner: **7 passed, 0 failed, 0 skipped** stages; Android/console
+  **146 passed, 2 skipped**, Source engine **158 passed**, sample analysis,
+  **70** shell scripts, graph, dashboard typecheck and committed-build freshness.
+- Dashboard: typecheck, **2,011** catalog keys across seven locales, local and
+  Pages **409-route** builds, and full browser suite **27 passed**.
+- Public browser smoke: **16** EN/TR Source destinations, preserved locale/base/
+  query links, no local API requests, operation buttons or hydration errors.
+- Real localhost console smoke: generated owned fixture Overview and inspector,
+  crawler exact preview, and no job started by preview.
+- Provenance: **109** current file hashes verified. Secret-signature review of
+  **40** changed text files found only three intentional invalid-auth URL test
+  fixtures; no production credentials. No third-party assets or new dependencies.
+
+SRC-024/025/030/031/032 are complete. **13** active implementation tasks and four
+upstream follow-ups remain; SRC-042 stays explicitly skipped. Actual native
+collection, remaining analysis UIs and distribution acceptance are still pending.

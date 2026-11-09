@@ -357,6 +357,8 @@ def test_engine_tree_stops_after_console_crash(tmp_path, monkeypatch):
 def test_runtime_verification_and_default_canary(console):
     route = "/api/source/settings/runtime"
     # Regenerate the owned fixture with the console-managed key, never printed.
+    if not (console[1] / "control/session-hmac.key").exists():
+        assert confirmed(console, route, {"action": "generate-key"}).state == "succeeded"
     key = (console[1] / "control/session-hmac.key").read_text().strip()
     script = Path(web_ui.REPO_ROOT) / "source-lab/engine/tests/fixture_workspace.py"
     fixture = console[1] / "verification-fixture"
@@ -400,3 +402,17 @@ def test_overview_pinned_crawler_formats(console):
     status, csv = call(console, "/api/source/analyzer/merged?export=csv")
     assert status == 200 and b"migration" in csv and b"browser_action" in csv
     assert call(console, "/api/source/analyzer/merged?export=json")[0] == 200
+
+
+def test_crawler_lists_are_private_bounded_and_link_safe(console):
+    folder = console[1] / "resources/sources"
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "owned.txt").write_text("owned/sample\n")
+    (folder / "not-a-list.json").write_text("{}")
+    if os.name == "posix":
+        (folder / "linked.txt").symlink_to(folder / "owned.txt")
+    status, result = call(console, "/api/source/analyzer")
+    assert status == 200
+    files = {item["name"] for item in result["sourceFiles"]}
+    assert "owned.txt" in files and "not-a-list.json" not in files and "linked.txt" not in files
+    assert result["sourceFilesTruncated"] is False

@@ -131,6 +131,24 @@ def candidates(root: str) -> list[dict]:
     return sorted(result, key=lambda item: item["key"])
 
 
+def source_lists(root: str) -> tuple[list[dict], bool]:
+    base = storage(root)
+    resources = Path(os.environ.get("SOURCE_LAB_RESOURCES", str(base / "resources"))).expanduser().resolve()
+    directory = checked(resources, "sources")
+    if not directory.exists():
+        return [], False
+    files, truncated = [], False
+    with os.scandir(directory) as entries:
+        for index, entry in enumerate(entries):
+            if index >= 1000 or len(files) >= 100:
+                truncated = True
+                break
+            suffix = Path(entry.name).suffix.lower()
+            if NAME.fullmatch(entry.name) and entry.is_file(follow_symlinks=False) and suffix in (".csv", ".txt", ".xlsx"):
+                files.append({"name": entry.name, "format": suffix[1:].upper()})
+    return sorted(files, key=lambda item: item["name"]), truncated
+
+
 def _integer(options: dict, key: str, default: int, maximum: int) -> int:
     value = options.get(key, default)
     if type(value) is not int or not 1 <= value <= maximum:

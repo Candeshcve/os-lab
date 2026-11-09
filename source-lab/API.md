@@ -38,7 +38,7 @@ omitted. Other labs retain their existing in-memory lifecycle.
 | `/detection` | DELETE | `{jobId}` cancels a matching Source detection job. |
 | `/evidence` | GET | Existing target summaries, `slug` detail or `slug` + `session` events. Session integrity remains explicitly unverified by the reader. |
 | `/evidence/report` | GET | `slug`, `file`: the five allowlisted formats; STIX remains CLI-only. JSON downloads are parsed and scrubbed before serialization. |
-| `/analyzer` | GET | Latest crawl `run`, report, CSV summary count and first 50 rows. |
+| `/analyzer` | GET | Latest crawl `run`, report, CSV summary count and first 50 rows; available `sourceFiles` and `sourceFilesTruncated`. Source-list discovery is capped at 100 files/1,000 scanned entries and refuses symlinks. |
 | `/analyzer` | POST | `sourceFile` basename from configured resources/sources or explicit `repos` owner/repo list. Optional `workers` (1–8), `depth` (1–10), `noAst`, `noMetadata`, `resume`, `keepWorkspace`. |
 | `/analyzer/merged` | GET | File-backed extension bundles, property/dependency/permission matrices and background groups; `export=json` or `csv`. |
 | `/deep-analysis` | GET | Available and analyzed bundles; `repo=owner/name` or slug selects a bundle; optional `file` reads bounded UTF-8 workspace source. |

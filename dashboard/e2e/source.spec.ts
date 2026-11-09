@@ -7,6 +7,7 @@ async function sourceShell(page: Page) {
     if (path === "/api/host") json = { host: { os: "linux", arch: "x86_64" }, labs: [{ id: "source", label: "Source Lab", state: "ready", actions: [] }] };
     if (path === "/api/jobs") json = { jobs: [] };
     if (path === "/api/logs") json = { logs: [] };
+    if (path === "/api/source/analyzer") json = { run: null, report: null, summaryCount: 0, summaryRows: [], sourceFiles: [{ name: "owned.txt", format: "TXT" }], sourceFilesTruncated: false };
     if (path === "/api/source/analyzer/merged") json = matrixFixture;
     if (path === "/api/source/sources") json = { stats: {}, files: [], mergedExtensions: [], curated: [], monitored: [] };
     if (path === "/api/source/spotlight") json = { data: [{ title: "owned__sample", href: "/source/evidence/?slug=owned__sample" }] };
@@ -96,4 +97,64 @@ test("Source Overview and catalogs report loading, empty and failed requests", a
   await page.route("**/api/source/sources", route => route.fulfill({ json: { stats: {}, files: [], mergedExtensions: [], curated: [], monitored: [] } }));
   await page.goto("/source/sources/");
   await expect(page.getByText("No matching sources.")).toBeVisible();
+});
+
+test("Source crawler validates inputs and previews, runs, polls and cancels", async ({ page }) => {
+  await sourceShell(page);
+  let started = false; let cancelled = false;
+  const job = { id: "source-fixture-job", lab: "source", action: "crawl", label: "Owned crawl", state: "running", command: "python3 source-lab/run.py crawl owned/sample", lines: 1, logs: ["Analyzing owned/sample"], truncated: false };
+  await page.route("**/api/source/analyzer", async route => {
+    if (route.request().method() === "GET") return route.fallback();
+    const body = route.request().postDataJSON();
+    expect(body.options).toEqual({ repos: ["owned/sample"], workers: 2, depth: 1, noAst: true, noMetadata: true, resume: false, keepWorkspace: true });
+    if (body.preview) return route.fulfill({ json: { plan: { display: job.command, effects: ["Contacts GitHub for selected sources"], timeoutSec: 3600 }, token: "fixture-confirmation" } });
+    expect(body.token).toBe("fixture-confirmation"); started = true;
+    return route.fulfill({ status: 202, json: { job } });
+  });
+  await page.route("**/api/jobs/source-fixture-job", route => route.fulfill({ json: job }));
+  await page.route("**/api/jobs/source-fixture-job/cancel", route => { cancelled = true; return route.fulfill({ json: { ...job, state: "cancelled", logs: ["Cancelled by operator"] } }); });
+  await page.goto("/source/analyzer/");
+  await expect(page.getByRole("button", { name: "Preview crawl" })).toBeDisabled();
+  await page.getByLabel("GitHub repositories").fill("https://user:credential@example.test/private");
+  await expect(page.getByRole("button", { name: "Preview crawl" })).toBeDisabled();
+  await page.getByLabel("GitHub repositories").fill("owned/sample");
+  await page.getByLabel("Workers", { exact: true }).fill("2");
+  await page.getByRole("button", { name: "Preview crawl" }).click();
+  await expect(page.getByRole("region", { name: "Crawl preview" })).toContainText("Contacts GitHub");
+  expect(started).toBe(false);
+  await page.getByRole("button", { name: "Confirm and run" }).click();
+  await expect(page.getByLabel("Crawler logs")).toContainText("Analyzing owned/sample");
+  await expect(page.getByRole("button", { name: "Preview crawl" })).toBeDisabled();
+  await page.getByRole("button", { name: "Cancel crawl" }).click();
+  await expect(page.getByLabel("Crawler logs")).toContainText("Cancelled by operator");
+  expect(started && cancelled).toBe(true);
+});
+
+test("Source crawler list selection invalidates preview and shows request errors", async ({ page }) => {
+  await sourceShell(page);
+  let requests = 0;
+  await page.route("**/api/source/analyzer", async route => {
+    if (route.request().method() === "GET") return route.fallback();
+    const body = route.request().postDataJSON(); expect(body.options.sourceFile).toBe("owned.txt");
+    if (++requests === 1) return route.fulfill({ json: { plan: { display: "python3 crawl --input owned.txt", effects: [], timeoutSec: 3600 }, token: "fixture" } });
+    return route.fulfill({ status: 409, json: { error: "Private workspace is busy" } });
+  });
+  await page.goto("/source/analyzer/");
+  await page.getByLabel("Input mode").selectOption("source");
+  await page.getByRole("combobox", { name: /^Source list/ }).selectOption("owned.txt");
+  await page.getByRole("button", { name: "Preview crawl" }).click();
+  await expect(page.getByRole("button", { name: "Confirm and run" })).toBeVisible();
+  await page.getByLabel("Clone depth").fill("2");
+  await expect(page.getByRole("button", { name: "Confirm and run" })).not.toBeVisible();
+  await page.getByRole("button", { name: "Preview crawl" }).click();
+  await expect(page.getByRole("alert")).toHaveText("Private workspace is busy");
+});
+
+test("Source crawler honors live missing requirements", async ({ page }) => {
+  await sourceShell(page);
+  await page.route("**/api/host", route => route.fulfill({ json: { host: { os: "linux", arch: "x86_64" }, labs: [{ id: "source", state: "ready", actions: [], requirements: [{ id: "git", found: false, required: false }] }] } }));
+  await page.goto("/source/analyzer/");
+  await page.getByLabel("GitHub repositories").fill("owned/sample");
+  await expect(page.getByRole("button", { name: "Preview crawl" })).toBeDisabled();
+  await expect(page.getByText("Crawler needs live Source Lab readiness and Git. Check Readiness & setup for missing requirements.")).toBeVisible();
 });
