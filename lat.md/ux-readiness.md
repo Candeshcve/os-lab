@@ -18,6 +18,15 @@ An address from configuration describes where a service would answer; it does no
 
 [[dashboard/src/shell/top-bar.tsx]] shows engine status only in the local app. [[dashboard/src/i18n/paths.ts]] handles locale and Pages base paths. [[dashboard/src/views/feedback-page.tsx]] provides issue, feature, discussion, and private security routes from both navigation modes.
 
+Legal Markdown cross-links in [[dashboard/src/lib/legal.ts#rewriteLinks]] and
+legal tabs/cards in [[dashboard/src/views/legal-page.tsx]] preserve the current
+locale and Pages base path. Article links are localized at build time because
+legal prose is excluded from client translation.
+
 ## Verification
 
 [[dashboard/e2e/health-and-content.spec.ts]] covers dependency actions, advanced details, run failures, and hydration across page types. Dashboard type, translation, and static build checks complement browser tests. Public Pages links and locale switching are checked under `/os-lab/`.
+
+[[dashboard/scripts/source-pages-smoke.mjs]] checks every Source route and guide
+across all eight locales below `/os-lab/`, including query-preserving language
+switches. Public pages must issue no engine calls or operation controls.

@@ -49,3 +49,12 @@ dependencies.
 Before launching, the installers rebuild the [[dashboard]] into the untracked
 `dashboard/build` when Node.js 22+ is present; otherwise, or with `--minimal`
 or `OSLAB_DASHBOARD_BUILD=0`, the committed `dashboard/dist` is used.
+
+## Source Lab distribution
+
+[[app/scripts/stage-runtime.mjs]] includes Source engine/adapters and refuses
+private resource/storage/archive inputs. Desktop updates preserve private state.
+
+Minimal installers skip pip package upgrades and report Source readiness through
+Python. Static Source detection needs no Node, VM or optional parser/browser
+installation. Native installer acceptance is tracked in [[source-lab/VALIDATION.md]].

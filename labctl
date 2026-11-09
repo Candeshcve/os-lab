@@ -34,6 +34,7 @@ Labs:
   android | apk      Android security lab (android-lab/lab/)
   ios | ios-lab      iOS/macOS lab (ios-lab/); native macOS uses make -C ios-lab mac-*
   linux | lin        Linux VM lab (linux-lab/)
+  source             Local source/package analysis (source-lab/)
   all                Run a command for Linux-host labs
 
 Commands:
@@ -998,13 +999,18 @@ cmd_all() {
     start|stop|restart|status|doctor|profiles)
       local lab rc=0 labs=(android win linux)
       if [ "$(uname -s)" = "Linux" ]; then labs+=(ios); fi
+      if [ "$cmd" = "status" ] || [ "$cmd" = "doctor" ]; then labs+=(source); fi
       for lab in "${labs[@]}"; do
-        "$ROOT/labctl" "$lab" "$cmd" "$@" || rc=$?
+        if [ "$lab" = "source" ]; then
+          "$ROOT/labctl" source "$cmd" || rc=$?
+        else
+          "$ROOT/labctl" "$lab" "$cmd" "$@" || rc=$?
+        fi
       done
       return "$rc"
       ;;
     monitor)
-      local once=0 interval=5 status_args=() labs=(android win linux)
+      local once=0 interval=5 status_args=() labs=(android win linux source)
       if [ "$(uname -s)" = "Linux" ]; then labs+=(ios); fi
       while [ $# -gt 0 ]; do
         case "$1" in
@@ -1019,7 +1025,11 @@ cmd_all() {
       while :; do
         if [ "$once" = "0" ] && [ -t 1 ]; then clear 2>/dev/null || printf '\033[H\033[J'; fi
         for lab in "${labs[@]}"; do
-          "$ROOT/labctl" "$lab" status "${status_args[@]}"
+          if [ "$lab" = "source" ]; then
+            "$ROOT/labctl" source status
+          else
+            "$ROOT/labctl" "$lab" status "${status_args[@]}"
+          fi
           printf '\n'
         done
         [ "$once" = "1" ] && break
@@ -1060,6 +1070,9 @@ main() {
   if [ "$target" = "all" ]; then
     cmd_all "$@"
     return
+  fi
+  if [ "$target" = "source" ] || [ "$target" = "source-lab" ]; then
+    exec "${SOURCE_LAB_PYTHON:-python3}" "$ROOT/source-lab/run.py" "$@"
   fi
   set_lab "$target"
   if [ "$LAB" = "ios" ] && [ "$(uname -s)" = "Darwin" ]; then

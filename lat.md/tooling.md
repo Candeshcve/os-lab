@@ -5,7 +5,9 @@ test suite, contribution flow and the project's security/licensing stance.
 
 ## Local test runner
 
-GitHub Actions is disabled for this repo; tests run locally via one script.
+The local runner complements enabled browser/content and Linux/macOS package
+workflows. Windows review builds do not imply permission to publish without
+Authenticode; its workflow requires SignPath or explicit unsigned-release approval.
 
 [[scripts/run-tests.sh]] is the CI replacement. It prepares a Python
 environment (a `.venv-test` unless `--no-venv`), runs the pytest suite in
@@ -18,12 +20,14 @@ the committed `dashboard/dist` differs from a fresh build.
 
 ## Tests
 
-The android lab carries the only automated test suite today.
+Android and Source Lab have independent automated test suites.
 
 It lives in [[android-lab/lab/tests]] (analyzer, reporter, MobSF client, secret
 scanner, patcher, flow parser, agentic engine, web UI, and the host engine in
 [[console/oslab.py]]). Shell scripts across the
 VM labs are kept `bash -n` clean and use `set -euo pipefail`.
+The [[source-lab]] engine tests run in their own process from
+[[source-lab/engine]] so their imports cannot collide with Android tests.
 
 ## Community and contribution
 
@@ -32,6 +36,11 @@ Contribution flow, coding conventions and the authorization stance.
 They are in [[CONTRIBUTING.md]], step by step from setup to pull request, and
 the [[dashboard]] renders the same file at `/contribute/`. Contributions must not
 add vendor binaries or proprietary media (see [[legal#Google platform-tools]]).
+The Source Lab migration is tracked in [[source-lab/README.md]], with its plan,
+task queue and pinned source inventory. [[source-lab]] records the implemented
+engine, console and file-backed dashboard workflows. Remaining native/live
+verification and patches are open Source bonus tasks in [[CONTRIBUTING.md]].
+
 Issue and PR templates are in
 [[.github/ISSUE_TEMPLATE]] and [[.github/PULL_REQUEST_TEMPLATE.md]]; behavior
 expectations in [[CODE_OF_CONDUCT.md]].
@@ -43,3 +52,7 @@ Private vulnerability reporting and the authorization-only scope.
 These are defined in [[SECURITY.md]]; the project is Apache-2.0 ([[LICENSE]]).
 The VM base images (`dockur/windows`, `qemux/qemu`, `dockurr/macos`) are MIT and
 do not distribute OS media; users are responsible for valid licences.
+
+[[dashboard/scripts/source-brain-model.test.mjs]] validates provider paths, graph
+limits/windows and bounded revision diff without a browser.
+[[source-lab/RUNBOOK.md]] records the portable release/rollback workflow.

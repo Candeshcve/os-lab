@@ -35,6 +35,7 @@ each a reproducible, isolated guest driven by `make` and a shared management CLI
 | [**Android**](android-lab/) | Emulator + MobSF, mitmproxy, Frida and containerized RE tools; static and dynamic workflows |
 | [**iOS**](ios-lab/) | macOS VM on Ubuntu, or native Xcode / Simulator / Appium on macOS |
 | [**Linux**](linux-lab/) | Disposable KVM guest for malware detonation, ELF RE, exploit/kernel and container-escape practice |
+| [**Source Lab**](source-lab/) | Portable Python source/package analysis, signed evidence, structural maps and local dashboard workflows; native/live verification remains open as bonus contributions |
 | [**Firewall**](firewall-lab/) | Student-built company network and firewall designs, rendered at [`/firewall/`](https://keyvanarasteh.github.io/os-lab/firewall/) |
 
 ## Quick start

@@ -8,7 +8,7 @@
 import { useEffect, useReducer } from "react";
 import type { CapabilityCatalog } from "../health/capabilities";
 
-export type LabId = "android" | "windows" | "linux" | "ios" | "macos";
+export type LabId = "android" | "windows" | "linux" | "ios" | "macos" | "source";
 export type LabState = "ready" | "needs-setup" | "unavailable";
 
 export interface HostTool {
@@ -68,6 +68,7 @@ export interface LabStatus {
 export interface LabRequest {
   lab: LabId;
   action: string;
+  options?: Record<string, unknown>;
   profile?: string;
   cpus?: string;
   ram?: string;
@@ -98,7 +99,7 @@ export interface LabPlan {
   setup: SetupDetails | null;
   display: string;
 }
-export type JobState = "running" | "succeeded" | "failed" | "cancelled" | "timed-out";
+export type JobState = "running" | "succeeded" | "failed" | "cancelled" | "timed-out" | "interrupted";
 export interface LabJob {
   id: string;
   label: string;

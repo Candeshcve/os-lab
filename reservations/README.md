@@ -3,7 +3,7 @@
 This folder is how a contributor **claims a roadmap task so nobody else takes it**.
 Each reservation is one file: `reservations/<TASK-ID>.json`. The task ids are the ones
 on the dashboard **Contribute → Roadmap & TODOs** tab (and in [`CONTRIBUTING.md`](../CONTRIBUTING.md)),
-e.g. `PENT-02`, `OS-11`, `FW-16`.
+e.g. `PENT-02`, `OS-11`, `FW-16`, or Source Lab bonus `SRC-B01`.
 
 The dashboard reads every file here at build time and shows each task as
 **Available**, **Reserved**, **PR open** or **Done**. One file per task means two people

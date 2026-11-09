@@ -34,9 +34,11 @@ import uuid
 
 # ── Static lab model ─────────────────────────────────────────────────────────
 
-LAB_ORDER = ["android", "windows", "linux", "ios", "macos"]
+LAB_ORDER = ["android", "windows", "linux", "ios", "macos", "source"]
 
 LABS = {
+    "source": {"label": "Source Lab", "dir": "source-lab", "labctl": "source", "containers": [],
+               "summary": "Local source and package analysis across five platforms."},
     "android": {
         "label": "Android Lab",
         "dir": "android-lab/lab",
@@ -113,6 +115,11 @@ LABCTL_ACTIONS = ["status", "doctor", "urls", "logs", "monitor", "start", "stop"
 MAC_ACTIONS = ["status", "doctor", "setup", "start", "stop", "appium-install", "appium-start", "appium-stop"]
 
 ACTION_INFO = {
+    "csv-merge": ("Join catalogs", "Join operator catalogs into private storage."),
+    "detect": ("Detect", "Analyze a selected local target."),
+    "crawl": ("Crawl", "Analyze explicitly selected repositories."),
+    "merge": ("Merge", "Plan or build selected authorized extensions."),
+    "runtime": ("Runtime settings", "Change private Source Lab runtime settings."),
     "status": ("Status", "One-shot state, endpoints and resource report."),
     "doctor": ("Doctor", "Run the lab preflight: OS, KVM, runtime, ports and disk."),
     "urls": ("URLs", "Print the lab's access addresses."),
@@ -308,6 +315,8 @@ def provider_report(os_name: str, arch: str) -> list[dict]:
     """Which providers are candidates on this host (os_lab_runtime.rs::provider_report)."""
     vm_linux = os_name == "linux" and arch == "x86_64"
     return [
+        {"id": "native-python", "guest": "Source / package analysis", "candidate": os_name in ("linux", "macos", "windows"),
+         "requirements": "Native Python 3.11+ and writable private storage; no VM or containers"},
         {"id": "windows-container", "guest": "Windows", "candidate": vm_linux or os_name == "windows",
          "requirements": "WSL2 Linux, working Docker/Podman and usable KVM" if os_name == "windows"
          else "x86_64 Linux, working Docker/Podman and usable KVM"},
@@ -329,6 +338,8 @@ def _req(id_: str, label: str, found: bool, required: bool = True, hint: str = "
 
 
 def provider_for(lab: str, os_name: str) -> str | None:
+    if lab == "source":
+        return "native-python" if os_name in ("linux", "macos", "windows") else None
     if lab == "macos":
         return "native-macos" if os_name == "macos" else None
     if os_name == "macos":
@@ -346,6 +357,9 @@ def provider_for(lab: str, os_name: str) -> str | None:
 
 def lab_status(lab: str, host: dict) -> dict:
     """Availability of one lab on this host: ready, needs-setup or unavailable, with the reasons."""
+    if lab == "source":
+        import source_control
+        return source_control.lab_status(host["root"], host["os"])
     meta = LABS[lab]
     os_name, arch = host["os"], host["arch"]
     tools = {t["id"]: t["found"] for t in host["tools"]}
@@ -491,6 +505,14 @@ def is_secret(key: str) -> bool:
 
 def lab_config(root: str, lab: str) -> dict:
     """Effective configuration: .env.example defaults overlaid by .env, with secrets masked."""
+    if lab == "source":
+        import source_control
+        base = source_control.storage(root)
+        resources = os.environ.get("SOURCE_LAB_RESOURCES", str(base / "resources"))
+        return {"lab": lab, "path": "Process environment (example files are not loaded)", "exists": False,
+                "fields": [{"key": "SOURCE_LAB_STORAGE", "value": str(base), "local": "SOURCE_LAB_STORAGE" in os.environ},
+                           {"key": "SOURCE_LAB_RESOURCES", "value": resources, "local": "SOURCE_LAB_RESOURCES" in os.environ}],
+                "profiles": [], "backups": [], "endpoints": []}
     meta = LABS[lab]
     base = os.path.join(root, meta["dir"])
     config_name = "config.env" if lab == "macos" else ".env"
@@ -536,7 +558,38 @@ def secret_values(root: str) -> list[str]:
         for key, value in env_entries(_read(os.path.join(root, meta["dir"], name))).items():
             if is_secret(key) and len(value) >= 3:
                 values.append(value)
+    for key, value in os.environ.items():
+        if is_secret(key) and len(value) >= 3:
+            values.append(value)
+    try:
+        from source_artifacts import SourceArtifacts
+        raw = SourceArtifacts(root)._read(("control", "session-hmac.key"), 4096, optional=True)
+        if raw:
+            values.append(raw.decode("utf-8").strip())
+    except (ValueError, OSError):
+        pass
+    key_file = os.environ.get("IQ_SESSION_HMAC_KEY_FILE")
+    if key_file:
+        try:
+            import stat
+            fd = os.open(key_file, os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_NOFOLLOW", 0))
+            with os.fdopen(fd, "rb") as stream:
+                if stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+                    raw = stream.read(4097)
+                    if len(raw) <= 4096:
+                        values.append(raw.decode("utf-8").strip())
+        except (OSError, ValueError):
+            pass
     return sorted(set(values), key=len, reverse=True)
+
+
+def redact_text(root: str, text: str, values=None) -> str:
+    for value in secret_values(root) if values is None else values:
+        if value:
+            text = text.replace(value, "[redacted]")
+    text = re.sub(r"(?i)(https?://)[^/\s@]+@", r"\1[redacted]@", text)
+    text = re.sub(r"(?i)((?:password|token|secret|api[_-]?key|authorization)\s*[=:]\s*)[^\s,;]+", r"\1[redacted]", text)
+    return text
 
 
 # ── Plans ────────────────────────────────────────────────────────────────────
@@ -585,6 +638,9 @@ def _scoped(root: str, *parts: str) -> str:
 
 def plan(root: str, request: dict, host: dict | None = None) -> dict:
     """Validate a lab request and build the exact command to run. Raises PlanError."""
+    if request.get("lab") == "source":
+        import source_control
+        return source_control.plan(root, request)
     allowed = {"lab", "action", "profile", "cpus", "ram", "disk", "device", "wslDistro", "backup"}
     unknown = set(request) - allowed
     if unknown:
@@ -817,21 +873,35 @@ class JobService:
         self.lock = threading.Lock()
 
     def list(self) -> list[dict]:
+        import source_jobs
         with self.lock:
+            source_jobs.recover(self)
             return [j.to_dict() for j in sorted(self.jobs.values(), key=lambda j: j.started_at, reverse=True)]
 
     def get(self, job_id: str) -> Job | None:
+        self.list()
         return self.jobs.get(job_id)
 
     def start(self, plan_: dict) -> Job:
         if not plan_.get("runnable"):
             raise PlanError("This action must be run in a terminal: " + (plan_.get("manualCommand") or ""))
+        import source_jobs
         with self.lock:
-            busy = [j for j in self.jobs.values() if j.lab == plan_["lab"] and j.state == "running"]
+            source_jobs.recover(self)
+            busy = [j for j in self.jobs.values() if j.lab == plan_["lab"] and (j.state == "running" or j.proc is not None)]
             if busy:
                 raise PlanError(f"Wait for the running {busy[0].label} job on this lab to finish")
             job = Job(f"{LABS[plan_['lab']]['label']} · {ACTION_INFO[plan_['action']][0]}", plan_["lab"], plan_["action"], plan_)
+            if job.lab == "source":
+                job.source_lock = source_jobs.claim(self.root)
             self.jobs[job.id] = job
+            if job.lab == "source":
+                try:
+                    source_jobs.save(self)
+                except Exception:
+                    source_jobs.release(job.source_lock)
+                    self.jobs.pop(job.id, None)
+                    raise
             # Keep the 50 most recent jobs
             for old in sorted(self.jobs.values(), key=lambda j: j.started_at)[:-50]:
                 if old.state != "running":
@@ -842,6 +912,12 @@ class JobService:
             job.state = "failed"
             job.error = f"Could not start the job worker: {e}"
             job.finished_at = time.time()
+            if job.lab == "source":
+                try:
+                    source_jobs.save(self)
+                finally:
+                    source_jobs.release(job.source_lock)
+                    job.source_lock = None
         return job
 
     def _run(self, job: Job, plan_: dict) -> None:
@@ -849,17 +925,24 @@ class JobService:
         redact: list[str] = []
         try:
             redact = secret_values(self.root)
-            env = dict(os.environ, NO_COLOR="1", TERM="dumb")
+            env = dict(os.environ, NO_COLOR="1", TERM="dumb", PYTHONUNBUFFERED="1")
+            if job.lab == "source" and job.action != "runtime" and not env.get("IQ_SESSION_HMAC_KEY") and not env.get("IQ_SESSION_HMAC_KEY_FILE"):
+                import source_control
+                key = source_control.checked(source_control.storage(self.root), "control/session-hmac.key")
+                if key.is_file():
+                    env["IQ_SESSION_HMAC_KEY_FILE"] = str(key)
             popen_kw: dict = {}
             if os.name == "posix":
                 popen_kw["start_new_session"] = True
+                if job.lab == "source":
+                    popen_kw["pass_fds"] = (job.source_lock,)
             else:
                 popen_kw["creationflags"] = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
             if job.cancelled:
                 job.state = "cancelled"
                 return
             job.proc = subprocess.Popen([plan_["program"]] + plan_["args"], cwd=self.root, env=env,
-                                        stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                        stdin=subprocess.PIPE if job.lab == "source" else subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                         bufsize=1, text=True, encoding="utf-8", errors="replace", **popen_kw)
             timer = threading.Timer(plan_["timeoutSec"], self._timeout, args=(job,))
             timer.daemon = True
@@ -867,11 +950,25 @@ class JobService:
             if job.cancelled:
                 self._signal(job)
             assert job.proc.stdout is not None
-            for line in job.proc.stdout:
-                line = ANSI.sub("", line.rstrip("\r\n"))
-                for value in redact:
-                    line = line.replace(value, "[redacted]")
+            discard_line = False
+            log_bytes = 0
+            while True:
+                line = job.proc.stdout.readline(8193)
+                if not line:
+                    break
+                if len(line) > 8192 or discard_line:
+                    discard_line = not line.endswith("\n")
+                    job.truncated = True
+                    if not discard_line:
+                        job.lines.append("[oversized log line omitted]")
+                    continue
+                line = redact_text(self.root, ANSI.sub("", line.rstrip("\r\n")), redact)
                 job.lines.append(line)
+                log_bytes += len(line)
+                if job.lab == "source":
+                    while log_bytes > 1024 * 1024 and job.lines:
+                        log_bytes -= len(job.lines.pop(0))
+                        job.truncated = True
                 if len(job.lines) > MAX_LINES:
                     del job.lines[: len(job.lines) - MAX_LINES]
                     job.truncated = True
@@ -898,6 +995,19 @@ class JobService:
             if timer:
                 timer.cancel()
             job.finished_at = time.time()
+            if job.lab == "source":
+                import source_jobs
+                try:
+                    source_jobs.save(self)
+                except (OSError, ValueError):
+                    job.error = "Could not save the private Source job record; inspect storage permissions."
+                    if job.state == "succeeded":
+                        job.state = "failed"
+                finally:
+                    source_jobs.release(job.source_lock)
+                    job.source_lock = None
+            if job.proc and job.proc.stdin:
+                job.proc.stdin.close()
             job.proc = None
 
     def _timeout(self, job: Job) -> None:
@@ -910,6 +1020,8 @@ class JobService:
         job = self.jobs.get(job_id)
         if not job:
             raise KeyError(job_id)
+        if getattr(job, "external", False) and job.state == "running":
+            raise PlanError("This Source job is owned by another console process")
         if job.state == "running":
             job.cancelled = True
             if job.proc:
@@ -925,9 +1037,18 @@ class JobService:
             if os.name == "posix":
                 os.killpg(proc.pid, signal.SIGTERM)
             else:
-                proc.terminate()
-        except (OSError, ProcessLookupError):
+                subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"], capture_output=True, timeout=10)
+        except (OSError, ProcessLookupError, subprocess.SubprocessError):
             pass
+        if os.name == "posix":
+            def force():
+                try:
+                    os.killpg(proc.pid, signal.SIGKILL)
+                except (OSError, ProcessLookupError):
+                    pass
+            timer = threading.Timer(2, force)
+            timer.daemon = True
+            timer.start()
 
 
 # ── Monitor ──────────────────────────────────────────────────────────────────
@@ -955,6 +1076,10 @@ def monitor(root: str, lab: str, host: dict | None = None) -> dict:
     """Container state and resource use for a lab (docker or podman on this host)."""
     if lab not in LABS:
         raise PlanError("Unknown lab")
+    if lab == "source":
+        import source_control
+        return {"lab": lab, "state": source_control.readiness(root)["state"], "containers": [],
+                "note": "Native Python analysis; no containers."}
     host = host or host_info(root)
     names = LABS[lab]["containers"]
     runtime = host["runtime"]

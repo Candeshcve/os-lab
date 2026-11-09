@@ -1,9 +1,11 @@
 # App releases
 
-Release packages are built and published locally on the matching host with the scripts in
-`app/scripts/`; the GitHub Actions artifact workflows are kept for reference but disabled. The
-only enabled workflow is `updater-manifest`, which publishes the signed feed after the assets
-exist. The release note for each version follows.
+Release packages use the scripts in `app/scripts/` on their matching hosts.
+Linux and macOS workflows publish signed packages. Windows review builds can
+run independently; publication requires SignPath configuration or explicit
+unsigned-release approval. Local builds remain supported. The
+`updater-manifest` workflow publishes the signed feed only when all required
+platform assets are present. The release note for each version follows.
 
 ## Publish the updater feed ("latest" detection)
 
@@ -26,6 +28,20 @@ node scripts/publish-app-update.mjs 0.2.8 --mark-latest --verify
 The script reads assets from `app/out/<version>` when present, otherwise downloads them from the
 release with `gh`, verifies every SHA-256 through `app/scripts/build-update-manifest.mjs`, and
 uploads `latest.json` to the `app-updates` prerelease.
+
+## 0.3.0 — release preparation
+
+- Add Source Lab: portable five-platform static analysis, signed evidence,
+  structural maps, crawler/catalog workflows and guarded background jobs.
+- Add Overview, Evidence/runtime, Deep analysis, Pipeline and bounded Brain
+  snapshot pages with localized navigation and informational public Pages.
+- Add authorized legacy artifact import with reviewed hashes/backups/rollback;
+  preserve private Source state across desktop updates.
+- Include workflow guides, owned-fixture acceptance and explicit capability
+  limits. Skills, databases, OpenAPI and further merger UI remain excluded.
+- Native/live verification and related patches are tracked as Source Lab bonus
+  contributions. This section does not claim native manual acceptance or that
+  every platform package has been published.
 
 ## 0.2.9
 
