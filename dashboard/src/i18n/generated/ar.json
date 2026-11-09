@@ -1919,5 +1919,17 @@
   "Opening installer…": "جارٍ فتح المثبّت…",
   "Update again": "التحديث مرة أخرى",
   "Downloading and verifying the update…": "جارٍ تنزيل التحديث والتحقق منه…",
-  "The new AppImage was saved beside your current one. Replace the running file with it, then start os-lab again.": "تم حفظ AppImage الجديد بجانب ملفك الحالي. استبدل الملف قيد التشغيل به، ثم أعد تشغيل os-lab."
+  "The new AppImage was saved beside your current one. Replace the running file with it, then start os-lab again.": "تم حفظ AppImage الجديد بجانب ملفك الحالي. استبدل الملف قيد التشغيل به، ثم أعد تشغيل os-lab.",
+  "Advanced settings": "الإعدادات المتقدمة",
+  "Feedback": "ملاحظات",
+  "Report a problem, request a feature, or tell us what could work better.": "أبلغ عن مشكلة أو اطلب ميزة أو اقترح تحسينًا.",
+  "Report a security concern": "الإبلاغ عن مشكلة أمنية",
+  "Report an issue": "الإبلاغ عن مشكلة",
+  "Report issues, suggest features, and share feedback": "الإبلاغ عن المشكلات واقتراح الميزات ومشاركة الملاحظات",
+  "Request a feature": "طلب ميزة",
+  "Send a vulnerability report privately through the repository security page.": "أبلغ عن الثغرة بشكل خاص عبر صفحة أمان المستودع.",
+  "Share feedback or ask a question": "شارك ملاحظاتك أو اطرح سؤالًا",
+  "Start a discussion about your experience, setup, or idea.": "ابدأ نقاشًا حول تجربتك أو إعدادك أو فكرتك.",
+  "Suggest a new capability or an improvement to an existing workflow.": "اقترح ميزة جديدة أو تحسينًا لسير عمل قائم.",
+  "Tell us what broke, which lab or page you used, and how to reproduce it.": "اشرح ما تعطل والمختبر أو الصفحة التي استخدمتها وكيفية إعادة حدوث المشكلة."
 }

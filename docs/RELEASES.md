@@ -27,6 +27,12 @@ The script reads assets from `app/out/<version>` when present, otherwise downloa
 release with `gh`, verifies every SHA-256 through `app/scripts/build-update-manifest.mjs`, and
 uploads `latest.json` to the `app-updates` prerelease.
 
+## 0.2.9
+
+- Add **Don't show this warning next time** to the container-runtime launcher page. The choice is
+  remembered; **File → Container setup…** reopens the page so the warning can be restored.
+- Keep an explicit **Retry** checking the engine even when the warning is hidden.
+
 ## 0.2.8
 
 - Add the **App update** card; it checks the signed feed and appears only when a newer build exists.

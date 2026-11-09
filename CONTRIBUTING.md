@@ -166,6 +166,24 @@ Course midterm reservations add a `course` (and an option number in `note`) — 
 | **OS-39** | **netplan DNS Configurator (approval-gated)** | Persistent DNS via `/etc/netplan/*.yaml` with a shown diff, `netplan try`/apply and a verify query; static vs DHCP. (Teached 02.11) | **Medium** · Small |
 | **OS-40** | **Wi-Fi / Interface DNS Troubleshooter** | Reproduces the 02.11 fault (DHCP `ignore-auto-dns`, empty resolver on Wi-Fi) and offers the `nmcli` fix; cache + AP/router/switch primer. (Teached 02.11) | **High** · Small |
 
+#### Bonus — shipped reference tools (not reservable)
+
+These are already implemented and merged under
+[`linux-lab/scripts/bonus/`](linux-lab/scripts/bonus/). They close recurring
+gaps that are not covered by OS-01…OS-40 and are **not** vize tasks — reserve an
+`OS-…` row above instead. Read them as worked examples of the lab's script style:
+read-only, `set -euo pipefail`, clear exit codes (`0` clean / `1` problem /
+`2` usage), portable between macOS and Linux, no external tools required.
+
+| ID | Tool | What it does |
+|---|---|---|
+| **OS-B1** | `env-doctor.sh` | Validates a lab `.env` against its `.env.example` — missing keys, empty values, unknown/extra keys, duplicates (`--json` for CI). Nothing today checks a copied `.env` for drift. |
+| **OS-B2** | `port-check.sh` | Reports whether the lab's `WEB_PORT`/`SSH_PORT` (or ports you pass) are free on `127.0.0.1` via bash `/dev/tcp`, catching the "port already allocated" start failure before `make up`. |
+| **OS-B3** | `ssh-config-doctor.sh` | Summarises each `~/.ssh/config` Host block and flags a missing `HostName`, an absent `IdentityFile`, or a key with group/other-readable permissions that `ssh` silently ignores. |
+| **OS-B4** | `shell-lint.sh` | `bash -n` (the repo's required gate) over the `*.sh` you touched, plus `shellcheck` advisories when installed — a scoped pre-PR check instead of the whole-repo `run-tests.sh`. |
+| **OS-B5** | `md-linkcheck.sh` | Verifies local (non-http) Markdown links resolve on disk, so a typo'd path in `VERIFY.md`/`REPORT.md`/docs is caught before it becomes a dead link. |
+| **OS-B6** | `secret-scan.sh` | Scans for known credential signatures (PEM/OpenSSH keys, AWS/GitHub/Slack/Google tokens) and reports `file:line` + rule with the value **redacted**; `--staged` for a pre-commit check. Complements the release scripts' tracked-key guard. |
+
 ### 3. Firewall Solutions
 
 | ID | Task | Scope & Reference | Priority / Effort |

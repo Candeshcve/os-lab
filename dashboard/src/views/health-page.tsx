@@ -282,6 +282,7 @@ export default function HealthPage() {
   }
   if (host) {
     const hostLab = labs.find((l) => l.state === "ready");
+    const setupLab = labs.find((l) => l.state === "needs-setup" && l.requirements.some((r) => r.required && !r.found) && l.actions.some((a) => a.id === "setup"));
     const containerCli = host.tools.some((tool) => (tool.id === "docker" || tool.id === "podman") && tool.found);
     const containerHelp = host.os === "macos"
       ? { url: "https://docs.docker.com/desktop/setup/install/mac-install/", label: "Docker Desktop for Mac" }
@@ -299,7 +300,7 @@ export default function HealthPage() {
       label: "Labs that can run now",
       state: hostLab ? "ok" : "warn",
       detail: `${labs.filter((l) => l.state === "ready").length} of ${labs.length} ready, ${labs.filter((l) => l.state === "needs-setup").length} need setup`,
-      fix: hostLab ? undefined : "Open a lab that needs setup and use Install dependencies."
+      fix: hostLab || !setupLab ? undefined : "Open a lab that needs setup and use Install dependencies."
     });
     checks.push({
       id: "runtime",

@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
+import type { LabStatus } from "../src/lib/api";
 
-const labs = [
+const labs: LabStatus[] = [
   { id: "macos", label: "macOS Lab", summary: "Native Xcode Simulator", state: "ready", provider: "native-macos", reasons: [], requirements: [], notes: [], actions: [], installed: true },
   { id: "ios", label: "iOS Lab", summary: "iOS Simulator", state: "ready", provider: "native-macos", reasons: [], requirements: [], notes: [], actions: [], installed: true },
   { id: "android", label: "Android Lab", summary: "Android analysis", state: "needs-setup", provider: "macos-containers", reasons: ["Missing container engine"], requirements: [], notes: [], actions: [], installed: true },
@@ -13,7 +14,7 @@ const content = {
   checkedAt: Date.now() / 1000, offline: false, source: "bundled", updateAvailable: true
 };
 
-async function mockApi(page: Page, os: "macos" | "windows" | "linux" = "macos") {
+async function mockApi(page: Page, os: "macos" | "windows" | "linux" = "macos", labPatch: Record<string, Partial<LabStatus>> = {}) {
   await page.route("**/api/**", async (route) => {
     const path = new URL(route.request().url()).pathname;
     let body: unknown = {};
@@ -25,10 +26,10 @@ async function mockApi(page: Page, os: "macos" | "windows" | "linux" = "macos") 
         runtime: null, xcode: os === "macos" ? { installed: true, iosRuntime: true, iosDevice: true } : null,
         python: "3.12", root: "/tmp/os-lab", tools: [], providers: []
       },
-      labs: os === "macos" ? labs : labs.map((lab) => ({ ...lab,
-        state: lab.id === os ? "ready" : lab.id === "macos" ? "unavailable" : "needs-setup",
+      labs: (os === "macos" ? labs : labs.map((lab) => ({ ...lab,
+        state: (lab.id === os ? "ready" : lab.id === "macos" ? "unavailable" : "needs-setup") as LabStatus["state"],
         provider: lab.id === "macos" ? null : os === "windows" ? "wsl2" : "linux-containers"
-      }))
+      }))).map((lab) => ({ ...lab, ...labPatch[lab.id] }))
     };
     else if (path === "/api/health") body = { status: "ok", version: "0.2.5", console: true };
     else if (path === "/api/capabilities") body = {
@@ -42,6 +43,10 @@ async function mockApi(page: Page, os: "macos" | "windows" | "linux" = "macos") 
     else if (/^\/api\/labs\/[a-z]+\/monitor$/.test(path)) body = { lab: path.split("/")[3], state: "stopped", containers: [] };
     else if (path === "/api/content/status" || path === "/api/content/check") body = content;
     else if (path === "/api/content/update") body = { ...content, installed: true, version: "content-149", sequence: 149, updateAvailable: false };
+    else if (path === "/api/reports") body = { reports: [] };
+    else if (path === "/api/apks") body = { apks: [] };
+    else if (path === "/api/hooks") body = { hooks: [] };
+    else if (path === "/api/devices") body = { devices: "List of devices attached\n" };
     else if (path === "/api/jobs") body = { jobs: [] };
     else if (path === "/api/logs") body = { logs: [] };
     await route.fulfill({ json: body });
@@ -118,5 +123,51 @@ test("a lab that is missing requirements hides its runtime sections until they a
   await expect(page.getByRole("heading", { name: "Actions" })).toBeVisible();
   await expect(page.getByText("Start, stop and the other actions appear once the missing dependencies are installed.")).toHaveCount(0);
   await expect(page.getByText("Live monitor")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Endpoints" })).not.toBeVisible();
+  await page.getByText("Advanced settings").click();
   await expect(page.getByRole("heading", { name: "Endpoints" })).toBeVisible();
+});
+
+test("setup is offered only when a required dependency is missing", async ({ page }) => {
+  const setup = { id: "setup", label: "Setup", description: "Install prerequisites", privileged: false };
+  const found = { id: "runtime", label: "Container runtime", found: true, required: true, hint: "" };
+  await mockApi(page, "macos", { ios: { actions: [setup], requirements: [found] } });
+  await page.goto("/labs/ios/");
+  await expect(page.getByRole("button", { name: "Install dependencies" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Dependencies" })).toBeVisible();
+});
+
+test("a missing required dependency offers setup", async ({ page }) => {
+  const setup = { id: "setup", label: "Setup", description: "Install prerequisites", privileged: false };
+  const missing = { id: "runtime", label: "Container runtime", found: false, required: true, hint: "Install it" };
+  await mockApi(page, "macos", { ios: { state: "needs-setup", actions: [setup], requirements: [missing] } });
+  await page.goto("/labs/ios/");
+  await expect(page.getByRole("button", { name: "Install dependencies" })).toBeVisible();
+});
+
+test("Android run failures are shown next to the action", async ({ page }) => {
+  await mockApi(page);
+  await page.route("**/api/run", (route) => route.fulfill({ status: 400, json: { error: "Target APK is missing" } }));
+  await page.goto("/android/workflows/");
+  await page.getByRole("button", { name: "Execute Pipeline" }).click();
+  await expect(page.getByRole("alert")).toContainText("Target APK is missing");
+});
+
+test("every local page type hydrates without a browser error", async ({ page }) => {
+  await mockApi(page);
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  for (const route of [
+    "/", "/jobs/", "/contribute/", "/feedback/", "/content/", "/health/", "/legal/",
+    "/legal/terms/", "/legal/acceptable-use/", "/legal/privacy/", "/legal/third-party/",
+    "/labs/android/", "/labs/ios/", "/labs/windows/", "/labs/linux/", "/labs/macos/",
+    "/android/", "/android/providers/", "/android/workflows/", "/android/console/",
+    "/android/analytics/", "/android/sitemap/", "/firewall/"
+  ]) {
+    errors.length = 0;
+    const response = await page.goto(route);
+    expect(response?.status(), route).toBe(200);
+    await expect(page.locator('button[aria-label="Open search"]').first(), route).toBeVisible();
+    expect(errors, route).toEqual([]);
+  }
 });

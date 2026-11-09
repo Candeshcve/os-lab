@@ -127,7 +127,8 @@ linux-lab/
 │   ├── backup.sh           # cold archive of storage + config
 │   ├── restore.sh          # restore an archive
 │   ├── install-service.sh  # systemd unit generator
-│   └── uninstall-service.sh
+│   ├── uninstall-service.sh
+│   └── bonus/              # read-only diagnostics: env-doctor, port-check, ssh-config-doctor (see bonus/README.md)
 ├── storage/                # VM disk, ISO cache, linux.ready (gitignored)
 ├── shared/                 # host <-> guest files (gitignored)
 └── backups/                # archives (gitignored)
