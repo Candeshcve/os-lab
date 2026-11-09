@@ -62,6 +62,11 @@
       "github": "apo536098-wq"
     },
     {
+      "slug": "novatek-holding",
+      "company": "NovaTek Holding — Çok Şubeli Güvenlik Duvarı Tasarımı",
+      "github": "Berrkle"
+    },
+    {
       "slug": "nraphy",
       "company": "Nraphy",
       "github": "RFKaya"
@@ -83,18 +88,18 @@
     }
   ],
   "summary": {
-    "companies": 18,
-    "branches": 74,
-    "firewalls": 91,
-    "rules": 1563,
+    "companies": 19,
+    "branches": 80,
+    "firewalls": 97,
+    "rules": 1717,
     "priceUsd": {
       "min": 0,
       "max": 205357,
-      "total": 1717336.0899999999
+      "total": 1808436.0899999999
     },
     "chosenByVendor": {
-      "Fortinet": 67,
-      "Palo Alto Networks": 6,
+      "Fortinet": 71,
+      "Palo Alto Networks": 8,
       "Cloudflare": 6,
       "Netfilter project": 5,
       "Açık kaynak": 2,
@@ -146,6 +151,12 @@
       "Fortinet Fortinet FortiGate 1000F": 1,
       "Palo Alto Networks Palo Alto Networks PA-1410": 1,
       "Netgate pfSense Plus (Netgate 4200)": 1,
+      "Fortinet FortiGate 200G (HA çift)": 1,
+      "Fortinet FortiGate 120G (HA çift)": 1,
+      "Fortinet FortiGate 90G (HA çift)": 1,
+      "Fortinet FortiGate 900G (HA çift)": 1,
+      "Palo Alto Networks PA-3410": 1,
+      "Palo Alto Networks PA-1420": 1,
       "Fortinet FortiGate 1000F": 1,
       "Palo Alto Networks Palo Alto PA-460 (HA)": 1,
       "Check Point Check Point Quantum 6600 (HA)": 1,
@@ -155,11 +166,11 @@
       "Deciso (açık kaynak) OPNsense (Deciso DEC3800)": 1
     },
     "vendorsConsidered": {
-      "Fortinet": 103,
-      "Check Point": 70,
-      "Palo Alto Networks": 70,
-      "Sophos": 56,
-      "Cisco": 51,
+      "Fortinet": 109,
+      "Check Point": 76,
+      "Palo Alto Networks": 76,
+      "Sophos": 62,
+      "Cisco": 57,
       "Netgate": 21,
       "Deciso": 16,
       "Cloudflare": 10,
@@ -3323,6 +3334,300 @@
           "vendor": "Sophos",
           "throughputGbps": 7,
           "priceUsd": 750
+        }
+      ]
+    },
+    {
+      "company": "NovaTek Holding — Çok Şubeli Güvenlik Duvarı Tasarımı",
+      "companySlug": "novatek-holding",
+      "sector": "Technology / Education",
+      "author": "M*** B*** Y***",
+      "branch": "İstanbul Genel Merkez (hub + veri merkezi)",
+      "branchId": "istanbul-hq",
+      "branchRole": "headquarters",
+      "location": "İstanbul, Türkiye",
+      "segment": "perimeter + internal segmentation (HA active-passive)",
+      "product": "FortiGate 200G (HA çift)",
+      "vendor": "Fortinet",
+      "throughputGbps": 6,
+      "priceUsd": 6900,
+      "ruleCount": 27,
+      "actions": {
+        "allow": 16,
+        "deny": 9,
+        "reject": 0,
+        "limit": 2
+      },
+      "alternativesCount": 4,
+      "alternatives": [
+        {
+          "product": "PA-1420",
+          "vendor": "Palo Alto Networks",
+          "throughputGbps": 6,
+          "priceUsd": 14000
+        },
+        {
+          "product": "Quantum Force 9100",
+          "vendor": "Check Point",
+          "throughputGbps": 6.5,
+          "priceUsd": 30000
+        },
+        {
+          "product": "Secure Firewall 3110",
+          "vendor": "Cisco",
+          "throughputGbps": 17,
+          "priceUsd": 18000
+        },
+        {
+          "product": "XGS 4300",
+          "vendor": "Sophos",
+          "throughputGbps": 6,
+          "priceUsd": 9000
+        }
+      ]
+    },
+    {
+      "company": "NovaTek Holding — Çok Şubeli Güvenlik Duvarı Tasarımı",
+      "companySlug": "novatek-holding",
+      "sector": "Technology / Education",
+      "author": "M*** B*** Y***",
+      "branch": "Ankara Ofisi (ikincil hub / DR)",
+      "branchId": "ankara",
+      "branchRole": "branch",
+      "location": "Ankara, Türkiye",
+      "segment": "perimeter (HA active-passive, secondary VPN hub)",
+      "product": "FortiGate 120G (HA çift)",
+      "vendor": "Fortinet",
+      "throughputGbps": 2.8,
+      "priceUsd": 3300,
+      "ruleCount": 21,
+      "actions": {
+        "allow": 11,
+        "deny": 9,
+        "reject": 0,
+        "limit": 1
+      },
+      "alternativesCount": 4,
+      "alternatives": [
+        {
+          "product": "PA-1410",
+          "vendor": "Palo Alto Networks",
+          "throughputGbps": 4.5,
+          "priceUsd": 9500
+        },
+        {
+          "product": "Quantum 3920",
+          "vendor": "Check Point",
+          "throughputGbps": 3.2,
+          "priceUsd": 9000
+        },
+        {
+          "product": "Secure Firewall 1230",
+          "vendor": "Cisco",
+          "throughputGbps": 13,
+          "priceUsd": 3500
+        },
+        {
+          "product": "XGS 118",
+          "vendor": "Sophos",
+          "throughputGbps": 3.25,
+          "priceUsd": 2100
+        }
+      ]
+    },
+    {
+      "company": "NovaTek Holding — Çok Şubeli Güvenlik Duvarı Tasarımı",
+      "companySlug": "novatek-holding",
+      "sector": "Technology / Education",
+      "author": "M*** B*** Y***",
+      "branch": "Londra Ofisi",
+      "branchId": "london",
+      "branchRole": "branch",
+      "location": "London, United Kingdom",
+      "segment": "perimeter (HA active-passive)",
+      "product": "FortiGate 90G (HA çift)",
+      "vendor": "Fortinet",
+      "throughputGbps": 2.2,
+      "priceUsd": 1900,
+      "ruleCount": 19,
+      "actions": {
+        "allow": 11,
+        "deny": 7,
+        "reject": 0,
+        "limit": 1
+      },
+      "alternativesCount": 4,
+      "alternatives": [
+        {
+          "product": "PA-1410",
+          "vendor": "Palo Alto Networks",
+          "throughputGbps": 4.5,
+          "priceUsd": 9500
+        },
+        {
+          "product": "Quantum 3920",
+          "vendor": "Check Point",
+          "throughputGbps": 3.2,
+          "priceUsd": 9000
+        },
+        {
+          "product": "Secure Firewall 1220",
+          "vendor": "Cisco",
+          "throughputGbps": 9,
+          "priceUsd": 2500
+        },
+        {
+          "product": "XGS 108",
+          "vendor": "Sophos",
+          "throughputGbps": 2.5,
+          "priceUsd": 1300
+        }
+      ]
+    },
+    {
+      "company": "NovaTek Holding — Çok Şubeli Güvenlik Duvarı Tasarımı",
+      "companySlug": "novatek-holding",
+      "sector": "Technology / Education",
+      "author": "M*** B*** Y***",
+      "branch": "Akademik Şube (10.000 öğrenci)",
+      "branchId": "academic-campus",
+      "branchRole": "campus",
+      "location": "İstanbul, Türkiye",
+      "segment": "campus edge + internal segmentation (HA active-passive, session sync)",
+      "product": "FortiGate 900G (HA çift)",
+      "vendor": "Fortinet",
+      "throughputGbps": 20,
+      "priceUsd": 38000,
+      "ruleCount": 33,
+      "actions": {
+        "allow": 19,
+        "deny": 12,
+        "reject": 0,
+        "limit": 2
+      },
+      "alternativesCount": 4,
+      "alternatives": [
+        {
+          "product": "PA-5410",
+          "vendor": "Palo Alto Networks",
+          "throughputGbps": 22,
+          "priceUsd": 95000
+        },
+        {
+          "product": "Quantum Force 19100",
+          "vendor": "Check Point",
+          "throughputGbps": 28.8,
+          "priceUsd": 110000
+        },
+        {
+          "product": "Secure Firewall 4215",
+          "vendor": "Cisco",
+          "throughputGbps": 65,
+          "priceUsd": 120000
+        },
+        {
+          "product": "XGS 8500",
+          "vendor": "Sophos",
+          "throughputGbps": 34,
+          "priceUsd": 60000
+        }
+      ]
+    },
+    {
+      "company": "NovaTek Holding — Çok Şubeli Güvenlik Duvarı Tasarımı",
+      "companySlug": "novatek-holding",
+      "sector": "Technology / Education",
+      "author": "M*** B*** Y***",
+      "branch": "Yazılım Ekibi (teknopark binası)",
+      "branchId": "software-team",
+      "branchRole": "branch",
+      "location": "İstanbul, Türkiye",
+      "segment": "perimeter + dev/prod segmentation (HA active-passive)",
+      "product": "PA-3410",
+      "vendor": "Palo Alto Networks",
+      "throughputGbps": 7.5,
+      "priceUsd": 27000,
+      "ruleCount": 27,
+      "actions": {
+        "allow": 16,
+        "deny": 10,
+        "reject": 0,
+        "limit": 1
+      },
+      "alternativesCount": 4,
+      "alternatives": [
+        {
+          "product": "FortiGate 200G",
+          "vendor": "Fortinet",
+          "throughputGbps": 6,
+          "priceUsd": 6900
+        },
+        {
+          "product": "Quantum Force 9300",
+          "vendor": "Check Point",
+          "throughputGbps": 10.5,
+          "priceUsd": 45000
+        },
+        {
+          "product": "Secure Firewall 3120",
+          "vendor": "Cisco",
+          "throughputGbps": 21,
+          "priceUsd": 28000
+        },
+        {
+          "product": "XGS 4300",
+          "vendor": "Sophos",
+          "throughputGbps": 6,
+          "priceUsd": 9000
+        }
+      ]
+    },
+    {
+      "company": "NovaTek Holding — Çok Şubeli Güvenlik Duvarı Tasarımı",
+      "companySlug": "novatek-holding",
+      "sector": "Technology / Education",
+      "author": "M*** B*** Y***",
+      "branch": "Ar-Ge Merkezi (teknokent binası)",
+      "branchId": "rnd-center",
+      "branchRole": "branch",
+      "location": "Ankara, Türkiye",
+      "segment": "perimeter + R&D isolation (HA active-passive)",
+      "product": "PA-1420",
+      "vendor": "Palo Alto Networks",
+      "throughputGbps": 6,
+      "priceUsd": 14000,
+      "ruleCount": 27,
+      "actions": {
+        "allow": 14,
+        "deny": 12,
+        "reject": 0,
+        "limit": 1
+      },
+      "alternativesCount": 4,
+      "alternatives": [
+        {
+          "product": "FortiGate 120G",
+          "vendor": "Fortinet",
+          "throughputGbps": 2.8,
+          "priceUsd": 3300
+        },
+        {
+          "product": "Quantum Force 9100",
+          "vendor": "Check Point",
+          "throughputGbps": 6.5,
+          "priceUsd": 30000
+        },
+        {
+          "product": "Secure Firewall 1240",
+          "vendor": "Cisco",
+          "throughputGbps": 18,
+          "priceUsd": 5500
+        },
+        {
+          "product": "XGS 118",
+          "vendor": "Sophos",
+          "throughputGbps": 3.25,
+          "priceUsd": 2100
         }
       ]
     },
