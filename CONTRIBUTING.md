@@ -184,6 +184,37 @@ read-only, `set -euo pipefail`, clear exit codes (`0` clean / `1` problem /
 | **OS-B5** | `md-linkcheck.sh` | Verifies local (non-http) Markdown links resolve on disk, so a typo'd path in `VERIFY.md`/`REPORT.md`/docs is caught before it becomes a dead link. |
 | **OS-B6** | `secret-scan.sh` | Scans for known credential signatures (PEM/OpenSSH keys, AWS/GitHub/Slack/Google tokens) and reports `file:line` + rule with the value **redacted**; `--staged` for a pre-commit check. Complements the release scripts' tracked-key guard. |
 
+### 2b. Cleanup Lab (CLN)
+
+A disk-cleanup lab that ports [Qleaner](https://github.com/keyvanarasteh/Qleaner)'s scan detections,
+detection signatures and clean techniques into os-lab. Only the behaviour is ported: pages follow the
+os-lab dashboard and [`docs/UX_READINESS.md`](docs/UX_READINESS.md), and Qleaner's known bugs must not be
+copied. Contract, safety rules, the port map and the bug list: [`cleanup-lab/README.md`](cleanup-lab/README.md).
+Course note: **MYO063** students can take these tasks as a bonus (`"course": "MYO063"` in the reservation).
+
+| ID | Task | Priority / Effort |
+|---|---|---|
+| **CLN-01** | Cleanup Lab skeleton: engine, labctl, readiness and /cleanup/ page | **High** · Small–Medium |
+| **CLN-02** | Detector catalog format, loader and Qleaner parity test | **High** · Medium |
+| **CLN-03** | Scan job: bounded-parallel size scan with progress and cancel | **High** · Medium |
+| **CLN-04** | Detections: system caches, logs, temp, crash reports, fonts, Spotlight, Trash | **High** · Small–Medium |
+| **CLN-05** | Detections: browser caches and privacy data, every profile | **High** · Small–Medium |
+| **CLN-06** | Detections: developer tool and package-manager caches | **High** · Medium |
+| **CLN-07** | Detections: deep project sweep (node_modules, Rust target), Xcode DerivedData, simulators | **Medium** · Small–Medium |
+| **CLN-08** | Detections: containers and VM images | **Medium** · Small |
+| **CLN-09** | Detection signatures: macOS app leftovers | **High** · Medium |
+| **CLN-10** | Detection signatures: Linux and Windows app leftovers | **Medium** · Medium |
+| **CLN-11** | Detections: package orphans (Homebrew leaves, global pip, gems) | **Medium** · Small |
+| **CLN-12** | Safety guard: canonical paths, allowed roots, ownership, running apps | **High** · Small–Medium |
+| **CLN-13** | Plan → confirm → clean, Trash by default, honest results | **High** · Medium |
+| **CLN-14** | Secure shred technique, done honestly | **Medium** · Small–Medium |
+| **CLN-15** | Audit history with a real integrity signature | **Medium** · Small |
+| **CLN-16** | Cleanup pages: scan, results, leftovers (os-lab UX) | **High** · Medium |
+| **CLN-17** | Ignore rules, enforced by the engine | **Medium** · Small |
+| **CLN-18** | Schedules: scheduled dry-run scans | **Medium** · Small–Medium |
+| **CLN-19** | Headless CLI parity: labctl cleanup scan / plan / clean --json | **Medium** · Small |
+| **CLN-20** | Privileged targets and disk-access check | **Medium** · Small–Medium |
+
 ### 3. Firewall Solutions
 
 | ID | Task | Scope & Reference | Priority / Effort |
