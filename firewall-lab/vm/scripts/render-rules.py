@@ -51,6 +51,26 @@ def resolve(ref, vlan_cidr):
     return "any", f"{ref} (symbolic)"
 
 
+PORT_RE = re.compile(r"^\d{1,5}(:\d{1,5})?$")
+
+
+def port_parts(port):
+    """Split a rule port ("22", "22,443", "1514:1515", "6881:6889,6969") into parts.
+
+    Returns None when any part is not a port or port range (e.g. "esp"), so the
+    caller can skip the rule instead of emitting an invalid or broadened one.
+    """
+    parts = [p.strip() for p in str(port).split(",") if p.strip()]
+    if not parts or not all(PORT_RE.match(p) for p in parts):
+        return None
+    return parts
+
+
+def l4_protos(proto):
+    """Protocols a port match applies to: proto "any" + port means TCP and UDP."""
+    return [proto] if proto in ("tcp", "udp") else ["tcp", "udp"]
+
+
 def rule_note(rule, src_note, dst_note):
     bits = [rule["note"]]
     if src_note:
@@ -88,19 +108,31 @@ def render_ufw(company, branch, firewalls, vlan_cidr, ssh_port, reset):
             dst, dn = resolve(r.get("to"), vlan_cidr)
             proto = r.get("proto", "any")
             direction = r.get("direction", "in")
-            parts = ["ufw"]
-            if direction == "forward":
-                parts.append("route")
-            parts.append(r["action"])
-            if direction in ("in", "out"):
-                parts.append(direction)
-            if proto and proto != "any":
-                parts += ["proto", proto]
-            parts += ["from", src, "to", dst]
-            if r.get("port") is not None:
-                parts += ["port", str(r["port"])]
-            parts += ["comment", shell_quote(rule_note(r, sn, dn)[:255])]
-            out.append(" ".join(parts))
+            note = shell_quote(rule_note(r, sn, dn)[:255])
+            port = r.get("port")
+            if port is not None:
+                ports = port_parts(port)
+                if ports is None:
+                    out.append(f"# SKIPPED (unsupported port {port!r}, translate by hand): {rule_note(r, sn, dn)}")
+                    continue
+                # UFW needs an explicit tcp/udp for a port match; "any" becomes one rule per protocol.
+                variants = [(p, ",".join(ports)) for p in l4_protos(proto)]
+            else:
+                variants = [(proto if proto != "any" else None, None)]
+            for vproto, vport in variants:
+                parts = ["ufw"]
+                if direction == "forward":
+                    parts.append("route")
+                parts.append(r["action"])
+                if direction in ("in", "out"):
+                    parts.append(direction)
+                if vproto:
+                    parts += ["proto", vproto]
+                parts += ["from", src, "to", dst]
+                if vport:
+                    parts += ["port", vport]
+                parts += ["comment", note]
+                out.append(" ".join(parts))
         out.append("")
     out += ["ufw --force enable", "ufw status numbered", ""]
     return "\n".join(out)
@@ -120,19 +152,30 @@ def _nft_match(r, vlan_cidr):
     if dst != "any":
         frags.append(f"ip daddr {dst}")
     proto = r.get("proto", "any")
-    if proto in ("tcp", "udp"):
-        if r.get("port") is not None:
-            port = str(r["port"]).replace(":", "-")
-            frags.append(f"{proto} dport {port}")
+    port = r.get("port")
+    if port is not None and proto in ("tcp", "udp", "any"):
+        ports = port_parts(port)
+        if ports is None:
+            return f"# SKIPPED (unsupported port {port!r}, translate by hand): {rule_note(r, sn, dn)}"
+        ports = [p.replace(":", "-") for p in ports]
+        # A comma list must be an anonymous set: "dport { 22, 443 }", not "dport 22,443".
+        dport = ports[0] if len(ports) == 1 else "{ " + ", ".join(ports) + " }"
+        if proto == "any":
+            # Never drop the port: "any" + port means TCP or UDP to those ports, not all traffic.
+            frags.append(f"meta l4proto {{ tcp, udp }} th dport {dport}")
         else:
-            frags.append(f"ip protocol {proto}")
+            frags.append(f"{proto} dport {dport}")
+    elif proto in ("tcp", "udp"):
+        frags.append(f"meta l4proto {proto}")
     elif proto == "icmp":
-        frags.append("ip protocol icmp")
+        frags.append("meta l4proto icmp")
     verdict = NFT_ACTION[r["action"]]
     if r["action"] == "limit":
         frags.append("limit rate 6/minute")
     frags.append(verdict)
-    frags.append(f'comment "{rule_note(r, sn, dn)[:63]}"')
+    # nft comments are double-quoted strings: keep inner quotes from ending them early.
+    comment = rule_note(r, sn, dn).replace('"', "'")[:63]
+    frags.append(f'comment "{comment}"')
     return " ".join(frags)
 
 
