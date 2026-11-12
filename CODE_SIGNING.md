@@ -1,7 +1,7 @@
 # Code signing policy
 
 os-lab desktop releases are built from this public repository. Windows installer signing through
-SignPath Foundation is planned; **the 0.2.4 Windows installers are unsigned**. Check the
+SignPath Foundation is planned; **the current Windows installers (0.3.0) are unsigned**. Check the
 Authenticode signature of a downloaded installer before relying on a claim that it is signed.
 
 Free code signing provided by [SignPath.io](https://signpath.io), certificate by
