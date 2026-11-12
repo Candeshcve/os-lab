@@ -190,7 +190,7 @@ A disk-cleanup lab that ports [Qleaner](https://github.com/keyvanarasteh/Qleaner
 detection signatures and clean techniques into os-lab. Only the behaviour is ported: pages follow the
 os-lab dashboard and [`docs/UX_READINESS.md`](docs/UX_READINESS.md), and Qleaner's known bugs must not be
 copied. Contract, safety rules, the port map and the bug list: [`cleanup-lab/README.md`](cleanup-lab/README.md).
-Course note: **MYO063** students can take these tasks as a bonus (`"course": "MYO063"` in the reservation).
+Course note: **MYO063** students can take these tasks as a bonus (`"course": "MYO063"` in the reservation); at most **2 merged PRs per student**, so reserve at most two CLN tasks at a time.
 
 | ID | Task | Priority / Effort |
 |---|---|---|

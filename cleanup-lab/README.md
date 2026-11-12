@@ -91,3 +91,4 @@ These were found by reading Qleaner (`src-tauri/src/cleaner/`, `commands.rs` unl
 - Tests pass; dashboard changes pass `npm run check`, `npm run test:i18n`, `npm run build`, `npm run test:e2e`.
 - `VERIFY.md` entry: commands run and their output, plus phone/tablet/desktop screenshots taken by script for UI changes.
 - Parity: the PR updates `PARITY.md` for the detectors it ports.
+- MYO063 bonus: at most two merged CLN PRs per student; hold at most two CLN reservations at a time.
