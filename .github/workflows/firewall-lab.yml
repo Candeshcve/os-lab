@@ -62,6 +62,8 @@ jobs:
           out="$(mktemp -d)"; bad=0
           for manifest in firewall-lab/companies/*/company.json; do
             slug="$(basename "$(dirname "$manifest")")"
+            dups="$(python3 -c 'import json,sys,collections;c=collections.Counter(b["id"] for b in json.load(open(sys.argv[1]))["branches"]);print(" ".join(k for k,v in c.items() if v>1))' "$manifest")"
+            if [ -n "$dups" ]; then echo "::error::$slug has duplicate branch ids ($dups); each branch must be rendered and checked"; bad=1; fi
             for branch in $(python3 -c 'import json,sys;print(" ".join(b["id"] for b in json.load(open(sys.argv[1]))["branches"]))' "$manifest"); do
               python3 firewall-lab/vm/scripts/render-rules.py "$slug" --branch "$branch" --target nft -o "$out/$slug.$branch.nft" >/dev/null
               python3 firewall-lab/vm/scripts/render-rules.py "$slug" --branch "$branch" --target ufw -o "$out/$slug.$branch.sh" >/dev/null

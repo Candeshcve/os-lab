@@ -29,6 +29,22 @@ VM labs are kept `bash -n` clean and use `set -euo pipefail`.
 The [[source-lab]] engine tests run in their own process from
 [[source-lab/engine]] so their imports cannot collide with Android tests.
 
+## Firewall rule renderer
+
+[[firewall-lab/vm/scripts/render-rules.py]] turns a company's abstract rules into UFW
+commands, an nftables ruleset or a vendor-neutral table, so the same ordered policy
+can be loaded in the disposable firewall guest.
+
+Port handling follows the declared rule exactly. A comma list becomes an nft
+anonymous set (`dport { 22, 443 }`) and stays a UFW multiport list. `proto: any`
+with a port means TCP or UDP to those ports (`meta l4proto { tcp, udp } th dport`
+in nft, one tcp and one udp command in UFW), never all traffic. A port on `icmp`
+is ignored by both backends. Items that are not ports or ascending ranges in
+1–65535 (`esp`, `80,,443`, `500:400`) are skipped with a comment and a stderr
+warning. Notes and names are flattened to one line before they go into comments.
+[[.github/workflows/firewall-lab.yml]] renders every branch of every company and
+checks the output with `nft -c` and `bash -n`, and rejects duplicate branch ids.
+
 ## Community and contribution
 
 Contribution flow, coding conventions and the authorization stance.
