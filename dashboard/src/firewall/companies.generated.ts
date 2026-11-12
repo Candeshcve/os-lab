@@ -12103,7 +12103,7 @@ export const COMPANIES: Company[] = [
                 "action": "allow",
                 "direction": "forward",
                 "proto": "udp",
-                "port": "500:4500",
+                "port": "500,4500",
                 "from": "any",
                 "to": "hq-vpn",
                 "note": "Ankara, Londra ve Akademik Şube ile IKEv2 ve NAT-T IPsec tünellerinin kurulması."
@@ -12356,7 +12356,7 @@ export const COMPANIES: Company[] = [
                 "action": "allow",
                 "direction": "forward",
                 "proto": "udp",
-                "port": "500:4500",
+                "port": "500,4500",
                 "from": "any",
                 "to": "hq-vpn",
                 "note": "İstanbul Genel Merkezi ile şifreli IPsec VPN veri ve yönetim tüneli."
@@ -12610,7 +12610,7 @@ export const COMPANIES: Company[] = [
                 "action": "allow",
                 "direction": "forward",
                 "proto": "udp",
-                "port": "500:4500",
+                "port": "500,4500",
                 "from": "any",
                 "to": "hq-vpn",
                 "note": "İstanbul Genel Merkezi ile şifreli telemetri ve yönetim IPsec VPN tüneli."
