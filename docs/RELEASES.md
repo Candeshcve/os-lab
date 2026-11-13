@@ -29,6 +29,29 @@ The script reads assets from `app/out/<version>` when present, otherwise downloa
 release with `gh`, verifies every SHA-256 through `app/scripts/build-update-manifest.mjs`, and
 uploads `latest.json` to the `app-updates` prerelease.
 
+## 0.3.5
+
+- Redesign Cleanup Lab's dashboard views. The advanced `/cleanup/scan/` page
+  renders catalog entries as sortable cards — largest-first once a scan exists,
+  or safest-first — with category icons, risk badges, measured sizes and
+  relative size bars. Hints, impacts, resolved paths, sources and privilege
+  notes moved into hover/focus detail popovers, and selection chips (Defaults /
+  All / None) sit beside the card grid.
+- Add a "Measured space" summary with a stacked bar by risk class; results are
+  grouped by category and size-sorted; clean reports show Trashed / Deleted /
+  Skipped / Failed badges; history rows collapse per-run item lists.
+- "Review & clean" builds the plan and opens a focused confirmation dialog
+  listing ready items with sizes and skipped items with their guard reasons
+  (for example a running application), so the selection can be corrected before
+  running. The dashboard's confirm step uses the same dialog. Trash remains the
+  default and the plan's fingerprint checks are unchanged.
+- Name container prune actions from their action ids with the command and risk
+  badge visible before confirming; leftover findings sort by confidence with
+  paths in the detail popover and no delete actions.
+- Fix size formatting: values of one kibibyte and above were previously rendered
+  as "MiB", and sizes now keep their left-to-right order in right-to-left
+  locales. New interface strings are translated in all seven supported locales.
+
 ## 0.3.4
 
 - Pin the Windows NSIS setup to per-user installs and verify the per-user mode
