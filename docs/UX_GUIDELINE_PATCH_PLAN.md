@@ -26,7 +26,37 @@ Current code also exposes these focused candidates:
 | F | `dashboard/src/shell/app-shell.tsx` uses native dialogs for the mobile drawer; `dashboard/src/shell/spotlight.tsx` has search semantics. | Check the complete keyboard/focus/return path, sticky bar, mobile width, theme, and RTL on representative routes; patch reproduced gaps. |
 | G | `dashboard/README.md` says public deployment filters Astro output into `dashboard/build-pages/`; `lat.md/ux-readiness.md` requires Source and How-to-use smoke on that final artifact. | Acceptance must inspect the filtered artifact, not just the raw Pages build. |
 
-These are code observations. A, B, and C support immediate scoped implementation. D–G require a short evidence pass before code changes. Keep verified pass results in the todo, rather than opening redundant PRs.
+These are code observations. A, B, and C support immediate scoped implementation; the audit below adds further code-backed fixes. D–G require a short evidence pass before code changes. Keep verified pass results in the todo, rather than opening redundant PRs.
+
+### Dashboard page and component audit (static review)
+
+This pass inventoried `dashboard/src/pages/`, the corresponding `views/`, `shell/`, `components/ui.tsx`, and the three dashboard E2E specs. It is a **source audit**, not a browser/device pass. The route groups below tell the next agent where to start. “Verify” rows are acceptance checks, not asserted bugs.
+
+| Routes / component | Code-backed gap or verification target | Best scoped treatment |
+| --- | --- | --- |
+| `/`, `/labs/<lab>/`, `/jobs/`, `/health/` | Jobs cancel failure lacks a catch; the lab-page cancel path already has a local error pattern. Health's `role=tablist` platform controls use tab roles without arrow-key handling or a tab/panel relationship. | Fix Jobs cancel locally; implement a complete tab interaction in Health (or use ordinary grouped buttons if tab semantics are unnecessary). Verify ready/setup/unavailable and job recovery with existing health E2E fixtures. |
+| Shared `CopyButton` in `components/ui.tsx` | `navigator.clipboard?.writeText()` rejection is swallowed, yet the check icon appears; the button is `size-7` (28 px). | Show copied only after success, expose failure and a selectable/manual route; let the shared coarse-pointer rule enlarge the hit area. Test denied clipboard on a page using this component. |
+| `/android/*` workbench | `ConsolePage` Clear awaits `api.clearLogs()` without catch or pending state; Stop catches errors. `RunButton` already reports errors beside actions. | Add local pending/error state for Clear, disable conflicting repeat clicks, preserve logs if clearing fails, and refresh from the server after success. Keep existing RunButton behavior. |
+| `/source/*` | Existing Source E2E covers destinations, previews, cancellation, evidence states, Brain, mobile drawer, and theme. `brain.tsx` draws keyboard-selectable graph nodes in an internally scrollable SVG. | Run a focused zoom/keyboard/screen-reader and narrow/RTL pass before changing Source. Preserve graph/export/deep links and label any proven issue with fixture and route. |
+| `/firewall/`, `/firewall/<company>/` | `ContributeModal` and `GapModal` focus their container and restore focus, but use non-native `role=dialog` overlays without trapping focus or making the background inert. Company Network/Gaps has `role=tablist` and tab roles without arrow-key/roving-tabindex behavior. Small text toggles also bypass `.iux-btn`. | Prefer native modal dialog semantics or equivalent focus trap/inert handling, retaining Escape/backdrop/return focus. Complete tab semantics or use ordinary buttons. Apply coarse-pointer sizing to text-only controls. |
+| `/contribute/` | `copyToClipboard()` swallows failure and sets `copiedId` unconditionally. The task data in `cleanup-lab-tasks.tsx` repeats “all seven locale catalogs” three times. | Reuse a truthful clipboard-result pattern with selectable fallback; correct task copy to “all active locales” without hard-coding a count. Preserve reservation/branch commands. |
+| Public `/` | Release lookup failure and setup-command Copy lack result states (finding B). | Distinguish loading from lookup failure; keep release-page fallback and add copy/manual-select feedback. |
+| `/how-to-use/`, `/feedback/`, `/legal/*`, `/content/`, `404` | How-to-use already handles clipboard rejection and manual selection. Feedback has distinct bug/feature/discussion/private-security links. Legal/content use locale-aware links and static English legal text. The 404 briefly renders nothing while resolving an unprerendered Firewall company. | Keep existing working behavior. Verify keyboard, locale/base routing, final Pages artifact, and 404 loading/unknown-company result; patch a failed check only. |
+| App/content update panels | `app-update-panel.tsx` retains last progress if polling fails, without a visible stale-connection cue; this may leave a downloading phase on screen until polling recovers. | Reproduce with a mocked polling failure before patching; if stale progress persists, label it as last known and provide retry/status guidance without falsely claiming completion. |
+
+Existing tests cover many Source and readiness cases; add tests for the **new** failure paths and interactions above, rather than cloning current assertions. The todo gives one checklist item per fix or evidence pass.
+
+### Copy sweep candidates (review before editing)
+
+| Location | Current effect | Recommendation |
+| --- | --- | --- |
+| `host-page.tsx` `MinimalistHero.description` | The dynamic ready count is followed by two standing sentences explaining setup and preview, also shown by the cards/actions. | Keep the dynamic count; shorten the standing guidance to one concise next-step phrase if a user check confirms the duplication. |
+| `jobs-page.tsx` `PageHead.description` | “Source Lab keeps private restart records…” is a Source-specific implementation detail on the general Jobs landing page. | Keep the 50-job limit; move restart/interruption detail next to an interrupted Source job or help detail. |
+| `content-panel.tsx` when an update is available | “A newer content pack is available” appears both in the main line and an Advanced badge. | Keep one visible update status and the version; retain hooks and signed-content consequences. |
+| `source/pages.tsx` public Source intro | Section description and body both say the public page needs a local console and has no local engine. | Consolidate into one short explanation plus a clear install next step; preserve the no-private-targets promise. |
+| `cleanup-lab-tasks.tsx` | Three visible task deliverables specify seven catalogs. | Correct to “all active locales” as UX-M, independently of any broader copy sweep. |
+
+These are candidates, except the factual locale correction. UX-H records the final keep/change choice and an exact before/after string before a copy PR.
 
 ## UX contract to add to the guideline
 
@@ -45,13 +75,21 @@ These are code observations. A, B, and C support immediate scoped implementation
 | A. Jobs cancel feedback | `dashboard/src/views/jobs-page.tsx` (`JobLog`), `dashboard/src/views/lab-page.tsx` (`JobCard` as reference), `dashboard/e2e/health-and-content.spec.ts` | Rejected cancel request is visible at the job, button does not double-submit, retry remains possible, success refreshes server state. |
 | B. Public home async feedback | `dashboard/src/views/public-home.tsx`, `dashboard/e2e/health-and-content.spec.ts` | Release lookup failure shows an honest fallback; copy success and clipboard rejection have accessible status and manual-copy route; no permanent “checking” label. |
 | C. Coarse-pointer controls | `dashboard/src/styles/iux.css`, `dashboard/src/shell/app-shell.tsx`, `dashboard/src/views/firewall-page.tsx` | Representative shell, action, dialog, and Firewall controls have usable hit areas on coarse pointer; desktop density, focus ring, and narrow/RTL layout remain sound. |
+| I. Shared clipboard truth | `dashboard/src/components/ui.tsx` `CopyButton`, `dashboard/src/views/contribute-page.tsx` `copyToClipboard`, `dashboard/src/views/how-to-use-page.tsx` as reference | Denied clipboard never displays “Copied”; success is announced; manual selection remains available. |
+| J. Android Clear feedback | `dashboard/src/views/android/pages.tsx` `ConsolePage`, `dashboard/src/views/android/common.tsx` | Rejected Clear is visible, current logs remain, repeat clicks are blocked while pending, success refreshes server logs. |
+| K. Firewall dialog focus | `dashboard/src/views/{contribute-modal,gap-modal}.tsx`, `dashboard/src/styles/firewall-contribute.css` | Tab/Shift+Tab cannot reach background controls while modal is open; Escape/backdrop/close and return focus work at mobile/RTL widths. |
+| L. Tab semantics | `dashboard/src/views/health-page.tsx` `PlatformTabs`, `dashboard/src/views/firewall-company-page.tsx` Network/Gaps, `dashboard/src/views/source/overview.tsx` as reference | Arrow/Home/End navigation or ordinary-button semantics are internally consistent; active panel/control is correctly identified to assistive tech. |
+| M. Contributor locale copy | `dashboard/src/views/cleanup-lab-tasks.tsx`, `dashboard/src/firewall/locale.ts` | All three stale “seven locale” task strings say “all active locales” or reflect the actual list; no changed task meaning. |
 | D. Local action parity | `dashboard/src/views/host-page.tsx`, `lab-page.tsx`, `source/action.tsx`, `android/common.tsx`, `jobs-page.tsx` | Matrix records exact-preview, required/optional, busy/conflict, cancel/poll error, retry and manual guidance for each; patch only failed cells. |
 | E. Shell and Source navigation | `dashboard/src/shell/{app-shell,sidebar,spotlight,top-bar}.tsx`, `dashboard/src/views/source/{pages,brain}.tsx`, `dashboard/e2e/source.spec.ts` | Mobile drawer/Spotlight focus and Escape, deep-link queries, graph selection, sticky header, zoom/narrow/RTL pass or have focused fixes. |
 | F. Source evidence | `dashboard/src/views/source/{evidence,pipeline,brain,overview}.tsx`, `source-lab/INVENTORY.md`, `dashboard/e2e/source.spec.ts` | Live/synthetic/imported/partial/unavailable and empty-coverage wording remain truthful; retained reports/downloads/routes still work. |
 | G. Public Pages and locale | `dashboard/src/views/{public-home,how-to-use-page,firewall-page,feedback-page,legal-page}.tsx`, `dashboard/src/i18n/paths.ts`, `dashboard/src/firewall/locale.ts` | Final filtered artifact has all active locale routes, browser-only features, base-aware links, non-English query-preserving switch, RTL/mobile, and no private/local operations. |
 | H. Copy sweep | `dashboard/src/views/{host-page,lab-page,jobs-page}.tsx`, `dashboard/src/views/source/*.tsx` | List exact repetitive/ambiguous copy with replacement/removal proposal; patch selected candidates in small surface PRs while retaining safety and operational guidance. |
+| N. Stale update/404 states | `dashboard/src/views/{app-update-panel,not-found-page}.tsx` | Mock slow/failed update polling and dynamic-company lookup; show truthful last-known/loading state only if current UI misleads or goes blank. |
 
-Points D–H are review gates. If a point passes, close it with test or manual evidence and no code PR. Do not infer missing features from this table.
+Points D–H and N are review gates. If a point passes, close it with test or manual evidence and no code PR. Do not infer missing features from this table.
+
+Recommended sequence: guideline text and inventory; A, B, I, J (truthful async feedback); K and L (modal/tab keyboard semantics); C (shared touch sizing, then exceptions); M (stale contributor copy); D–H and N evidence passes; final Pages and device acceptance. Re-check fresh `master` before each split because another PR may have fixed a candidate.
 
 ## Verification and completion
 
