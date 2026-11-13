@@ -540,3 +540,64 @@ def test_the_volumes_endpoint_takes_no_query_parameters():
     with pytest.raises(cleanup_api.CleanupError) as caught:
         api.get("/api/cleanup/volumes", {"x": "1"})
     assert caught.value.status == 400
+def test_the_privileged_capabilities_report_actions_and_disk_access():
+    import cleanup_lab.privilege as privilege_module
+
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    report = api.get("/api/cleanup/privileged", {})
+    assert report["platform"] == paths_module.platform_id()
+    assert isinstance(report["diskAccess"], dict)
+    if not report["applicable"]:
+        assert report["actions"] == []
+        return
+    assert report["elevation"] in ("pkexec", "sudo", "osascript", "uac")
+    for action in report["actions"]:
+        assert action["id"].startswith("privileged.")
+        assert action["risk"] in ("low", "medium", "high")
+        assert isinstance(action["runArgv"], list)
+    if report["platform"] != "macos":
+        assert report["diskAccess"]["applicable"] is False
+
+
+def test_privileged_preview_and_run_are_typed_single_use_and_audited(tmp_path, monkeypatch):
+    import cleanup_lab.privilege as privilege_module
+
+    plan = privilege_module.PrivilegedPreview(
+        platform="linux", action_id="privileged.linux.apt-cache", risk="low",
+        preview_argv=None, run_argv=("apt-get", "clean"), elevation="pkexec",
+        elevation_argv=("pkexec", "--disable-internal-agent", "apt-get", "clean"),
+        digest="d" * 64, count=7, total_bytes=1234, created_at=time.time(),
+    )
+    material = {"count": 7, "totalBytes": 1234, "notes": [], "missing": False}
+    monkeypatch.setattr(privilege_module, "preview", lambda *args, **kwargs: (plan, material))
+    monkeypatch.setattr(privilege_module, "execute", lambda *args, **kwargs: {
+        "actionId": plan.action_id, "platform": "linux", "status": "completed",
+        "candidateCount": 7,
+        "command": ["pkexec", "--disable-internal-agent", "apt-get", "clean"],
+        "elevation": "pkexec", "output": "ok", "bytesRemoved": None,
+    })
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    for body in ({"nope": 1}, {"actionId": ""}, {"actionId": 3}):
+        with pytest.raises(cleanup_api.CleanupError) as raised:
+            api.post("/api/cleanup/privileged/preview", body)
+        assert raised.value.status == 400
+    with pytest.raises(cleanup_api.CleanupError) as raised:
+        api.post("/api/cleanup/privileged/run", {"previewId": "nope"})
+    assert raised.value.status == 404
+
+    preview = api.post("/api/cleanup/privileged/preview", {"actionId": "privileged.linux.apt-cache"})
+    assert preview["previewId"]
+    assert preview["candidateCount"] == 7
+    assert preview["totalBytes"] == 1234
+    assert preview["command"] == ["pkexec", "--disable-internal-agent", "apt-get", "clean"]
+
+    job = api.post("/api/cleanup/privileged/run", {"previewId": preview["previewId"]})
+    wait_for(job, "done")
+    assert job.kind == "privileged-run"
+    assert job.result["status"] == "completed"
+    assert job.error is None
+    assert job.finishedAt is not None
+
+    with pytest.raises(cleanup_api.CleanupError) as raised:
+        api.post("/api/cleanup/privileged/run", {"previewId": preview["previewId"]})
+    assert raised.value.status == 409

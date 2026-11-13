@@ -12,7 +12,7 @@ its own visual style; Cleanup Lab pages use the os-lab dashboard shell and follo
 
 Status: **Engine skeleton (CLN-01), detector catalog (CLN-02), safety guard
 (CLN-12), the read-only scan job (CLN-03), the plan → clean flow (CLN-13) and
-the volume inventory (CLN-28) are in place; the rest is roadmap.** The engine package, the readiness probe (`labctl
+the volume inventory (CLN-28) and the typed privileged actions (CLN-20) are in place; the rest is roadmap.** The engine package, the readiness probe (`labctl
 cleanup status|doctor`, `GET /api/cleanup/status`) and the catalog (`GET
 /api/cleanup/catalog`) exist; `POST /api/cleanup/scan` runs a catalog scan as a
 console job with progress and cancel, `POST /api/cleanup/plan` previews a clean,
@@ -115,6 +115,22 @@ drive types are hidden rather than guessed. Windows enumerates drives through
 `/cleanup/` volumes card is the dashboard layer's part (handoff in
 [`STATUS.md`](STATUS.md)).
 
+## Privileged actions (CLN-20)
+
+System maintenance that needs root or admin is a typed action, not a path
+item: `GET /api/cleanup/privileged` lists what this computer offers (APT
+package cache, a journald vacuum, `apt-get autoremove --purge`, the Spotlight
+index rebuild, DISM's component store cleanup), `POST
+/api/cleanup/privileged/preview` fingerprints the candidates or the tool's
+own usage report, and `POST /api/cleanup/privileged/run` executes the fixed
+argv once through the desktop's own elevation — polkit `pkexec` on Linux
+(`sudo -n` as fallback), the `osascript` administrator dialog on macOS, and
+the UAC prompt on Windows. No password is stored, no shell string is
+accepted, changed candidates refuse the run, and every run is audited. macOS
+gains the read-only Full Disk Access probe with guidance; elsewhere the
+engine reports `applicable: False` so the page can hide it. An elevated `rm`
+is refused by design: the Trash rule has no privileged exception.
+
 ## Safety guard
 
 `cleanup_lab/safety.py` guards every filesystem deletion and move. It
@@ -129,7 +145,8 @@ English `reason`; `assert_safe_target()` raises both as `SafetyError`. Refusal c
 
 Container daemon pruning is a separate CLN-08 action: fixed argv from a validated
 allowlist, a candidate preview, a ten-minute single-use confirmation id, a fresh
-candidate check and an audit record. It never accepts a shell string or a path.
+candidate check and an audit record. Privileged system maintenance follows the
+same pattern (CLN-20). It never accepts a shell string or a path.
 
 ## Architecture contract
 
