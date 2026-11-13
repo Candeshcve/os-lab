@@ -41,6 +41,15 @@ why it was dropped, and [[cleanup-lab/catalog/README.md]] documents the format.
 
 ## Scan job
 
+CLN-11 adds read-only package review suggestions.
+
+[[cleanup-lab/engine/cleanup_lab/packages.py]] powers `POST /api/cleanup/packages/scan`, which
+accepts no argv or paths and returns a job. Homebrew's `autoremove --dry-run`
+identifies unneeded dependencies; pip's `list --not-required --format=json`
+and RubyGems' local list identify top-level packages for review. Each result
+includes an exact uninstall argv as a preview, but this API has no uninstall
+execution endpoint. Missing tools are hidden and parser errors are reported.
+
 CLN-09 adds read-only macOS leftover signatures and a typed scan job.
 
 [[cleanup-lab/engine/cleanup_lab/leftovers_macos.py]] reads installed app bundle
