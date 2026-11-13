@@ -2,6 +2,8 @@
 
 These guidelines apply to the local dashboard's host and lab pages, the Android workbench, and the public Pages site. The architecture map is in [`lat.md/lat.md`](../lat.md/lat.md); the dashboard-specific graph node is [`lat.md/ux-readiness.md`](../lat.md/ux-readiness.md).
 
+The proposed extension and its tracked acceptance work are in the [UX guideline patch plan](UX_GUIDELINE_PATCH_PLAN.md) and [checklist](UX_GUIDELINE_PATCH_TODO.md).
+
 ## Show actions only when they make sense
 
 - Derive setup actions from the current host report. Show **Install dependencies** only when a required prerequisite is missing and the lab exposes a `setup` action. The backend decides the `ready`, `needs-setup`, and `unavailable` states; do not infer readiness from the mere presence of an action.
@@ -22,7 +24,7 @@ These guidelines apply to the local dashboard's host and lab pages, the Android 
 - The local app can show engine connection and job status. Public Pages has no local engine, so it must not display a perpetual connection indicator or local-only actions as if they work there.
 - Build internal links with the locale and the Pages base path. Test language switching both from English and from a non-English route under `/os-lab/`.
 - Keep feedback reachable from local and public navigation. Bug and feature links use repository issue templates; discussions handle general feedback; vulnerability reports go to a private security channel.
-- Add visible UI copy to all seven locale catalogs and run the translation check.
+- Add visible UI copy to every active locale catalog (currently eight, as defined by `FIREWALL_LOCALES` in `dashboard/src/firewall/locale.ts`) and run the translation check.
 
 ## Review and verification
 
