@@ -104,11 +104,11 @@ class LoadTest(unittest.TestCase):
     def test_repository_catalog_loads(self):
         entries = catalog.load(ROOT, BASE_ENV)
         ids = [entry["id"] for entry in entries]
-        self.assertEqual(ids[:2], ["developers.gradle", "developers.maven"])
-        self.assertEqual(ids[-3:], ["system.user-caches", "system.user-logs", "system.trash"])
-        self.assertEqual(len(ids), 50)
-        self.assertTrue(all(entry["family"] in ("developers", "system") for entry in entries))
-        self.assertTrue(all(entry["file"] in ("developers.json", "system.json") for entry in entries))
+        self.assertEqual(ids[:2], ["browser.chrome.cache", "browser.chrome.history"])
+        self.assertEqual(ids[-9:], ['system.user-caches', 'system.user-logs', 'system.trash', 'system.temp', 'system.local-temp', 'system.shared-temp', 'system.crash-reports', 'system.font-caches', 'system.spotlight-index'])
+        self.assertEqual(len(ids), 65)
+        self.assertEqual({entry["family"] for entry in entries}, {"browser", "developers", "system"})
+        self.assertEqual({entry["file"] for entry in entries}, {"browser.json", "developers.json", "system.json"})
 
     def test_for_platform_filters_without_dropping_the_entry(self):
         with tempfile.TemporaryDirectory() as base:

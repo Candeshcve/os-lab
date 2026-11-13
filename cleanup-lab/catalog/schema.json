@@ -101,7 +101,7 @@
           "description": "Process names whose presence skips the item (CLN-12 lock)."
         },
         "detector": {
-          "enum": ["paths", "artifacts", "signatures", "tool"],
+          "enum": ["paths", "profile-glob", "temp", "spotlight", "artifacts", "signatures", "tool"],
           "description": "How the entry is found. Defaults to paths."
         },
         "toolName": {

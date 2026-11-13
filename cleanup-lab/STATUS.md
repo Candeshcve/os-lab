@@ -32,19 +32,19 @@ the finding and the decision are in the session log.
 | CLN-01 | merged | [#134](https://github.com/keyvanarasteh/os-lab/pull/134) | d04941f6 | `/cleanup/` page, sidebar entry, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred | none |
 | CLN-02 | merged | [#135](https://github.com/keyvanarasteh/os-lab/pull/135) | 39ea0f1f | — | — | none |
 | CLN-03 | merged | [#138](https://github.com/keyvanarasteh/os-lab/pull/138) | c253cf34 | `/cleanup/` scan page, sidebar/route, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred | none |
-| CLN-04 | pending | — | — | — | — | none |
-| CLN-05 | pending | — | — | — | — | none |
+| CLN-04 | in progress (this PR) | [#143](https://github.com/keyvanarasteh/os-lab/pull/143) | — | — | — | none |
+| CLN-05 | in progress (this PR) | [#144](https://github.com/keyvanarasteh/os-lab/pull/144) | — | — | — | none |
 | CLN-06 | in progress (this PR) | [#145](https://github.com/keyvanarasteh/os-lab/pull/145) | — | — | — | none |
-| CLN-07 | pending | — | — | — | — | none |
+| CLN-07 | in progress (this PR) | [#147](https://github.com/keyvanarasteh/os-lab/pull/147) | — | project sweep UI and simulator action deferred | read-only detection only | none |
 | CLN-08 | pending | — | — | — | — | none |
-| CLN-09 | pending | — | — | — | — | none |
+| CLN-09 | in progress (this PR) | [#150](https://github.com/keyvanarasteh/os-lab/pull/150) | — | frontend client/state awaits CLN-16 merge; UX later | logic and API first | none |
 | CLN-10 | pending | — | — | — | — | none |
-| CLN-11 | pending | — | — | — | — | none |
+| CLN-11 | in progress (this PR) | [#152](https://github.com/keyvanarasteh/os-lab/pull/152) | — | frontend client/state awaits CLN-16 merge; UX later | logic and API first, report-and-suggest only | none |
 | CLN-12 | merged | [#136](https://github.com/keyvanarasteh/os-lab/pull/136) | 3d5ab866 | — | — | none |
-| CLN-13 | merged | [#139](https://github.com/keyvanarasteh/os-lab/pull/139) | 6656ed55 | — | — | none |
+| CLN-13 | merged | [#139](https://github.com/keyvanarasteh/os-lab/pull/139) | 6656ed55 | `/cleanup/` plan + confirm UI, mode picker, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred to CLN-16 | none |
 | CLN-14 | pending | — | — | — | — | none |
-| CLN-15 | in progress | [#140](https://github.com/keyvanarasteh/os-lab/pull/140) | — | history view on `/cleanup/` belongs to CLN-16 | dashboard layer deferred to CLN-16 | none |
-| CLN-16 | in progress | [#141](https://github.com/keyvanarasteh/os-lab/pull/141) | — | — | — | none |
+| CLN-15 | in progress (this PR) | [#140](https://github.com/keyvanarasteh/os-lab/pull/140) | — | history view on `/cleanup/` belongs to CLN-16 | dashboard layer deferred to CLN-16 | none |
+| CLN-16 | in progress (this PR) | [#141](https://github.com/keyvanarasteh/os-lab/pull/141) | — | — | — | none |
 | CLN-17 | pending | — | — | — | — | none |
 | CLN-18 | pending | — | — | — | — | none |
 | CLN-19 | pending | — | — | — | — | none |
@@ -53,7 +53,7 @@ the finding and the decision are in the session log.
 | CLN-22 | merged | [#137](https://github.com/keyvanarasteh/os-lab/pull/137) | a3133e76 | — | done ahead of order by Claude Code at the maintainer's request; engine and dashboard untouched | none |
 | CLN-23 | pending | — | — | Disk Explorer page | console side only | none |
 | CLN-24 | pending | — | — | — | — | none |
-| CLN-25 | in progress (this PR) | [#146](https://github.com/keyvanarasteh/os-lab/pull/146) | — | dashboard source label awaits CLN-16 merge | engine payloads ready | none |
+| CLN-25 | in review (this PR) | [#146](https://github.com/keyvanarasteh/os-lab/pull/146) | — | source label wired into cleanup results | engine and dashboard payloads ready | none |
 | CLN-26 | pending | — | — | — | — | none |
 | CLN-27 | pending | — | — | — | — | none |
 | CLN-28 | pending | — | — | `/cleanup/` volumes card | console side only | none |
