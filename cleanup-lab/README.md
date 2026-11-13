@@ -124,7 +124,7 @@ every Qleaner detector id to a catalog id, or to a written reason for dropping i
 | Capability | Reference | Task |
 |---|---|---|
 | Native parallel scan: allocated vs apparent size, hard-link de-duplication, one-filesystem mode, size tree, progress, cancel | `reference/qrust-scan` (`walk`, `platform`, `cancel`) | CLN-21 |
-| Known gaps in that crate (nested ignore files, recursive glob, name-only candidates, panic on pool error) | `reference/README.md` | CLN-22 |
+| Hardening of that crate (nested ignore files, iterative glob, marker-verified candidates, pool error, saturating counts) — done | `reference/README.md` | CLN-22 |
 | Drill-down, sort modes, hotspot descent, glob seek, gitignored view | `qrust-scan` (`tree`, `glob_search`, `gitignore`); `cleanup_ref.path_policy.validate_scan_root` | CLN-23 |
 | Build artifacts proved by marker files and `CACHEDIR.TAG` | `cleanup_ref.artifacts` | CLN-24 |
 | Cache paths from env var → tool probe (fixed argv) → per-OS default | `cleanup_ref.devcache` | CLN-25 |
