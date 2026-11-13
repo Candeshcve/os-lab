@@ -400,3 +400,16 @@ def test_the_browser_route_plans_and_cleans(tmp_path, monkeypatch):
     finally:
         server.shutdown()
         server.server_close()
+
+
+def test_macos_leftover_job_accepts_no_paths(monkeypatch):
+    from cleanup_lab import leftovers_macos
+    monkeypatch.setattr(leftovers_macos, "platform_id", lambda: "linux")
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    with pytest.raises(cleanup_api.CleanupError) as refused:
+        api.post("/api/cleanup/leftovers/macos/scan", {"path": "/tmp"})
+    assert refused.value.status == 400
+    job = api.post("/api/cleanup/leftovers/macos/scan", {})
+    wait_for(job, "done")
+    assert job.result["available"] is False
+    assert job.result["items"] == []

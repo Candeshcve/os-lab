@@ -46,7 +46,8 @@ PLAN_STATUS = {
     "used": 409,
     "cancelled": 409,
 }
-BODY_KEYS = {"scan": SCAN_KEYS, "plan": PLAN_KEYS, "clean": CLEAN_KEYS}
+BODY_KEYS = {"scan": SCAN_KEYS, "plan": PLAN_KEYS, "clean": CLEAN_KEYS,
+             "macos-leftovers": ()}
 
 
 class CleanupError(ValueError):
@@ -215,6 +216,22 @@ class CleanupJobStore:
         job = CleanupJob("scan", {"entryIds": entry_ids, "workers": workers})
         self._register(job)
         return self._spawn(job, self._run_scan, (root, job, entry_ids, workers))
+
+    def start_macos_leftovers(self, root):
+        job = CleanupJob("macos-leftovers", {})
+        self._register(job)
+        return self._spawn(job, self._run_macos_leftovers, (root, job))
+
+    def _run_macos_leftovers(self, root, job):
+        try:
+            result = _module(root, "leftovers_macos").scan(root, cancel=job.cancel)
+            job.result = result
+            job.state = "cancelled" if result["cancelled"] else "done"
+        except Exception as exc:
+            job.state = "failed"
+            job.error = "{0}: {1}".format(type(exc).__name__, exc)
+        finally:
+            job.finishedAt = time.time()
 
     def start_plan(self, root, request):
         """Validate the plan request, then build the plan on a worker thread.
@@ -429,6 +446,9 @@ class CleanupAPI:
         if path == "/api/cleanup/scan":
             _object_body(body, "scan")
             return JOBS.start_scan(self.root, body)
+        if path == "/api/cleanup/leftovers/macos/scan":
+            _object_body(body, "macos-leftovers")
+            return JOBS.start_macos_leftovers(self.root)
         if path == "/api/cleanup/plan":
             _object_body(body, "plan")
             return JOBS.start_plan(self.root, body)
