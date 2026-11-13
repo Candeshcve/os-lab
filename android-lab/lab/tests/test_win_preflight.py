@@ -46,7 +46,7 @@ GOLDEN = {
         {"vtx": "ok", "virtualbox": "warn", "podman": "info"},
         {"native_userland": "ready", "virtualbox": "degraded", "podman_wsl2": "needs-setup"},
         "Model 1: native userland",
-        [],
+        ["virtualbox"],
     ),
     "wsl_missing_needs_admin": (
         "warn",
@@ -107,7 +107,8 @@ def test_hypervisor_hides_vtx_flags_but_counts_as_enabled():
 def test_old_virtualbox_under_hyperv_suggests_upgrade():
     report = wp.evaluate(load("hyperv_blocks_virtualbox"))
     vbox = next(c for c in report["checks"] if c["id"] == "virtualbox")
-    assert "Upgrade VirtualBox" in vbox["remediation"][0]
+    assert "Upgrade VirtualBox" in vbox["remediation"][0]["text"]
+    assert vbox["remediation"][0]["admin"] is True
 
 
 def test_restricted_policy_fix_needs_no_admin():
@@ -115,7 +116,8 @@ def test_restricted_policy_fix_needs_no_admin():
     ep = next(c for c in report["checks"] if c["id"] == "execution_policy")
     assert "Restricted" in ep["message"]
     assert ep["needs_admin"] is False
-    assert any("-Scope CurrentUser" in fix for fix in ep["remediation"])
+    assert any("-Scope CurrentUser" in f["text"] and not f["admin"] for f in ep["remediation"])
+    assert any("lab.ps1 win-preflight" in f["text"] for f in ep["remediation"])
 
 
 def test_undefined_policy_on_server_is_remote_signed():
@@ -267,3 +269,154 @@ def test_system_exe_resolves_only_under_system_root(monkeypatch, tmp_path):
     monkeypatch.setenv("SystemRoot", str(tmp_path))
     assert wp._system_exe("wsl.exe") == os.path.join(str(tmp_path), "System32", "wsl.exe")
     assert wp._system_exe("missing.exe") is None
+
+
+
+# --- Sourcery review follow-ups ---------------------------------------------
+
+def _ready():
+    return load("ready_podman")
+
+
+def check(report, cid):
+    return next(c for c in report["checks"] if c["id"] == cid)
+
+
+@pytest.mark.parametrize("field,value,blocked", [
+    ("ram_gb", 3.0, "ram"),
+    ("disk_free_gb", 5.0, "disk"),
+    ("vm_disk_free_gb", 5.0, "vm_disk"),
+])
+def test_host_floors_block_vm_models(field, value, blocked):
+    facts = _ready()
+    facts[field] = value
+    report = wp.evaluate(facts)
+    assert check(report, blocked)["status"] == "fail"
+    assert report["models"]["podman_wsl2"] == "unavailable"
+    assert report["models"]["virtualbox"] == "unavailable"
+    assert report["recommended_model"] != "Model 3: Podman/WSL2"
+
+
+def test_disk_floor_also_blocks_native_model():
+    facts = _ready()
+    facts["disk_free_gb"] = 5.0
+    report = wp.evaluate(facts)
+    assert report["models"]["native_userland"] == "blocked"
+    assert report["recommended_model"] is None
+
+
+def test_arm64_host_only_recommends_native():
+    facts = _ready()
+    facts["arch"] = "ARM64"
+    report = wp.evaluate(facts)
+    assert check(report, "platform")["status"] == "warn"
+    assert report["models"]["podman_wsl2"] == "unavailable"
+    assert report["recommended_model"] == "Model 1: native userland"
+
+
+def test_vm_disk_on_other_volume_is_checked_separately():
+    facts = _ready()
+    facts["vm_disk_free_gb"] = 15.0
+    report = wp.evaluate(facts)
+    assert check(report, "vm_disk")["status"] == "warn"
+    assert "Profile drive" in check(report, "vm_disk")["message"]
+
+
+@pytest.mark.parametrize("tool,payload,model", [
+    ("wsl", {"installed": None, "distros": [], "error": "wsl -l -v failed (exit -1): timed out after 20s"}, "podman_wsl2"),
+    ("podman", {"installed": True, "version": "5.2.1", "machines": [], "error": "podman machine list failed (exit 125): boom"}, "podman_wsl2"),
+    ("virtualbox", {"installed": True, "version": None, "path": "x", "default_path": True, "error": "VBoxManage --version failed (exit 1): boom"}, "virtualbox"),
+])
+def test_failed_probe_is_reported_not_treated_as_missing_setup(tool, payload, model):
+    facts = _ready()
+    facts[tool] = payload
+    report = wp.evaluate(facts)
+    c = check(report, tool)
+    assert c["status"] == "warn" and "could not be queried" in c["message"].lower() or "could not query" in c["message"].lower()
+    assert report["models"][model] == "unknown"
+
+
+def test_probe_error_formatting():
+    assert wp._probe_error("wsl -l -v", 1, "\n  Error: X\nmore") == "wsl -l -v failed (exit 1): Error: X"
+    assert wp.wsl_no_distros("Windows Subsystem for Linux has no installed distributions.")
+
+
+def test_group_policy_restriction_needs_it():
+    facts = _ready()
+    facts["execution_policy"] = "AllSigned"
+    facts["execution_policy_scope"] = "MachinePolicy"
+    c = check(wp.evaluate(facts), "execution_policy")
+    assert c["status"] == "warn" and "Group Policy" in c["message"]
+    assert c["needs_admin"] is True
+    assert not any("Set-ExecutionPolicy" in f["text"] for f in c["remediation"])
+
+
+def test_mark_of_the_web_blocks_remote_signed():
+    facts = _ready()
+    facts["lab_ps1_zone_id"] = 3
+    c = check(wp.evaluate(facts), "execution_policy")
+    assert c["status"] == "warn"
+    assert c["remediation"][0]["text"].endswith(r"Unblock-File .\lab.ps1")
+    facts["lab_ps1_zone_id"] = 1  # intranet zone is fine
+    assert check(wp.evaluate(facts), "execution_policy")["status"] == "ok"
+
+
+def test_per_step_admin_labels():
+    report = wp.evaluate(load("vtx_disabled_bios"))
+    steps = check(report, "vtx")["remediation"]
+    assert [s["admin"] for s in steps] == [True, False]  # firmware = IT, Model 1 = no admin
+    out = wp.format_report(report)
+    assert "BIOS/UEFI (needs firmware access: ask IT on a managed PC).  [admin]" in out
+    assert "then wf1.\n" in out  # the no-admin workaround is not labelled [admin]
+
+
+def test_hypervisor_off_is_labelled_security_downgrade():
+    steps = check(wp.evaluate(load("hyperv_blocks_virtualbox")), "virtualbox")["remediation"]
+    downgrade = steps[-1]
+    assert downgrade["text"].startswith("SECURITY DOWNGRADE") and downgrade["admin"] is True
+    assert "HVCI" in downgrade["text"]
+
+
+def test_virtualbox_outside_default_path_is_not_ready():
+    facts = _ready()
+    facts["hypervisor_present"] = False
+    facts["cpu"] = {"name": "Lab CPU", "virtualization_firmware_enabled": True,
+                    "vmx_extensions": True, "slat": True}
+    facts["virtualbox"] = {"installed": True, "version": "7.0.20",
+                           "path": r"D:\Apps\VBox\VBoxManage.exe", "default_path": False}
+    report = wp.evaluate(facts)
+    assert check(report, "virtualbox")["status"] == "warn"
+    assert report["models"]["virtualbox"] == "needs-setup"
+
+
+def test_distro_name_is_quoted_and_controls_stripped():
+    facts = load("execution_policy_restricted")
+    facts["wsl"]["distros"] = [{"name": "Legacy Debian'; calc #\x1b[31m", "state": "Stopped",
+                                "version": 1, "default": True}]
+    report = wp.evaluate(facts)
+    cmd = check(report, "wsl")["remediation"][0]["text"]
+    assert cmd == "wsl --set-version 'Legacy Debian''; calc #' 2"
+    assert "\x1b" not in wp.format_report(report)
+
+
+def test_clean_and_ps_quote():
+    assert wp.clean("a\x1b[2Jb\x07c\nd") == "abcd"
+    assert wp.ps_quote("O'Brien") == "'O''Brien'"
+
+
+def test_save_facts_is_atomic(tmp_path):
+    target = tmp_path / "facts.json"
+    target.write_text("old", encoding="utf-8")
+    wp.save_facts({"platform": "windows"}, str(target))
+    assert json.loads(target.read_text(encoding="utf-8")) == {"platform": "windows"}
+    assert [p.name for p in tmp_path.iterdir()] == ["facts.json"]
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="NTFS alternate data streams")
+def test_zone_identifier_is_read_from_ntfs_stream(tmp_path):
+    script = tmp_path / "lab.ps1"
+    script.write_text("# x", encoding="utf-8")
+    with open(str(script) + ":Zone.Identifier", "w", encoding="utf-8") as fh:
+        fh.write("[ZoneTransfer]\nZoneId=3\n")
+    assert wp._probe_zone_id(str(script)) == 3
+    assert wp._probe_zone_id(str(tmp_path / "missing.ps1")) is None

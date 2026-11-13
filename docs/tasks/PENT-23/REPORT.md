@@ -20,7 +20,7 @@ Böylece öğrenci, neyi kendisinin düzeltebileceğini ve neyi IT'den istemesi 
 |---|---|
 | [`android-lab/lab/scripts/win_preflight.py`](../../../android-lab/lab/scripts/win_preflight.py) | Yalnızca standart kütüphane kullanan araç: `gather_facts()` (Windows probe), `evaluate()` (saf mantık), CLI |
 | [`android-lab/lab/lab.ps1`](../../../android-lab/lab/lab.ps1) | Yeni komut: `.\lab.ps1 win-preflight [-Json]` (UTF-8 BOM korundu, PS 5.1'de parse hatası yok) |
-| [`android-lab/lab/tests/test_win_preflight.py`](../../../android-lab/lab/tests/test_win_preflight.py) | 28 test: senaryo golden testleri, parser'lar, CLI çıkış kodları, güvenli program yolu çözümü, canlı Windows probe |
+| [`android-lab/lab/tests/test_win_preflight.py`](../../../android-lab/lab/tests/test_win_preflight.py) | 47 test: senaryo golden testleri, parser'lar, CLI çıkış kodları, güvenli program yolu, kod incelemesi bulguları, canlı Windows probe |
 | [`android-lab/lab/tests/fixtures/win_preflight/`](../../../android-lab/lab/tests/fixtures/win_preflight/) | Sorun senaryolarını yeniden üreten 6 adet host-facts dosyası |
 | [`android-lab/lab/README-WINDOWS.md`](../../../android-lab/lab/README-WINDOWS.md), [`lat.md/android-lab.md`](../../../lat.md/android-lab.md) | Dokümantasyon |
 
@@ -112,7 +112,7 @@ Overall: OK
 
 ### Test sonuçları
 
-- `tests/test_win_preflight.py`: **28 passed** (Windows), 27 passed + 1 skipped (Linux; canlı Windows probe testi atlanır).
+- `tests/test_win_preflight.py`: **47 passed** (Windows), 45 passed + 2 skipped (Linux; yalnızca Windows'ta çalışan canlı probe ve NTFS stream testleri atlanır).
 - `android-lab/lab` test paketinin tamamı Windows'ta: değişiklikten önce 152 passed / 6 failed,
   değişiklikten sonra **176 passed** / aynı 6 failed. Düşen 6 test (`test_oslab_console`,
   `test_cleanup_console`, `test_web_ui`) bu değişiklikten önce de düşüyordu ve Windows hostuna
@@ -122,7 +122,7 @@ Overall: OK
 
   | Aşama | Bu dal (PENT-23) | Temiz master |
   |---|---|---|
-  | android-lab/lab (pytest) | **191 passed**, 1 failed | 168 passed, 1 failed |
+  | android-lab/lab (pytest) | **213 passed**, 1 failed | 168 passed, 1 failed |
   | source-lab/engine | ok (176 passed) | ok |
   | cleanup-lab/reference/python | ok | ok |
   | cleanup-lab/engine | 2 failed | 2 failed (root olmayan kullanıcıyla: 1) |
@@ -134,9 +134,32 @@ Overall: OK
   `cleanup-lab/engine` içindeki `test_refusal_codes_are_stable` ve `test_unusable_trash_needs_setup`)
   **temiz master'da da aynı şekilde düşüyor**. Bunlar PENT-23 kapsamı dışında, bu yüzden bu PR'da
   düzeltilmedi (AGENTS.md: her PR tek bir mantıksal değişiklik). Bu PR yeni bir hataya yol açmıyor;
-  23 yeni test geçiyor (Windows'a özgü canlı probe testi Linux'ta skip ediliyor).
+  45 yeni test geçiyor (yalnızca Windows.ta çalışan 2 test Linux.ta skip ediliyor).
 
-## 6. Yapay zekâ kullanımı
+## 6. Kod incelemesi (Sourcery) sonrası düzeltmeler
+
+PR'daki otomatik inceleme 16 bulgu bildirdi. Her biri koda karşı tek tek kontrol edildi.
+
+**Düzeltilenler:**
+- Önerilen model artık RAM, disk, mimari (ARM64) ve Python koşullarını da sağlamak zorunda.
+- Zaman aşımına uğrayan ya da hata veren WSL / Podman / VirtualBox probe'u "kurulu değil" sayılmıyor, hata olarak raporlanıyor (model durumu `unknown`).
+- Group Policy (MachinePolicy / UserPolicy) ile zorlanan yürütme ilkesi için IT'ye yönlendiriliyor, çünkü bu durumda kullanıcı ayarı işe yaramaz.
+- İnternetten indirilmiş (Mark-of-the-Web) `lab.ps1` RemoteSigned altında engelleniyor; bu durumda `Unblock-File` öneriliyor.
+- `[admin]` etiketi artık her adım için ayrı: geçici çözümler yanlışlıkla "admin" görünmüyor.
+- VM diski kontrolü: VirtualBox VM'leri ve WSL imajları kullanıcı profilinin bulunduğu sürücüde, bu sürücü ayrıca kontrol ediliyor.
+- `--save-facts` dosyayı atomik yazıyor (geçici dosya + `os.replace`).
+- Hyper-V'yi kapatma önerisi açıkça "SECURITY DOWNGRADE" olarak etiketlendi (VBS/HVCI korumasını kaldırır).
+- WSL dağıtım adları PowerShell için tırnaklanıyor; rapor çıktısında kontrol karakterleri ve ANSI kodları temizleniyor.
+- VirtualBox varsayılan klasör dışındaysa (lab.ps1 onu bulamaz) "hazır" sayılmıyor.
+- Restricted ilke için önerilen tek seferlik komut artık `win-preflight` çalıştırıyor.
+
+**Kanıtla yanlış olduğu gösterilenler:**
+- "`exit` PowerShell oturumunu kapatıyor": `.\lab.ps1` ile çağrılan script'teki `exit` yalnızca script'i bitirir. PowerShell 5.1.26100'de denendi, oturum açık kaldı ve `$LASTEXITCODE=1` döndü.
+- "PS 5.1'de `-Json | ConvertFrom-Json` bozuluyor": PowerShell 5.1.26100'de çalıştırıldı ve sorunsuz ayrıştırıldı.
+- "subprocess komut enjeksiyonu": Komutlar liste olarak, shell olmadan ve sabit argümanlarla çalışıyor. Satır `nosemgrep` ile gerekçesiyle işaretlendi.
+- "`admin_only_fixes` INFO maddelerini içermiyor": Bu bilinçli bir tercih. Liste yalnızca sorunları (WARN/FAIL) içeriyor, isteğe bağlı INFO maddelerinin adımları yine kendi `[admin]` etiketini taşıyor.
+
+## 7. Yapay zekâ kullanımı
 
 Bu çalışmada kodun, testlerin ve bu raporun taslağı Claude Code (Anthropic) ile birlikte yazıldı.
 Tüm çıktılar bu makinede çalıştırılarak doğrulandı. Hyper-V bayrak davranışı ve yürütme ilkesi

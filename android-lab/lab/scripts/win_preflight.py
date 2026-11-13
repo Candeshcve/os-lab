@@ -28,6 +28,7 @@ Exit code: 0 when no check failed, 1 when one did (or a warning with --strict).
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import platform
@@ -35,6 +36,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from typing import Any, Optional
 
 SCHEMA_VERSION = 1
@@ -98,6 +100,12 @@ def wsl_not_installed(text: str, returncode: int) -> bool:
     return returncode != 0 and any(m in low for m in markers)
 
 
+def wsl_no_distros(text: str) -> bool:
+    """True when WSL is installed but answers that it has no distributions."""
+    low = text.lower()
+    return "no installed distributions" in low or "has no installed" in low
+
+
 def parse_podman_machines(text: str) -> list[dict[str, Any]]:
     """Parse ``podman machine list --format json``."""
     try:
@@ -159,11 +167,27 @@ def _run(cmd: list[str], env: Optional[dict] = None) -> tuple[int, str]:
     no user, file or network input reaches the command line.
     """
     try:
-        proc = subprocess.run(cmd, capture_output=True, timeout=PROBE_TIMEOUT,
+        # Audited: argv list, no shell, absolute path from _system_exe/_which_trusted,
+        # constant arguments only (see the callers below).
+        proc = subprocess.run(cmd, capture_output=True, timeout=PROBE_TIMEOUT,  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit
                               env=env, stdin=subprocess.DEVNULL)
-    except (OSError, subprocess.SubprocessError):
-        return -1, ""
+    except subprocess.TimeoutExpired:
+        return -1, f"timed out after {PROBE_TIMEOUT}s"
+    except (OSError, subprocess.SubprocessError) as exc:
+        return -1, f"could not start: {exc.__class__.__name__}"
     return proc.returncode, decode_console(proc.stdout) + decode_console(proc.stderr)
+
+
+def _first_line(text: str) -> str:
+    for line in (text or "").splitlines():
+        if line.strip():
+            return line.strip()[:160]
+    return ""
+
+
+def _probe_error(tool: str, code: int, out: str) -> str:
+    detail = _first_line(out) or "no output"
+    return f"{tool} failed (exit {code}): {detail}"
 
 
 _CIM_SCRIPT = (
@@ -176,10 +200,15 @@ _CIM_SCRIPT = (
     "hyp=$c.HypervisorPresent;ram=$c.TotalPhysicalMemory;caption=$o.Caption;"
     "build=$o.BuildNumber;arch=$o.OSArchitecture;"
     # Skip the Process scope: this probe itself runs with -ExecutionPolicy Bypass.
-    "ep=[string](Get-ExecutionPolicy -List|Where-Object{$_.Scope -ne 'Process' -and "
-    "[string]$_.ExecutionPolicy -ne 'Undefined'}|Select-Object -First 1).ExecutionPolicy}"
+    # -List is in precedence order, so the first defined scope is the effective one.
+    "ep=[string]$e.ExecutionPolicy;eps=[string]$e.Scope}"
     "|ConvertTo-Json -Compress"
 )
+_CIM_PREFIX = (
+    "$e=Get-ExecutionPolicy -List|Where-Object{[string]$_.Scope -ne 'Process' -and "
+    "[string]$_.ExecutionPolicy -ne 'Undefined'}|Select-Object -First 1;"
+)
+GPO_SCOPES = {"machinepolicy", "userpolicy"}
 
 
 def _probe_cim() -> dict[str, Any]:
@@ -189,7 +218,7 @@ def _probe_cim() -> dict[str, Any]:
         return {}
     # -ExecutionPolicy Bypass applies to this one child process only.
     code, out = _run([shell, "-NoProfile", "-NonInteractive", "-ExecutionPolicy",
-                      "Bypass", "-Command", _CIM_SCRIPT])
+                      "Bypass", "-Command", _CIM_PREFIX + _CIM_SCRIPT])
     if code != 0:
         return {}
     start = out.find("{")
@@ -215,43 +244,77 @@ def _probe_wsl() -> dict[str, Any]:
     code, out = _run([exe, "-l", "-v"], env=env)
     if wsl_not_installed(out, code):
         return {"installed": False, "distros": []}
-    return {"installed": True, "distros": parse_wsl_list(out)}
+    distros = parse_wsl_list(out)
+    if code != 0 and not distros and not wsl_no_distros(out):
+        # Timeout, launch failure or an unrecognized error: do not guess.
+        return {"installed": None, "distros": [], "error": _probe_error("wsl -l -v", code, out)}
+    return {"installed": True, "distros": distros}
 
 
 def _probe_podman() -> dict[str, Any]:
     exe = _which_trusted("podman")
     if not exe:
         return {"installed": False, "version": None, "machines": []}
-    _, ver = _run([exe, "--version"])
-    _, ml = _run([exe, "machine", "list", "--format", "json"])
+    vcode, ver = _run([exe, "--version"])
+    if vcode != 0:
+        return {"installed": True, "version": None, "machines": [],
+                "error": _probe_error("podman --version", vcode, ver)}
+    mcode, ml = _run([exe, "machine", "list", "--format", "json"])
+    if mcode != 0:
+        return {"installed": True, "version": parse_version(ver), "machines": [],
+                "error": _probe_error("podman machine list", mcode, ml)}
     return {"installed": True, "version": parse_version(ver),
             "machines": parse_podman_machines(ml[ml.find("["):] if "[" in ml else "")}
 
 
 def _probe_virtualbox() -> dict[str, Any]:
-    exe = _which_trusted("VBoxManage") or (VBOX_DEFAULT if os.path.exists(VBOX_DEFAULT) else None)
+    on_default = os.path.isfile(VBOX_DEFAULT)
+    exe = VBOX_DEFAULT if on_default else _which_trusted("VBoxManage")
     if not exe:
         return {"installed": False, "version": None}
-    _, ver = _run([exe, "--version"])
-    return {"installed": True, "version": parse_version(ver)}
+    code, ver = _run([exe, "--version"])
+    facts = {"installed": True, "version": parse_version(ver), "path": exe,
+             # lab.ps1's vbox-* commands only use the default install path.
+             "default_path": on_default}
+    if code != 0:
+        facts["error"] = _probe_error("VBoxManage --version", code, ver)
+    return facts
+
+
+def _probe_zone_id(path: str) -> Optional[int]:
+    """Mark-of-the-Web zone of a file (3 = Internet), read from its NTFS stream."""
+    try:
+        with open(path + ":Zone.Identifier", encoding="utf-8", errors="replace") as fh:
+            m = re.search(r"ZoneId\s*=\s*(\d+)", fh.read())
+    except OSError:
+        return None
+    return int(m.group(1)) if m else None
+
+
+def _free_gb(path: str) -> Optional[float]:
+    try:
+        return round(shutil.disk_usage(path).free / 1024 ** 3, 1)
+    except OSError:
+        return None
 
 
 def gather_facts(lab_dir: str = LAB_DIR) -> dict[str, Any]:
     """Collect host facts. Read-only; on non-Windows only the basics are filled."""
     is_windows = sys.platform == "win32"
-    try:
-        disk_gb = round(shutil.disk_usage(lab_dir).free / 1024 ** 3, 1)
-    except OSError:
-        disk_gb = None
     facts: dict[str, Any] = {
         "schema": SCHEMA_VERSION,
         "platform": "windows" if is_windows else sys.platform,
         "arch": platform.machine(),
         "python": {"version": platform.python_version()},
-        "disk_free_gb": disk_gb,
+        "disk_free_gb": _free_gb(lab_dir),
     }
     if not is_windows:
         return facts
+    # VirtualBox VMs (lab.ps1 vbox-create) and WSL/Podman images live under the
+    # user profile, which may be on another volume than the lab checkout.
+    profile = os.environ.get("USERPROFILE") or os.path.expanduser("~")
+    same_volume = (os.path.splitdrive(os.path.abspath(profile))[0].lower()
+                   == os.path.splitdrive(os.path.abspath(lab_dir))[0].lower())
     cim = _probe_cim()
     ram = cim.get("ram")
     facts.update({
@@ -268,6 +331,9 @@ def gather_facts(lab_dir: str = LAB_DIR) -> dict[str, Any]:
         "ram_gb": round(int(ram) / 1024 ** 3, 1) if str(ram or "").isdigit() else None,
         # Empty means every non-Process scope is Undefined -> the OS default applies.
         "execution_policy": cim.get("ep") or ("Undefined" if cim else None),
+        "execution_policy_scope": cim.get("eps") or None,
+        "lab_ps1_zone_id": _probe_zone_id(os.path.join(lab_dir, "lab.ps1")),
+        "vm_disk_free_gb": None if same_volume else _free_gb(profile),
         "wsl": _probe_wsl(),
         "podman": _probe_podman(),
         "virtualbox": _probe_virtualbox(),
@@ -278,14 +344,35 @@ def gather_facts(lab_dir: str = LAB_DIR) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Evaluation (pure)
 # ---------------------------------------------------------------------------
-def _check(cid: str, status: str, message: str, fix: Optional[list[str]] = None,
-           needs_admin: bool = False) -> dict[str, Any]:
-    return {"id": cid, "status": status, "message": message,
-            "remediation": fix or [], "needs_admin": needs_admin}
+def fix(text: str, admin: bool = False) -> dict[str, Any]:
+    """One remediation step; ``admin`` says whether that step needs elevation/IT."""
+    return {"text": text, "admin": admin}
+
+
+def _check(cid: str, status: str, message: str,
+           fixes: Optional[list[Any]] = None) -> dict[str, Any]:
+    steps = [f if isinstance(f, dict) else fix(f) for f in (fixes or [])]
+    return {"id": cid, "status": status, "message": message, "remediation": steps,
+            # True when the primary fix (first step) needs admin/IT; later steps are
+            # workarounds and carry their own per-step "admin" flag.
+            "needs_admin": bool(steps) and steps[0]["admin"]}
 
 
 def _version_tuple(text: Optional[str]) -> tuple[int, ...]:
     return tuple(int(x) for x in re.findall(r"\d+", text or ""))[:3]
+
+
+def ps_quote(value: str) -> str:
+    """Quote a value as a PowerShell single-quoted literal (safe to copy/paste)."""
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+_CONTROL = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]|[\x00-\x1f\x7f-\x9f]")
+
+
+def clean(text: Any) -> str:
+    """Strip ANSI escapes and control characters from fact-derived text."""
+    return _CONTROL.sub("", str(text))
 
 
 def _vtx_state(facts: dict[str, Any]) -> str:
@@ -309,23 +396,43 @@ def _vtx_state(facts: dict[str, Any]) -> str:
     return "unknown"
 
 
+def _is_x64(facts: dict[str, Any]) -> bool:
+    arch = str(facts.get("arch") or "").upper()
+    return not arch or arch in ("AMD64", "X86_64", "64-BIT", "64 BIT")
+
+
+def _disk_check(cid: str, label: str, gb: Any, add) -> None:
+    if not isinstance(gb, (int, float)):
+        return
+    if gb < DISK_FAIL_GB:
+        add(_check(cid, FAIL, f"{label}: {gb} GB free, below the {DISK_FAIL_GB} GB floor.",
+                   ["Free space on that drive (Disk Cleanup, empty Downloads/Recycle Bin)."]))
+    elif gb < DISK_MIN_GB:
+        add(_check(cid, WARN, f"{label}: {gb} GB free, below the {DISK_MIN_GB} GB minimum for images.",
+                   ["Free space before pulling emulator/VM images."]))
+    else:
+        add(_check(cid, OK, f"{label}: {gb} GB free."))
+
+
 def evaluate(facts: dict[str, Any]) -> dict[str, Any]:
     checks: list[dict[str, Any]] = []
     add = checks.append
 
     # 1. Platform
     if facts.get("platform") != "windows":
-        add(_check("platform", SKIP, f"Not a Windows host ({facts.get('platform')}); "
+        add(_check("platform", SKIP, f"Not a Windows host ({clean(facts.get('platform'))}); "
                    "this preflight targets the Windows zero-admin lab.",
                    ["On Linux/macOS use scripts/preflight.sh instead."]))
         return _summarize(facts, checks, vtx="unknown")
     arch = str(facts.get("arch") or "").upper()
-    caption = facts.get("os_caption") or "Windows"
-    if arch and arch not in ("AMD64", "X86_64", "64-BIT", "64 BIT"):
-        add(_check("platform", WARN, f"{caption} on {arch}: the emulator images are x86_64 only.",
-                   ["Use the static (native userland) workflows on ARM hosts."]))
+    caption = clean(facts.get("os_caption") or "Windows")
+    if not _is_x64(facts):
+        add(_check("platform", WARN, f"{caption} on {clean(arch)}: the emulator, VM and container "
+                   "images are x86_64 only.",
+                   ["Use Model 1 (native userland, static workflows) on this host."]))
     else:
-        add(_check("platform", OK, f"{caption} (build {facts.get('os_build') or '?'}), {arch or 'x64'}"))
+        add(_check("platform", OK, f"{caption} (build {clean(facts.get('os_build') or '?')}), "
+                   f"{clean(arch) or 'x64'}"))
 
     # 2. Privilege
     admin = facts.get("is_admin")
@@ -339,7 +446,7 @@ def evaluate(facts: dict[str, Any]) -> dict[str, Any]:
 
     # 3. VT-x / AMD-V
     vtx = _vtx_state(facts)
-    cpu_name = (facts.get("cpu") or {}).get("name") or "CPU"
+    cpu_name = clean((facts.get("cpu") or {}).get("name") or "CPU")
     if vtx == "hypervisor":
         add(_check("vtx", OK, "Hardware virtualization is on and owned by the Windows hypervisor "
                    "(Hyper-V / WSL2 / VBS)."))
@@ -348,10 +455,9 @@ def evaluate(facts: dict[str, Any]) -> dict[str, Any]:
     elif vtx == "disabled":
         add(_check("vtx", FAIL, "VT-x/AMD-V is DISABLED in BIOS/UEFI: VirtualBox 64-bit guests, "
                    "WSL2 and Podman machines cannot start.",
-                   ["Enable 'Intel Virtualization Technology' / 'SVM Mode' in BIOS/UEFI "
-                    "(needs firmware access: ask IT on a managed PC).",
-                    "Until then use Model 1 (native userland): .\\lab.ps1 setup, then wf1."],
-                   needs_admin=True))
+                   [fix("Enable 'Intel Virtualization Technology' / 'SVM Mode' in BIOS/UEFI "
+                        "(needs firmware access: ask IT on a managed PC).", admin=True),
+                    fix("Until then use Model 1 (native userland): .\\lab.ps1 setup, then wf1.")]))
     elif vtx == "unsupported":
         add(_check("vtx", FAIL, f"{cpu_name} has no VT-x/AMD-V extensions.",
                    ["Only Model 1 (native userland, static analysis) is possible on this CPU."]))
@@ -362,20 +468,29 @@ def evaluate(facts: dict[str, Any]) -> dict[str, Any]:
 
     # 4. VirtualBox (and its clash with the Windows hypervisor)
     vbox = facts.get("virtualbox") or {}
-    if vbox.get("installed"):
-        ver = vbox.get("version") or "?"
+    ver = clean(vbox.get("version") or "?")
+    if vbox.get("error"):
+        add(_check("virtualbox", WARN, f"VirtualBox found but could not be queried: "
+                   f"{clean(vbox['error'])}",
+                   ["Run 'VBoxManage --version' yourself to see the error; reinstall if it persists."]))
+    elif vbox.get("installed") and vbox.get("default_path") is False:
+        add(_check("virtualbox", WARN, f"VirtualBox {ver} found at {clean(vbox.get('path'))}, but the "
+                   f"lab.ps1 vbox-* commands only use {VBOX_DEFAULT}.",
+                   [fix("Reinstall VirtualBox to the default folder so lab.ps1 can find it.", admin=True)]))
+    elif vbox.get("installed"):
         if vtx == "hypervisor":
-            fix = ["Prefer the Podman/WSL2 path (Model 3), which shares the Windows hypervisor.",
-                   "VirtualBox 6.1.16+ / 7.x can run on Hyper-V via the Windows Hypervisor "
-                   "Platform, but slowly and without nested VT-x (the in-guest Android "
-                   "emulator will not boot)."]
+            steps = [fix("Prefer the Podman/WSL2 path (Model 3), which shares the Windows hypervisor."),
+                     fix("VirtualBox 6.1.16+ / 7.x can run on Hyper-V via the Windows Hypervisor "
+                         "Platform, but slowly and without nested VT-x (the in-guest Android "
+                         "emulator will not boot).")]
             if _version_tuple(ver) and _version_tuple(ver) < (6, 1, 16):
-                fix.insert(0, "Upgrade VirtualBox to 7.x: older versions fail with "
-                              "VERR_VMX_NO_VMX / VERR_NEM_* while Hyper-V is on.")
-            fix.append("Admin-only alternative: 'bcdedit /set hypervisorlaunchtype off' and turn off "
-                       "Memory Integrity, then reboot (this also disables WSL2).")
+                steps.insert(0, fix("Upgrade VirtualBox to 7.x: older versions fail with "
+                                    "VERR_VMX_NO_VMX / VERR_NEM_* while Hyper-V is on.", admin=True))
+            steps.append(fix("SECURITY DOWNGRADE, not recommended: 'bcdedit /set hypervisorlaunchtype "
+                             "off' plus turning off Memory Integrity removes VBS/HVCI kernel "
+                             "protection (and disables WSL2). Only with IT approval.", admin=True))
             add(_check("virtualbox", WARN, f"VirtualBox {ver} found, but the Windows hypervisor is "
-                       "active: VirtualBox falls back to the slow NEM mode.", fix))
+                       "active: VirtualBox falls back to the slow NEM mode.", steps))
         elif vt_usable:
             add(_check("virtualbox", OK, f"VirtualBox {ver} installed; VT-x available to it."))
         else:
@@ -383,62 +498,89 @@ def evaluate(facts: dict[str, Any]) -> dict[str, Any]:
                        "so 64-bit guests will not start.", ["Fix the 'vtx' check first."]))
     else:
         add(_check("virtualbox", INFO, "VirtualBox not installed (Model 2 unavailable).",
-                   ["Optional. The VirtualBox installer needs admin once; ask IT if you want Model 2."],
-                   needs_admin=True))
+                   [fix("Optional. The VirtualBox installer needs admin once; ask IT if you want "
+                        "Model 2.", admin=True)]))
 
     # 5. WSL
     wsl = facts.get("wsl") or {}
     distros = wsl.get("distros") or []
     wsl2 = [d for d in distros if d.get("version") == 2]
-    if not wsl.get("installed"):
+    if wsl.get("error"):
+        add(_check("wsl", WARN, f"Could not query WSL: {clean(wsl['error'])}",
+                   ["Run 'wsl -l -v' yourself to see the error; 'wsl --update' often fixes it."]))
+    elif not wsl.get("installed"):
         add(_check("wsl", WARN, "WSL is not installed (Podman needs WSL2).",
-                   ["'wsl --install' needs Administrator once (it enables Windows features "
-                    "and reboots): ask IT, or use Model 1/2."], needs_admin=True))
+                   [fix("'wsl --install' needs Administrator once (it enables Windows features "
+                        "and reboots): ask IT.", admin=True),
+                    fix("Meanwhile use Model 1 (native userland).")]))
     elif not distros:
         add(_check("wsl", WARN, "WSL is installed but has no distribution.",
                    ["wsl --install -d Ubuntu   (per-user, no admin once the feature is on)"]))
     elif not wsl2:
-        names = ", ".join(d["name"] for d in distros)
+        names = ", ".join(clean(d["name"]) for d in distros)
         add(_check("wsl", WARN, f"Only WSL1 distributions ({names}); containers need WSL2.",
-                   [f"wsl --set-version {distros[0]['name']} 2", "wsl --set-default-version 2"]))
+                   [f"wsl --set-version {ps_quote(clean(distros[0]['name']))} 2",
+                    "wsl --set-default-version 2"]))
     elif not vt_usable and vtx != "unknown":
         add(_check("wsl", FAIL, "WSL2 distributions exist but VT-x is off, so they cannot start.",
                    ["Fix the 'vtx' check first."]))
     else:
         add(_check("wsl", OK, "WSL2 ready: " + ", ".join(
-            f"{d['name']} ({d['state']})" for d in wsl2)))
+            f"{clean(d['name'])} ({clean(d['state'])})" for d in wsl2)))
 
     # 6. Podman
     pod = facts.get("podman") or {}
     machines = pod.get("machines") or []
-    if not pod.get("installed"):
+    pver = clean(pod.get("version") or "")
+    if pod.get("error"):
+        add(_check("podman", WARN, f"Podman found but could not be queried: {clean(pod['error'])}",
+                   ["Run 'podman machine list' yourself to see the error."]))
+    elif not pod.get("installed"):
         add(_check("podman", INFO, "Podman not installed (Model 3 unavailable).",
                    ["Install Podman Desktop with the per-user ('for me only') option: no admin needed."]))
     elif not wsl2:
-        add(_check("podman", WARN, f"Podman {pod.get('version') or ''} found, but there is no "
-                   "WSL2 backend for its machine.", ["Fix the 'wsl' check first."]))
+        add(_check("podman", WARN, f"Podman {pver} found, but there is no WSL2 backend for its "
+                   "machine.", ["Fix the 'wsl' check first."]))
     elif not machines:
         add(_check("podman", WARN, "Podman installed but no machine is initialized.",
                    ["podman machine init", "podman machine start"]))
     elif not any(m["running"] for m in machines):
-        add(_check("podman", WARN, f"Podman machine '{machines[0]['name']}' is stopped.",
+        add(_check("podman", WARN, f"Podman machine '{clean(machines[0]['name'])}' is stopped.",
                    ["podman machine start"]))
     else:
-        add(_check("podman", OK, f"Podman {pod.get('version') or ''} machine running."))
+        add(_check("podman", OK, f"Podman {pver} machine running."))
 
-    # 7. PowerShell execution policy
+    # 7. PowerShell execution policy (+ Group Policy scope, + Mark-of-the-Web)
     policy = facts.get("execution_policy")
+    scope = str(facts.get("execution_policy_scope") or "")
     if policy and policy.lower() == "undefined":
         # No scope sets a policy: Windows client defaults to Restricted, Server to RemoteSigned.
-        policy = "RemoteSigned" if "server" in str(caption).lower() else "Restricted"
-    if policy and policy.lower() in BLOCKING_POLICIES:
-        add(_check("execution_policy", WARN, f"PowerShell execution policy is '{policy}': "
-                   ".\\lab.ps1 is blocked ('running scripts is disabled on this system').",
-                   ["One-off, no admin: powershell -ExecutionPolicy Bypass -File .\\lab.ps1 preflight",
-                    "Persistent, no admin: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned",
-                    "Downloaded zip? Also: Unblock-File .\\lab.ps1"]))
+        policy = "RemoteSigned" if "server" in caption.lower() else "Restricted"
+    zone = facts.get("lab_ps1_zone_id")
+    from_internet = isinstance(zone, int) and zone >= 3
+    unblock = fix("Unblock the downloaded script once, no admin: Unblock-File .\\lab.ps1")
+    if policy and policy.lower() in BLOCKING_POLICIES and scope.lower() in GPO_SCOPES:
+        add(_check("execution_policy", WARN, f"Execution policy '{clean(policy)}' is enforced by "
+                   f"Group Policy ({clean(scope)}): .\\lab.ps1 is blocked and no user setting or "
+                   "-ExecutionPolicy switch can override it.",
+                   [fix("Ask IT to allow RemoteSigned for your user, or to sign lab.ps1.", admin=True),
+                    fix("Meanwhile run the Python tools directly: python scripts\\win_preflight.py")]))
+    elif policy and policy.lower() in BLOCKING_POLICIES:
+        steps = [fix("One-off, no admin: powershell -ExecutionPolicy Bypass -File .\\lab.ps1 win-preflight"),
+                 fix("Persistent, no admin: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned")]
+        if from_internet:
+            steps.append(unblock)
+        add(_check("execution_policy", WARN, f"PowerShell execution policy is '{clean(policy)}': "
+                   ".\\lab.ps1 is blocked ('running scripts is disabled on this system').", steps))
+    elif policy and policy.lower() == "remotesigned" and from_internet:
+        add(_check("execution_policy", WARN, "Policy 'RemoteSigned', but lab.ps1 is marked as "
+                   f"downloaded from the Internet (zone {zone}), so PowerShell refuses the unsigned "
+                   "script.", [unblock]))
+    elif policy and policy.lower() == "unrestricted" and from_internet:
+        add(_check("execution_policy", INFO, "Policy 'Unrestricted': lab.ps1 is marked as downloaded, "
+                   "so PowerShell will ask for confirmation each run.", [unblock]))
     elif policy:
-        add(_check("execution_policy", OK, f"Execution policy '{policy}' allows lab.ps1."))
+        add(_check("execution_policy", OK, f"Execution policy '{clean(policy)}' allows lab.ps1."))
 
     # 8. RAM
     ram = facts.get("ram_gb")
@@ -454,44 +596,53 @@ def evaluate(facts: dict[str, Any]) -> dict[str, Any]:
             note = "" if ram >= RAM_REC_GB else f" (recommended {RAM_REC_GB} GB)"
             add(_check("ram", OK, f"{ram} GB RAM{note}."))
 
-    # 9. Disk
-    disk = facts.get("disk_free_gb")
-    if isinstance(disk, (int, float)):
-        if disk < DISK_FAIL_GB:
-            add(_check("disk", FAIL, f"{disk} GB free: below the {DISK_FAIL_GB} GB floor.",
-                       ["Free space, or move the lab to a larger drive."]))
-        elif disk < DISK_MIN_GB:
-            add(_check("disk", WARN, f"{disk} GB free: below the {DISK_MIN_GB} GB minimum for images.",
-                       ["Free space before pulling emulator/VM images."]))
-        else:
-            add(_check("disk", OK, f"{disk} GB free."))
+    # 9. Disk: lab checkout, and (if on another volume) the profile drive that holds
+    #    VirtualBox VMs and WSL/Podman images.
+    _disk_check("disk", "Lab drive", facts.get("disk_free_gb"), add)
+    _disk_check("vm_disk", "Profile drive (VM / WSL images)", facts.get("vm_disk_free_gb"), add)
 
     # 10. Python
     pyver = (facts.get("python") or {}).get("version")
     if pyver:
         if _version_tuple(pyver)[:2] < PYTHON_MIN:
-            add(_check("python", FAIL, f"Python {pyver} is older than "
+            add(_check("python", FAIL, f"Python {clean(pyver)} is older than "
                        f"{PYTHON_MIN[0]}.{PYTHON_MIN[1]}.",
                        ["Install Python 3.11+ from python.org with 'Install for me only'."]))
         else:
-            add(_check("python", OK, f"Python {pyver}."))
+            add(_check("python", OK, f"Python {clean(pyver)}."))
 
     return _summarize(facts, checks, vtx=vtx)
 
 
 def _models(facts: dict[str, Any], checks: list[dict[str, Any]], vtx: str) -> dict[str, str]:
+    """Readiness per lab model; a model is only 'ready' if every host floor it needs holds."""
     by_id = {c["id"]: c["status"] for c in checks}
-    python_ok = by_id.get("python") != FAIL
+    failed = {cid for cid, st in by_id.items() if st == FAIL}
     vt_usable = vtx in ("hypervisor", "enabled")
-    native = "ready" if python_ok else "blocked"
-    vbox_installed = (facts.get("virtualbox") or {}).get("installed")
-    if not vbox_installed or not vt_usable:
-        vbox = "unavailable" if not vt_usable else "not-installed"
+
+    # Model 1 runs Python tools on the host: needs Python and room on the lab drive.
+    native = "blocked" if failed & {"python", "disk"} else "ready"
+
+    # Models 2/3 run x86_64 guests: need x64, VT-x, and the RAM/disk floors.
+    host_ok = _is_x64(facts) and vt_usable and not failed & {"ram", "disk", "vm_disk"}
+
+    vbox_facts = facts.get("virtualbox") or {}
+    if vbox_facts.get("error"):
+        vbox = "unknown"
+    elif not host_ok:
+        vbox = "unavailable"
+    elif not vbox_facts.get("installed"):
+        vbox = "not-installed"
+    elif vbox_facts.get("default_path") is False:
+        vbox = "needs-setup"
     elif vtx == "hypervisor":
         vbox = "degraded"
     else:
         vbox = "ready"
-    if not vt_usable:
+
+    if (facts.get("podman") or {}).get("error") or (facts.get("wsl") or {}).get("error"):
+        podman = "unknown"
+    elif not host_ok:
         podman = "unavailable"
     elif by_id.get("podman") == OK:
         podman = "ready"
@@ -515,6 +666,8 @@ def _summarize(facts: dict[str, Any], checks: list[dict[str, Any]], vtx: str) ->
         "vtx_state": vtx,
         "recommended_model": recommended,
         "models": models,
+        # Problems (WARN/FAIL) that only admin/IT can resolve. Optional INFO items such as
+        # "VirtualBox not installed" are excluded on purpose; their steps still carry admin=True.
         "admin_only_fixes": [c["id"] for c in checks if c["needs_admin"] and c["status"] in (WARN, FAIL)],
         "checks": checks,
     }
@@ -529,9 +682,9 @@ _TAGS = {OK: "[OK]  ", INFO: "[INFO]", WARN: "[WARN]", FAIL: "[FAIL]", SKIP: "[S
 def format_report(report: dict[str, Any]) -> str:
     lines = ["=== Windows No-Admin Lab Preflight (PENT-23) ==="]
     for c in report["checks"]:
-        lines.append(f"  {_TAGS[c['status']]} {c['id']:<17} {c['message']}")
-        for fix in c["remediation"]:
-            lines.append(f"           -> {fix}" + ("  [admin]" if c["needs_admin"] else ""))
+        lines.append(f"  {_TAGS[c['status']]} {c['id']:<17} {clean(c['message'])}")
+        for step in c["remediation"]:
+            lines.append(f"           -> {clean(step['text'])}" + ("  [admin]" if step["admin"] else ""))
     if report["models"]:
         lines.append("")
         lines.append("Lab models: " + ", ".join(f"{k}={v}" for k, v in report["models"].items()))
@@ -540,6 +693,22 @@ def format_report(report: dict[str, Any]) -> str:
         lines.append("Needs IT/admin: " + ", ".join(report["admin_only_fixes"]))
     lines.append(f"Overall: {report['overall'].upper()}")
     return "\n".join(lines)
+
+
+def save_facts(facts: dict[str, Any], path: str) -> None:
+    """Write facts atomically: a temp file in the same folder, then os.replace."""
+    folder = os.path.dirname(os.path.abspath(path))
+    fd, tmp = tempfile.mkstemp(prefix=".facts-", suffix=".tmp", dir=folder)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump(facts, fh, indent=2)
+            fh.flush()
+            os.fsync(fh.fileno())
+        os.replace(tmp, path)
+    except BaseException:
+        with contextlib.suppress(OSError):
+            os.unlink(tmp)
+        raise
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -556,8 +725,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     else:
         facts = gather_facts()
     if args.save_facts:
-        with open(args.save_facts, "w", encoding="utf-8") as fh:
-            json.dump(facts, fh, indent=2)
+        save_facts(facts, args.save_facts)
 
     report = evaluate(facts)
     if args.json:

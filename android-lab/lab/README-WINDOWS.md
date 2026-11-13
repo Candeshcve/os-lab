@@ -138,8 +138,8 @@ check that tells you which lab model this PC can run and what to fix. Nothing is
 | `virtualbox` | `VBoxManage --version` | Hyper-V active → VirtualBox runs in slow NEM mode without nested VT-x → prefer Podman/WSL2 |
 | `wsl` | `wsl -l -v` | WSL missing → `wsl --install` (**admin/IT**); WSL1 only → `wsl --set-version <distro> 2` |
 | `podman` | `podman machine list` | no machine → `podman machine init`; stopped → `podman machine start` |
-| `execution_policy` | `Get-ExecutionPolicy -List` (Process scope ignored) | Restricted → `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` (no admin) |
-| `ram`, `disk`, `python` | CIM, free space, interpreter | below 8 GB / 20 GB / Python 3.11 |
+| `execution_policy` | `Get-ExecutionPolicy -List` (Process scope ignored), `lab.ps1:Zone.Identifier` | Restricted → `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` (no admin); enforced by Group Policy → ask IT; downloaded (Mark-of-the-Web) → `Unblock-File .\lab.ps1` |
+| `ram`, `disk`, `vm_disk`, `python` | CIM, free space on the lab drive and (if different) the profile drive that holds VMs / WSL images, interpreter | below 8 GB / 20 GB / Python 3.11 |
 
 When Hyper-V (or WSL2/VBS) is running, Windows reports `VMMonitorModeExtensions` and SLAT as
 `False` (verified on Windows 11 build 26300); the check reads `HypervisorPresent` first so this is
@@ -149,6 +149,10 @@ Use `-Json` for a machine-readable report. To share or replay a host state, save
 `python scripts\win_preflight.py --save-facts facts.json` and evaluate it anywhere with
 `--facts facts.json`; the test suite replays the known failure scenarios in
 `tests/fixtures/win_preflight/` this way. Exit code is 1 if any check fails (`--strict`: warnings too).
+
+Each remediation step is labelled `[admin]` only when that step needs elevation or IT. A probe that
+times out or errors is reported as such (model state `unknown`) instead of being read as "not set up",
+and a model is only recommended when the RAM, disk, architecture and Python floors it needs all hold.
 
 ---
 
