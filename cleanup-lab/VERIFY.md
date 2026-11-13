@@ -454,6 +454,16 @@ file changed and this worktree has no Node dependencies; the page is CLN-16. Rus
 `fmt`/`clippy` — no Rust changed. No Windows host ran the cross-volume and
 freedesktop-Trash paths; those use injected tests.
 
+## CLN-11 — package review suggestions
+
+Fixed-argv Homebrew, pip3 and gem inventory calls are read-only and use a
+15-second timeout. Captured-style output fixtures verify Homebrew dry-run
+formulae, pip JSON and RubyGems local names, plus malformed pip output and
+missing tools. Each result carries a typed uninstall argv without running it;
+names beginning with options are rejected. Console tests reject caller-supplied
+argv and return a job. Pip and gem candidates are for review, not proven
+orphans.
+
 ## CLN-04 … CLN-29
 
 Each task appends its own section when it lands.

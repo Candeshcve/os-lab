@@ -400,3 +400,16 @@ def test_the_browser_route_plans_and_cleans(tmp_path, monkeypatch):
     finally:
         server.shutdown()
         server.server_close()
+
+
+def test_package_inventory_job_is_read_only_and_typed(monkeypatch):
+    from cleanup_lab import packages
+    monkeypatch.setattr(packages, "inventory", lambda: {"available": False, "items": [], "sources": [], "errors": []})
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    with pytest.raises(cleanup_api.CleanupError) as refused:
+        api.post("/api/cleanup/packages/scan", {"argv": ["brew", "uninstall", "x"]})
+    assert refused.value.status == 400
+    job = api.post("/api/cleanup/packages/scan", {})
+    wait_for(job, "done")
+    assert job.kind == "packages"
+    assert job.result["items"] == []

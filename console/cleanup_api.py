@@ -46,7 +46,8 @@ PLAN_STATUS = {
     "used": 409,
     "cancelled": 409,
 }
-BODY_KEYS = {"scan": SCAN_KEYS, "plan": PLAN_KEYS, "clean": CLEAN_KEYS}
+BODY_KEYS = {"scan": SCAN_KEYS, "plan": PLAN_KEYS, "clean": CLEAN_KEYS,
+             "packages": ()}
 
 
 class CleanupError(ValueError):
@@ -215,6 +216,21 @@ class CleanupJobStore:
         job = CleanupJob("scan", {"entryIds": entry_ids, "workers": workers})
         self._register(job)
         return self._spawn(job, self._run_scan, (root, job, entry_ids, workers))
+
+    def start_packages(self, root):
+        job = CleanupJob("packages", {})
+        self._register(job)
+        return self._spawn(job, self._run_packages, (root, job))
+
+    def _run_packages(self, root, job):
+        try:
+            job.result = _module(root, "packages").inventory()
+            job.state = "done"
+        except Exception as exc:
+            job.state = "failed"
+            job.error = "{0}: {1}".format(type(exc).__name__, exc)
+        finally:
+            job.finishedAt = time.time()
 
     def start_plan(self, root, request):
         """Validate the plan request, then build the plan on a worker thread.
@@ -429,6 +445,9 @@ class CleanupAPI:
         if path == "/api/cleanup/scan":
             _object_body(body, "scan")
             return JOBS.start_scan(self.root, body)
+        if path == "/api/cleanup/packages/scan":
+            _object_body(body, "packages")
+            return JOBS.start_packages(self.root)
         if path == "/api/cleanup/plan":
             _object_body(body, "plan")
             return JOBS.start_plan(self.root, body)
