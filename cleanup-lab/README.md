@@ -19,7 +19,7 @@ console job with progress and cancel, `POST /api/cleanup/plan` previews a clean,
 and `POST /api/cleanup/clean {planId}` runs that confirmed plan. The `/cleanup/`
 page is **not built yet**: the dashboard layer lands separately, and
 [`STATUS.md`](STATUS.md) carries the endpoint contract, page states and strings it
-must use. Audit history is **not wired yet** (CLN-15). The work
+must use. Audit history is stored privately with a per-install HMAC key (CLN-15). The work
 is split into tasks `CLN-01` … `CLN-29` on the dashboard **Contribute → Roadmap &
 TODOs** tab (filter: Open Source OS, label "Cleanup Lab"). Reserve a task before you
 start, as with every os-lab task
@@ -102,7 +102,7 @@ is running stay skipped.
 
 ## Safety guard
 
-`cleanup_lab/safety.py` is the only place a destructive call is allowed to pass. It
+`cleanup_lab/safety.py` guards every filesystem deletion and move. It
 ports the reference path policy (resolved containment, component comparison, no purge
 of a protected root) and adds the two checks the page needs next to each item:
 ownership (`lstat` owner against the current user) and the running-app lock, matched
@@ -112,11 +112,15 @@ English `reason`; `assert_safe_target()` raises both as `SafetyError`. Refusal c
 `empty`, `nul`, `relative`, `protected`, `system-root`, `missing`, `no-path`,
 `outside-root`, `foreign-owner`, `app-running`.
 
+Container daemon pruning is a separate CLN-08 action: fixed argv from a validated
+allowlist, a candidate preview, a ten-minute single-use confirmation id, a fresh
+candidate check and an audit record. It never accepts a shell string or a path.
+
 ## Architecture contract
 
 | Layer | Where | Rule |
 |---|---|---|
-| Engine | `cleanup-lab/engine/` | Python standard library first. Pure functions for detection; one module (`safety.py`) guards every destructive call. |
+| Engine | `cleanup-lab/engine/` | Python standard library first. `safety.py` guards filesystem actions; the typed container preview guards daemon prune actions. |
 | Catalog | `cleanup-lab/catalog/*.json` | All target paths live here as data, per OS. No hardcoded paths in code. |
 | Console API | `console/` (`/api/cleanup/...`) | Typed, validated actions. Never accept a command string or a free-form path list from the page. Long work runs as console jobs with preview, progress and cancel. |
 | Dashboard | `dashboard/src/pages/cleanup/`, `dashboard/src/views/cleanup/` | Existing shell and components, typed `api.ts` client, all seven locale catalogs. |
