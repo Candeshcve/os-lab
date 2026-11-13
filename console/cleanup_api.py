@@ -37,6 +37,8 @@ SCAN_KEYS = ("entryIds", "workers")
 PLAN_KEYS = ("entryIds", "workers", "mode")
 #: The only key a clean request may carry: which confirmed plan to run.
 CLEAN_KEYS = ("planId",)
+CONTAINER_PREVIEW_KEYS = ("actionId",)
+CONTAINER_PRUNE_KEYS = ("previewId",)
 #: Engine ``PlanError.code`` → HTTP status on the plan → clean namespace.
 PLAN_STATUS = {
     "plan-invalid": 400,
@@ -46,7 +48,9 @@ PLAN_STATUS = {
     "used": 409,
     "cancelled": 409,
 }
-BODY_KEYS = {"scan": SCAN_KEYS, "plan": PLAN_KEYS, "clean": CLEAN_KEYS}
+BODY_KEYS = {"scan": SCAN_KEYS, "plan": PLAN_KEYS, "clean": CLEAN_KEYS,
+             "container-preview": CONTAINER_PREVIEW_KEYS, "container-prune": CONTAINER_PRUNE_KEYS,
+             "vm-scan": ()}
 
 
 class CleanupError(ValueError):
@@ -215,6 +219,50 @@ class CleanupJobStore:
         job = CleanupJob("scan", {"entryIds": entry_ids, "workers": workers})
         self._register(job)
         return self._spawn(job, self._run_scan, (root, job, entry_ids, workers))
+
+    def start_vm_scan(self, root):
+        job = CleanupJob("vm-scan", {})
+        self._register(job)
+        return self._spawn(job, self._run_vm_scan, (root, job))
+
+    def _run_vm_scan(self, root, job):
+        try:
+            result = _module(root, "vms").inventory(root, cancel=job.cancel)
+            job.result = result
+            job.state = "cancelled" if result["cancelled"] else "done"
+        except Exception as exc:
+            job.state = "failed"
+            job.error = "{0}: {1}".format(type(exc).__name__, exc)
+        finally:
+            job.finishedAt = time.time()
+
+    def start_container_prune(self, root, preview_id):
+        try:
+            _module(root, "history").prepare()
+        except Exception as exc:
+            raise CleanupError(500, "Audit history is unavailable: {0}".format(exc)) from exc
+        plan = CONTAINER_PREVIEWS.claim(preview_id)
+        job = CleanupJob("container-prune", {"previewId": preview_id, "actionId": plan.action_id})
+        self._register(job)
+        return self._spawn(job, self._run_container_prune, (root, job, plan))
+
+    def _run_container_prune(self, root, job, plan):
+        try:
+            result = _module(root, "containers").execute(root, plan)
+        except Exception as exc:
+            result = {"actionId": plan.action_id, "engine": plan.engine, "status": "failed",
+                      "error": "{0}: {1}".format(type(exc).__name__, exc), "bytesRemoved": None}
+        job.result = result
+        try:
+            _module(root, "history").append(result)
+            job.state = "done" if result["status"] == "completed" else "failed"
+            if job.state == "failed":
+                job.error = result.get("error")
+        except Exception as exc:
+            job.state = "failed"
+            job.error = "Audit history could not record the result: {0}".format(exc)
+        finally:
+            job.finishedAt = time.time()
 
     def start_plan(self, root, request):
         """Validate the plan request, then build the plan on a worker thread.
@@ -394,9 +442,39 @@ class PlanStore:
             self.plans.pop(old.id, None)
 
 
+class ContainerPreviewStore:
+    """Single-use, short-lived preview records, kept in this console process."""
+
+    def __init__(self):
+        self.records = {}
+        self.lock = threading.Lock()
+
+    def register(self, plan):
+        preview_id = uuid.uuid4().hex[:12]
+        with self.lock:
+            self.records[preview_id] = {"plan": plan, "used": False}
+            if len(self.records) > MAX_PLANS:
+                oldest = min(self.records, key=lambda key: self.records[key]["plan"].created_at)
+                self.records.pop(oldest)
+        return preview_id
+
+    def claim(self, preview_id):
+        with self.lock:
+            record = self.records.get(preview_id)
+            if record is None:
+                raise CleanupError(404, "Container preview not found")
+            if record["used"]:
+                raise CleanupError(409, "Container preview was already used")
+            if time.time() - record["plan"].created_at > 600:
+                raise CleanupError(410, "Container preview expired")
+            record["used"] = True
+            return record["plan"]
+
+
 #: One store per console process; the handler instances are per-request.
 JOBS = CleanupJobStore()
 PLANS = PlanStore()
+CONTAINER_PREVIEWS = ContainerPreviewStore()
 
 
 class CleanupAPI:
@@ -415,6 +493,9 @@ class CleanupAPI:
                 return catalog.report(self.root)
             except catalog.CatalogError as exc:
                 raise CleanupError(500, "The detector catalog is invalid: {0}".format(exc)) from exc
+        if path == "/api/cleanup/containers":
+            _query(query)
+            return _module(self.root, "containers").capabilities(self.root)
         if path == "/api/cleanup/history":
             _query(query)
             try:
@@ -440,6 +521,28 @@ class CleanupAPI:
         if path == "/api/cleanup/scan":
             _object_body(body, "scan")
             return JOBS.start_scan(self.root, body)
+        if path == "/api/cleanup/vms/scan":
+            _object_body(body, "vm-scan")
+            return JOBS.start_vm_scan(self.root)
+        if path == "/api/cleanup/containers/preview":
+            _object_body(body, "container-preview")
+            action_id = body.get("actionId")
+            if not isinstance(action_id, str) or not action_id:
+                raise CleanupError(400, "actionId must name an available container action")
+            try:
+                plan, candidates = _module(self.root, "containers").preview(self.root, action_id)
+            except Exception as exc:
+                raise CleanupError(400, str(exc)) from exc
+            preview_id = CONTAINER_PREVIEWS.register(plan)
+            return {"previewId": preview_id, "actionId": plan.action_id, "engine": plan.engine,
+                    "risk": plan.risk, "candidateCount": plan.count, "candidates": candidates,
+                    "command": [plan.engine, *plan.prune_argv], "expiresAt": plan.created_at + 600}
+        if path == "/api/cleanup/containers/prune":
+            _object_body(body, "container-prune")
+            preview_id = body.get("previewId")
+            if not isinstance(preview_id, str) or not preview_id:
+                raise CleanupError(400, "previewId must name a confirmed preview")
+            return JOBS.start_container_prune(self.root, preview_id)
         if path == "/api/cleanup/plan":
             _object_body(body, "plan")
             return JOBS.start_plan(self.root, body)

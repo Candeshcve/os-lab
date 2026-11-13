@@ -11,8 +11,9 @@ typed layers over it.
 
 The package lives in [[cleanup-lab/engine/cleanup_lab]]. `readiness`, `paths`, the
 catalog loader (CLN-02), the scan job (CLN-03), the safety guard (CLN-12) and the
-plan → clean executor (CLN-13) and audit history (CLN-15) exist now. One module, `safety.py`,
-guards every destructive call, so no other module may delete, move or shred.
+plan → clean executor (CLN-13) and audit history (CLN-15) exist now. `safety.py`
+guards filesystem deletion and moves; CLN-08's daemon prune actions use a
+separate typed, single-use preview guard.
 
 Target paths are data, never code: every platform path, risk class, owning process
 and privilege flag belongs in `cleanup-lab/catalog/*.json` (CLN-02). Per-OS
@@ -40,6 +41,23 @@ guess. [[cleanup-lab/PARITY.md]] maps every Qleaner detector id to a catalog id 
 why it was dropped, and [[cleanup-lab/catalog/README.md]] documents the format.
 
 ## Scan job
+
+CLN-08 offers container and VM detection through typed console endpoints.
+
+[[cleanup-lab/engine/cleanup_lab/containers.py]] reports a responsive Docker
+engine or falls back to Podman. It loads fixed preview/prune argv from
+[[cleanup-lab/catalog/actions/containers.json]], checks those arguments against
+an allowlist, and hides actions when neither engine responds. A preview records
+candidate JSON and expires after ten minutes; execution re-previews and refuses
+changed candidates. `POST /api/cleanup/containers/prune` accepts only a single-use
+preview id, runs as a job and appends its result to the signed audit history.
+Volumes are high risk and never pre-selected. `bytesRemoved` remains null when
+the engine does not provide a trustworthy byte count.
+
+[[cleanup-lab/engine/cleanup_lab/vms.py]] inventories configured VirtualBox,
+VMware, Parallels and UTM locations from [[cleanup-lab/catalog/actions/vms.json]].
+Each found bundle is measured read-only and marked `reportOnly`; the API has no
+VM deletion action.
 
 [[cleanup-lab/engine/cleanup_lab/scan.py]] measures the catalog's resolved paths
 read-only, with progress and cancel.

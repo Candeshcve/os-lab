@@ -481,6 +481,20 @@ CLN-13 (three AppImage architecture expectations, invalid `JAVA_HOME` for JADX,
 source console mutation guard, and web UI preview status): 6 failed, 158 passed,
 1 skipped. No dashboard files changed; CLN-16 owns the history view.
 
+## CLN-08 — container actions and report-only VMs
+
+The container catalog defines four Docker prune scopes and three Podman fallback
+scopes. The engine checks every preview/prune argv against a fixed allowlist,
+detects a responding engine, hides actions when neither responds, fingerprints
+candidate JSON, and re-previews before a single-use action. Volumes are high
+risk and never pre-selected. The console prepares signed audit history before
+claiming a preview and appends every result. VM bundles are measured read-only
+from catalog roots and have no delete endpoint.
+
+A fake Docker executable verifies preview, execution and stale refusal; a fake
+Podman verifies fallback. Console tests verify request keys, a successful
+single-use prune with history verification, and VM report-only inventory.
+
 ## CLN-04 … CLN-29
 
 Each task appends its own section when it lands.

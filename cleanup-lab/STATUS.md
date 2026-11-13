@@ -36,7 +36,7 @@ the finding and the decision are in the session log.
 | CLN-05 | pending | — | — | — | — | none |
 | CLN-06 | pending | — | — | — | — | none |
 | CLN-07 | pending | — | — | — | — | none |
-| CLN-08 | pending | — | — | — | — | none |
+| CLN-08 | in progress (this PR) | — | — | core dashboard types and controls await CLN-16 merge | logic and API first, UX later | none |
 | CLN-09 | pending | — | — | — | — | none |
 | CLN-10 | pending | — | — | — | — | none |
 | CLN-11 | pending | — | — | — | — | none |
