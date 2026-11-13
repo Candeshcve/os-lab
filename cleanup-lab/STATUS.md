@@ -39,7 +39,7 @@ the finding and the decision are in the session log.
 | CLN-08 | pending | — | — | — | — | none |
 | CLN-09 | pending | — | — | — | — | none |
 | CLN-10 | pending | — | — | — | — | none |
-| CLN-11 | in progress (this PR) | — | — | frontend client/state awaits CLN-16 merge; UX later | logic and API first, report-and-suggest only | none |
+| CLN-11 | in progress (this PR) | [#152](https://github.com/keyvanarasteh/os-lab/pull/152) | — | frontend client/state awaits CLN-16 merge; UX later | logic and API first, report-and-suggest only | none |
 | CLN-12 | merged | [#136](https://github.com/keyvanarasteh/os-lab/pull/136) | 3d5ab866 | — | — | none |
 | CLN-13 | in progress (this PR) | [#139](https://github.com/keyvanarasteh/os-lab/pull/139) | — | `/cleanup/` plan + confirm UI, mode picker, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred | none |
 | CLN-14 | pending | — | — | — | — | none |
