@@ -11,13 +11,15 @@ its own visual style; Cleanup Lab pages use the os-lab dashboard shell and follo
 [`docs/UX_READINESS.md`](../docs/UX_READINESS.md).
 
 Status: **Engine skeleton (CLN-01), detector catalog (CLN-02), safety guard
-(CLN-12) and the read-only scan job (CLN-03) are in place; the rest is roadmap.**
-The engine package, the readiness probe (`labctl cleanup status|doctor`,
-`GET /api/cleanup/status`) and the catalog (`GET /api/cleanup/catalog`) exist, and
-`POST /api/cleanup/scan` runs a catalog scan as a console job with progress and
-cancel. The `/cleanup/` page is **not built yet**: the dashboard layer lands
-separately, and [`STATUS.md`](STATUS.md) carries the endpoint contract, page
-states and strings it must use. Cleaning is not wired yet. The work
+(CLN-12), the read-only scan job (CLN-03) and the plan → clean flow (CLN-13) are
+in place; the rest is roadmap.** The engine package, the readiness probe (`labctl
+cleanup status|doctor`, `GET /api/cleanup/status`) and the catalog (`GET
+/api/cleanup/catalog`) exist; `POST /api/cleanup/scan` runs a catalog scan as a
+console job with progress and cancel, `POST /api/cleanup/plan` previews a clean,
+and `POST /api/cleanup/clean {planId}` runs that confirmed plan. The `/cleanup/`
+page is **not built yet**: the dashboard layer lands separately, and
+[`STATUS.md`](STATUS.md) carries the endpoint contract, page states and strings it
+must use. Audit history is **not wired yet** (CLN-15). The work
 is split into tasks `CLN-01` … `CLN-29` on the dashboard **Contribute → Roadmap &
 TODOs** tab (filter: Open Source OS, label "Cleanup Lab"). Reserve a task before you
 start, as with every os-lab task
@@ -76,6 +78,27 @@ lists the recent jobs, and `POST /api/cleanup/jobs/<id>/cancel` sets the cancel
 flag. A cancelled scan returns its partial counters with `"cancelled": true` — never
 an error and never invented bytes. Jobs live in the console process, like the other
 lab jobs.
+
+## Plan → clean
+
+`cleanup_lab/clean.py` turns catalog entries into a confirmable plan and runs only
+that plan. Building is read-only: every path goes through the safety guard, then
+one `lstat` walk records its size, files, folders and a fingerprint (symlinks are
+counted, never followed). `POST /api/cleanup/plan` requires catalog `entryIds`
+(plus optional `workers` and `mode`) — the page never sends a path list. The plan
+lists every item as `ready` or `skipped` with a stable code and reason, defaults to
+`trash`, and expires after ten minutes or as soon as an item changes.
+
+`POST /api/cleanup/clean {planId}` verifies the fingerprints again, then runs the
+plan once (`used` afterwards). Trash is the default and the only automatic choice:
+a failed move is a failed item, never a silent permanent delete; `mode: "delete"`
+must be explicit. A cross-volume move is copied into the Trash, compared against a
+fresh walk of the original, and only then removed from the source — if removing the
+source fails, the verified copy stays. Transient errors are retried, and every item
+reports `trashed`, `deleted`, `skipped` (code + reason) or `failed` (error). Bytes
+are credited only after the item is really gone from its original path, using this
+run's measurement — never the plan estimate. Privileged items and items whose app
+is running stay skipped.
 
 ## Safety guard
 

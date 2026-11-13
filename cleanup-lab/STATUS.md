@@ -31,7 +31,7 @@ the finding and the decision are in the session log.
 |---|---|---|---|---|---|---|
 | CLN-01 | merged | [#134](https://github.com/keyvanarasteh/os-lab/pull/134) | d04941f6 | `/cleanup/` page, sidebar entry, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred | none |
 | CLN-02 | merged | [#135](https://github.com/keyvanarasteh/os-lab/pull/135) | 39ea0f1f | — | — | none |
-| CLN-03 | in progress (this PR) | [#138](https://github.com/keyvanarasteh/os-lab/pull/138) | — | `/cleanup/` scan page, sidebar/route, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred | none |
+| CLN-03 | merged | [#138](https://github.com/keyvanarasteh/os-lab/pull/138) | c253cf34 | `/cleanup/` scan page, sidebar/route, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred | none |
 | CLN-04 | pending | — | — | — | — | none |
 | CLN-05 | pending | — | — | — | — | none |
 | CLN-06 | pending | — | — | — | — | none |
@@ -41,7 +41,7 @@ the finding and the decision are in the session log.
 | CLN-10 | pending | — | — | — | — | none |
 | CLN-11 | pending | — | — | — | — | none |
 | CLN-12 | merged | [#136](https://github.com/keyvanarasteh/os-lab/pull/136) | 3d5ab866 | — | — | none |
-| CLN-13 | pending | — | — | — | — | none |
+| CLN-13 | in progress (this PR) | — | — | `/cleanup/` plan + confirm UI, mode picker, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred | none |
 | CLN-14 | pending | — | — | — | — | none |
 | CLN-15 | pending | — | — | — | — | none |
 | CLN-16 | pending | — | — | dashboard page is the whole task | console side only | none |
@@ -62,6 +62,138 @@ the finding and the decision are in the session log.
 No CLN task has a student reservation or open student PR: `grep -rl CLN-
 reservations/` matches only `README.md` and `_schema.json`, and no open PR title or
 branch names a CLN id.
+
+## Dashboard handoff — CLN-13
+
+### Console endpoints (live on this branch)
+
+`POST /api/cleanup/plan` — header `X-OSLab: 1`, JSON body:
+
+```json
+{ "entryIds": ["system.user-caches"], "workers": 4, "mode": "trash" }
+```
+
+`entryIds` is **required** (catalog ids from `GET /api/cleanup/catalog`); `workers`
+is `1`–`16`; `mode` is `trash` (default) or `delete`. A path, a command, any other
+key, an empty/duplicate/unknown id list, a bad worker count and any other mode are
+`400`. The answer is `202` with a job whose `kind` is `plan`:
+
+```json
+{
+  "id": "9e1c0a7b3d21", "kind": "plan", "state": "running",
+  "request": { "entryIds": ["system.user-caches"], "workers": 4, "mode": "trash" },
+  "progress": { "phase": "planning", "pathsDone": 0, "pathsTotal": 1,
+                "bytesSeen": 0, "filesSeen": 0, "currentPath": "" },
+  "result": null, "error": null,
+  "startedAt": 0, "finishedAt": null
+}
+```
+
+Poll `GET /api/cleanup/jobs/<id>`. When `state` is `done`, `result` is the plan:
+
+```json
+{
+  "planId": "8c1f2a9b0d44", "createdAt": 0, "expiresAt": 0, "ttlSeconds": 600,
+  "mode": "trash", "platform": "macos",
+  "items": [
+    {
+      "entryId": "system.user-caches", "entryName": "User caches", "risk": "low",
+      "template": "~/Library/Caches", "path": "/Users/me/Library/Caches",
+      "status": "ready", "code": "", "reason": "",
+      "privileged": false, "mode": "trash",
+      "sizeBytes": 40960, "sizeOnDiskBytes": 40960, "files": 3, "folders": 4
+    }
+  ],
+  "totals": { "items": 1, "ready": 1, "skipped": 0, "bytes": 40960,
+              "files": 3, "folders": 4 }
+}
+```
+
+`POST /api/cleanup/clean` — header `X-OSLab: 1`, body `{ "planId": "8c1f2a9b0d44" }`,
+no other key → `202` job `kind: "clean"`. Errors are answered before a job starts:
+`404` unknown plan, `410` expired, `409` already used. A plan is **single-use** and
+expires after ten minutes **or** when any item's fingerprint changed; the change is
+re-checked inside the job, which ends `failed` with that message and removes nothing.
+
+Clean progress: `phase` `queued`/`cleaning`/`done`/`cancelled`, `itemsDone`,
+`itemsTotal`, `bytesRemoved`, `currentPath`. When finished:
+
+```json
+{
+  "planId": "8c1f2a9b0d44", "mode": "trash", "platform": "macos",
+  "startedAt": 0, "finishedAt": 0, "durationMs": 0, "cancelled": false,
+  "results": [
+    {
+      "entryId": "system.user-caches", "entryName": "User caches",
+      "template": "~/Library/Caches", "path": "/Users/me/Library/Caches",
+      "mode": "trash", "status": "trashed",
+      "code": "", "reason": "", "error": null,
+      "bytes": 40960, "files": 3, "folders": 4,
+      "trashPath": "/Users/me/.Trash/Caches"
+    }
+  ],
+  "progress": { "phase": "done", "itemsDone": 1, "itemsTotal": 1,
+                "bytesRemoved": 40960, "currentPath": "" },
+  "totals": { "items": 1, "trashed": 1, "deleted": 0,
+              "skipped": 0, "failed": 0, "bytes": 40960,
+              "files": 3, "folders": 4 }
+}
+```
+
+Statuses are exactly `trashed`, `deleted`, `skipped` and `failed`. A skipped item
+has a stable `code` plus an English `reason`: `no-path`, `privileged`,
+`app-running`, `foreign-owner`, `protected`, `system-root`, `outside-root`,
+`missing`, `unreadable`, `not-cleanable`, `duplicate`, `nested`, `trash-nesting`,
+`cancelled`. A failed item has an `error`; a failed Trash is **failed, not
+deleted** — the original is still there. `bytes`/`files`/`folders` are this run's
+measurement and only counted after the item is really gone; a failed/skipped item
+counts 0. `trashPath` is `null` for `delete`, skips and failures. **Do not sum the
+plan's estimate**; show `result.totals.bytes` and say “moved to Trash” (or “deleted”
+only in delete mode).
+
+`mode: "delete"` is permanent and only happens when the plan names it; never make it
+the default, never fall back to it, and warn in the confirm step. There is no audit
+history yet (CLN-15) and no undo beyond the user's own Trash. Privileged items are
+planned as skipped and must offer no clean action.
+
+### What the page does with it
+
+CLN-16 owns the page. The scan section stays; add a plan/confirm section with:
+
+| State | What the page shows |
+|---|---|
+| idle | selected catalog entries, **Build plan**; Trash is the default and delete is a deliberate second choice with a warning |
+| planning | `pathsDone / pathsTotal`, `bytesSeen`, `filesSeen`, `currentPath`; **Cancel** |
+| plan ready | every item with `status`, `code`/`reason`, size, files, folders; **N items ready**, byte total; **Confirm clean** disabled when `totals.ready` is 0; “Expires in 10 minutes” |
+| expired / stale / used | that sentence verbatim plus **Build a new plan**; never retry the same `planId` |
+| cleaning | `itemsDone / itemsTotal`, `bytesRemoved`, `currentPath`; **Cancel** |
+| done | one row per item with its status, reason/error and (for Trash) `trashPath`; the counted `totals.bytes`; say space was **moved to Trash**, not “freed” |
+| cancelled | “Clean cancelled” and the partial rows; remaining items are skipped with reason `cancelled`; a new plan is needed |
+| failed | `error`; for a stale plan explicitly “nothing was removed”; if some rows exist, show them |
+| public Pages | no plan/clean action: “The Cleanup Lab runs in the local app.” |
+
+Keep the confirm action behind an explicit dialog that names the item count, the
+byte total and the mode (Trash default / delete permanent). Never pre-select a
+`credentials`/`privacy` entry, and never expose a free-form path or command field.
+
+### Visible strings (English; these are the i18n keys)
+
+`Build plan` · `Confirm clean` · `Trash (default)` · `Delete permanently` ·
+`Planning…` · `Plan ready` · `Nothing to clean` · `items ready` · `Cleaning…` ·
+`Clean cancelled` · `Clean failed` · `Moved to Trash` · `Deleted permanently` ·
+`Skipped` · `Failed` · `Moved to Trash, not freed` ·
+`This plan expired because an item changed. Build a new plan.` ·
+`This plan was already run. Build a new plan.` ·
+`This plan expired. Build a new plan.` ·
+`The item could not be moved to Trash and was left in place.` ·
+`Deleting permanently cannot be undone.` ·
+`The cleanup engine could not start the job.` ·
+`No answer from the cleanup engine. Start os-lab from a terminal, then try again.` ·
+`The Cleanup Lab runs in the local app.`
+
+Dynamic strings (`entryName`, `template`, `path`, `reason`, `error`, `trashPath`)
+come from the engine/API in English, like every other lab payload; they are not
+translated client-side.
 
 ## Dashboard handoff — CLN-03
 
@@ -429,3 +561,23 @@ reservation or open student PR existed. A completed `./scripts/run-tests.sh` run
 worktree (no new failure), and the one `lat check` failure (section summary too
 long) was fixed and re-checked green. The full suite was not re-run after that
 documentation-only fix, per the maintainer's instruction.
+
+**2026-11-13 — CLN-13.** Plan → confirm → clean. Added `cleanup_lab/clean.py`: a
+read-only plan build (safety guard, one `lstat` walk, per-item fingerprint), a
+single-use ten-minute plan, and an executor that verifies fingerprints first and
+then trashes (default) or deletes (explicit) each item. A failed Trash is a failed
+item, never a permanent-delete fallback; transient errors retry; cross-volume moves
+are copied, verified and only then removed, with the verified copy kept when the
+source cannot be removed. Per-item `trashed`/`deleted`/`skipped`/`failed` results
+carry reasons, and bytes are counted only when the item is gone from its original
+path. The console exposes `POST /api/cleanup/plan`, `POST /api/cleanup/clean
+{planId}` and poll/cancel through the shared job store; stale/expired/used plans
+answer `409`/`410` and remove nothing. Fixed `_validate_entry_ids` calling
+`catalog.load()` without the repo root. Added 24 engine tests (112 total, OK) and
+five console tests (10 total, passed) including the real browser route. `README.md`,
+`PARITY.md`, `VERIFY.md`, `lat.md/cleanup-lab.md` and this handoff updated. No
+CLN-13 reservation or open student PR existed. A full `./scripts/run-tests.sh` run
+was 7 passed / 1 failed / 1 skipped: the android stage shows the same six
+pre-existing ids as `master` (158 passed), and the dashboard stage skipped because
+this worktree has no `node_modules`. Dashboard typecheck/build/e2e were not run —
+no dashboard file changed.

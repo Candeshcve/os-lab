@@ -41,6 +41,17 @@ Unlike Qleaner's scan, a path the engine cannot read is reported in `unreadable`
 instead of aborting or being silently skipped, and one directory worker never
 follows a symlink out of its top-level path.
 
+## Plan → clean translations
+
+| Qleaner function | Cleanup Lab | Notes |
+|---|---|---|
+| `clean_items` / `clean_leftovers` | `clean.build_plan` + `clean.execute_plan` + console jobs | Guard → measure → fingerprint → confirm. The request names catalog ids, never paths. |
+| Trash fallback to `remove_dir_all` | `clean._run_trash` | **Not ported.** A failed Trash move is a failed item; permanent delete only when the plan says `mode: "delete"`. |
+| `retry_remove` | `clean.retry` | Retries `EBUSY`, `ETXTBSY`, `EAGAIN`, `EWOULDBLOCK`, `EINTR`, `ENOTEMPTY` three times; the final error is reported, never swallowed. |
+| (none) | `clean.fingerprint_path` + `clean.verify_plan` | A plan is single-use and expires after ten minutes or when an item's fingerprint changes. |
+| (none) | per-item result | `trashed` / `deleted` / `skipped` (stable code + reason) / `failed` (error); bytes counted only after the original is gone. |
+| streaming progress | progress callback | `itemsDone`, `itemsTotal`, `bytesRemoved`, `currentPath`; the job is polled through `GET /api/cleanup/jobs/<id>`. |
+
 ## System
 
 | Qleaner id | Catalog id | Task | Notes |

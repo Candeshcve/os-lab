@@ -369,6 +369,91 @@ instruction). No code changed.
 and this PR adds no page. `cargo clippy`/`fmt` — no Rust changed. No Windows host
 ran the POSIX permission and FIFO tests; they are skipped there by design.
 
+## CLN-13 — plan → confirm → clean, Trash by default, honest results
+
+Branch `feat/cln-13-plan-confirm-clean`. Engine, console API, tests and the
+knowledge graph. No file under `dashboard/` changed; the page and its confirm step
+are CLN-16 and the contract is in the CLN-13 handoff in `STATUS.md`.
+
+### Engine unit tests
+
+```console
+$ cd cleanup-lab/engine && ../../.venv-test/bin/python -m unittest discover -s tests -p 'test_*.py'
+Ran 112 tests in 1.059s
+
+OK
+```
+
+The 24 new tests cover: a read-only plan that lists sizes and marks ready items;
+the safety guard skipping running apps and privileged entries; duplicate and nested
+paths yielding to the first item; a FIFO planned as not cleanable; a cancelled plan
+build making no plan; the Trash never being moved into itself; planning leaving
+mtimes untouched; Trash by default with collision names; a **failed Trash staying a
+failure** (the original remains, no bytes counted); transient `EBUSY` retries with
+backoff; partial failure across two entries; cancel between items; cross-volume copy
+verified before removing the source; a failed source removal keeping the verified
+copy; the freedesktop `.trashinfo` sidecar on Linux; explicit delete mode; changed,
+added and vanished items expiring the plan; the TTL clock; planned skips carrying
+reasons and zero bytes; and invalid requests/worker bounds.
+
+### Console tests
+
+```console
+$ cd android-lab/lab && ../../.venv-test/bin/python -m pytest tests/test_cleanup_console.py -q
+..........                                                               [100%]
+10 passed in 1.21s
+```
+
+Covers: a real plan job previewed and cleaned from the console (job kinds, ready
+size, Trash move, counted bytes, Trash path, recent jobs); typed refusal of a path,
+command, unknown key, empty/duplicate/unknown ids, bad mode/workers and bad
+`planId`; a changed item failing the clean with nothing removed; a plan being
+single-use (`409`) and expiring (`410`); and the browser route starting both a
+plan and a clean with `202`, polling to `done`.
+
+### Repository checks
+
+```console
+$ PATH=.../.venv-test/bin:$PATH CARGO_TARGET_DIR=/Volumes/Projects/iQ/.cargo-target-cln13 \
+    ./scripts/run-tests.sh --no-venv
+...
+6 failed, 158 passed, 1 skipped in 21.50s
+[fail] android-lab/lab test suite
+[ok]   source-lab/engine test suite         176 passed
+[ok]   cleanup-lab/reference/python          35 tests, OK
+[ok]   cleanup-lab/engine                    112 tests, OK
+[ok]   cleanup-lab/reference/qrust-scan      27 tests, OK
+[ok]   sample analysis + report generated
+[ok]   all 70 shell scripts parse
+[ok]   lat check
+[skip] dashboard dependencies not installed
+7 passed, 1 failed, 1 skipped
+```
+
+The only failure is the known android stage: the same six ids as `master`
+(`test_app_update` ×3, `test_jadx_decompiler_on_real_dex`, the
+`test_source_console` mutation guard, the `test_web_ui` plan preview), with the
+suite at `158 passed` thanks to the ten console tests. The dashboard stage was
+skipped because this worktree has no `node_modules`; nothing under `dashboard/`
+changed. `lat check` also ran clean on its own:
+
+```console
+$ lat check
+All checks passed in 456ms
+$ git diff --check
+(clean)
+$ python -m py_compile cleanup-lab/engine/cleanup_lab/clean.py console/cleanup_api.py \
+    android-lab/lab/web_ui.py android-lab/lab/tests/test_cleanup_console.py
+(ok)
+```
+
+### Not run
+
+`npm run check` / `build` / `test:e2e` and dashboard screenshots — no dashboard
+file changed and this worktree has no Node dependencies; the page is CLN-16. Rust
+`fmt`/`clippy` — no Rust changed. No Windows host ran the cross-volume and
+freedesktop-Trash paths; those use injected tests.
+
 ## CLN-04 … CLN-29
 
 Each task appends its own section when it lands.
