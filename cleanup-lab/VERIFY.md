@@ -467,10 +467,10 @@ A Pages build under `/os-lab` passed the Turkish route e2e with no API calls or
 clean controls. `scripts/deploy-page.sh --dry-run` retained all 32 cleanup routes.
 `lat check` and `git diff --check` passed.
 
-The full `npm run test:e2e` run had 43 passed, 1 skipped, 1 failed. The failure is
-the existing How to use reference freshness check (`build-how-to-use-reference.py
---check`); its generated command inventory is stale on master and is outside the
-cleanup UI changes.
+The generated How to use command inventory needed the existing Cleanup Lab
+`labctl` help text; it was refreshed with `build-how-to-use-reference.py` and
+the dashboard was rebuilt. The full `npm run test:e2e` run then passed with
+44 passed, 1 skipped.
 
 ## CLN-04 … CLN-29
 
