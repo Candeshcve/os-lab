@@ -40,7 +40,7 @@ the finding and the decision are in the session log.
 | CLN-09 | pending | — | — | — | — | none |
 | CLN-10 | pending | — | — | — | — | none |
 | CLN-11 | pending | — | — | — | — | none |
-| CLN-12 | pending | — | — | — | — | none |
+| CLN-12 | in progress (this PR) | — | — | — | — | none |
 | CLN-13 | pending | — | — | — | — | none |
 | CLN-14 | pending | — | — | — | — | none |
 | CLN-15 | pending | — | — | — | — | none |
@@ -62,6 +62,41 @@ the finding and the decision are in the session log.
 No CLN task has a student reservation or open student PR: `grep -rl CLN-
 reservations/` matches only `README.md` and `_schema.json`, and no open PR title or
 branch names a CLN id.
+
+## Dashboard handoff — CLN-12
+
+### Console endpoint
+
+None. The guard is engine-internal: CLN-13's plan and CLN-15's run will return a
+`reason` and `reasonCode` per item from `safety.check_target()`.
+
+### What the page shows per item
+
+`Ok` items carry the resolved path. A refused item must show its translated code and
+keep the entry visible — never silently drop it. Codes:
+
+| Code | Meaning | English fallback |
+|---|---|---|
+| `empty` | empty path in a request | A filesystem path cannot be empty. |
+| `nul` | NUL byte in a path | A filesystem path cannot contain NUL bytes. |
+| `relative` | not absolute and not `~/…` | Filesystem paths must be absolute: `<path>` |
+| `protected` | `/`, the home folder or a drive root | Refusing to operate on protected root `<path>`. |
+| `system-root` | `/System`, `/usr`, `C:\Windows` … | Refusing to operate on system directory `<path>`. |
+| `missing` | vanished since the scan | Path no longer exists. |
+| `no-path` | entry has no path for this OS | This entry has no path for this system. |
+| `outside-root` | symlink resolved outside the entry's root | Path resolves outside its catalog root (symlink escape). |
+| `foreign-owner` | owned by another account | Owned by another user account; a privileged plan is required. |
+| `app-running` | an owning app is running | The owning application is running: `<apps>`. |
+
+Also refused, for CLN-23 and CLN-27: `missing` / `not-a-folder` / `unreadable` when
+choosing a scan folder, `outside-roots` for a target outside every allowed root,
+`same-path` / `nested` / `destination-outside` for a copy.
+
+### Suggested UI strings
+
+`Skipped` · `Could not be cleaned` · `Some items were skipped` — the reasons themselves
+come from the payload. A privileged entry shows `Needs administrator rights` and stays
+unselected.
 
 ## Dashboard handoff — CLN-02
 
@@ -241,3 +276,13 @@ per-OS template expansion, unresolved paths reported with a reason, pre-selected
 risk refused), `cleanup-lab/PARITY.md` mapping every Qleaner detector id read from
 `detectors.rs`, `catalog/README.md`, `labctl cleanup catalog` and
 `GET /api/cleanup/catalog`. No CLN reservation or open CLN PR existed for this task.
+
+**2026-11-13 — CLN-12.** Safety guard. Added `cleanup_lab/safety.py`: the reference
+path policy (canonical/resolved paths, protected and system roots, component
+containment, `validate_scan_root`, `validate_target`, `validate_copy`) plus ownership
+and a process-table lock matched on whole names from each entry's `owningProcesses`.
+`check_target()` returns a verdict with a stable code and an English reason;
+`assert_safe_target()` raises both. 22 new tests (69 total), including a check that no
+shipped catalog entry points at a protected root. The old `contains("..")` and
+`contains("system")` checks are gone; `a..b` is a valid path and `~/.cache/systemd`
+is not blocked by a substring.

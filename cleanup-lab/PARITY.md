@@ -17,6 +17,16 @@ and `commands.rs` on Qleaner's default branch on 2026-11-13.
 Qleaner's known bugs and the "Do not port" tables are in
 [`README.md`](README.md); this file records coverage, not behaviour.
 
+## Safety translations
+
+| Qleaner check | Cleanup Lab | Why |
+|---|---|---|
+| `path.contains("..")` | `safety.canonical` + resolved containment | the old test rejected valid names like `a..b` and never resolved a symlink |
+| `path.contains("system")` | `protected_roots` + `system_roots` per OS | the substring blocked `~/.cache/systemd` and protected nothing else |
+| Chrome and Firefox only, by substring | the entry's `owningProcesses`, whole name from the process table | every entry names its own apps; `Slack` does not match `slackd` |
+| `is_owned_by_user` (uid compare) | `safety.owned_by_user` | kept; Qleaner called it on macOS only |
+| `is_process_running` (two names) | `safety.running_processes` | now fed by the catalog, with injected process lists in tests |
+
 ## System
 
 | Qleaner id | Catalog id | Task | Notes |

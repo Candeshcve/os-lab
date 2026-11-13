@@ -71,13 +71,18 @@ engine.
 
 The eight rules in the README are the acceptance criteria for every task.
 
-Scans are read-only (`lstat`, symlinks never followed). Cleaning is
-plan → confirm → run with Trash by default, and a failed Trash never becomes a
-silent permanent delete. Every target is resolved inside an allowed root and is
-skipped when its owning app runs. Credentials and privacy data are never
-pre-selected. Bytes are counted only when removed, every skip and failure carries a
-reason, and every run is written to the audit history. Tests use generated temp
-trees and fake binaries, never real user files.
+Every destructive call passes through [[cleanup-lab/engine/cleanup_lab/safety.py]]:
+the target is resolved with its symlinks and must stay inside its catalog entry's
+roots; it is refused when it is a protected or system root, when it is owned by
+another account, or when an owning application is running (whole-name match against
+the process table, not a Chrome/Firefox substring). `check_target()` returns a
+verdict with a stable `code` and an English reason; `assert_safe_target()` raises
+the same pair. Scans stay read-only (`lstat`, symlinks never followed). Cleaning is
+plan → confirm → run with Trash by default, and a failed Trash never becomes a silent
+permanent delete. Credentials and privacy data are never pre-selected. Bytes are
+counted only when removed, every skip and failure carries a reason, and every run is
+written to the audit history. Tests use generated temp trees and fake binaries,
+never real user files.
 
 ## Tests
 
