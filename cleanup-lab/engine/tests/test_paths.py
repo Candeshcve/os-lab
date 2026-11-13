@@ -58,8 +58,29 @@ class WritableTest(unittest.TestCase):
 
     def test_file_is_not_a_writable_folder(self):
         with tempfile.NamedTemporaryFile() as handle:
-            self.assertEqual(paths.nearest_existing(os.path.join(handle.name, "x")), handle.name)
             self.assertFalse(paths.is_writable_dir(os.path.join(handle.name, "x")))
+
+    def test_relative_xdg_values_are_ignored(self):
+        env = {"HOME": "/home/ada", "XDG_STATE_HOME": "relative/state", "XDG_DATA_HOME": "relative/data"}
+        self.assertEqual(paths.state_dir(env, "linux"), "/home/ada/.local/state/os-lab/cleanup")
+        self.assertEqual(paths.trash_dir(env, "linux"), "/home/ada/.local/share/Trash")
+
+    def test_dangling_symlink_is_the_existing_component(self):
+        with tempfile.TemporaryDirectory() as base:
+            link = os.path.join(base, "dangling")
+            os.symlink(os.path.join(base, "missing"), link)
+            self.assertEqual(paths.nearest_existing(os.path.join(link, "state")), link)
+            self.assertFalse(paths.is_writable_dir(os.path.join(link, "state")))
+
+    def test_private_folder_check(self):
+        with tempfile.TemporaryDirectory() as base:
+            private = os.path.join(base, "private")
+            os.makedirs(private)
+            os.chmod(private, 0o700)
+            self.assertTrue(paths.is_private_dir(private))
+            os.chmod(private, 0o755)
+            self.assertFalse(paths.is_private_dir(private))
+            self.assertTrue(paths.is_private_dir(os.path.join(base, "missing")))
 
     def test_missing_chain_climbs_to_the_existing_parent(self):
         with tempfile.TemporaryDirectory() as base:

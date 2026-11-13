@@ -37,10 +37,23 @@ decide `ready`, `needs-setup` or `unavailable`. The detector catalog, the native
 scan backend and the tools on `PATH` are optional capabilities, so a missing one
 never blocks a scan.
 
-`/cleanup/` renders that probe in the dashboard shell and keeps its actions tied to
-it: the page offers only Re-check and says in words that scanning and cleaning are
-not wired yet. Public Pages has no engine, so it explains that instead of polling,
-per [[lat.md/ux-readiness.md]].
+`/cleanup/` will render that probe in the dashboard shell, offering only Re-check and
+saying in words that scanning and cleaning are not wired yet; until that page lands,
+`labctl cleanup status` and `GET /api/cleanup/status` are how to read it. Public Pages
+has no engine, so the page will explain that instead of polling, per
+[[lat.md/ux-readiness.md]].
+
+## Console API
+
+`console/cleanup_api.py` answers `/api/cleanup/...`; the web console routes that prefix
+before the static dashboard fallthrough.
+
+`GET /api/cleanup/status` returns the readiness probe. A request carries no command
+string and no free-form path list: an unknown path is `404`, unexpected or duplicate
+query parameters are `400`, and a missing engine is `501`. Later tasks add the scan
+job (CLN-03), plan → clean (CLN-13), history (CLN-15), ignore rules (CLN-17),
+volumes (CLN-28) and runtimes (CLN-29) here, each typed and validated again by the
+engine.
 
 ## Safety
 

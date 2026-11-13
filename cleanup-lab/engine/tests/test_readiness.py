@@ -50,6 +50,37 @@ class ProbeTest(unittest.TestCase):
             self.assertEqual(found, {"platform": True, "python": True, "home": True, "trash": True, "state": True})
             self.assertEqual(report["requirements"][1]["detail"], "3.12.1")
 
+    def test_python_311_is_new_enough(self):
+        with tempfile.TemporaryDirectory() as base:
+            report = self.probe(base, env=fake_env(base), version=(3, 11, 0))
+            python = [item for item in report["requirements"] if item["id"] == "python"][0]
+            self.assertTrue(python["found"], "(3, 11, 0) must not compare below MIN_PYTHON")
+            self.assertEqual(report["state"], "ready")
+
+    def test_unusable_trash_needs_setup(self):
+        with tempfile.TemporaryDirectory() as base:
+            env = fake_env(base)
+            trash = os.path.join(env["HOME"], ".Trash")
+            os.makedirs(trash)
+            os.chmod(trash, 0o500)
+            try:
+                report = self.probe(base, env=env)
+            finally:
+                os.chmod(trash, 0o700)
+            item = [entry for entry in report["requirements"] if entry["id"] == "trash"][0]
+            self.assertFalse(item["found"])
+            self.assertEqual(report["state"], "needs-setup")
+
+    def test_shared_state_folder_needs_setup(self):
+        with tempfile.TemporaryDirectory() as base:
+            env = fake_env(base)
+            os.makedirs(env["OSLAB_CLEANUP_STATE"])
+            os.chmod(env["OSLAB_CLEANUP_STATE"], 0o755)
+            report = self.probe(base, env=env)
+            item = [entry for entry in report["requirements"] if entry["id"] == "state"][0]
+            self.assertFalse(item["found"])
+            self.assertIn("writable by your user only", item["hint"])
+
     def test_old_python_needs_setup(self):
         with tempfile.TemporaryDirectory() as base:
             report = self.probe(base, env=fake_env(base), version=(3, 9, 6))

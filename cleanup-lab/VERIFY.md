@@ -16,14 +16,17 @@ log there).
 
 ```console
 $ cd cleanup-lab/engine && ../../.venv-test/bin/python -m unittest discover -s tests -p 'test_*.py'
-Ran 21 tests in 0.010s
+Ran 29 tests in 0.048s
 OK
 ```
 
 Covers: platform mapping, per-OS state and Trash paths, the `OSLAB_CLEANUP_STATE`
-override, the "never writes the state folder" rule, old-Python and unsupported-OS
-states, missing home folder, detector counting, fake `PATH` lookups, the Windows
-Recycle Bin entry, and the CLI exit codes (`0` ready / `1` problem / `2` usage).
+override, relative XDG values being ignored, dangling-symlink and non-directory
+components, the "never writes the state folder" rule, Python 3.11 exactly (the
+`(3, 11, 0) >= (3, 11)` boundary), an unusable Trash, a group-readable state
+folder, old-Python and unsupported-OS states, missing home folder, detector
+counting, fake `PATH` lookups, the Windows Recycle Bin entry, control-character
+escaping in CLI output, and the CLI exit codes (`0` ready / `1` problem / `2` usage).
 
 ### CLI
 
@@ -46,7 +49,8 @@ $ echo $?
 0
 ```
 
-`./labctl cleanup doctor` adds `Paths:` and `Hints:`; `--json` prints the same
+`./labctl cleanup doctor` adds `Paths:` and a `Hints:` block with every
+requirement's hint (failed ones marked `(needs attention)`); `--json` prints the same
 payload as the HTTP endpoint. `bash -n labctl` parses.
 
 ### Console endpoint

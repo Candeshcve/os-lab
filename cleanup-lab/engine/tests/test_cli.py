@@ -47,12 +47,36 @@ class CliTest(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(json.loads(text)["state"], "ready")
 
-    def test_doctor_lists_paths_and_hints(self):
+    def test_doctor_lists_every_hint(self):
+        report = dict(
+            READY,
+            state="needs-setup",
+            reasons=["Install Python 3.11 or newer."],
+            requirements=[
+                {"id": "python", "label": "Python 3.11 or newer", "found": False,
+                 "required": True, "hint": "Install Python 3.11 or newer.", "detail": "3.9.6"},
+                {"id": "home", "label": "Home folder readable", "found": True,
+                 "required": True, "hint": "Make it readable.", "detail": "/home/ada"},
+            ],
+        )
+        code, text = self.run_cli(["doctor"], report)
+        self.assertEqual(code, 1)
+        self.assertIn("Install Python 3.11 or newer.", text)
+        self.assertIn("(needs attention)", text)
+        self.assertIn("Make it readable.", text)
+
+    def test_doctor_ready_message_makes_no_scan_claim(self):
         code, text = self.run_cli(["doctor"])
         self.assertEqual(code, 0)
-        self.assertIn("Paths:", text)
-        self.assertIn("/home/ada", text)
-        self.assertIn("Hints:", text)
+        self.assertIn("nothing has been scanned yet", text)
+        self.assertNotIn("can scan and plan", text)
+
+    def test_control_characters_in_values_are_escaped(self):
+        report = dict(READY, home="/home/\x1b[31mada")
+        code, text = self.run_cli(["doctor"], report)
+        self.assertEqual(code, 0)
+        self.assertNotIn("\x1b", text)
+        self.assertIn("\\x1b", text)
 
     def test_unknown_subcommand_is_a_usage_error(self):
         stream = io.StringIO()

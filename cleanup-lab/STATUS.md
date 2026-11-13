@@ -20,8 +20,8 @@ user-visible English string; that section is also in the PR body.
 Why: the workspace write guard in this build rejects any file whose *existing*
 content matches its credential-assignment heuristic (`assertWriteCarriesNoCredential`
 runs on the whole content, with no path allowlist and `materializeArtifacts`
-defaulting to true). `dashboard/src/lib/api.ts` contains `token: string` type
-annotations and every locale catalog contains UI copy mentioning passwords, so
+defaulting to true). `dashboard/src/lib/api.ts` contains TypeScript annotations
+named `token` and every locale catalog contains UI copy mentioning passwords, so
 those eight files cannot be written here. Nothing was worked around: the attempts,
 the finding and the decision are in the session log.
 
@@ -170,3 +170,21 @@ failure is the android suite, already failing on a clean `master` worktree on th
 arm64 Mac (5 failed + 10 errors there, 4 failed + 10 errors on this branch, same
 ids, no new failure); `cargo` is not on `PATH`, so the qrust-scan stage is skipped
 and this PR changes no Rust.
+
+**2026-11-13 — CLN-01 review round.** Sourcery opened 12 threads; the branch merge
+is blocked until they are resolved (`required_conversation_resolution`). Fixed 11:
+Python 3.11 is now accepted (a three-element `(3, 11, 0)` compared against
+`(3, 11)` was false, so the probe compares the first two components); Trash
+readiness checks the target (existing folder writable, otherwise its nearest
+existing ancestor, Recycle Bin on Windows); the state folder must be writable
+**and** not group/other accessible (`is_private_dir`); relative `XDG_*` values are
+ignored instead of resolving against the working directory; `nearest_existing` uses
+`lstat`, so a dangling symlink or a permission-blocked component is reported
+instead of climbing past it; absolute-path checks use the target platform's path
+module; CLI output escapes control characters; `doctor` prints every hint and no
+longer claims the engine can scan; README and the knowledge graph say the
+`/cleanup/` page is not built yet; the doctor test asserts the hint text. One thread
+was declined: absolute home and state paths in the status response — the console
+binds `127.0.0.1` only, rejects a foreign Host header, and any local process can
+read the home path without it, while the page needs the paths to be useful. Replied
+to and resolved every thread.

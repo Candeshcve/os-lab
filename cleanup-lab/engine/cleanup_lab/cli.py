@@ -27,25 +27,39 @@ def _mark(found, stream):
     return _colour("[--]", "\033[31m", stream)
 
 
+def _safe(value):
+    """Escape control characters so a path or process name cannot rewrite the terminal."""
+    return "".join(
+        character if character.isprintable() else "\\x{:02x}".format(ord(character))
+        for character in str(value)
+    )
+
+
 def _status_lines(report, stream):
     engine = report["engine"]
     lines = [
-        "Cleanup Lab {0} · {1} · {2}".format(engine["version"], report["platform"]["label"], report["state"]),
+        "Cleanup Lab {0} · {1} · {2}".format(
+            _safe(engine["version"]), _safe(report["platform"]["label"]), _safe(report["state"])
+        ),
     ]
     for item in report["requirements"]:
         lines.append(
-            "  {0} {1:<32} {2}".format(_mark(item["found"], stream), item["label"], item["detail"])
+            "  {0} {1:<32} {2}".format(
+                _mark(item["found"], stream), _safe(item["label"]), _safe(item["detail"])
+            )
         )
     lines.append("")
     lines.append("Capabilities:")
     for item in report["capabilities"]:
         lines.append(
-            "  {0} {1:<32} {2}".format(_mark(item["found"], stream), item["label"], item["detail"])
+            "  {0} {1:<32} {2}".format(
+                _mark(item["found"], stream), _safe(item["label"]), _safe(item["detail"])
+            )
         )
     if report["reasons"]:
         lines.append("")
         lines.append("What to fix:")
-        lines.extend("  - {0}".format(reason) for reason in report["reasons"])
+        lines.extend("  - {0}".format(_safe(reason)) for reason in report["reasons"])
     return lines
 
 
@@ -53,15 +67,15 @@ def _doctor_lines(report, stream):
     lines = _status_lines(report, stream)
     lines.append("")
     lines.append("Paths:")
-    lines.append("  home        {0}".format(report["home"]))
-    lines.append("  state       {0}".format(report["stateDir"]))
+    lines.append("  home        {0}".format(_safe(report["home"])))
+    lines.append("  state       {0}".format(_safe(report["stateDir"])))
     lines.append("")
     lines.append("Hints:")
     for item in report["requirements"]:
-        if not item["found"]:
-            lines.append("  {0}: {1}".format(item["label"], item["hint"]))
+        marker = "" if item["found"] else " (needs attention)"
+        lines.append("  {0}{1}: {2}".format(_safe(item["label"]), marker, _safe(item["hint"])))
     readiness = {
-        "ready": "The engine can scan and plan on this computer.",
+        "ready": "Every readiness check passed; nothing has been scanned yet.",
         "needs-setup": "The engine is installed but something it needs is missing.",
         "unavailable": "This operating system is not supported by Cleanup Lab.",
     }[report["state"]]

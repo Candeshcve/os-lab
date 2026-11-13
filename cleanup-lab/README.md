@@ -10,9 +10,11 @@ behaviour is ported, not the code or the look.** Qleaner has known bugs (below) 
 its own visual style; Cleanup Lab pages use the os-lab dashboard shell and follow
 [`docs/UX_READINESS.md`](../docs/UX_READINESS.md).
 
-Status: **CLN-01 skeleton in place; the rest is roadmap.** The engine package, the
-readiness probe (`labctl cleanup status|doctor`, `GET /api/cleanup/status`) and the
-`/cleanup/` readiness page exist. Scanning and cleaning are not wired yet. The work
+Status: **CLN-01 skeleton in place; the rest is roadmap.** The engine package and the
+readiness probe (`labctl cleanup status|doctor`, `GET /api/cleanup/status`) exist.
+The `/cleanup/` page is **not built yet**: the dashboard layer lands separately, and
+[`STATUS.md`](STATUS.md) carries the endpoint contract, page states and strings it
+must use. Scanning and cleaning are not wired yet. The work
 is split into tasks `CLN-01` … `CLN-29` on the dashboard **Contribute → Roadmap &
 TODOs** tab (filter: Open Source OS, label "Cleanup Lab"). Reserve a task before you
 start, as with every os-lab task

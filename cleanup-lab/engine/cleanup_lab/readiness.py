@@ -16,6 +16,7 @@ import time
 from . import __version__
 from .paths import (
     home_dir,
+    is_private_dir,
     is_writable_dir,
     platform_id,
     state_dir,
@@ -87,6 +88,21 @@ def _simulator_tool(platform, env):
     return _first_on_path(env, ("emulator", "avdmanager"))
 
 
+def _trash_usable(platform, trash):
+    """Whether items could actually be moved to this platform's Trash.
+
+    A Trash folder that exists must be writable; one that does not exist yet is
+    fine when its nearest existing ancestor is writable (a fresh Linux account
+    has no ``~/.local/share/Trash`` until the first move). Windows uses the
+    Recycle Bin through the shell, which has no path to check.
+    """
+    if trash is None:
+        return platform == "windows"
+    if os.path.isdir(trash):
+        return os.access(trash, os.W_OK | os.X_OK)
+    return is_writable_dir(trash)
+
+
 def _tool_capabilities(platform, env):
     items = []
     for id_, label, names in CHECKED_TOOLS:
@@ -127,9 +143,9 @@ def probe(root=None, env=None, sys_platform=None, version=None):
     python = _python_version(version)
 
     home_readable = os.path.isdir(home) and os.access(home, os.R_OK | os.X_OK)
-    trash_ready = supported
+    trash_ready = _trash_usable(platform, trash)
     trash_detail = trash or "Recycle Bin"
-    state_ready = is_writable_dir(state)
+    state_ready = is_writable_dir(state) and is_private_dir(state)
 
     requirements = [
         _requirement(
@@ -142,7 +158,7 @@ def probe(root=None, env=None, sys_platform=None, version=None):
         _requirement(
             "python",
             "Python 3.11 or newer",
-            python >= MIN_PYTHON,
+            python[:2] >= MIN_PYTHON,
             "labctl cleanup prefers the checkout's .venv; install Python 3.11 or newer.",
             ".".join(str(part) for part in python),
         ),
@@ -164,7 +180,7 @@ def probe(root=None, env=None, sys_platform=None, version=None):
             "state",
             "Private state folder writable",
             state_ready,
-            "The audit history and the learned profile live here. Set OSLAB_CLEANUP_STATE to a writable folder.",
+            "The audit history and the learned profile live here. Keep it writable by your user only, or set OSLAB_CLEANUP_STATE to such a folder.",
             state,
         ),
     ]
