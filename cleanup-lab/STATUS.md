@@ -34,7 +34,7 @@ the finding and the decision are in the session log.
 | CLN-03 | merged | [#138](https://github.com/keyvanarasteh/os-lab/pull/138) | c253cf34 | `/cleanup/` scan page, sidebar/route, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred | none |
 | CLN-04 | pending | — | — | — | — | none |
 | CLN-05 | pending | — | — | — | — | none |
-| CLN-06 | in progress (this PR) | — | — | — | — | none |
+| CLN-06 | in progress (this PR) | [#145](https://github.com/keyvanarasteh/os-lab/pull/145) | — | — | — | none |
 | CLN-07 | pending | — | — | — | — | none |
 | CLN-08 | pending | — | — | — | — | none |
 | CLN-09 | pending | — | — | — | — | none |
