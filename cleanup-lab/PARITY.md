@@ -144,7 +144,23 @@ never pre-selected (rule 5). Toolchains carry `risk: high` and are relocate-only
 | Qleaner id | Catalog id | Task | Notes |
 |---|---|---|---|
 | `deep_node_modules` | `projects.node-modules` | CLN-07, CLN-24 | Matched by marker files (`package.json`), not by name. Qleaner matches the folder name only. |
-| `deep_rust_targets` | `projects.rust-target` | CLN-07, CLN-24 | `Cargo.toml` or `pom.xml` proof; a folder called `target` without one is not offered. |
+| `deep_rust_targets` | `projects.rust-target` | CLN-07, CLN-24 | Requires `Cargo.toml`; a folder called `target` without one is not offered. |
+| Maven `target` | `projects.maven-target` | CLN-24 | Requires `pom.xml`. |
+| Gradle `.gradle` | `projects.gradle-cache` | CLN-24 | Requires Gradle build/settings marker. |
+| Gradle `build` | `projects.gradle-build` | CLN-24 | Requires Gradle build marker. |
+| Python virtualenv | `projects.python-venv` | CLN-24 | Requires inner `pyvenv.cfg`. |
+| Python tox | `projects.python-tox` | CLN-24 | Requires tox or Python project marker. |
+| Python bytecode | `projects.python-pycache` | CLN-24 | Requires Python project marker. |
+| Next.js build | `projects.next-build` | CLN-24 | Requires `package.json`. |
+| Nuxt build | `projects.nuxt-build` | CLN-24 | Requires Nuxt config. |
+| SvelteKit build | `projects.svelte-kit` | CLN-24 | Requires Svelte config. |
+| JS tool cache | `projects.js-tool-cache` | CLN-24 | Requires `package.json`. |
+| Dart tool cache | `projects.dart-tool` | CLN-24 | Requires `pubspec.yaml`. |
+| SwiftPM build | `projects.swiftpm-build` | CLN-24 | Requires `Package.swift`. |
+| Zig build | `projects.zig-cache` | CLN-24 | Requires `build.zig`. |
+| Elixir build | `projects.elixir-build` | CLN-24 | Requires `mix.exs`. |
+| Terraform providers | `projects.terraform-providers` | CLN-24 | Requires Terraform source marker. |
+| Tagged cache | `projects.cachedir-tag` | CLN-24 | Requires valid `CACHEDIR.TAG` signature. |
 
 Roots come from the console as validated ids (CLN-07), never as free-form paths.
 

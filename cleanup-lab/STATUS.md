@@ -52,8 +52,8 @@ the finding and the decision are in the session log.
 | CLN-21 | pending | — | — | — | — | none |
 | CLN-22 | merged | [#137](https://github.com/keyvanarasteh/os-lab/pull/137) | a3133e76 | — | done ahead of order by Claude Code at the maintainer's request; engine and dashboard untouched | none |
 | CLN-23 | pending | — | — | Disk Explorer page | console side only | none |
-| CLN-24 | pending | — | — | — | — | none |
-| CLN-25 | in review (this PR) | [#146](https://github.com/keyvanarasteh/os-lab/pull/146) | — | source label wired into cleanup results | engine and dashboard payloads ready | none |
+| CLN-24 | in review (this PR) | [#148](https://github.com/keyvanarasteh/os-lab/pull/148) | — | — | catalog signatures behind CLN-07 sweep | none |
+| CLN-25 | merged | [#146](https://github.com/keyvanarasteh/os-lab/pull/146) | e5dfac27 | source label wired into cleanup results | engine and dashboard payloads ready | none |
 | CLN-26 | pending | — | — | — | — | none |
 | CLN-27 | pending | — | — | — | — | none |
 | CLN-28 | pending | — | — | `/cleanup/` volumes card | console side only | none |
