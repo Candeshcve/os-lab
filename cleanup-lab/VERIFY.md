@@ -469,4 +469,64 @@ passed 115 tests. Native Windows scanning was not run on this macOS host.
 
 ## CLN-04, CLN-05, CLN-07 … CLN-29
 
+## CLN-11 — package review suggestions
+
+Fixed-argv Homebrew, pip3 and gem inventory calls are read-only and use a
+15-second timeout. Captured-style output fixtures verify Homebrew dry-run
+formulae, pip JSON and RubyGems local names, plus malformed pip output and
+missing tools. Each result carries a typed uninstall argv without running it;
+names beginning with options are rejected. Console tests reject caller-supplied
+argv and return a job. Pip and gem candidates are for review, not proven
+orphans.
+
+## CLN-09 — macOS leftover signatures
+
+The scanner reads `Info.plist` with `plistlib` and scans catalog roots without
+following symlinks. Exact bundle ids and dotted children, whole team-id prefix,
+and normalized app name are separate evidence rules. A generated tree verifies
+that `com.acme.editor2` and `Acme Editor Pro` do not match `com.acme.editor` or
+`Acme Editor`. Fixtures also cover hidden apps, large app data, symlink skips,
+and an empty installed inventory returning `unknown`. The console endpoint
+rejects free-form paths and returns a job. All findings are report-only.
+
+## CLN-07 — deep project sweep and Xcode simulators
+
+The sweep accepts configured root ids, scans read-only, checks project marker
+files and stops below matched artifacts. A generated tree test covers valid
+Node and Rust projects, false `target`/`node_modules` names, a nested artifact
+and a symlink loop. Console tests reject paths, unknown ids and malformed age
+filters. A fake `xcrun simctl list -j devices` checks fixed argv, timeout,
+unavailable devices and measured size. Engine suite: 115 passed; console
+contract suite: 11 passed via `uv run --with pytest`. Native Xcode was not
+available on this host.
+
+## CLN-15 — private audit history
+
+Branch `codex/cln-15-audit-history` from master `6656ed55`. A clean request
+checks that a private state folder, 32-byte per-install key and SQLite store are
+usable before claiming the plan. Completed clean results are recorded with their
+paths, mode, counted bytes and outcomes. Rows and the chain head have HMAC-SHA256
+signatures; `labctl cleanup history --verify` and `GET /api/cleanup/history`
+verify the full chain. Changed or removed rows fail verification. Like any local
+integrity scheme, restoring an older complete snapshot of both database and key
+cannot be distinguished without an external trusted anchor.
+
+```console
+$ cd cleanup-lab/engine && ../../.venv-test/bin/python -m unittest discover -s tests -p 'test_*.py'
+Ran 118 tests — OK
+$ cd android-lab/lab && ../../.venv-test/bin/python -m pytest tests/test_cleanup_console.py -q
+10 passed
+$ lat check
+All checks passed
+```
+
+`./scripts/run-tests.sh --no-venv` passed the cleanup engine, reference Python,
+Rust, Source Lab, shell syntax, knowledge graph and dashboard typecheck/build
+stages. Its Android stage had the same six host or baseline failures recorded for
+CLN-13 (three AppImage architecture expectations, invalid `JAVA_HOME` for JADX,
+source console mutation guard, and web UI preview status): 6 failed, 158 passed,
+1 skipped. No dashboard files changed; CLN-16 owns the history view.
+
+## CLN-04 … CLN-29
+
 Each task appends its own section when it lands.
