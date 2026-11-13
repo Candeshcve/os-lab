@@ -454,6 +454,130 @@ file changed and this worktree has no Node dependencies; the page is CLN-16. Rus
 `fmt`/`clippy` — no Rust changed. No Windows host ran the cross-volume and
 freedesktop-Trash paths; those use injected tests.
 
+## CLN-16 — cleanup dashboard pages
+
+Branch `codex/cln-16-cleanup-dashboard` from master `6656ed55`, independent of
+CLN-15 PR #140. Adds `/cleanup/`, `/cleanup/results/`, `/cleanup/leftovers/` and
+`/cleanup/history/` in all eight route sets, with local typed API calls and a
+read-only public Pages view. The history route expects CLN-15 to merge first.
+
+`npm run check`, `npm run test:i18n`, and `npm run build` passed. The new mocked
+API e2e passed for scan, plan, confirm, clean, results, leftovers and history.
+A Pages build under `/os-lab` passed the Turkish route e2e with no API calls or
+clean controls. `scripts/deploy-page.sh --dry-run` retained all 32 cleanup routes.
+`lat check` and `git diff --check` passed.
+
+The generated How to use command inventory needed the existing Cleanup Lab
+`labctl` help text; it was refreshed with `build-how-to-use-reference.py` and
+the dashboard was rebuilt. The full `npm run test:e2e` run then passed with
+44 passed, 1 skipped.
+
+## CLN-05 — browser caches and privacy data
+
+Branch `codex/cln-05-browser-caches` from master `6656ed55`. The catalog
+includes Chrome, Edge, Brave, Opera, Vivaldi, Firefox and Safari caches on
+their applicable operating systems. Chrome history and extension traces are
+privacy-class entries and never pre-selected. Browser process names feed the
+existing running-app lock. `profile-glob` expands all matching local profiles;
+the guard refuses a candidate whose symlink resolves outside the catalog root.
+
+Disposable-home fixtures cover Chrome Default, numbered and guest profiles,
+Firefox profiles, process locks, symlink escape, privacy defaults and per-OS
+template expansion. The engine suite passed 116 tests. Native Windows browser
+profile scanning was not run on this macOS host.
+
+## CLN-04, CLN-06 … CLN-29
+
+## CLN-04 — system detections
+
+Branch `codex/cln-04-system-caches` from master `6656ed55`. The system catalog
+now has per-OS paths for account caches and logs, per-item temporary data,
+crash reports, font caches and macOS Spotlight indexes. A temp detector
+enumerates immediate children of catalog roots while omitting symlinks, lock,
+socket and pid names, and regular files below 1 KiB. Spotlight expands indexes
+on mounted volumes. Shared temp and Spotlight are privileged and never
+pre-selected; the current unprivileged plan reports them as skipped.
+
+Generated-tree fixtures cover macOS and Linux temp scanning, Windows path
+expansion, and multiple macOS Spotlight volumes. The engine suite passed 115
+tests. `lat check`, JSON parsing and `git diff --check` passed. Native Windows
+scanning was not run on this macOS host.
+
+## CLN-05 … CLN-29
+
+## CLN-06 — developer tool and package-manager caches
+
+Branch `codex/cln-06-developer-caches` from master `6656ed55`. Adds 47
+developer entries with per-OS defaults, credential risk and non-cleanable
+toolchain/local-cluster entries. Optional binary presence uses `shutil.which`
+with the supplied `PATH`, never `sh -c`; nvm and virtualenvwrapper use their
+directories because they may be shell functions. CLN-25 adds dynamic cache
+resolution from environment and fixed-argv probes.
+
+Generated-home tests cover XDG/macOS/Windows paths, a fake npm binary, absent
+pnpm, credential defaults and plan refusal for toolchains. The engine suite
+passed 115 tests. Native Windows scanning was not run on this macOS host.
+
+## CLN-04, CLN-05, CLN-07 … CLN-29
+
+## CLN-11 — package review suggestions
+
+Fixed-argv Homebrew, pip3 and gem inventory calls are read-only and use a
+15-second timeout. Captured-style output fixtures verify Homebrew dry-run
+formulae, pip JSON and RubyGems local names, plus malformed pip output and
+missing tools. Each result carries a typed uninstall argv without running it;
+names beginning with options are rejected. Console tests reject caller-supplied
+argv and return a job. Pip and gem candidates are for review, not proven
+orphans.
+
+## CLN-09 — macOS leftover signatures
+
+The scanner reads `Info.plist` with `plistlib` and scans catalog roots without
+following symlinks. Exact bundle ids and dotted children, whole team-id prefix,
+and normalized app name are separate evidence rules. A generated tree verifies
+that `com.acme.editor2` and `Acme Editor Pro` do not match `com.acme.editor` or
+`Acme Editor`. Fixtures also cover hidden apps, large app data, symlink skips,
+and an empty installed inventory returning `unknown`. The console endpoint
+rejects free-form paths and returns a job. All findings are report-only.
+
+## CLN-07 — deep project sweep and Xcode simulators
+
+The sweep accepts configured root ids, scans read-only, checks project marker
+files and stops below matched artifacts. A generated tree test covers valid
+Node and Rust projects, false `target`/`node_modules` names, a nested artifact
+and a symlink loop. Console tests reject paths, unknown ids and malformed age
+filters. A fake `xcrun simctl list -j devices` checks fixed argv, timeout,
+unavailable devices and measured size. Engine suite: 115 passed; console
+contract suite: 11 passed via `uv run --with pytest`. Native Xcode was not
+available on this host.
+
+## CLN-15 — private audit history
+
+Branch `codex/cln-15-audit-history` from master `6656ed55`. A clean request
+checks that a private state folder, 32-byte per-install key and SQLite store are
+usable before claiming the plan. Completed clean results are recorded with their
+paths, mode, counted bytes and outcomes. Rows and the chain head have HMAC-SHA256
+signatures; `labctl cleanup history --verify` and `GET /api/cleanup/history`
+verify the full chain. Changed or removed rows fail verification. Like any local
+integrity scheme, restoring an older complete snapshot of both database and key
+cannot be distinguished without an external trusted anchor.
+
+```console
+$ cd cleanup-lab/engine && ../../.venv-test/bin/python -m unittest discover -s tests -p 'test_*.py'
+Ran 118 tests — OK
+$ cd android-lab/lab && ../../.venv-test/bin/python -m pytest tests/test_cleanup_console.py -q
+10 passed
+$ lat check
+All checks passed
+```
+
+`./scripts/run-tests.sh --no-venv` passed the cleanup engine, reference Python,
+Rust, Source Lab, shell syntax, knowledge graph and dashboard typecheck/build
+stages. Its Android stage had the same six host or baseline failures recorded for
+CLN-13 (three AppImage architecture expectations, invalid `JAVA_HOME` for JADX,
+source console mutation guard, and web UI preview status): 6 failed, 158 passed,
+1 skipped. No dashboard files changed; CLN-16 owns the history view.
+
 ## CLN-04 … CLN-29
 
 Each task appends its own section when it lands.

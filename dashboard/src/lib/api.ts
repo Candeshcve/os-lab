@@ -145,6 +145,41 @@ export interface Hook {
   code: string;
 }
 
+export interface CleanupStatus {
+  state: LabState;
+  reasons: string[];
+  requirements: { id: string; label: string; found: boolean; hint: string; detail: string }[];
+  capabilities: { id: string; label: string; found: boolean; detail: string }[];
+}
+export interface CleanupEntry {
+  id: string; name: string; category: string; risk: string; hint: string; impact: string;
+  defaultSelected: boolean; needsPrivilege: boolean;
+  paths: { template: string; path: string | null; reason: string }[];
+}
+export interface CleanupScan {
+  cancelled: boolean;
+  entries: { id: string; name: string; category: string; risk: string; sizeBytes: number; files: number; folders: number; unreadable: string[]; paths: { path: string | null; reason: string; sizeBytes: number; error: string | null }[] }[];
+  totals: { sizeBytes: number; files: number; folders: number; unreadable: number };
+}
+export interface CleanupPlan {
+  planId: string; mode: "trash" | "delete"; expiresAt: number;
+  items: { entryId: string; entryName: string; path: string | null; status: string; code: string; reason: string; sizeBytes: number; files: number; folders: number }[];
+  totals: { ready: number; skipped: number; bytes: number };
+}
+export interface CleanupResult {
+  planId: string; mode: "trash" | "delete"; cancelled: boolean;
+  results: { entryId: string; entryName: string; path: string | null; status: string; code: string; reason: string; error: string | null; bytes: number; trashPath: string | null }[];
+  totals: { items: number; trashed: number; deleted: number; skipped: number; failed: number; bytes: number };
+}
+export interface CleanupJob {
+  id: string; kind: "scan" | "plan" | "clean"; state: "running" | "done" | "cancelled" | "failed";
+  request: { entryIds?: string[]; mode?: "trash" | "delete"; planId?: string };
+  progress: Record<string, string | number> | null;
+  result: CleanupScan | CleanupPlan | CleanupResult | null;
+  error: string | null;
+}
+export interface CleanupHistory { entries: { id: number; result: CleanupResult; hmac: string }[]; total: number; verified: boolean }
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -202,6 +237,15 @@ export interface AppUpdateState {
 }
 
 export const api = {
+  cleanupStatus: () => call<CleanupStatus>("/api/cleanup/status"),
+  cleanupCatalog: () => call<{ platform: string; entries: CleanupEntry[] }>("/api/cleanup/catalog"),
+  cleanupHistory: () => call<CleanupHistory>("/api/cleanup/history"),
+  cleanupJobs: () => call<{ jobs: CleanupJob[] }>("/api/cleanup/jobs"),
+  cleanupScan: (entryIds: string[]) => post<CleanupJob>("/api/cleanup/scan", { entryIds }),
+  cleanupPlan: (entryIds: string[], mode: "trash" | "delete") => post<CleanupJob>("/api/cleanup/plan", { entryIds, mode }),
+  cleanupClean: (planId: string) => post<CleanupJob>("/api/cleanup/clean", { planId }),
+  cleanupJob: (id: string) => call<CleanupJob>(`/api/cleanup/jobs/${encodeURIComponent(id)}`),
+  cleanupCancel: (id: string) => post<CleanupJob>(`/api/cleanup/jobs/${encodeURIComponent(id)}/cancel`),
   health: () => call<{ status: string; version: string; console: boolean }>("/api/health"),
   host: () => call<{ host: HostInfo; labs: LabStatus[] }>("/api/host"),
   capabilities: () => call<CapabilityCatalog>("/api/capabilities"),
