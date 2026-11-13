@@ -464,6 +464,16 @@ that `com.acme.editor2` and `Acme Editor Pro` do not match `com.acme.editor` or
 and an empty installed inventory returning `unknown`. The console endpoint
 rejects free-form paths and returns a job. All findings are report-only.
 
+## CLN-10 — Linux and Windows leftover signatures
+
+Linux inventory uses fixed argv for dpkg, rpm, Flatpak and Snap and scans
+configured XDG config, share and cache roots. Windows inventory reads uninstall
+registry keys and scans configured AppData roots. Both use CLN-09's confidence
+rules and return report-only findings. Generated fixtures prove exact `firefox`
+and Flatpak id matches, a `firefox-old` near miss, an inventory failure yielding
+`unknown`, and Windows `Acme Editor` versus `Acme Editor Pro`. Console tests
+reject free-form paths on the general typed scan endpoint.
+
 ## CLN-04 … CLN-29
 
 Each task appends its own section when it lands.

@@ -43,6 +43,15 @@ why it was dropped, and [[cleanup-lab/catalog/README.md]] documents the format.
 
 CLN-09 adds read-only macOS leftover signatures and a typed scan job.
 
+CLN-10 extends the same identity rules to Linux and Windows. On Linux,
+[[cleanup-lab/engine/cleanup_lab/leftovers_cross.py]] queries available dpkg,
+rpm, Flatpak and Snap inventories with fixed argv and scans configured XDG
+config/share/cache roots. On Windows, it reads uninstall registry keys without
+launching a command and scans Roaming and Local AppData. The roots are in
+[[cleanup-lab/catalog/signatures/cross-platform-leftovers.json]]. If an inventory
+fails, unmatched candidates remain `unknown`; all findings are report-only.
+`POST /api/cleanup/leftovers/scan` dispatches by host OS and accepts no paths.
+
 [[cleanup-lab/engine/cleanup_lab/leftovers_macos.py]] reads installed app bundle
 ids and optional team ids from `Info.plist` with `plistlib`. It checks candidate
 folders under the configured [[cleanup-lab/catalog/signatures/macos-leftovers.json]]
