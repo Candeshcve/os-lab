@@ -11,6 +11,7 @@ One file per family. `family` must match the first segment of every entry id.
 | File | Family | Entries |
 |---|---|---|
 | `system.json` | `system` | User caches, user logs, Trash (Qleaner: `user_caches`, `system_logs`, `trash`) |
+| `browser.json` | `browser` | Chrome, Edge, Brave, Opera, Vivaldi, Firefox and Safari caches; Chrome history and extension traces |
 
 Later tasks add `browser.json` (CLN-05), `developers.json` (CLN-06),
 `projects.json` (CLN-07/24), `containers.json` and `vms.json` (CLN-08),
@@ -36,6 +37,14 @@ catalog id or to the reason it was dropped.
 | `paths` | `macos` / `linux` / `windows` → list of templates. An entry without a path for an OS simply does not appear there |
 
 ## Path templates
+
+`profile-glob` expands the catalog's profile patterns to existing paths. It
+includes Default, numbered, guest and other local profiles, while the safety
+guard checks each resolved candidate against the literal catalog root and
+refuses symlink escapes. Browser entries name their owning process so a running
+browser blocks cleaning. History and extension traces are privacy items and
+never pre-selected.
+
 
 | Template | Expands to |
 |---|---|

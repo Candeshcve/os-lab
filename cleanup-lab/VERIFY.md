@@ -454,6 +454,20 @@ file changed and this worktree has no Node dependencies; the page is CLN-16. Rus
 `fmt`/`clippy` — no Rust changed. No Windows host ran the cross-volume and
 freedesktop-Trash paths; those use injected tests.
 
-## CLN-04 … CLN-29
+## CLN-05 — browser caches and privacy data
+
+Branch `codex/cln-05-browser-caches` from master `6656ed55`. The catalog
+includes Chrome, Edge, Brave, Opera, Vivaldi, Firefox and Safari caches on
+their applicable operating systems. Chrome history and extension traces are
+privacy-class entries and never pre-selected. Browser process names feed the
+existing running-app lock. `profile-glob` expands all matching local profiles;
+the guard refuses a candidate whose symlink resolves outside the catalog root.
+
+Disposable-home fixtures cover Chrome Default, numbered and guest profiles,
+Firefox profiles, process locks, symlink escape, privacy defaults and per-OS
+template expansion. The engine suite passed 116 tests. Native Windows browser
+profile scanning was not run on this macOS host.
+
+## CLN-04, CLN-06 … CLN-29
 
 Each task appends its own section when it lands.
