@@ -29,6 +29,26 @@ The script reads assets from `app/out/<version>` when present, otherwise downloa
 release with `gh`, verifies every SHA-256 through `app/scripts/build-update-manifest.mjs`, and
 uploads `latest.json` to the `app-updates` prerelease.
 
+## 0.3.4
+
+- Pin the Windows NSIS setup to per-user installs and verify the per-user mode
+  during install; clear the stored install-path value on uninstall so a
+  reinstall does not inherit a stale path.
+- Add a read-only volume inventory to Cleanup Lab's engine: `GET
+  /api/cleanup/volumes` and `labctl cleanup volumes` list every local volume's
+  capacity and kind, mark the volume holding the home folder, and warn above
+  90% usage.
+- Add typed privileged maintenance actions behind the desktop's own elevation
+  prompt — APT package cache, journald vacuum, apt autoremove, the Spotlight
+  index rebuild and DISM's component store cleanup — with fingerprinted
+  single-use previews and an audited run, plus the read-only macOS Full Disk
+  Access probe. No stored password; an elevated `rm` stays refused.
+- Add cache relocation: move a catalog entry to another volume behind a
+  symlink and back (restore, relink, resume), where every step keeps either
+  the original or a verified copy. These Cleanup Lab capabilities live in the
+  engine, the console API and `labctl`; their dashboard cards follow in a
+  later release.
+
 ## 0.3.3
 
 - Make Cleanup Lab's default page a compact scan, recommendation, plan review,
