@@ -50,6 +50,8 @@ function Test-CurrentUserInstall($Setup) {
   $exe = Join-Path $installDir 'os-lab-app.exe'
   $userKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\os-lab'
   $machineKey = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\os-lab'
+  # Tauri's MSI reads this value to reuse a previous NSIS install directory (see installer-hooks.nsh).
+  $reuseKey = 'HKCU:\Software\Keyvan Arasteh\os-lab'
   foreach ($present in @($installDir, $userKey)) {
     if (Test-Path $present) { Die "a per-user os-lab install already exists ($present); remove it before -SmokeInstall" }
   }
@@ -75,9 +77,15 @@ function Test-CurrentUserInstall($Setup) {
       for ($i = 0; $i -lt 30 -and (Test-Path $installDir); $i++) { Start-Sleep -Milliseconds 500 }
       if (Test-Path $installDir) {
         if (-not $problem) { $problem = "the uninstaller left $installDir behind" }
-      } elseif (Test-Path $userKey) {
-        if (-not $problem) { $problem = 'the uninstaller left the HKCU entry behind' }
-      } else { Say 'uninstalled cleanly' }
+      }
+      if (Test-Path $userKey) {
+        if (-not $problem) { $problem = 'the uninstaller left the HKCU uninstall entry behind' }
+      }
+      $reuse = (Get-ItemProperty $reuseKey -Name '(default)' -ErrorAction SilentlyContinue).'(default)'
+      if ($reuse) {
+        if (-not $problem) { $problem = "the uninstaller left its install path in $reuseKey" }
+      }
+      if (-not $problem) { Say 'uninstalled cleanly' }
     }
   }
   if ($problem) { Die "per-user install check failed: $problem" }
