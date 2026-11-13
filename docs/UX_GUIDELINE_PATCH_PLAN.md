@@ -4,7 +4,7 @@
 
 The owner's request: "i mean best ux guideline patch for os-lab repo not qlar" and "regarding my prompts i asked in plan of qlar ux guidelinepatchs consider im asking same style prompts best fffor os-lab and regarding that analyze and create todo for its ux parts detailed which and agent can patch by reading plan and todo with smallest code read." This draft PR is the plan/todo home. It does not authorize claims that untested host or device behavior works.
 
-- Ship each stable code item below in its own non-draft PR against fresh `master` when sound. Keep this draft PR as the tracking home; link and mark split PRs in the [todo](UX_GUIDELINE_PATCH_TODO.md). A coherent pair of tiny items may share a PR only when they touch the same surface and verification.
+- The owner subsequently asked to patch all code-backed findings in commits on this draft PR. That instruction supersedes the proposed split-PR sequence for points A–C and I–M. Keep the [todo](UX_GUIDELINE_PATCH_TODO.md) current, and keep the PR draft while evidence-first reviews and physical host/device acceptance remain open. New findings from D–H or N should still become focused follow-up PRs when verified.
 - Before a slice, read its **First read** paths and the matching test, then inspect only direct callers/types needed for the change. Read [AGENTS.md](../AGENTS.md), [UX readiness](UX_READINESS.md), and [the UX graph node](../lat.md/ux-readiness.md) for shared rules. The broad inventory is a reconciliation task, not a reason to read the whole repository before each fix.
 - Preserve working actions, Source Lab destinations, downloads, locale routes, and local/public separation. The [Source inventory](../source-lab/INVENTORY.md) records retained and excluded features; the [Source TODO](../source-lab/TODO.md) has completed UI work. Do not revive excluded integrations or treat an older sentence in the Source plan as current implementation status.
 - The guideline update is **standard plus enforcement**: write measurable rules into `UX_READINESS.md`, then patch verified violations. Do not style-churn a working page merely to satisfy an abstract rule. Record a reproduction or code-level failure before changing behavior.
@@ -89,7 +89,7 @@ These are candidates, except the factual locale correction. UX-H records the fin
 
 Points D–H and N are review gates. If a point passes, close it with test or manual evidence and no code PR. Do not infer missing features from this table.
 
-Recommended sequence: guideline text and inventory; A, B, I, J (truthful async feedback); K and L (modal/tab keyboard semantics); C (shared touch sizing, then exceptions); M (stale contributor copy); D–H and N evidence passes; final Pages and device acceptance. Re-check fresh `master` before each split because another PR may have fixed a candidate.
+The owner chose to bundle the code-backed fixes in this draft PR. D–H and N remain evidence passes; re-check fresh `master` before later follow-up work because another PR may have fixed a candidate.
 
 ## Verification and completion
 
