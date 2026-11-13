@@ -638,6 +638,12 @@ type, translation, build and browser checks pass with all seven catalogs updated
 Branch `feat/cln-28`. Scope: the engine volume inventory, `GET
 /api/cleanup/volumes`, `labctl cleanup volumes`, tests, docs. The `/cleanup/`
 volumes card is the dashboard layer's part (handoff in `STATUS.md`).
+## CLN-20 — privileged targets and disk-access check
+
+Branch `feat/cln-20`. Scope: the privileged-action engine module, the action
+catalog, the console endpoints, the readiness capability, the macOS Full Disk
+Access probe, tests and docs. The `/cleanup/` privileged card is the dashboard
+layer's part (handoff in `STATUS.md`).
 
 ### Engine unit tests
 
@@ -663,6 +669,19 @@ with `FAIL:`/`ERROR:`) and compared: 86 ids before, 86 after, diff 0 — **no ne
 failure**. The 24 new `test_volumes.py` tests (fake mount tables and fake
 disks only, per README rule 8) and the existing `test_cli.py` suite (10 tests)
 pass on this host.
+Ran 180 tests in 1.350s
+FAILED (failures=49, errors=37, skipped=4)
+```
+
+Same discipline as CLN-28: a clean `origin/master` worktree on this Windows
+host fails the same suite before any change (154 tests, failures=49,
+errors=37, skipped=4 — platform-specific expectations, pre-existing). The
+failing test ids were captured on both runs: **86 ids before, 86 after, diff 0
+— no new failure**. The 26 new `test_privilege.py` tests (fake runners, fake
+`which`, injected executors — no real sudo/pkexec/osascript/UAC, per rule 8)
+pass; the catalog inventory assertion was updated deliberately from 65 to 66
+entries for the new `system.shared-font-caches` path and the updated test
+passes.
 
 ### Console contract
 
@@ -683,12 +702,19 @@ Cleanup Lab volumes · windows · 1 volume
   [ok] C:\                          NTFS     root       86% used · home
 exit 0
 ```
+1 failed, 10 passed, 7 skipped in 1.18s
+```
+
+The failure is the same single pre-existing Windows one recorded at the
+baseline (fake docker binary fixture); the two new privileged-endpoint tests
+pass.
 
 ### Knowledge graph
 
 ```console
 $ lat check
 All checks passed in 950ms
+All checks passed
 ```
 
 ### Not run
@@ -700,6 +726,16 @@ All checks passed in 950ms
   changed; the volumes card is the dashboard-layer handoff.
 * Live macOS and Linux collector runs — covered here by the injected
   fake-table tests; on-host confirmation is pending.
+* `./scripts/run-tests.sh` — no usable bash on this host (WSL launcher without
+  distributions), as recorded for CLN-28; the targeted suites above are the
+  stages this change needs.
+* Live elevated runs of every action (`apt-get clean` on Linux, `mdutil -E /`
+  on macOS, DISM on Windows) — deliberately not executed from a test or agent;
+  execution is covered by the injected-executor tests, and the real elevation
+  prompts belong to the user, not to CI. The `GET /api/cleanup/privileged`
+  capabilities call is safe and returns this host's actions without running
+  any of them.
+* Dashboard checks — no dashboard file changed; the card is the handoff.
 
 ## CLN-04 … CLN-29
 

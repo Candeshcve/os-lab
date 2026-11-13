@@ -48,7 +48,7 @@ the finding and the decision are in the session log.
 | CLN-17 | pending | — | — | — | — | none |
 | CLN-18 | pending | — | — | — | — | none |
 | CLN-19 | pending | — | — | — | — | none |
-| CLN-20 | pending | — | — | — | — | none |
+| CLN-20 | in review (this PR) | [#171](https://github.com/keyvanarasteh/os-lab/pull/171) | — | `/cleanup/` privileged card (dashboard layer) | action model, not elevated path deletion (see handoff) | none |
 | CLN-21 | pending | — | — | — | — | none |
 | CLN-22 | merged | [#137](https://github.com/keyvanarasteh/os-lab/pull/137) | a3133e76 | — | done ahead of order by Claude Code at the maintainer's request; engine and dashboard untouched | none |
 | CLN-23 | pending | — | — | Disk Explorer page | console side only | none |
@@ -56,7 +56,7 @@ the finding and the decision are in the session log.
 | CLN-25 | merged | [#146](https://github.com/keyvanarasteh/os-lab/pull/146) | e5dfac27 | source label wired into cleanup results | engine and dashboard payloads ready | none |
 | CLN-26 | pending | — | — | — | — | none |
 | CLN-27 | pending | — | — | — | — | none |
-| CLN-28 | in review (this PR) | [#170](https://github.com/keyvanarasteh/os-lab/pull/170) | — | `/cleanup/` volumes card (dashboard layer) | console + engine landed per the layer split | none |
+| CLN-28 | merged | [#170](https://github.com/keyvanarasteh/os-lab/pull/170) | c10d5ad9 | `/cleanup/` volumes card (dashboard layer) | console + engine landed per the layer split | none |
 | CLN-29 | pending | — | — | — | — | none |
 
 No CLN task has a student reservation or open student PR: `grep -rl CLN-
@@ -530,6 +530,65 @@ Visible strings (English; these are the i18n keys):
 `Usage unknown` · `Could not measure this volume`. Dynamic strings (`mountPoint`,
 `name`, `filesystem`, `error`, `warnings[]`) come from the engine in English,
 like every other lab payload; they are not translated client-side.
+## Dashboard handoff — CLN-20
+
+### Console endpoints (live on this branch)
+
+`GET /api/cleanup/privileged` — no query parameters (an unknown one is `400`):
+
+```json
+{
+  "platform": "linux",
+  "applicable": true,
+  "elevation": "pkexec",
+  "actions": [
+    {"id": "privileged.linux.apt-cache", "name": "APT package cache", "risk": "low",
+     "impact": "…", "previewMode": "files", "previewArgv": null,
+     "runArgv": ["apt-get", "clean"]}
+  ],
+  "diskAccess": {"applicable": false, "granted": null, "paths": [],
+                  "guidance": "", "reason": "Full Disk Access is a macOS privacy setting."}
+}
+```
+
+`elevation` is `pkexec` / `sudo` / `osascript` / `uac`, or `null` when the
+desktop offers none — hide the actions then. `POST
+/api/cleanup/privileged/preview` carries only `{"actionId": "privileged.linux.apt-cache"}`
+(unknown keys are `400`, an unknown action is `400`) and answers the preview id,
+the candidate material (`count`, `totalBytes` for files; `output` for tool text;
+`candidates` for package lists), the elevated command and `expiresAt`. `POST
+/api/cleanup/privileged/run` carries only `{"previewId": …}` — `404` unknown,
+`409` used, `410` expired — and starts job kind `privileged-run`; the result is
+appended to the signed audit history with `bytesRemoved: null` (the tool does
+not report trustworthy bytes — never invent them).
+
+`diskAccess` is macOS-only: `granted` is `true` / `false` / `null` (unknown),
+with `paths[]` evidence and, on `false`, the `guidance` sentence.
+
+### What the page does with it
+
+| State | What the page shows |
+|---|---|
+| no engine section | when `applicable` is `false` or `elevation` is `null`, the card is hidden (readiness hides it too) |
+| idle | one row per action: name, risk, impact, preview source; **Preview** |
+| previewed | the elevated command, the candidate material, `expiresAt`; **Run** behind an explicit confirm dialog that names the action and says the tool deletes directly (no Trash, no undo) |
+| running | job progress; **Cancel** refuses only the poll, the elevated process itself is not cancelled |
+| done | the tool's `output` (or the UAC sentence), and the history note |
+| failed | the error next to the action |
+| public Pages | no engine calls: the page explains local installation |
+
+Never expose a free-form command or path field. A macOS disk-access card shows
+`granted` with the probe paths; on other platforms it is hidden.
+
+### Visible strings (English; these are the i18n keys)
+
+`Privileged maintenance` · `System maintenance that needs administrator rights, shown before anything runs.` ·
+`Preview` · `Run` · `Elevated command` · `Candidates` · `This action removes data directly; it does not use the Trash and cannot be undone.` ·
+`Waiting for the elevation prompt…` · `The elevation prompt was refused.` ·
+`Full Disk Access` · `Granted` · `Not granted` · `Unknown` · `Open System Settings` ·
+`The Cleanup Lab runs in the local app.` Dynamic strings (`name`, `impact`,
+`output`, `error`, `guidance`) come from the engine in English, like every
+other lab payload.
 
 ## Session log
 
@@ -643,3 +702,18 @@ pre-existing platform-specific failures on this Windows host (49 failures + 37
 errors on a clean master checkout); the failing test set is identical after
 this change, and the console contract suite keeps its single pre-existing
 Windows failure.
+**2026-11-13 — CLN-20.** Privileged targets and the disk-access check. Added
+`cleanup_lab/privilege.py` (typed actions for apt cache, journald vacuum,
+apt autoremove, Spotlight rebuild and DISM component store cleanup; elevation
+through pkexec/sudo/osascript/UAC with no stored password; fingerprinted
+single-use previews; the read-only macOS Full Disk Access probe),
+`cleanup-lab/catalog/actions/privileged.json` mirrored by the engine allowlist,
+`GET /api/cleanup/privileged` + preview/run endpoints, an optional
+`privileged-actions` readiness capability and 26 engine tests with fake
+runners (rule 8). Design decision, recorded deliberately: privileged
+maintenance is the CLN-08 action pattern, not an elevated path deletion — an
+elevated `rm` would bypass rule 3's Trash guarantee. The catalog inventory
+assertion (`test_catalog.py`) was updated from 65 to 66 entries for the new
+`system.shared-font-caches` Linux path. The `/cleanup/` privileged card is the
+dashboard layer's part; the handoff is above. Windows host baseline failures
+are unchanged (86 identical ids; see VERIFY.md).

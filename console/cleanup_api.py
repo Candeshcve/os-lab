@@ -3,9 +3,9 @@
 The console accepts typed, validated calls only: never a command string and never
 a free-form path list from the page (``cleanup-lab/README.md``). Ready:
 readiness (CLN-01), the detector catalog (CLN-02), the scan job (CLN-03) and the
-plan → clean flow (CLN-13), audit history (CLN-15) and the volume inventory
-(CLN-28); the remaining endpoints add their own actions here, each validated
-again by the engine's safety guard.
+plan → clean flow (CLN-13), audit history (CLN-15), the volume inventory
+(CLN-28) and the typed privileged actions (CLN-20); the remaining endpoints add
+their own actions here, each validated again by the engine's safety guard.
 
 The engine is imported from ``cleanup-lab/engine`` (``cleanup_lab``), which is a
 plain standard-library package: the console does not install it.
@@ -53,6 +53,7 @@ PLAN_STATUS = {
 BODY_KEYS = {"scan": SCAN_KEYS, "deep-scan": DEEP_KEYS, "plan": PLAN_KEYS, "clean": CLEAN_KEYS,
              "macos-leftovers": (), "packages": (), "vm-scan": (),
               "container-preview": CONTAINER_PREVIEW_KEYS, "container-prune": CONTAINER_PRUNE_KEYS,
+              "privileged-preview": CONTAINER_PREVIEW_KEYS, "privileged-run": CONTAINER_PRUNE_KEYS,
               "leftovers": ()}
 
 
@@ -316,6 +317,35 @@ class CleanupJobStore:
         finally:
             job.finishedAt = time.time()
 
+    def start_privileged_run(self, root, preview_id):
+        """Claim a single-use privileged preview and run its audited job."""
+        try:
+            _module(root, "history").prepare()
+        except Exception as exc:
+            raise CleanupError(500, "Audit history is unavailable: {0}".format(exc)) from exc
+        plan = PRIVILEGED_PREVIEWS.claim(preview_id)
+        job = CleanupJob("privileged-run", {"previewId": preview_id, "actionId": plan.action_id})
+        self._register(job)
+        return self._spawn(job, self._run_privileged, (root, job, plan))
+
+    def _run_privileged(self, root, job, plan):
+        try:
+            result = _module(root, "privilege").execute(root, plan)
+        except Exception as exc:
+            result = {"actionId": plan.action_id, "platform": plan.platform, "status": "failed",
+                      "error": "{0}: {1}".format(type(exc).__name__, exc), "bytesRemoved": None}
+        job.result = result
+        try:
+            _module(root, "history").append(result)
+            job.state = "done" if result["status"] == "completed" else "failed"
+            if job.state == "failed":
+                job.error = result.get("error")
+        except Exception as exc:
+            job.state = "failed"
+            job.error = "Audit history could not record the result: {0}".format(exc)
+        finally:
+            job.finishedAt = time.time()
+
     def start_deep_scan(self, root, request):
         deep = _module(root, "deep")
         root_ids = request.get("rootIds")
@@ -520,10 +550,11 @@ class PlanStore:
             self.plans.pop(old.id, None)
 
 
-class ContainerPreviewStore:
+class PreviewStore:
     """Single-use, short-lived preview records, kept in this console process."""
 
-    def __init__(self):
+    def __init__(self, label="Container preview"):
+        self.label = label
         self.records = {}
         self.lock = threading.Lock()
 
@@ -540,11 +571,11 @@ class ContainerPreviewStore:
         with self.lock:
             record = self.records.get(preview_id)
             if record is None:
-                raise CleanupError(404, "Container preview not found")
+                raise CleanupError(404, "{0} not found".format(self.label))
             if record["used"]:
-                raise CleanupError(409, "Container preview was already used")
+                raise CleanupError(409, "{0} was already used".format(self.label))
             if time.time() - record["plan"].created_at > 600:
-                raise CleanupError(410, "Container preview expired")
+                raise CleanupError(410, "{0} expired".format(self.label))
             record["used"] = True
             return record["plan"]
 
@@ -552,7 +583,8 @@ class ContainerPreviewStore:
 #: One store per console process; the handler instances are per-request.
 JOBS = CleanupJobStore()
 PLANS = PlanStore()
-CONTAINER_PREVIEWS = ContainerPreviewStore()
+CONTAINER_PREVIEWS = PreviewStore()
+PRIVILEGED_PREVIEWS = PreviewStore("Privileged preview")
 
 
 class CleanupAPI:
@@ -580,6 +612,9 @@ class CleanupAPI:
         if path == "/api/cleanup/volumes":
             _query(query)
             return _module(self.root, "volumes").inventory()
+        if path == "/api/cleanup/privileged":
+            _query(query)
+            return _module(self.root, "privilege").capabilities(self.root)
         if path == "/api/cleanup/simulators":
             _query(query)
             return _module(self.root, "deep").simulators(self.root)
@@ -630,6 +665,26 @@ class CleanupAPI:
             if not isinstance(preview_id, str) or not preview_id:
                 raise CleanupError(400, "previewId must name a confirmed preview")
             return JOBS.start_container_prune(self.root, preview_id)
+        if path == "/api/cleanup/privileged/preview":
+            _object_body(body, "privileged-preview")
+            action_id = body.get("actionId")
+            if not isinstance(action_id, str) or not action_id:
+                raise CleanupError(400, "actionId must name an available privileged action")
+            try:
+                plan, candidates = _module(self.root, "privilege").preview(self.root, action_id)
+            except Exception as exc:
+                raise CleanupError(400, str(exc)) from exc
+            preview_id = PRIVILEGED_PREVIEWS.register(plan)
+            return {"previewId": preview_id, "actionId": plan.action_id, "elevation": plan.elevation,
+                    "risk": plan.risk, "candidateCount": plan.count, "candidates": candidates,
+                    "totalBytes": plan.total_bytes, "command": list(plan.elevation_argv),
+                    "expiresAt": plan.created_at + 600}
+        if path == "/api/cleanup/privileged/run":
+            _object_body(body, "privileged-run")
+            preview_id = body.get("previewId")
+            if not isinstance(preview_id, str) or not preview_id:
+                raise CleanupError(400, "previewId must name a confirmed privileged preview")
+            return JOBS.start_privileged_run(self.root, preview_id)
         if path == "/api/cleanup/packages/scan":
             _object_body(body, "packages")
             return JOBS.start_packages(self.root)

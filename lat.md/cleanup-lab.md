@@ -194,6 +194,27 @@ macOS parses the fixed `mount` probe plus an optional fixed `diskutil info
 -plist` probe. An unreadable volume carries an `error` instead of failing the
 probe. The `/cleanup/` volumes card is the dashboard layer's part.
 
+## Privileged actions
+
+CLN-20 adds typed privileged actions: [[cleanup-lab/engine/cleanup_lab/privilege.py]]
+previews and runs root-level maintenance through the desktop's own elevation.
+
+System maintenance — `apt-get clean`, a journald vacuum, `apt-get autoremove
+--purge`, the Spotlight index rebuild, DISM's component store cleanup — is
+never a plan → clean path item: an elevated `rm` would bypass the Trash rules,
+so the cleaning happens inside the tool itself, behind the CLN-08 pattern
+(fixed argv from a validated allowlist mirrored by
+[[cleanup-lab/catalog/actions/privileged.json]], a fingerprinted preview, a
+single-use preview id, a fresh candidate check and an audited run). The page
+sends an action id and a preview id, never a command string. `GET
+/api/cleanup/privileged`, `POST /api/cleanup/privileged/preview` and `POST
+/api/cleanup/privileged/run` follow the container contract; readiness gains an
+optional `privileged-actions` capability; `system.shared-font-caches` joins
+the catalog as a scanned, privilege-flagged Linux path.
+`privilege.disk_access()` ports the read-only macOS Full Disk Access probe
+with guidance and reports `applicable: False` elsewhere. The `/cleanup/`
+privileged card is the dashboard layer's part.
+
 ## Dashboard pages
 
 [[dashboard/src/views/cleanup/pages.tsx]] renders the compact default dashboard at
@@ -237,8 +258,8 @@ verified runs from the private SQLite store. The store writes each completed
 clean result with path, bytes, mode and outcome, chaining records with
 HMAC-SHA256 and a random per-install key. `labctl cleanup history --verify`
 checks the full chain and exits 1 on tampering. History is durable across console
-restarts. Later tasks add ignore rules (CLN-17),
-volumes (CLN-28) and runtimes (CLN-29) here, each typed and validated again by the
+restarts. Later tasks add ignore rules (CLN-17) and
+runtimes (CLN-29) here, each typed and validated again by the
 engine.
 
 ## Safety
@@ -264,8 +285,8 @@ The engine tests run under `unittest` from the engine folder.
 
 `cd cleanup-lab/engine && python3 -m unittest discover -s tests -p 'test_*.py'`
 covers the probe, the catalog, the scan, plan → clean (guard, fingerprints,
-Trash by default, honest failures), the path rules, the CLI exit codes and the
-volume inventory.
+Trash by default, honest failures), the path rules, the CLI exit codes, the
+volume inventory and the privileged actions.
 Tests live in [[cleanup-lab/engine/tests]]; the console's typed job contract is
 covered by [[android-lab/lab/tests/test_cleanup_console.py]]. [[scripts/run-tests.sh]]
 runs the same suites next to the reference code tests, the Android suite, `bash -n`,
