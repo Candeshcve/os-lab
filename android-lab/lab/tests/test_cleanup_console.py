@@ -456,3 +456,50 @@ def test_vm_inventory_job_is_report_only(tmp_path, monkeypatch):
     wait_for(job, "done")
     assert job.result["items"][0]["id"] == "vms.virtualbox"
     assert job.result["items"][0]["reportOnly"] is True
+
+def test_package_inventory_job_is_read_only_and_typed(monkeypatch):
+    from cleanup_lab import packages
+    monkeypatch.setattr(packages, "inventory", lambda: {"available": False, "items": [], "sources": [], "errors": []})
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    with pytest.raises(cleanup_api.CleanupError) as refused:
+        api.post("/api/cleanup/packages/scan", {"argv": ["brew", "uninstall", "x"]})
+    assert refused.value.status == 400
+    job = api.post("/api/cleanup/packages/scan", {})
+    wait_for(job, "done")
+    assert job.kind == "packages"
+    assert job.result["items"] == []
+
+def test_macos_leftover_job_accepts_no_paths(monkeypatch):
+    from cleanup_lab import leftovers_macos
+    monkeypatch.setattr(leftovers_macos, "platform_id", lambda: "linux")
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    with pytest.raises(cleanup_api.CleanupError) as refused:
+        api.post("/api/cleanup/leftovers/macos/scan", {"path": "/tmp"})
+    assert refused.value.status == 400
+    job = api.post("/api/cleanup/leftovers/macos/scan", {})
+    wait_for(job, "done")
+    assert job.result["available"] is False
+    assert job.result["items"] == []
+
+def test_deep_sweep_request_uses_configured_root_ids(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    project = tmp_path / "Projects" / "web"
+    project.mkdir(parents=True)
+    (project / "package.json").write_text("{}")
+    cache = project / "node_modules"
+    cache.mkdir()
+    (cache / "file").write_bytes(b"abc")
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    offered = api.get("/api/cleanup/deep-roots", {})["roots"]
+    assert any(x["id"] == "home-projects" and x["available"] for x in offered)
+    for request in ({"rootIds": ["/tmp"]}, {"rootIds": ["home-projects"], "path": "/tmp"},
+                    {"rootIds": ["home-projects"], "minIdleDays": True},
+                    {"rootIds": [["home-projects"]]}):
+        with pytest.raises(cleanup_api.CleanupError) as raised:
+            api.post("/api/cleanup/deep-scan", request)
+        assert raised.value.status == 400
+    job = api.post("/api/cleanup/deep-scan", {"rootIds": ["home-projects"], "minIdleDays": 0})
+    wait_for(job, "done")
+    assert job.result["items"][0]["id"] == "projects.node-modules"
+    assert job.result["items"][0]["sizeBytes"] == 3

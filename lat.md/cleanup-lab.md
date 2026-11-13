@@ -30,6 +30,26 @@ usage error, matching [[lat.md/labctl.md]].
 
 ## Catalog
 
+CLN-05 adds [[cleanup-lab/catalog/browser.json]] for Chrome, Edge, Brave,
+Opera, Vivaldi, Firefox and Safari.
+
+The `profile-glob` detector expands every matching profile path from catalog
+data. Chrome history and extension traces carry `privacy` risk and are never
+pre-selected; every browser names its owning process for the running-app guard.
+
+CLN-06 adds [[cleanup-lab/catalog/developers.json]] with per-OS developer cache
+defaults, credentials and toolchains.
+
+The catalog reports binary presence through `shutil.which` without a shell.
+Shell functions are tracked by their directories. Credential entries are never
+pre-selected; toolchains and local clusters have `cleanable: false` and the
+plan skips them. CLN-25 resolves developer caches from an environment variable,
+an allowlisted fixed-argument tool probe (five-second timeout), or the catalog
+default. Invalid probe output falls back safely. The catalog, scan, plan and
+result records identify the chosen source for each path.
+The cleanup results and plan pages display that source beside the resolved path.
+
+
 Target paths are data. One JSON file per family under `cleanup-lab/catalog`, validated
 against `schema.json`.
 
@@ -58,6 +78,54 @@ the engine does not provide a trustworthy byte count.
 VMware, Parallels and UTM locations from [[cleanup-lab/catalog/actions/vms.json]].
 Each found bundle is measured read-only and marked `reportOnly`; the API has no
 VM deletion action.
+[[dashboard/src/views/cleanup/extra-tools.tsx]] shows only actions offered by
+the live container engine. It requires a candidate preview before confirmation,
+shows risk, command and errors, and reports VM bundles without a delete control.
+Public Pages does not request these endpoints.
+
+CLN-04 adds system temp, crash, font and Spotlight catalog entries on the
+applicable operating systems. The regular scan remains read-only.
+
+Temp roots enumerate immediate candidates after filtering locks, small files
+and symlinks. Spotlight expands indexes on mounted macOS volumes. Shared temp
+and Spotlight entries require a later privileged clean flow.
+
+CLN-11 adds read-only package review suggestions.
+
+[[cleanup-lab/engine/cleanup_lab/packages.py]] powers `POST /api/cleanup/packages/scan`, which
+accepts no argv or paths and returns a job. Homebrew's `autoremove --dry-run`
+identifies unneeded dependencies; pip's `list --not-required --format=json`
+and RubyGems' local list identify top-level packages for review. Each result
+includes an exact uninstall argv as a preview, but this API has no uninstall
+execution endpoint. Missing tools are hidden and parser errors are reported.
+
+CLN-09 adds read-only macOS leftover signatures and a typed scan job.
+
+[[cleanup-lab/engine/cleanup_lab/leftovers_macos.py]] reads installed app bundle
+ids and optional team ids from `Info.plist` with `plistlib`. It checks candidate
+folders under the configured [[cleanup-lab/catalog/signatures/macos-leftovers.json]]
+roots by exact bundle id or dotted child, whole team prefix, or normalized app
+name. It reports confidence and evidence for potential orphans, hidden apps and
+large app data; an empty app inventory produces `unknown` instead of an orphan
+claim. `POST /api/cleanup/leftovers/macos/scan` accepts no paths and returns a
+job. Every finding is report-only; the endpoint cannot clean it.
+
+CLN-07 adds a read-only project sweep and an Xcode simulator inventory.
+
+[[cleanup-lab/deep-roots.json]] defines selectable root ids; the console accepts
+only those ids through `POST /api/cleanup/deep-scan`, with an optional
+`minIdleDays` filter, and exposes availability through `GET /api/cleanup/deep-roots`.
+The engine stops descending
+at a proved `node_modules` or Rust/Maven `target`, measures it without following
+links, and reports ecosystem, regeneration hint and project directory age.
+`GET /api/cleanup/simulators` reads Xcode's JSON device list with fixed argv,
+flags unavailable devices and measures each device directory under the configured
+[[cleanup-lab/simulator-roots.json]] root. These are detection results, not
+cleanup targets. CLN-24 replaces the first three project checks with marker-verified
+signatures from [[cleanup-lab/catalog/signatures/projects.json]].
+[[cleanup-lab/engine/cleanup_lab/artifacts.py]] validates the signature data,
+refuses symlink markers, checks `CACHEDIR.TAG`, and reports the project's newest
+marker age with the ecosystem and regeneration hint.
 
 [[cleanup-lab/engine/cleanup_lab/scan.py]] measures the catalog's resolved paths
 read-only, with progress and cancel.
@@ -91,11 +159,25 @@ decide `ready`, `needs-setup` or `unavailable`. The detector catalog, the native
 scan backend and the tools on `PATH` are optional capabilities, so a missing one
 never blocks a scan.
 
-`/cleanup/` will render that probe in the dashboard shell, offering only Re-check and
-saying in words that cleaning is not wired yet; until that page lands,
-`labctl cleanup status` and `GET /api/cleanup/status` are how to read it. Public Pages
-has no engine, so the page will explain that instead of polling, per
+`/cleanup/` renders that probe in the dashboard shell, with scan, plan and clean
+actions only when the engine is ready. Public Pages has no engine, so the page
+explains local installation without polling, per
 [[lat.md/ux-readiness.md]].
+
+## Dashboard pages
+
+[[dashboard/src/views/cleanup/pages.tsx]] renders scan and confirm at `/cleanup/`,
+category results at `/cleanup/results/`, skipped/failed and unreadable items at
+`/cleanup/leftovers/`, and verified audit records at `/cleanup/history/`.
+
+The typed client is in [[dashboard/src/lib/api.ts]]. Each action shows its own
+error; the confirm step names the planned item count, size and mode, and a
+changed selection, expired plan or used plan requires a new preview. Trash is
+the default.
+
+The local app polls only while a job runs. Public Pages renders the routes without
+engine calls or destructive controls. All eight route sets are built, including
+the seven translated locales.
 
 ## Console API
 
