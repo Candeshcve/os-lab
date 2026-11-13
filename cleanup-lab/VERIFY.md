@@ -454,6 +454,24 @@ file changed and this worktree has no Node dependencies; the page is CLN-16. Rus
 `fmt`/`clippy` — no Rust changed. No Windows host ran the cross-volume and
 freedesktop-Trash paths; those use injected tests.
 
+## CLN-16 — cleanup dashboard pages
+
+Branch `codex/cln-16-cleanup-dashboard` from master `6656ed55`, independent of
+CLN-15 PR #140. Adds `/cleanup/`, `/cleanup/results/`, `/cleanup/leftovers/` and
+`/cleanup/history/` in all eight route sets, with local typed API calls and a
+read-only public Pages view. The history route expects CLN-15 to merge first.
+
+`npm run check`, `npm run test:i18n`, and `npm run build` passed. The new mocked
+API e2e passed for scan, plan, confirm, clean, results, leftovers and history.
+A Pages build under `/os-lab` passed the Turkish route e2e with no API calls or
+clean controls. `scripts/deploy-page.sh --dry-run` retained all 32 cleanup routes.
+`lat check` and `git diff --check` passed.
+
+The full `npm run test:e2e` run had 43 passed, 1 skipped, 1 failed. The failure is
+the existing How to use reference freshness check (`build-how-to-use-reference.py
+--check`); its generated command inventory is stale on master and is outside the
+cleanup UI changes.
+
 ## CLN-04 … CLN-29
 
 Each task appends its own section when it lands.

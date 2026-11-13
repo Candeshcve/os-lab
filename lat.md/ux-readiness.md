@@ -25,6 +25,9 @@ legal prose is excluded from client translation.
 
 ## Verification
 
+[[dashboard/e2e/cleanup.spec.ts]] checks the typed scan → plan → confirm → clean
+flow and the public Turkish `/os-lab/tr/cleanup/` route without engine calls.
+
 [[dashboard/e2e/health-and-content.spec.ts]] covers dependency actions, advanced details, run failures, and hydration across page types. Dashboard type, translation, and static build checks complement browser tests. Public Pages links and locale switching are checked under `/os-lab/`.
 
 [[dashboard/scripts/source-pages-smoke.mjs]] checks every Source route and guide
