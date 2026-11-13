@@ -105,7 +105,7 @@ class LoadTest(unittest.TestCase):
         entries = catalog.load(ROOT, BASE_ENV)
         ids = [entry["id"] for entry in entries]
         self.assertEqual(
-            ids, ["system.user-caches", "system.user-logs", "system.trash"], "file order, family order"
+            ids, ["system.user-caches", "system.user-logs", "system.trash", "system.temp", "system.local-temp", "system.shared-temp", "system.crash-reports", "system.font-caches", "system.spotlight-index"], "file order, family order"
         )
         self.assertTrue(all(entry["family"] == "system" for entry in entries))
         self.assertTrue(all(entry["file"] == "system.json" for entry in entries))

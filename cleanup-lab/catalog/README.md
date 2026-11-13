@@ -10,7 +10,7 @@ One file per family. `family` must match the first segment of every entry id.
 
 | File | Family | Entries |
 |---|---|---|
-| `system.json` | `system` | User caches, user logs, Trash (Qleaner: `user_caches`, `system_logs`, `trash`) |
+| `system.json` | `system` | User caches/logs, Trash, per-item temp data, crash reports, font caches and Spotlight indexes |
 
 Later tasks add `browser.json` (CLN-05), `developers.json` (CLN-06),
 `projects.json` (CLN-07/24), `containers.json` and `vms.json` (CLN-08),
@@ -36,6 +36,13 @@ catalog id or to the reason it was dropped.
 | `paths` | `macos` / `linux` / `windows` → list of templates. An entry without a path for an OS simply does not appear there |
 
 ## Path templates
+
+The `temp` detector expands each configured root to its immediate files and
+folders, omitting symlinks, `.lock`/`.sock`/`.pid` files and regular files below
+1 KiB. The `spotlight` detector expands the catalog's `/Volumes/*` template to
+indexes on mounted macOS volumes. Shared temp and Spotlight entries are never
+pre-selected and require a later privileged flow before cleaning.
+
 
 | Template | Expands to |
 |---|---|
