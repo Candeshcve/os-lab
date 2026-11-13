@@ -190,6 +190,50 @@ $ git diff --check
 `npm run check|test:i18n|build|test:e2e` — no file under `dashboard/` changed, and
 Playwright browsers are not installed here.
 
+## CLN-12 — one safety guard for every destructive call
+
+Branch `feat/cln-12-safety-guard`. Scope: `cleanup_lab/safety.py` and its tests; the
+modules that will call it are CLN-13 (plan) and CLN-15 (run).
+
+### Engine unit tests
+
+```console
+$ cd cleanup-lab/engine && ../../.venv-test/bin/python -m unittest discover -s tests -p 'test_*.py'
+Ran 69 tests in 0.144s
+OK
+```
+
+22 new cases: path inside / equal to / outside its catalog root, a sibling with the
+same prefix (`caches-old` vs `caches`), the valid name `a..b` that Qleaner's
+`contains("..")` rejected, a symlink resolving outside the root, protected roots (`/`
+and home), a missing path, a foreign owner (injected `lstat`), a running owning app,
+whole-name vs basename process matching, the Windows `tasklist` CSV parser, a failing
+process listing, scan-folder validation, copy pairs, the refusal codes, and a check
+that every shipped catalog entry resolves to a non-protected path.
+
+### Repository checks
+
+```console
+$ ./scripts/run-tests.sh
+8 passed, 1 failed, 1 skipped
+```
+
+The failure is the android suite, pre-existing on this arm64 Mac (same ids on a clean
+`master` worktree); `cargo` is not installed, so qrust-scan is skipped and no Rust
+changed.
+
+```console
+$ lat check
+All checks passed in 318ms
+$ git diff --check
+(clean)
+```
+
+### Not run
+
+`npm` checks — no `dashboard/` file changed. Process matching was exercised with
+injected tables on this macOS host; no Windows or Linux host ran the `tasklist` path.
+
 ## CLN-03 … CLN-29
 
 Each task appends its own section when it lands.

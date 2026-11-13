@@ -57,6 +57,18 @@ expands it, and [`PARITY.md`](PARITY.md) records which Qleaner detector each ent
 replaces. `./labctl cleanup catalog` prints the entries for this computer with every
 path it could resolve — and the reason for each it could not.
 
+## Safety guard
+
+`cleanup_lab/safety.py` is the only place a destructive call is allowed to pass. It
+ports the reference path policy (resolved containment, component comparison, no purge
+of a protected root) and adds the two checks the page needs next to each item:
+ownership (`lstat` owner against the current user) and the running-app lock, matched
+against the entry's `owningProcesses` by whole name — not a substring, and not only
+Chrome and Firefox. `check_target()` returns a verdict with a stable `code` plus an
+English `reason`; `assert_safe_target()` raises both as `SafetyError`. Refusal codes:
+`empty`, `nul`, `relative`, `protected`, `system-root`, `missing`, `no-path`,
+`outside-root`, `foreign-owner`, `app-running`.
+
 ## Architecture contract
 
 | Layer | Where | Rule |
