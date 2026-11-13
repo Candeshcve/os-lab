@@ -2204,5 +2204,15 @@
   "Volumes overview and disk-pressure card": "Vue d'ensemble des volumes et carte d'occupation du disque",
   "List local mounted volumes (name, mount point, total, free, root / removable / internal) on macOS, Linux and Windows with the standard library, mark the volume that holds the home folder, and warn above a usage threshold. CLN-27 uses the list to offer a destination.": "Lister les volumes locaux montés (nom, point de montage, total, libre, racine / amovible / interne) sous macOS, Linux et Windows avec la bibliothèque standard, signaler le volume qui contient le dossier personnel et avertir au-delà d'un seuil d'utilisation. CLN-27 utilise cette liste pour proposer une destination.",
   "Simulator and emulator runtimes: list, size, remove": "Runtimes de simulateurs et d'émulateurs : lister, mesurer, supprimer",
-  "Beyond CLN-07's device list: Xcode simulator runtimes (`xcrun simctl runtime list -j`, `runtime delete <id>`), unavailable simulator devices, and Android AVDs and SDK system images, each with size and in-use state. Fixed argv only; removal goes through plan → confirm with ids from the page, never paths.": "Au-delà de la liste d'appareils de CLN-07 : runtimes des simulateurs Xcode (`xcrun simctl runtime list -j`, `runtime delete <id>`), appareils de simulateur indisponibles, AVD Android et images système du SDK, chacun avec sa taille et son état d'utilisation. Uniquement des argv fixes ; la suppression passe par plan → confirmation avec des identifiants venant de la page, jamais des chemins."
+  "Beyond CLN-07's device list: Xcode simulator runtimes (`xcrun simctl runtime list -j`, `runtime delete <id>`), unavailable simulator devices, and Android AVDs and SDK system images, each with size and in-use state. Fixed argv only; removal goes through plan → confirm with ids from the page, never paths.": "Au-delà de la liste d'appareils de CLN-07 : runtimes des simulateurs Xcode (`xcrun simctl runtime list -j`, `runtime delete <id>`), appareils de simulateur indisponibles, AVD Android et images système du SDK, chacun avec sa taille et son état d'utilisation. Uniquement des argv fixes ; la suppression passe par plan → confirmation avec des identifiants venant de la page, jamais des chemins.",
+  "Checking latest release…": "Vérification de la dernière version…",
+  "Release details unavailable. Open the latest release page.": "Détails de la version indisponibles. Ouvrez la page de la dernière version.",
+  "Latest published release": "Dernière version publiée",
+  "Clipboard unavailable. Select the text manually.": "Presse-papiers indisponible. Sélectionnez le texte manuellement.",
+  "Could not cancel job:": "Impossible d’annuler la tâche :",
+  "Could not clear logs:": "Impossible d’effacer les journaux :",
+  "Try again.": "Réessayez.",
+  "Logs cleared.": "Journaux effacés.",
+  "Cancelling…": "Annulation…",
+  "Clearing…": "Effacement…"
 }

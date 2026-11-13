@@ -2204,5 +2204,15 @@
   "Volumes overview and disk-pressure card": "Resumen de volúmenes y tarjeta de ocupación del disco",
   "List local mounted volumes (name, mount point, total, free, root / removable / internal) on macOS, Linux and Windows with the standard library, mark the volume that holds the home folder, and warn above a usage threshold. CLN-27 uses the list to offer a destination.": "Listar los volúmenes locales montados (nombre, punto de montaje, total, libre, raíz / extraíble / interno) en macOS, Linux y Windows con la biblioteca estándar, marcar el volumen que contiene la carpeta personal y avisar por encima de un umbral de uso. CLN-27 usa la lista para ofrecer un destino.",
   "Simulator and emulator runtimes: list, size, remove": "Runtimes de simuladores y emuladores: listar, medir, eliminar",
-  "Beyond CLN-07's device list: Xcode simulator runtimes (`xcrun simctl runtime list -j`, `runtime delete <id>`), unavailable simulator devices, and Android AVDs and SDK system images, each with size and in-use state. Fixed argv only; removal goes through plan → confirm with ids from the page, never paths.": "Más allá de la lista de dispositivos de CLN-07: runtimes de simuladores de Xcode (`xcrun simctl runtime list -j`, `runtime delete <id>`), dispositivos de simulador no disponibles, y AVD de Android e imágenes de sistema del SDK, cada uno con su tamaño y estado de uso. Solo argv fijo; la eliminación pasa por plan → confirmación con ids desde la página, nunca rutas."
+  "Beyond CLN-07's device list: Xcode simulator runtimes (`xcrun simctl runtime list -j`, `runtime delete <id>`), unavailable simulator devices, and Android AVDs and SDK system images, each with size and in-use state. Fixed argv only; removal goes through plan → confirm with ids from the page, never paths.": "Más allá de la lista de dispositivos de CLN-07: runtimes de simuladores de Xcode (`xcrun simctl runtime list -j`, `runtime delete <id>`), dispositivos de simulador no disponibles, y AVD de Android e imágenes de sistema del SDK, cada uno con su tamaño y estado de uso. Solo argv fijo; la eliminación pasa por plan → confirmación con ids desde la página, nunca rutas.",
+  "Checking latest release…": "Comprobando la última versión…",
+  "Release details unavailable. Open the latest release page.": "Los detalles de la versión no están disponibles. Abre la página de la última versión.",
+  "Latest published release": "Última versión publicada",
+  "Clipboard unavailable. Select the text manually.": "Portapapeles no disponible. Selecciona el texto manualmente.",
+  "Could not cancel job:": "No se pudo cancelar el trabajo:",
+  "Could not clear logs:": "No se pudieron borrar los registros:",
+  "Try again.": "Inténtalo de nuevo.",
+  "Logs cleared.": "Registros borrados.",
+  "Cancelling…": "Cancelando…",
+  "Clearing…": "Borrando…"
 }

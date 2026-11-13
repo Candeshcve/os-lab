@@ -2204,5 +2204,15 @@
   "Volumes overview and disk-pressure card": "Birimlere genel bakış ve disk doluluk kartı",
   "List local mounted volumes (name, mount point, total, free, root / removable / internal) on macOS, Linux and Windows with the standard library, mark the volume that holds the home folder, and warn above a usage threshold. CLN-27 uses the list to offer a destination.": "macOS, Linux ve Windows'ta yerel bağlı birimleri (ad, bağlama noktası, toplam, boş, kök / çıkarılabilir / dahili) standart kütüphaneyle listele, ev klasörünü barındıran birimi işaretle ve kullanım eşiğin üstüne çıkınca uyar. CLN-27 bu listeyi hedef önermek için kullanır.",
   "Simulator and emulator runtimes: list, size, remove": "Simülatör ve emülatör çalışma zamanları: listele, boyutla, kaldır",
-  "Beyond CLN-07's device list: Xcode simulator runtimes (`xcrun simctl runtime list -j`, `runtime delete <id>`), unavailable simulator devices, and Android AVDs and SDK system images, each with size and in-use state. Fixed argv only; removal goes through plan → confirm with ids from the page, never paths.": "CLN-07'nin cihaz listesinin ötesi: Xcode simülatör çalışma zamanları (`xcrun simctl runtime list -j`, `runtime delete <id>`), kullanılamayan simülatör cihazları, Android AVD'leri ve SDK sistem imajları, her biri boyutu ve kullanım durumuyla. Yalnızca sabit argv; kaldırma, sayfadan yol değil kimlik alarak plan → onay akışından geçer."
+  "Beyond CLN-07's device list: Xcode simulator runtimes (`xcrun simctl runtime list -j`, `runtime delete <id>`), unavailable simulator devices, and Android AVDs and SDK system images, each with size and in-use state. Fixed argv only; removal goes through plan → confirm with ids from the page, never paths.": "CLN-07'nin cihaz listesinin ötesi: Xcode simülatör çalışma zamanları (`xcrun simctl runtime list -j`, `runtime delete <id>`), kullanılamayan simülatör cihazları, Android AVD'leri ve SDK sistem imajları, her biri boyutu ve kullanım durumuyla. Yalnızca sabit argv; kaldırma, sayfadan yol değil kimlik alarak plan → onay akışından geçer.",
+  "Checking latest release…": "Son sürüm kontrol ediliyor…",
+  "Release details unavailable. Open the latest release page.": "Sürüm ayrıntıları kullanılamıyor. En son sürüm sayfasını açın.",
+  "Latest published release": "En son yayımlanan sürüm",
+  "Clipboard unavailable. Select the text manually.": "Panoya erişilemiyor. Metni elle seçin.",
+  "Could not cancel job:": "İş iptal edilemedi:",
+  "Could not clear logs:": "Günlükler temizlenemedi:",
+  "Try again.": "Yeniden deneyin.",
+  "Logs cleared.": "Günlükler temizlendi.",
+  "Cancelling…": "İptal ediliyor…",
+  "Clearing…": "Temizleniyor…"
 }

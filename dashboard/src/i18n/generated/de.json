@@ -2204,5 +2204,15 @@
   "Volumes overview and disk-pressure card": "Volume-Übersicht und Karte zur Speicherauslastung",
   "List local mounted volumes (name, mount point, total, free, root / removable / internal) on macOS, Linux and Windows with the standard library, mark the volume that holds the home folder, and warn above a usage threshold. CLN-27 uses the list to offer a destination.": "Lokal eingehängte Volumes (Name, Einhängepunkt, gesamt, frei, Root / wechselbar / intern) unter macOS, Linux und Windows mit der Standardbibliothek auflisten, das Volume mit dem Home-Ordner markieren und oberhalb einer Auslastungsschwelle warnen. CLN-27 nutzt die Liste, um ein Ziel anzubieten.",
   "Simulator and emulator runtimes: list, size, remove": "Simulator- und Emulator-Laufzeiten: auflisten, Größe ermitteln, entfernen",
-  "Beyond CLN-07's device list: Xcode simulator runtimes (`xcrun simctl runtime list -j`, `runtime delete <id>`), unavailable simulator devices, and Android AVDs and SDK system images, each with size and in-use state. Fixed argv only; removal goes through plan → confirm with ids from the page, never paths.": "Über die Geräteliste von CLN-07 hinaus: Xcode-Simulator-Laufzeiten (`xcrun simctl runtime list -j`, `runtime delete <id>`), nicht verfügbare Simulatorgeräte sowie Android-AVDs und SDK-Systemimages, jeweils mit Größe und Nutzungsstatus. Nur festes argv; das Entfernen läuft über Plan → Bestätigen mit IDs von der Seite, nie mit Pfaden."
+  "Beyond CLN-07's device list: Xcode simulator runtimes (`xcrun simctl runtime list -j`, `runtime delete <id>`), unavailable simulator devices, and Android AVDs and SDK system images, each with size and in-use state. Fixed argv only; removal goes through plan → confirm with ids from the page, never paths.": "Über die Geräteliste von CLN-07 hinaus: Xcode-Simulator-Laufzeiten (`xcrun simctl runtime list -j`, `runtime delete <id>`), nicht verfügbare Simulatorgeräte sowie Android-AVDs und SDK-Systemimages, jeweils mit Größe und Nutzungsstatus. Nur festes argv; das Entfernen läuft über Plan → Bestätigen mit IDs von der Seite, nie mit Pfaden.",
+  "Checking latest release…": "Neueste Version wird geprüft…",
+  "Release details unavailable. Open the latest release page.": "Versionsdetails sind nicht verfügbar. Öffnen Sie die Seite der neuesten Version.",
+  "Latest published release": "Neueste veröffentlichte Version",
+  "Clipboard unavailable. Select the text manually.": "Zwischenablage nicht verfügbar. Wählen Sie den Text manuell aus.",
+  "Could not cancel job:": "Auftrag konnte nicht abgebrochen werden:",
+  "Could not clear logs:": "Protokolle konnten nicht gelöscht werden:",
+  "Try again.": "Versuchen Sie es erneut.",
+  "Logs cleared.": "Protokolle gelöscht.",
+  "Cancelling…": "Wird abgebrochen…",
+  "Clearing…": "Wird gelöscht…"
 }

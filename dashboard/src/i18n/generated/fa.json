@@ -2204,5 +2204,15 @@
   "Volumes overview and disk-pressure card": "نمای کلی حجم‌ها و کارت فشار دیسک",
   "List local mounted volumes (name, mount point, total, free, root / removable / internal) on macOS, Linux and Windows with the standard library, mark the volume that holds the home folder, and warn above a usage threshold. CLN-27 uses the list to offer a destination.": "حجم‌های محلی متصل (نام، نقطه اتصال، کل، آزاد، ریشه / جداشدنی / داخلی) را در macOS، ‏Linux و Windows با کتابخانه استاندارد فهرست کنید، حجمی را که پوشه خانه روی آن است مشخص کنید و بالاتر از یک آستانه مصرف هشدار دهید. CLN-27 از این فهرست برای پیشنهاد مقصد استفاده می‌کند.",
   "Simulator and emulator runtimes: list, size, remove": "زمان‌اجراهای شبیه‌ساز و امولاتور: فهرست، اندازه، حذف",
-  "Beyond CLN-07's device list: Xcode simulator runtimes (`xcrun simctl runtime list -j`, `runtime delete <id>`), unavailable simulator devices, and Android AVDs and SDK system images, each with size and in-use state. Fixed argv only; removal goes through plan → confirm with ids from the page, never paths.": "فراتر از فهرست دستگاه‌های CLN-07: زمان‌اجراهای شبیه‌ساز Xcode ‏(`xcrun simctl runtime list -j`، ‏`runtime delete <id>`)، دستگاه‌های شبیه‌ساز در دسترس‌نبودنی، و AVDهای اندروید و ایمیج‌های سیستمی SDK، هر کدام با اندازه و وضعیت استفاده. فقط argv ثابت؛ حذف از مسیر طرح → تأیید و با شناسه‌هایی از صفحه انجام می‌شود، هرگز با مسیر."
+  "Beyond CLN-07's device list: Xcode simulator runtimes (`xcrun simctl runtime list -j`, `runtime delete <id>`), unavailable simulator devices, and Android AVDs and SDK system images, each with size and in-use state. Fixed argv only; removal goes through plan → confirm with ids from the page, never paths.": "فراتر از فهرست دستگاه‌های CLN-07: زمان‌اجراهای شبیه‌ساز Xcode ‏(`xcrun simctl runtime list -j`، ‏`runtime delete <id>`)، دستگاه‌های شبیه‌ساز در دسترس‌نبودنی، و AVDهای اندروید و ایمیج‌های سیستمی SDK، هر کدام با اندازه و وضعیت استفاده. فقط argv ثابت؛ حذف از مسیر طرح → تأیید و با شناسه‌هایی از صفحه انجام می‌شود، هرگز با مسیر.",
+  "Checking latest release…": "در حال بررسی آخرین نسخه…",
+  "Release details unavailable. Open the latest release page.": "جزئیات نسخه در دسترس نیست. صفحهٔ آخرین نسخه را باز کنید.",
+  "Latest published release": "آخرین نسخهٔ منتشرشده",
+  "Clipboard unavailable. Select the text manually.": "کلیپ‌بورد در دسترس نیست. متن را به‌صورت دستی انتخاب کنید.",
+  "Could not cancel job:": "لغو کار ممکن نشد:",
+  "Could not clear logs:": "پاک‌کردن گزارش‌ها ممکن نشد:",
+  "Try again.": "دوباره تلاش کنید.",
+  "Logs cleared.": "گزارش‌ها پاک شدند.",
+  "Cancelling…": "در حال لغو…",
+  "Clearing…": "در حال پاک‌سازی…"
 }

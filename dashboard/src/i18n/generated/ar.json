@@ -2204,5 +2204,15 @@
   "Volumes overview and disk-pressure card": "نظرة عامة على وحدات التخزين وبطاقة ضغط القرص",
   "List local mounted volumes (name, mount point, total, free, root / removable / internal) on macOS, Linux and Windows with the standard library, mark the volume that holds the home folder, and warn above a usage threshold. CLN-27 uses the list to offer a destination.": "اعرض وحدات التخزين المحلية المركّبة (الاسم، نقطة التركيب، الإجمالي، الحر، جذر / قابلة للإزالة / داخلية) على macOS وLinux وWindows باستخدام المكتبة القياسية، وميّز الوحدة التي تضم المجلد الرئيسي، وحذّر عند تجاوز حد الاستخدام. يستخدم CLN-27 هذه القائمة لاقتراح وجهة.",
   "Simulator and emulator runtimes: list, size, remove": "بيئات تشغيل المحاكيات: عرض، قياس، إزالة",
-  "Beyond CLN-07's device list: Xcode simulator runtimes (`xcrun simctl runtime list -j`, `runtime delete <id>`), unavailable simulator devices, and Android AVDs and SDK system images, each with size and in-use state. Fixed argv only; removal goes through plan → confirm with ids from the page, never paths.": "ما بعد قائمة أجهزة CLN-07: بيئات تشغيل محاكي Xcode ‏(`xcrun simctl runtime list -j`، ‏`runtime delete <id>`)، وأجهزة المحاكي غير المتاحة، وأجهزة Android الافتراضية (AVD) وصور نظام SDK، كلٌّ مع حجمه وحالة استخدامه. argv ثابت فقط؛ وتمر الإزالة عبر خطة → تأكيد بمعرّفات من الصفحة، لا بمسارات أبدًا."
+  "Beyond CLN-07's device list: Xcode simulator runtimes (`xcrun simctl runtime list -j`, `runtime delete <id>`), unavailable simulator devices, and Android AVDs and SDK system images, each with size and in-use state. Fixed argv only; removal goes through plan → confirm with ids from the page, never paths.": "ما بعد قائمة أجهزة CLN-07: بيئات تشغيل محاكي Xcode ‏(`xcrun simctl runtime list -j`، ‏`runtime delete <id>`)، وأجهزة المحاكي غير المتاحة، وأجهزة Android الافتراضية (AVD) وصور نظام SDK، كلٌّ مع حجمه وحالة استخدامه. argv ثابت فقط؛ وتمر الإزالة عبر خطة → تأكيد بمعرّفات من الصفحة، لا بمسارات أبدًا.",
+  "Checking latest release…": "جارٍ التحقق من أحدث إصدار…",
+  "Release details unavailable. Open the latest release page.": "تفاصيل الإصدار غير متاحة. افتح صفحة أحدث إصدار.",
+  "Latest published release": "أحدث إصدار منشور",
+  "Clipboard unavailable. Select the text manually.": "الحافظة غير متاحة. حدّد النص يدويًا.",
+  "Could not cancel job:": "تعذّر إلغاء المهمة:",
+  "Could not clear logs:": "تعذّر مسح السجلات:",
+  "Try again.": "حاول مرة أخرى.",
+  "Logs cleared.": "تم مسح السجلات.",
+  "Cancelling…": "جارٍ الإلغاء…",
+  "Clearing…": "جارٍ المسح…"
 }
