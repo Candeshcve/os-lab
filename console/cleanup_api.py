@@ -3,7 +3,7 @@
 The console accepts typed, validated calls only: never a command string and never
 a free-form path list from the page (``cleanup-lab/README.md``). Ready:
 readiness (CLN-01), the detector catalog (CLN-02), the scan job (CLN-03) and the
-plan → clean flow (CLN-13); history (CLN-15) and the remaining endpoints add
+plan → clean flow (CLN-13) and audit history (CLN-15); the remaining endpoints add
 their own actions here, each validated again by the engine's safety guard.
 
 The engine is imported from ``cleanup-lab/engine`` (``cleanup_lab``), which is a
@@ -47,7 +47,8 @@ PLAN_STATUS = {
     "used": 409,
     "cancelled": 409,
 }
-BODY_KEYS = {"scan": SCAN_KEYS, "deep-scan": DEEP_KEYS, "plan": PLAN_KEYS, "clean": CLEAN_KEYS}
+BODY_KEYS = {"scan": SCAN_KEYS, "deep-scan": DEEP_KEYS, "plan": PLAN_KEYS, "clean": CLEAN_KEYS,
+             "macos-leftovers": (), "packages": ()}
 
 
 class CleanupError(ValueError):
@@ -217,6 +218,37 @@ class CleanupJobStore:
         self._register(job)
         return self._spawn(job, self._run_scan, (root, job, entry_ids, workers))
 
+    def start_packages(self, root):
+        job = CleanupJob("packages", {})
+        self._register(job)
+        return self._spawn(job, self._run_packages, (root, job))
+
+    def _run_packages(self, root, job):
+        try:
+            job.result = _module(root, "packages").inventory()
+            job.state = "done"
+        except Exception as exc:
+            job.state = "failed"
+            job.error = "{0}: {1}".format(type(exc).__name__, exc)
+        finally:
+            job.finishedAt = time.time()
+
+    def start_macos_leftovers(self, root):
+        job = CleanupJob("macos-leftovers", {})
+        self._register(job)
+        return self._spawn(job, self._run_macos_leftovers, (root, job))
+
+    def _run_macos_leftovers(self, root, job):
+        try:
+            result = _module(root, "leftovers_macos").scan(root, cancel=job.cancel)
+            job.result = result
+            job.state = "cancelled" if result["cancelled"] else "done"
+        except Exception as exc:
+            job.state = "failed"
+            job.error = "{0}: {1}".format(type(exc).__name__, exc)
+        finally:
+            job.finishedAt = time.time()
+
     def start_deep_scan(self, root, request):
         deep = _module(root, "deep")
         root_ids = request.get("rootIds")
@@ -270,6 +302,10 @@ class CleanupJobStore:
         inside the job, which then fails honestly with nothing removed.
         """
         clean = _module(root, "clean")
+        try:
+            _module(root, "history").prepare()
+        except Exception as exc:
+            raise CleanupError(500, "Audit history is unavailable: {0}".format(exc)) from exc
         try:
             record = PLANS.claim(plan_id)
         except PlanStoreError as exc:
@@ -333,6 +369,7 @@ class CleanupJobStore:
             )
             job.result = result
             job.progress = result["progress"]
+            _module(root, "history").append(result)
             job.state = "cancelled" if result["cancelled"] else "done"
         except clean.PlanError as exc:
             # A stale or expired plan fails the job honestly: nothing was removed.
@@ -443,6 +480,13 @@ class CleanupAPI:
         if path == "/api/cleanup/simulators":
             _query(query)
             return _module(self.root, "deep").simulators(self.root)
+
+        if path == "/api/cleanup/history":
+            _query(query)
+            try:
+                return _module(self.root, "history").read()
+            except Exception as exc:
+                raise CleanupError(500, "Audit history is unavailable: {0}".format(exc)) from exc
         if path == "/api/cleanup/jobs":
             _query(query)
             return {"jobs": JOBS.list()}
@@ -462,6 +506,12 @@ class CleanupAPI:
         if path == "/api/cleanup/scan":
             _object_body(body, "scan")
             return JOBS.start_scan(self.root, body)
+        if path == "/api/cleanup/packages/scan":
+            _object_body(body, "packages")
+            return JOBS.start_packages(self.root)
+        if path == "/api/cleanup/leftovers/macos/scan":
+            _object_body(body, "macos-leftovers")
+            return JOBS.start_macos_leftovers(self.root)
         if path == "/api/cleanup/deep-scan":
             _object_body(body, "deep-scan")
             return JOBS.start_deep_scan(self.root, body)
