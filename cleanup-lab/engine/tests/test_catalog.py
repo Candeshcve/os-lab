@@ -105,8 +105,11 @@ class LoadTest(unittest.TestCase):
         entries = catalog.load(ROOT, BASE_ENV)
         ids = [entry["id"] for entry in entries]
         self.assertEqual(ids[:2], ["developers.gradle", "developers.maven"])
-        self.assertEqual(ids[-3:], ["system.user-caches", "system.user-logs", "system.trash"])
-        self.assertEqual(len(ids), 50)
+        self.assertEqual(
+            ids[-9:],
+            ["system.user-caches", "system.user-logs", "system.trash", "system.temp", "system.local-temp", "system.shared-temp", "system.crash-reports", "system.font-caches", "system.spotlight-index"],
+        )
+        self.assertEqual(len(ids), 56)
         self.assertTrue(all(entry["family"] in ("developers", "system") for entry in entries))
         self.assertTrue(all(entry["file"] in ("developers.json", "system.json") for entry in entries))
 

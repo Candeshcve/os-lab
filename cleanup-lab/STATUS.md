@@ -32,7 +32,7 @@ the finding and the decision are in the session log.
 | CLN-01 | merged | [#134](https://github.com/keyvanarasteh/os-lab/pull/134) | d04941f6 | `/cleanup/` page, sidebar entry, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred | none |
 | CLN-02 | merged | [#135](https://github.com/keyvanarasteh/os-lab/pull/135) | 39ea0f1f | — | — | none |
 | CLN-03 | merged | [#138](https://github.com/keyvanarasteh/os-lab/pull/138) | c253cf34 | `/cleanup/` scan page, sidebar/route, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred | none |
-| CLN-04 | pending | — | — | — | — | none |
+| CLN-04 | in progress (this PR) | [#143](https://github.com/keyvanarasteh/os-lab/pull/143) | — | — | — | none |
 | CLN-05 | pending | — | — | — | — | none |
 | CLN-06 | in progress (this PR) | [#145](https://github.com/keyvanarasteh/os-lab/pull/145) | — | — | — | none |
 | CLN-07 | in progress (this PR) | [#147](https://github.com/keyvanarasteh/os-lab/pull/147) | — | project sweep UI and simulator action deferred | read-only detection only | none |

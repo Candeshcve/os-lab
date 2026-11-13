@@ -454,6 +454,23 @@ file changed and this worktree has no Node dependencies; the page is CLN-16. Rus
 `fmt`/`clippy` — no Rust changed. No Windows host ran the cross-volume and
 freedesktop-Trash paths; those use injected tests.
 
+## CLN-04 — system detections
+
+Branch `codex/cln-04-system-caches` from master `6656ed55`. The system catalog
+now has per-OS paths for account caches and logs, per-item temporary data,
+crash reports, font caches and macOS Spotlight indexes. A temp detector
+enumerates immediate children of catalog roots while omitting symlinks, lock,
+socket and pid names, and regular files below 1 KiB. Spotlight expands indexes
+on mounted volumes. Shared temp and Spotlight are privileged and never
+pre-selected; the current unprivileged plan reports them as skipped.
+
+Generated-tree fixtures cover macOS and Linux temp scanning, Windows path
+expansion, and multiple macOS Spotlight volumes. The engine suite passed 115
+tests. `lat check`, JSON parsing and `git diff --check` passed. Native Windows
+scanning was not run on this macOS host.
+
+## CLN-05 … CLN-29
+
 ## CLN-06 — developer tool and package-manager caches
 
 Branch `codex/cln-06-developer-caches` from master `6656ed55`. Adds 47

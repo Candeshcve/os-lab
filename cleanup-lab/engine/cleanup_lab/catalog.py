@@ -28,6 +28,7 @@ Template syntax (see ``cleanup-lab/catalog/README.md``):
 from __future__ import annotations
 
 import json
+import stat
 import ntpath
 import os
 import shutil
@@ -50,7 +51,7 @@ CATEGORIES = (
     "package",
     "simulator",
 )
-DETECTORS = ("paths", "artifacts", "signatures", "tool")
+DETECTORS = ("paths", "temp", "spotlight", "artifacts", "signatures", "tool")
 NEVER_PRESELECTED = ("high", "credentials", "privacy")
 FAMILY_PATTERN = re.compile(r"^[a-z][a-z0-9-]*$")
 ID_PATTERN = re.compile(r"^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+$")
@@ -284,9 +285,47 @@ def resolve(entry, platform, env=None):
     """The entry's paths for one platform, each resolved or carrying its reason."""
     env = os.environ if env is None else env
     resolved = []
+    detector = entry.get("detector", "paths")
     for template in entry["paths"].get(platform, []):
+        if detector == "spotlight" and template.endswith("/*/.Spotlight-V100"):
+            parent_template = template[:-len("/*/.Spotlight-V100")]
+            parent, reason = expand(parent_template, platform, env)
+            if parent is None:
+                resolved.append({"template": template, "path": None, "reason": reason})
+                continue
+            try:
+                with os.scandir(parent) as listing:
+                    volumes = sorted(item.path for item in listing if item.is_dir())
+            except OSError as exc:
+                resolved.append({"template": template, "path": None, "reason": str(exc)})
+                continue
+            for volume in volumes:
+                index = os.path.join(volume, ".Spotlight-V100")
+                if os.path.lexists(index):
+                    resolved.append({"template": template, "path": index, "reason": ""})
+            continue
         path, reason = expand(template, platform, env)
-        resolved.append({"template": template, "path": path, "reason": reason})
+        if detector != "temp" or path is None:
+            resolved.append({"template": template, "path": path, "reason": reason})
+            continue
+        try:
+            with os.scandir(path) as listing:
+                candidates = sorted(listing, key=lambda item: item.name)
+        except OSError as exc:
+            resolved.append({"template": template, "path": None, "reason": str(exc)})
+            continue
+        for item in candidates:
+            if item.name.lower().endswith((".lock", ".sock", ".pid")):
+                continue
+            try:
+                info = item.stat(follow_symlinks=False)
+            except OSError:
+                continue
+            if stat.S_ISLNK(info.st_mode) or not (
+                stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode) and info.st_size >= 1024
+            ):
+                continue
+            resolved.append({"template": template, "path": item.path, "reason": ""})
     return resolved
 
 

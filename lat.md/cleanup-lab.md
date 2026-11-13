@@ -50,6 +50,13 @@ why it was dropped, and [[cleanup-lab/catalog/README.md]] documents the format.
 
 ## Scan job
 
+CLN-04 adds system temp, crash, font and Spotlight catalog entries on the
+applicable operating systems. The regular scan remains read-only.
+
+Temp roots enumerate immediate candidates after filtering locks, small files
+and symlinks. Spotlight expands indexes on mounted macOS volumes. Shared temp
+and Spotlight entries require a later privileged clean flow.
+
 CLN-11 adds read-only package review suggestions.
 
 [[cleanup-lab/engine/cleanup_lab/packages.py]] powers `POST /api/cleanup/packages/scan`, which

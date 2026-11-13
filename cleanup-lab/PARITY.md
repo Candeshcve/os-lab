@@ -61,7 +61,7 @@ follows a symlink out of its top-level path.
 | `trash` | `system.trash` | CLN-02 (seed) | Never pre-selected: emptying the Trash is permanent. Qleaner scans `~/.Trash`, `~/.local/share/Trash/files` and `C:\$Recycle.Bin`; the Windows path needs a privileged read (CLN-20), so it gets its own entry there. |
 | `temp_files` | `system.temp` | CLN-04 | `std::env::temp_dir()`; Qleaner only emits it on Windows. |
 | `local_temp` | `system.local-temp` | CLN-04 | `%LOCALAPPDATA%\Temp`. |
-| `tmp_{base}_{name}` (instance) | `system.temp` | CLN-04 | From `detect_temp_data`: `$TMPDIR`, `/private/tmp`, `/private/var/folders`, `~/.tmp`, `~/tmp`; skips `.lock`, `.sock`, `.pid` and items under 1 KiB. `/private/tmp` and `/private/var/folders` are read-only scans; cleaning needs a privileged plan. |
+| `tmp_{base}_{name}` (instance) | `system.temp` / `system.shared-temp` | CLN-04 | From `detect_temp_data`: `$TMPDIR`, `/private/tmp`, `/private/var/folders`, `~/.tmp`, `~/tmp`; skips `.lock`, `.sock`, `.pid` and regular files under 1 KiB. Shared roots are never pre-selected and cleaning needs a privileged plan. |
 | `crash_{name}` (instance) | `system.crash-reports` | CLN-04 | `~/Library/Logs/DiagnosticReports`, `~/Library/Logs/CrashReporter`, `~/.local/share/apport`. |
 | `font_cache_{name}` (instance) | `system.font-caches` | CLN-04 | `~/Library/Caches/com.apple.ATS`, `~/.cache/fontconfig`. |
 | `spotlight_{vol_name}` (instance) | `system.spotlight-index` | CLN-04 | `.Spotlight-V100` per volume; `needsPrivilege: true` on macOS (CLN-20 rebuilds it). |
