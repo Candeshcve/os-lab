@@ -633,6 +633,74 @@ capabilities, candidate previews, risk, command, confirmed prune result and
 report-only VM inventory; the browser test covers the typed requests. Dashboard
 type, translation, build and browser checks pass with all seven catalogs updated.
 
+## CLN-28 — volumes overview and disk pressure
+
+Branch `feat/cln-28`. Scope: the engine volume inventory, `GET
+/api/cleanup/volumes`, `labctl cleanup volumes`, tests, docs. The `/cleanup/`
+volumes card is the dashboard layer's part (handoff in `STATUS.md`).
+
+### Engine unit tests
+
+```console
+$ cd cleanup-lab/engine && python -m unittest discover -s tests -p 'test_*.py'
+Ran 178 tests in 1.120s
+FAILED (failures=49, errors=37, skipped=4)
+```
+
+Baseline discipline: this Windows host fails the same suite on a clean master
+worktree **before** any change, with the same counts — the suite carries
+platform-specific expectations (macOS path templates, POSIX-only fixtures) that
+do not hold on Windows:
+
+```console
+# clean origin/master worktree, before this branch's changes
+Ran 154 tests in 3.032s
+FAILED (failures=49, errors=37, skipped=4)
+```
+
+The failing test ids were captured on both runs (`unittest -v` lines starting
+with `FAIL:`/`ERROR:`) and compared: 86 ids before, 86 after, diff 0 — **no new
+failure**. The 24 new `test_volumes.py` tests (fake mount tables and fake
+disks only, per README rule 8) and the existing `test_cli.py` suite (10 tests)
+pass on this host.
+
+### Console contract
+
+```console
+$ python -m pytest android-lab/lab/tests/test_cleanup_console.py -q
+1 failed, 10 passed, 7 skipped in 0.89s
+```
+
+The failure (`test_container_prune_requires_single_use_preview_and_audits`) is
+pre-existing on this host at the baseline (the fake docker binary fixture is
+POSIX-shaped); the two new volumes tests pass.
+
+### CLI on this host (real, read-only run)
+
+```console
+$ python -c "import sys; sys.path.insert(0, 'cleanup-lab/engine'); from cleanup_lab import cli; print('exit', cli.main(['volumes']))"
+Cleanup Lab volumes · windows · 1 volume
+  [ok] C:\                          NTFS     root       86% used · home
+exit 0
+```
+
+### Knowledge graph
+
+```console
+$ lat check
+All checks passed in 950ms
+```
+
+### Not run
+
+* `./scripts/run-tests.sh` — this host has no usable bash (the `bash` on PATH is
+  the WSL launcher without distributions), so the repo runner cannot start here;
+  the targeted suites above are the same stages it would run for this change.
+* `npm run check` / `test:i18n` / `build` / `test:e2e` — no dashboard file
+  changed; the volumes card is the dashboard-layer handoff.
+* Live macOS and Linux collector runs — covered here by the injected
+  fake-table tests; on-host confirmation is pending.
+
 ## CLN-04 … CLN-29
 
 Each task appends its own section when it lands.

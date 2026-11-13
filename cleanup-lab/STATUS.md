@@ -56,7 +56,7 @@ the finding and the decision are in the session log.
 | CLN-25 | merged | [#146](https://github.com/keyvanarasteh/os-lab/pull/146) | e5dfac27 | source label wired into cleanup results | engine and dashboard payloads ready | none |
 | CLN-26 | pending | — | — | — | — | none |
 | CLN-27 | pending | — | — | — | — | none |
-| CLN-28 | pending | — | — | `/cleanup/` volumes card | console side only | none |
+| CLN-28 | in review (this PR) | [#170](https://github.com/keyvanarasteh/os-lab/pull/170) | — | `/cleanup/` volumes card (dashboard layer) | console + engine landed per the layer split | none |
 | CLN-29 | pending | — | — | — | — | none |
 
 No CLN task has a student reservation or open student PR: `grep -rl CLN-
@@ -483,6 +483,54 @@ Actions: exactly one, Re-check (re-fetch). No scan/clean button until CLN-03/13.
 Dynamic strings from the API (`label`, `detail`, `hint`, `reasons`) are English
 server-side, like every other lab label; they are not translated client-side.
 
+## Dashboard handoff — CLN-28
+
+### Console endpoint (live on this branch)
+
+`GET /api/cleanup/volumes` — no query parameters (an unknown one is `400`); no
+POST, no job: the probe is synchronous and read-only.
+
+```json
+{
+  "platform": "windows",
+  "checkedAt": 0,
+  "threshold": 0.9,
+  "homeVolume": "C:\\\\",
+  "error": null,
+  "volumes": [
+    {
+      "mountPoint": "C:\\\\", "name": "Windows", "device": "C:", "filesystem": "NTFS",
+      "kind": "root", "totalBytes": 0, "freeBytes": 0, "usedBytes": 0,
+      "usage": 0.93, "isHome": true, "pressure": "warning", "error": null
+    }
+  ],
+  "warnings": ["Volume C:\\\\ is 93% full (7.8 GB free)."]
+}
+```
+
+`kind` is `root` / `internal` / `removable` / `unknown`; `pressure` is `ok` or
+`warning` (usage strictly above `threshold`). A volume that could not be
+measured carries a non-null `error`, `null` byte fields and `usage` — show the
+error, never zero-filled numbers. `homeVolume` is `null` when no mount point
+contains the home folder. Byte totals are `shutil.disk_usage` values; never sum
+them into a claim of reclaimable space — they are capacity, not cleanup results.
+
+### What the card does (the `/cleanup/` volumes card is this handoff)
+
+| State | What the page shows |
+|---|---|
+| ready | one row per volume: mount point, kind, filesystem, used/total and a bar; the home volume marked; the `warnings` list under it |
+| unreadable volume | the row stays visible with its `error` text and no numbers — never hidden, never zero-filled |
+| probe failed (top-level `error`) | that error text alone; no invented rows |
+| public Pages | no engine call: the page explains local installation |
+
+Visible strings (English; these are the i18n keys):
+`Volumes` · `Local volumes and disk pressure. Read-only; nothing is scanned or removed.` ·
+`Home` · `Root volume` · `Internal` · `Removable` · `Unknown` · `{percent}% used` ·
+`Usage unknown` · `Could not measure this volume`. Dynamic strings (`mountPoint`,
+`name`, `filesystem`, `error`, `warnings[]`) come from the engine in English,
+like every other lab payload; they are not translated client-side.
+
 ## Session log
 
 **2026-11-13 — CLN-01.** Read `AGENTS.md`, `CONTRIBUTING.md` §2b,
@@ -581,3 +629,17 @@ was 7 passed / 1 failed / 1 skipped: the android stage shows the same six
 pre-existing ids as `master` (158 passed), and the dashboard stage skipped because
 this worktree has no `node_modules`. Dashboard typecheck/build/e2e were not run —
 no dashboard file changed.
+
+**2026-11-13 — CLN-28.** Volumes overview and disk pressure. Added
+`cleanup_lab/volumes.py` (kernel32 drive enumeration on Windows,
+`/proc/self/mountinfo` on Linux, the fixed `mount` probe plus an optional fixed
+`diskutil info -plist` probe on macOS; network and pseudo filesystems filtered
+before any capacity query; the home volume marked by longest prefix; pressure
+warnings above 90% usage), `GET /api/cleanup/volumes`, `labctl cleanup volumes`
+and 24 engine tests over fake mount tables (rule 8: no real volume touched).
+The `/cleanup/` volumes card is the dashboard layer's part; the handoff is
+above. Baseline note, recorded honestly in VERIFY.md: the engine suite has
+pre-existing platform-specific failures on this Windows host (49 failures + 37
+errors on a clean master checkout); the failing test set is identical after
+this change, and the console contract suite keeps its single pre-existing
+Windows failure.

@@ -180,6 +180,20 @@ actions only when the engine is ready. Public Pages has no engine, so the page
 explains local installation without polling, per
 [[lat.md/ux-readiness.md]].
 
+## Volumes
+
+CLN-28 adds a read-only volume inventory: [[cleanup-lab/engine/cleanup_lab/volumes.py]]
+answers `GET /api/cleanup/volumes` and `labctl cleanup volumes`.
+
+Every local volume is reported with its mount point, filesystem, capacity and
+kind (`root` / `internal` / `removable` / `unknown`), the volume holding the
+home folder is marked, and usage above 90% raises a pressure warning. Network
+and pseudo filesystems are filtered before any capacity call; Windows
+enumerates drives through kernel32, Linux reads `/proc/self/mountinfo`, and
+macOS parses the fixed `mount` probe plus an optional fixed `diskutil info
+-plist` probe. An unreadable volume carries an `error` instead of failing the
+probe. The `/cleanup/` volumes card is the dashboard layer's part.
+
 ## Dashboard pages
 
 [[dashboard/src/views/cleanup/pages.tsx]] renders the compact default dashboard at
@@ -209,7 +223,7 @@ the seven translated locales.
 `console/cleanup_api.py` answers `/api/cleanup/...`; the web console routes that prefix
 before the static dashboard fallthrough.
 
-`GET /api/cleanup/status` and `GET /api/cleanup/catalog` are read-only.
+`GET /api/cleanup/status`, `GET /api/cleanup/catalog` and `GET /api/cleanup/volumes` are read-only.
 `POST /api/cleanup/scan`, `POST /api/cleanup/plan` and `POST /api/cleanup/clean
 {planId}` start jobs whose requests carry catalog ids, an optional worker count or
 mode, and a plan id only. `GET /api/cleanup/jobs/<id>` returns progress and result;
@@ -250,7 +264,8 @@ The engine tests run under `unittest` from the engine folder.
 
 `cd cleanup-lab/engine && python3 -m unittest discover -s tests -p 'test_*.py'`
 covers the probe, the catalog, the scan, plan → clean (guard, fingerprints,
-Trash by default, honest failures), the path rules and the CLI exit codes.
+Trash by default, honest failures), the path rules, the CLI exit codes and the
+volume inventory.
 Tests live in [[cleanup-lab/engine/tests]]; the console's typed job contract is
 covered by [[android-lab/lab/tests/test_cleanup_console.py]]. [[scripts/run-tests.sh]]
 runs the same suites next to the reference code tests, the Android suite, `bash -n`,
