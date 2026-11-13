@@ -33,6 +33,7 @@ MAX_ENTRY_IDS = 200
 #: The only keys a scan request may carry. Paths are deliberately not among
 #: them: the scan walks the catalog, never a list the page sends.
 SCAN_KEYS = ("entryIds", "workers")
+DEEP_KEYS = ("rootIds", "minIdleDays")
 #: The only keys a plan request may carry; ``mode`` defaults to ``trash``.
 PLAN_KEYS = ("entryIds", "workers", "mode")
 #: The only key a clean request may carry: which confirmed plan to run.
@@ -46,7 +47,7 @@ PLAN_STATUS = {
     "used": 409,
     "cancelled": 409,
 }
-BODY_KEYS = {"scan": SCAN_KEYS, "plan": PLAN_KEYS, "clean": CLEAN_KEYS}
+BODY_KEYS = {"scan": SCAN_KEYS, "deep-scan": DEEP_KEYS, "plan": PLAN_KEYS, "clean": CLEAN_KEYS}
 
 
 class CleanupError(ValueError):
@@ -215,6 +216,32 @@ class CleanupJobStore:
         job = CleanupJob("scan", {"entryIds": entry_ids, "workers": workers})
         self._register(job)
         return self._spawn(job, self._run_scan, (root, job, entry_ids, workers))
+
+    def start_deep_scan(self, root, request):
+        deep = _module(root, "deep")
+        root_ids = request.get("rootIds")
+        idle = request.get("minIdleDays", 0)
+        if not isinstance(root_ids, list) or not root_ids or any(not isinstance(x, str) for x in root_ids) or len(root_ids) != len(set(root_ids)):
+            raise CleanupError(400, "rootIds must be unique configured root ids")
+        if not isinstance(idle, int) or isinstance(idle, bool) or not 0 <= idle <= 3650:
+            raise CleanupError(400, "minIdleDays must be an integer from 0 to 3650")
+        available = {x["id"] for x in deep.roots(root) if x["available"]}
+        if any(x not in available for x in root_ids):
+            raise CleanupError(400, "Unknown or unavailable rootId")
+        job = CleanupJob("deep-scan", {"rootIds": root_ids, "minIdleDays": idle})
+        self._register(job)
+        return self._spawn(job, self._run_deep_scan, (root, job, root_ids, idle))
+
+    def _run_deep_scan(self, root, job, root_ids, idle):
+        try:
+            result = _module(root, "deep").sweep(root, root_ids, min_idle_days=idle, cancel=job.cancel)
+            job.result = result
+            job.state = "cancelled" if result["cancelled"] else "done"
+        except Exception as exc:
+            job.state = "failed"
+            job.error = "{0}: {1}".format(type(exc).__name__, exc)
+        finally:
+            job.finishedAt = time.time()
 
     def start_plan(self, root, request):
         """Validate the plan request, then build the plan on a worker thread.
@@ -410,6 +437,12 @@ class CleanupAPI:
                 return catalog.report(self.root)
             except catalog.CatalogError as exc:
                 raise CleanupError(500, "The detector catalog is invalid: {0}".format(exc)) from exc
+        if path == "/api/cleanup/deep-roots":
+            _query(query)
+            return {"roots": _module(self.root, "deep").roots(self.root)}
+        if path == "/api/cleanup/simulators":
+            _query(query)
+            return _module(self.root, "deep").simulators(self.root)
         if path == "/api/cleanup/jobs":
             _query(query)
             return {"jobs": JOBS.list()}
@@ -429,6 +462,9 @@ class CleanupAPI:
         if path == "/api/cleanup/scan":
             _object_body(body, "scan")
             return JOBS.start_scan(self.root, body)
+        if path == "/api/cleanup/deep-scan":
+            _object_body(body, "deep-scan")
+            return JOBS.start_deep_scan(self.root, body)
         if path == "/api/cleanup/plan":
             _object_body(body, "plan")
             return JOBS.start_plan(self.root, body)

@@ -454,6 +454,17 @@ file changed and this worktree has no Node dependencies; the page is CLN-16. Rus
 `fmt`/`clippy` — no Rust changed. No Windows host ran the cross-volume and
 freedesktop-Trash paths; those use injected tests.
 
+## CLN-07 — deep project sweep and Xcode simulators
+
+The sweep accepts configured root ids, scans read-only, checks project marker
+files and stops below matched artifacts. A generated tree test covers valid
+Node and Rust projects, false `target`/`node_modules` names, a nested artifact
+and a symlink loop. Console tests reject paths, unknown ids and malformed age
+filters. A fake `xcrun simctl list -j devices` checks fixed argv, timeout,
+unavailable devices and measured size. Engine suite: 115 passed; console
+contract suite: 11 passed via `uv run --with pytest`. Native Xcode was not
+available on this host.
+
 ## CLN-04 … CLN-29
 
 Each task appends its own section when it lands.
