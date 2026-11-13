@@ -233,3 +233,37 @@ def test_gather_facts_live_windows_is_well_formed():
     assert {"wsl", "podman", "virtualbox", "cpu"} <= set(facts)
     report = wp.evaluate(facts)
     assert report["overall"] in ("ok", "warn", "fail")
+
+
+# --- executable resolution (no binaries from the current/lab directory) -------
+
+def test_which_trusted_rejects_binary_in_current_dir(monkeypatch, tmp_path):
+    planted = tmp_path / "podman.exe"
+    planted.write_text("")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(wp.shutil, "which", lambda name: str(planted))
+    assert wp._which_trusted("podman") is None
+
+
+def test_which_trusted_rejects_binary_in_lab_dir(monkeypatch):
+    monkeypatch.setattr(wp.shutil, "which", lambda name: os.path.join(wp.LAB_DIR, "wsl.exe"))
+    assert wp._which_trusted("wsl") is None
+
+
+def test_which_trusted_accepts_install_dir(monkeypatch, tmp_path):
+    install = tmp_path / "Program Files" / "Podman"
+    install.mkdir(parents=True)
+    exe = install / "podman.exe"
+    monkeypatch.setattr(wp.shutil, "which", lambda name: str(exe))
+    assert wp._which_trusted("podman") == str(exe)
+    monkeypatch.setattr(wp.shutil, "which", lambda name: None)
+    assert wp._which_trusted("podman") is None
+
+
+def test_system_exe_resolves_only_under_system_root(monkeypatch, tmp_path):
+    sys32 = tmp_path / "System32"
+    sys32.mkdir()
+    (sys32 / "wsl.exe").write_text("")
+    monkeypatch.setenv("SystemRoot", str(tmp_path))
+    assert wp._system_exe("wsl.exe") == os.path.join(str(tmp_path), "System32", "wsl.exe")
+    assert wp._system_exe("missing.exe") is None

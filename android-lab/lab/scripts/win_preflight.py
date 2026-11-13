@@ -131,7 +131,33 @@ def _to_bool(value: Any) -> Optional[bool]:
 # ---------------------------------------------------------------------------
 # Probing (Windows only, read-only, no elevation)
 # ---------------------------------------------------------------------------
+def _system_exe(*parts: str) -> Optional[str]:
+    """Absolute path to a Windows system binary under %SystemRoot%\\System32."""
+    root = os.environ.get("SystemRoot") or r"C:\Windows"
+    path = os.path.join(root, "System32", *parts)
+    return path if os.path.isfile(path) else None
+
+
+def _which_trusted(name: str) -> Optional[str]:
+    """shutil.which, but never a binary sitting in the current or lab directory.
+
+    On Windows a bare command name can resolve from the current directory, so a
+    planted e.g. podman.exe next to the lab would otherwise be executed.
+    """
+    path = shutil.which(name)
+    if not path:
+        return None
+    folder = os.path.normcase(os.path.dirname(os.path.abspath(path)))
+    untrusted = {os.path.normcase(os.path.abspath(d)) for d in (os.getcwd(), LAB_DIR)}
+    return None if folder in untrusted else path
+
+
 def _run(cmd: list[str], env: Optional[dict] = None) -> tuple[int, str]:
+    """Run a fixed argv (list form, never a shell) with a timeout.
+
+    Every caller passes an absolute executable path and constant arguments;
+    no user, file or network input reaches the command line.
+    """
     try:
         proc = subprocess.run(cmd, capture_output=True, timeout=PROBE_TIMEOUT,
                               env=env, stdin=subprocess.DEVNULL)
@@ -157,7 +183,8 @@ _CIM_SCRIPT = (
 
 
 def _probe_cim() -> dict[str, Any]:
-    shell = shutil.which("powershell") or shutil.which("pwsh")
+    shell = (_system_exe("WindowsPowerShell", "v1.0", "powershell.exe")
+             or _which_trusted("pwsh"))
     if not shell:
         return {}
     # -ExecutionPolicy Bypass applies to this one child process only.
@@ -181,7 +208,7 @@ def _probe_admin() -> Optional[bool]:
 
 
 def _probe_wsl() -> dict[str, Any]:
-    exe = shutil.which("wsl")
+    exe = _system_exe("wsl.exe")
     if not exe:
         return {"installed": False, "distros": []}
     env = dict(os.environ, WSL_UTF8="1")
@@ -192,7 +219,7 @@ def _probe_wsl() -> dict[str, Any]:
 
 
 def _probe_podman() -> dict[str, Any]:
-    exe = shutil.which("podman")
+    exe = _which_trusted("podman")
     if not exe:
         return {"installed": False, "version": None, "machines": []}
     _, ver = _run([exe, "--version"])
@@ -202,7 +229,7 @@ def _probe_podman() -> dict[str, Any]:
 
 
 def _probe_virtualbox() -> dict[str, Any]:
-    exe = shutil.which("VBoxManage") or (VBOX_DEFAULT if os.path.exists(VBOX_DEFAULT) else None)
+    exe = _which_trusted("VBoxManage") or (VBOX_DEFAULT if os.path.exists(VBOX_DEFAULT) else None)
     if not exe:
         return {"installed": False, "version": None}
     _, ver = _run([exe, "--version"])

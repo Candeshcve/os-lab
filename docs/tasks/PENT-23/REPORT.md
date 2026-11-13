@@ -20,7 +20,7 @@ Böylece öğrenci, neyi kendisinin düzeltebileceğini ve neyi IT'den istemesi 
 |---|---|
 | [`android-lab/lab/scripts/win_preflight.py`](../../../android-lab/lab/scripts/win_preflight.py) | Yalnızca standart kütüphane kullanan araç: `gather_facts()` (Windows probe), `evaluate()` (saf mantık), CLI |
 | [`android-lab/lab/lab.ps1`](../../../android-lab/lab/lab.ps1) | Yeni komut: `.\lab.ps1 win-preflight [-Json]` (UTF-8 BOM korundu, PS 5.1'de parse hatası yok) |
-| [`android-lab/lab/tests/test_win_preflight.py`](../../../android-lab/lab/tests/test_win_preflight.py) | 24 test: senaryo golden testleri, parser'lar, CLI çıkış kodları, canlı Windows probe |
+| [`android-lab/lab/tests/test_win_preflight.py`](../../../android-lab/lab/tests/test_win_preflight.py) | 28 test: senaryo golden testleri, parser'lar, CLI çıkış kodları, güvenli program yolu çözümü, canlı Windows probe |
 | [`android-lab/lab/tests/fixtures/win_preflight/`](../../../android-lab/lab/tests/fixtures/win_preflight/) | Sorun senaryolarını yeniden üreten 6 adet host-facts dosyası |
 | [`android-lab/lab/README-WINDOWS.md`](../../../android-lab/lab/README-WINDOWS.md), [`lat.md/android-lab.md`](../../../lat.md/android-lab.md) | Dokümantasyon |
 
@@ -44,6 +44,7 @@ Böylece öğrenci, neyi kendisinin düzeltebileceğini ve neyi IT'den istemesi 
 - **Probe ile değerlendirme ayrı.** `--save-facts` makinenin durumunu JSON olarak kaydeder,
   `--facts` ise bu dosyayı başka bir makinede değerlendirir. Böylece Windows'a özgü durumlar
   Linux CI'da da test edilebilir.
+- **Güvenli program yolu.** `powershell.exe` ve `wsl.exe` her zaman `%SystemRoot%\System32` içinden çağrılır; `podman` / `VBoxManage` için PATH'te bulunan dosya mevcut klasörde ya da lab klasöründeyse reddedilir (oraya bırakılmış sahte bir `.exe` çalıştırılamaz). Komutlar liste olarak, shell olmadan ve yalnızca sabit argümanlarla çalışır.
 - **Salt okunur.** Araç hiçbir ayarı değiştirmez. CIM sorgusu yalnızca kendi alt sürecinde
   `-ExecutionPolicy Bypass` ile çalışır.
 - **Kanıta dayalı.** Mümkün olduğunca makinede doğrulanan davranışa dayanır (aşağıdaki iki hata
@@ -111,7 +112,7 @@ Overall: OK
 
 ### Test sonuçları
 
-- `tests/test_win_preflight.py`: **24 passed**.
+- `tests/test_win_preflight.py`: **28 passed** (Windows), 27 passed + 1 skipped (Linux; canlı Windows probe testi atlanır).
 - `android-lab/lab` test paketinin tamamı Windows'ta: değişiklikten önce 152 passed / 6 failed,
   değişiklikten sonra **176 passed** / aynı 6 failed. Düşen 6 test (`test_oslab_console`,
   `test_cleanup_console`, `test_web_ui`) bu değişiklikten önce de düşüyordu ve Windows hostuna
