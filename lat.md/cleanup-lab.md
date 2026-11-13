@@ -27,6 +27,18 @@ fallthrough. Long work becomes a console job with preview, progress and cancel.
 `cleanup_lab.cli`: exit `0` when ready, `1` when a required check fails, `2` for a
 usage error, matching [[lat.md/labctl.md]].
 
+## Catalog
+
+Target paths are data. One JSON file per family under `cleanup-lab/catalog`, validated
+against `schema.json`.
+
+[[cleanup-lab/engine/cleanup_lab/catalog.py]] loads it: unique ids, a family prefix,
+the known risk classes, and `defaultSelected` refused for `high`, `credentials` and
+`privacy`. Templates (`~`, `{cache}`, `${VAR}`, `${VAR:-fallback}`, `%VAR%`) expand per
+operating system; an unset variable yields `path: null` plus a reason instead of a
+guess. [[cleanup-lab/PARITY.md]] maps every Qleaner detector id to a catalog id or to
+why it was dropped, and [[cleanup-lab/catalog/README.md]] documents the format.
+
 ## Readiness
 
 `readiness.py` reports what the engine can do on this host without writing anything.

@@ -29,8 +29,8 @@ the finding and the decision are in the session log.
 
 | ID | Status | PR | Merge commit | Deliverables not done | Deviations | Student reservations / PRs |
 |---|---|---|---|---|---|---|
-| CLN-01 | in progress (this PR) | — | — | `/cleanup/` page, sidebar entry, seven locale catalogs, dashboard screenshots | dashboard layer deferred to the handoff below | none |
-| CLN-02 | pending | — | — | — | — | none |
+| CLN-01 | merged | [#134](https://github.com/keyvanarasteh/os-lab/pull/134) | d04941f6 | `/cleanup/` page, sidebar entry, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred | none |
+| CLN-02 | in progress (this PR) | — | — | — | — | none |
 | CLN-03 | pending | — | — | — | — | none |
 | CLN-04 | pending | — | — | — | — | none |
 | CLN-05 | pending | — | — | — | — | none |
@@ -62,6 +62,51 @@ the finding and the decision are in the session log.
 No CLN task has a student reservation or open student PR: `grep -rl CLN-
 reservations/` matches only `README.md` and `_schema.json`, and no open PR title or
 branch names a CLN id.
+
+## Dashboard handoff — CLN-02
+
+### Console endpoint (already live)
+
+`GET /api/cleanup/catalog` → `200 application/json`
+
+```json
+{
+  "platform": "macos",
+  "entries": [
+    {
+      "id": "system.user-caches",
+      "name": "User caches",
+      "family": "system",
+      "category": "system",
+      "risk": "low",
+      "hint": "Application caches for the current user. They speed up loading.",
+      "impact": "Apps rebuild these; the first launch after cleaning is slower.",
+      "defaultSelected": true,
+      "needsPrivilege": false,
+      "owningProcesses": [],
+      "detector": "paths",
+      "note": "",
+      "paths": [
+        { "template": "~/Library/Caches", "path": "/Users/Q/Library/Caches", "reason": "" }
+      ]
+    }
+  ]
+}
+```
+
+`risk` is `low` / `medium` / `high` / `credentials` / `privacy`; the last three are
+never pre-selected. `paths[].path` is `null` when the template could not be resolved
+(e.g. an unset `XDG_CACHE_HOME`), and `paths[].reason` then says why. Errors: `400`
+unexpected or duplicate query parameters, `404` unknown path, `500` malformed catalog
+(the message names the file). No POST, no jobs.
+
+### UI
+
+CLN-02 adds no page. When a later page lists detectors (CLN-16), it reads this
+endpoint; a path with `path: null` must show its `reason`, not be hidden. Suggested
+strings, if such a list is built: `Detector catalog` · `No detector catalog` ·
+`Could not resolve this path`. Everything else comes from `name`, `hint`, `impact`
+and `risk` in the payload.
 
 ## Dashboard handoff — CLN-01
 
@@ -188,3 +233,11 @@ was declined: absolute home and state paths in the status response — the conso
 binds `127.0.0.1` only, rejects a foreign Host header, and any local process can
 read the home path without it, while the page needs the paths to be useful. Replied
 to and resolved every thread.
+
+**2026-11-13 — CLN-02.** Catalog format, loader, seeds and parity. Added
+`cleanup-lab/catalog/schema.json` (draft 2020-12), `catalog/system.json` with three
+seed entries (user caches, user logs, Trash), `cleanup_lab/catalog.py` (validation,
+per-OS template expansion, unresolved paths reported with a reason, pre-selected
+risk refused), `cleanup-lab/PARITY.md` mapping every Qleaner detector id read from
+`detectors.rs`, `catalog/README.md`, `labctl cleanup catalog` and
+`GET /api/cleanup/catalog`. No CLN reservation or open CLN PR existed for this task.

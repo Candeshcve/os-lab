@@ -11,6 +11,7 @@ plain standard-library package: the console does not install it.
 """
 from __future__ import annotations
 
+import importlib
 import os
 import sys
 
@@ -23,15 +24,14 @@ class CleanupError(ValueError):
         self.status = status
 
 
-def _readiness(root):
+def _module(root, name):
     engine = os.path.join(root, "cleanup-lab", "engine")
     if engine not in sys.path:
         sys.path.insert(0, engine)
     try:
-        from cleanup_lab import readiness
+        return importlib.import_module("cleanup_lab." + name)
     except ImportError as exc:  # a lone console copy without the engine
         raise CleanupError(501, "The cleanup engine (cleanup-lab/engine) is not installed") from exc
-    return readiness
 
 
 def _query(query):
@@ -48,5 +48,12 @@ class CleanupAPI:
     def get(self, path, query):
         if path == "/api/cleanup/status":
             _query(query)
-            return _readiness(self.root).probe(self.root)
+            return _module(self.root, "readiness").probe(self.root)
+        if path == "/api/cleanup/catalog":
+            _query(query)
+            catalog = _module(self.root, "catalog")
+            try:
+                return catalog.report(self.root)
+            except catalog.CatalogError as exc:
+                raise CleanupError(500, "The detector catalog is invalid: {0}".format(exc)) from exc
         raise CleanupError(404, "Cleanup Lab endpoint not found")

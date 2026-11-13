@@ -36,6 +36,7 @@ console imports it from `console/cleanup_api.py`; `labctl` runs its CLI.
 ```bash
 ./labctl cleanup status          # readiness of this computer, exit 0 ready / 1 problem
 ./labctl cleanup doctor          # every check, path and hint
+./labctl cleanup catalog         # detector catalog for this OS, with resolved paths
 ./labctl cleanup status --json   # the same probe as JSON (what /api/cleanup/status returns)
 cd cleanup-lab/engine && python3 -m unittest discover -s tests -p 'test_*.py'
 ```
@@ -46,6 +47,15 @@ folder, the Trash target and the private state folder, plus optional capabilitie
 in `~/Library/Application Support/os-lab/cleanup` on macOS,
 `$XDG_STATE_HOME/os-lab/cleanup` on Linux and `%LOCALAPPDATA%\os-lab\cleanup` on
 Windows; `OSLAB_CLEANUP_STATE` overrides it.
+
+## Detector catalog
+
+`cleanup-lab/catalog/*.json` holds every target as data: id, name, category, risk,
+hint, impact, default selection, owning processes, privilege flag and per-OS paths.
+[`schema.json`](catalog/schema.json) documents the format, `catalog.py` validates and
+expands it, and [`PARITY.md`](PARITY.md) records which Qleaner detector each entry
+replaces. `./labctl cleanup catalog` prints the entries for this computer with every
+path it could resolve — and the reason for each it could not.
 
 ## Architecture contract
 

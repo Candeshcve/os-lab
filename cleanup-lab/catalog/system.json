@@ -1,0 +1,51 @@
+{
+  "$schema": "./schema.json",
+  "version": 1,
+  "family": "system",
+  "entries": [
+    {
+      "id": "system.user-caches",
+      "name": "User caches",
+      "category": "system",
+      "risk": "low",
+      "hint": "Application caches for the current user. They speed up loading.",
+      "impact": "Apps rebuild these; the first launch after cleaning is slower.",
+      "defaultSelected": true,
+      "needsPrivilege": false,
+      "detector": "paths",
+      "paths": {
+        "macos": ["~/Library/Caches"],
+        "linux": ["${XDG_CACHE_HOME:-~/.cache}"]
+      }
+    },
+    {
+      "id": "system.user-logs",
+      "name": "User logs",
+      "category": "system",
+      "risk": "low",
+      "hint": "Log files written by applications, used for debugging.",
+      "impact": "Apps start a new log file on their next run.",
+      "defaultSelected": true,
+      "needsPrivilege": false,
+      "detector": "paths",
+      "paths": {
+        "macos": ["~/Library/Logs"]
+      }
+    },
+    {
+      "id": "system.trash",
+      "name": "Trash",
+      "category": "system",
+      "risk": "medium",
+      "hint": "Items already in the Trash. Their space is only freed when the Trash is emptied.",
+      "impact": "Trashed files are removed permanently.",
+      "defaultSelected": false,
+      "needsPrivilege": false,
+      "detector": "paths",
+      "paths": {
+        "macos": ["~/.Trash"],
+        "linux": ["${XDG_DATA_HOME:-~/.local/share}/Trash/files"]
+      }
+    }
+  ]
+}
