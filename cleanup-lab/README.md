@@ -19,7 +19,7 @@ console job with progress and cancel, `POST /api/cleanup/plan` previews a clean,
 and `POST /api/cleanup/clean {planId}` runs that confirmed plan. The `/cleanup/`
 page is **not built yet**: the dashboard layer lands separately, and
 [`STATUS.md`](STATUS.md) carries the endpoint contract, page states and strings it
-must use. Audit history is **not wired yet** (CLN-15). The work
+must use. Audit history is stored privately with a per-install HMAC key (CLN-15). The work
 is split into tasks `CLN-01` … `CLN-29` on the dashboard **Contribute → Roadmap &
 TODOs** tab (filter: Open Source OS, label "Cleanup Lab"). Reserve a task before you
 start, as with every os-lab task
