@@ -10,10 +10,18 @@ behaviour is ported, not the code or the look.** Qleaner has known bugs (below) 
 its own visual style; Cleanup Lab pages use the os-lab dashboard shell and follow
 [`docs/UX_READINESS.md`](../docs/UX_READINESS.md).
 
-Status: **roadmap**. The work is split into tasks `CLN-01` … `CLN-20` on the
+Status: **roadmap**. The work is split into tasks `CLN-01` … `CLN-29` on the
 dashboard **Contribute → Roadmap & TODOs** tab (filter: Open Source OS, label
 "Cleanup Lab"). Reserve a task before you start, as with every os-lab task
 ([`reservations/README.md`](../reservations/README.md)).
+
+Tasks `CLN-21` … `CLN-29` also have **working reference code** in
+[`reference/`](reference/README.md): the `qrust-scan` Rust crate (parallel
+allocated-size scan, size tree, hotspots, glob seek, progress, cancel) and the
+`cleanup_ref` Python modules (path policy, marker-verified artifact signatures,
+tool-reported cache locations, relocation planner, learning profile). That code
+was contributed by the maintainer from private projects, with known bugs fixed,
+and is covered by tests. It is read-only and not yet wired into the engine.
 
 ## Architecture contract
 
@@ -65,6 +73,20 @@ every Qleaner detector id to a catalog id, or to a written reason for dropping i
 | HMAC-signed audit history | `db.rs` | CLN-15 |
 | Ignore rules, schedules, headless CLI, disk-access check | `rules`, `schedules` pages, `cli.rs`, `check_system_disk_access` | CLN-17 … CLN-20 |
 
+## What the reference code adds
+
+| Capability | Reference | Task |
+|---|---|---|
+| Native parallel scan: allocated vs apparent size, hard-link de-duplication, one-filesystem mode, size tree, progress, cancel | `reference/qrust-scan` (`walk`, `platform`, `cancel`) | CLN-21 |
+| Known gaps in that crate (nested ignore files, recursive glob, name-only candidates, panic on pool error) | `reference/README.md` | CLN-22 |
+| Drill-down, sort modes, hotspot descent, glob seek, gitignored view | `qrust-scan` (`tree`, `glob_search`, `gitignore`); `cleanup_ref.path_policy.validate_scan_root` | CLN-23 |
+| Build artifacts proved by marker files and `CACHEDIR.TAG` | `cleanup_ref.artifacts` | CLN-24 |
+| Cache paths from env var → tool probe (fixed argv) → per-OS default | `cleanup_ref.devcache` | CLN-25 |
+| Cleaned-items ledger, learned score, soft pre-selection, Quick Clean | `cleanup_ref.learning` | CLN-26 |
+| Move / restore / relink a cache behind a symlink, 7 link states | `cleanup_ref.relocation` | CLN-27 |
+| Volumes and disk pressure | — (spec only) | CLN-28 |
+| Simulator runtimes, unavailable devices, Android AVDs and system images | — (spec only) | CLN-29 |
+
 ## Do not port (known Qleaner bugs)
 
 These were found by reading Qleaner (`src-tauri/src/cleaner/`, `commands.rs` unless noted). A PR that copies one of them is not accepted.
@@ -83,6 +105,22 @@ These were found by reading Qleaner (`src-tauri/src/cleaner/`, `commands.rs` unl
 | Shredder ignores write and remove errors and still reports success | `secure_shred_file` | CLN-14 reports every failure |
 | The audit-log HMAC key is hardcoded in source (`QleanerTelemetryCryptoIntegrity`), so the signature proves nothing | `clean_leftovers`, `db.rs` | Rule 7, CLN-15 |
 | The Ignore Rules page is a placeholder; nothing enforces it | `src/routes/rules` | CLN-17 enforces it in the engine |
+
+The private sources behind `reference/` had bugs of their own. They are fixed in
+the reference code, and a PR that brings any of them back is not accepted either:
+
+| Bug | What the reference code does instead |
+|---|---|
+| Purge removed items permanently (no Trash), counted apparent size and counted folders as files | CLN-13: Trash by default, bytes actually freed |
+| Purge only refused `/` and the home folder, so any other home folder (Documents, Desktop…) could be purged | `path_policy.validate_target`: inside a catalog allowed root, not the root itself |
+| Containment compared strings without resolving symlinks | `path_policy.is_contained`: resolved paths, path components |
+| Relocation ran `rm -rf` on the original right after copying, with no verification, and retried as an elevated shell script built by string interpolation | `relocation.plan_move`: copy → verify → rename aside → symlink → verify → remove aside; no elevated fallback |
+| "Prepare" / "link" ran `rm -rf` on whatever was at the home path | `relocation.plan_relink` refuses a real folder (CONFLICT) |
+| An unreadable learning ledger was silently replaced, losing lifetime totals | `learning.LedgerStore` moves it aside and reports it |
+| Pre-selection excluded only `high` risk | Also excludes `credentials` and `privacy` (rule 5) |
+| Cleanup candidates `target` / `venv` matched by name only | `artifacts`: marker files required |
+| Windows: directory identity read with `File::open`, so `stay_on_filesystem` zeroed every file | Fixed in `qrust-scan/src/platform.rs` |
+| Apps quit (or force-quit) through AppleScript before cleaning | Rule 4: skip with a reason; never quit the user's apps |
 
 ## Definition of a good PR
 

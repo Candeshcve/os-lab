@@ -214,6 +214,18 @@ Course note: **MYO063** students can take these tasks as a bonus (`"course": "MY
 | **CLN-18** | Schedules: scheduled dry-run scans | **Medium** · Small–Medium |
 | **CLN-19** | Headless CLI parity: labctl cleanup scan / plan / clean --json | **Medium** · Small |
 | **CLN-20** | Privileged targets and disk-access check | **Medium** · Small–Medium |
+| **CLN-21** | Native scan backend: wire qrust-scan into the desktop app | **High** · Medium |
+| **CLN-22** | Harden qrust-scan: nested .gitignore, iterative glob, verified candidates | **High** · Small–Medium |
+| **CLN-23** | Disk Explorer page: read-only size tree, hotspots and seek | **Medium** · Medium |
+| **CLN-24** | Project artifact signatures proved by marker files | **High** · Small–Medium |
+| **CLN-25** | Tool-reported cache locations: environment, then the tool, then the default | **High** · Small |
+| **CLN-26** | Learning loop: cleaned-items ledger, soft pre-selection, Quick Clean | **Medium** · Medium |
+| **CLN-27** | Relocate caches to another volume behind a symlink | **Medium** · Medium |
+| **CLN-28** | Volumes overview and disk-pressure card | **Medium** · Small |
+| **CLN-29** | Simulator and emulator runtimes: list, size, remove | **Medium** · Small–Medium |
+
+CLN-21 … CLN-29 start from working, tested reference code in [`cleanup-lab/reference/`](cleanup-lab/reference/README.md)
+(the `qrust-scan` Rust crate and the `cleanup_ref` Python modules). Adapt it to the contract; do not bypass the safety guard.
 
 ### 3. Firewall Solutions
 

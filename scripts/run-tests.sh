@@ -93,6 +93,29 @@ else
   bad "source-lab/engine test suite"
 fi
 
+# Cleanup Lab reference logic: standard library only, so plain unittest is enough.
+hdr "Cleanup Lab reference tests (unittest)"
+if [ -n "$PY" ] || pick_python; then
+  if ( cd "$ROOT/cleanup-lab/reference/python" && "$PY" -m unittest discover -s tests -p 'test_*.py' -q ); then
+    ok "cleanup-lab/reference/python"
+  else
+    bad "cleanup-lab/reference/python"
+  fi
+else
+  bad "no python3 for cleanup-lab/reference/python"
+fi
+
+hdr "Cleanup Lab qrust-scan crate (cargo test)"
+if command -v cargo >/dev/null 2>&1; then
+  if ( cd "$ROOT/cleanup-lab/reference/qrust-scan" && cargo test --quiet ); then
+    ok "cleanup-lab/reference/qrust-scan"
+  else
+    bad "cleanup-lab/reference/qrust-scan"
+  fi
+else
+  skip "cargo not installed; qrust-scan tests not run"
+fi
+
 if [ "$QUICK" = "1" ]; then
   printf '\n%s--quick: skipping remaining stages%s\n' "$YELLOW" "$RESET"
 else
