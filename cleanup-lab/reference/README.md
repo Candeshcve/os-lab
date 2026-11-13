@@ -34,9 +34,9 @@ design. They are reimplemented, not taken from dua's source.
 |---|---|
 | `walk` | `jwalk` parallel walk on a dedicated Rayon pool. Sizes come from `symlink_metadata` (never follows links). Allocated size by default (`st_blocks × 512` / `GetCompressedFileSizeW`) and apparent size on request. Hard links are counted once by `(dev, inode)` / `(volume serial, file index)`. Optionally stays on one filesystem. A single-pass depth stack rolls child sizes, counts and newest mtime into their parent. Progress is throttled to 120 ms. Cancellation is polled per entry and during the final rollup. |
 | `tree` | Flat node array (parent / first child / next sibling). Sort by size, name, count or recursive mtime. `hotspot_descend` follows the biggest child down to a leaf. |
-| `glob_search` | In-memory DFS over the finished tree. `*` and `?` never cross `/`; `**` does. Stops descending at a match. |
-| `cleanup` | Known regenerable directory names (`node_modules`, `target`, `__pycache__`, `.venv` …) among the current view's children. **Name only** — see CLN-22 and `python/cleanup_ref/artifacts.py`. |
-| `gitignore` | Finds the enclosing repo and flags the current view's children matched by its root `.gitignore`. |
+| `glob_search` | In-memory seek over the finished tree, **iterative** (any depth). `*` and `?` never cross `/`; `**` does. Stops descending at a match. |
+| `cleanup` | Regenerable build folders among the current view's children, **proved by a marker file** (`node_modules` + `package.json`, `target` + `Cargo.toml`/`pom.xml`, `.venv` + `pyvenv.cfg`, a valid `CACHEDIR.TAG` …). Same signature ids as `python/cleanup_ref/artifacts.py`; keep the two tables in step. |
+| `gitignore` | Finds the enclosing repo and flags the current view's children git would ignore: global excludes (`core.excludesFile`), `info/exclude`, and the `.gitignore` of the repo root and every directory down to the view. Deeper files win; nothing below an ignored directory can be re-included. |
 | `platform` | The only OS-specific code: allocated size, file identity, default thread count (3 on macOS because of APFS contention, otherwise the machine's parallelism up to 16). |
 
 **Fixed in this copy:** on Windows a directory's identity was read with a
@@ -44,12 +44,16 @@ plain `File::open`, which fails on directories. That left the scan root's
 volume serial at 0, so `stay_on_filesystem` zeroed the size of every file. The
 handle is now opened with `FILE_FLAG_BACKUP_SEMANTICS` and no access rights.
 
-**Known gaps (CLN-22):** only the repo-root `.gitignore` is read (no nested
-`.gitignore`, `.git/info/exclude` or global excludes). `glob_search` is
-recursive, so a very deep tree can exhaust the stack. Cleanup candidates are
-matched by name alone. A failure to build the Rayon pool panics instead of
-returning an error. On Windows every entry is opened once to read its
-identity, even single-link files. `entry_count` is `u32`.
+**Closed in CLN-22:** nested `.gitignore`, `.git/info/exclude` and the global
+excludes file are read; `glob_search` no longer recurses, so a deep tree cannot
+exhaust the stack; cleanup candidates need their project's marker files instead
+of a name match (a `target/` without `Cargo.toml` is not reported); a failure to
+build the thread pool is a `ScanError::Io` instead of a panic; `entry_count`
+saturates at `u32::MAX` and a tree too large to index is an error, not a wrap.
+
+**Still open:** on Windows every entry is opened once to read its identity, even
+single-link files (a speed cost, not a correctness one). `cleanup_candidates` and
+`gitignored_children` look at the current view only, as designed.
 
 ```bash
 cd cleanup-lab/reference/qrust-scan

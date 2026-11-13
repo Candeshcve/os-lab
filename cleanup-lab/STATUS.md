@@ -50,7 +50,7 @@ the finding and the decision are in the session log.
 | CLN-19 | pending | — | — | — | — | none |
 | CLN-20 | pending | — | — | — | — | none |
 | CLN-21 | pending | — | — | — | — | none |
-| CLN-22 | pending | — | — | — | — | none |
+| CLN-22 | in review | this PR | — | — | done ahead of order by Claude Code at the maintainer's request; engine and dashboard untouched | none |
 | CLN-23 | pending | — | — | Disk Explorer page | console side only | none |
 | CLN-24 | pending | — | — | — | — | none |
 | CLN-25 | pending | — | — | — | — | none |

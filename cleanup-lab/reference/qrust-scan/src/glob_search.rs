@@ -8,11 +8,15 @@ pub struct GlobMatch {
     pub relative_path: String,
 }
 
-/// In-memory DFS glob seek over an already-scanned tree — dua's `/` search
-///. Scoped to the subtree under `view_root`, not a
-/// filesystem re-walk. `*`/`?` never cross `/` (dua's `NO_MATCH_SLASH_LITERAL`);
-/// `**` still crosses directory boundaries. On a match the node is recorded
-/// and its children are *not* searched further — the match is the seek result.
+/// In-memory glob seek over an already-scanned tree — dua's `/` search.
+/// Scoped to the subtree under `view_root`, not a filesystem re-walk. `*`/`?`
+/// never cross `/` (dua's `NO_MATCH_SLASH_LITERAL`); `**` still crosses
+/// directory boundaries. On a match the node is recorded and its children are
+/// *not* searched further — the match is the seek result.
+///
+/// Iterative (an explicit stack of sibling lists), so a tree of any depth
+/// cannot overflow the call stack. Results are in the same pre-order as the
+/// recursive version this replaced.
 pub fn glob_search(
     tree: &Tree,
     view_root: NodeId,
@@ -30,22 +34,28 @@ pub fn glob_search(
         .map_err(|e| e.to_string())?
         .compile_matcher();
 
+    struct Frame {
+        kids: Vec<NodeId>,
+        next: usize,
+        /// Length of `path` for this frame's parent.
+        prefix_len: usize,
+    }
+
     let mut results = Vec::new();
     let mut path = String::new();
-    walk(tree, view_root, &glob, &mut path, &mut results);
-    Ok(results)
-}
-
-fn walk(
-    tree: &Tree,
-    node: NodeId,
-    glob: &globset::GlobMatcher,
-    path: &mut String,
-    results: &mut Vec<GlobMatch>,
-) {
-    for child in tree.children(node) {
+    let mut stack = vec![Frame {
+        kids: tree.children(view_root),
+        next: 0,
+        prefix_len: 0,
+    }];
+    while let Some(frame) = stack.last_mut() {
+        let Some(&child) = frame.kids.get(frame.next) else {
+            stack.pop();
+            continue;
+        };
+        frame.next += 1;
+        path.truncate(frame.prefix_len);
         let n = &tree.nodes[child as usize];
-        let start = path.len();
         if !path.is_empty() {
             path.push('/');
         }
@@ -57,8 +67,13 @@ fn walk(
                 relative_path: path.clone(),
             });
         } else if n.is_dir {
-            walk(tree, child, glob, path, results);
+            let prefix_len = path.len();
+            stack.push(Frame {
+                kids: tree.children(child),
+                next: 0,
+                prefix_len,
+            });
         }
-        path.truncate(start);
     }
+    Ok(results)
 }

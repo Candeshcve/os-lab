@@ -119,17 +119,19 @@ fn glob_search_rejects_empty_pattern() {
 }
 
 #[test]
-fn cleanup_candidates_matches_known_names_only() {
+fn cleanup_candidates_need_their_project_markers() {
     let root = tmp_root("cleanup");
+    write_file(&root.join("package.json"), 2);
+    write_file(&root.join("Cargo.toml"), 2);
     write_file(&root.join("node_modules/pkg/index.js"), 10);
     write_file(&root.join("target/debug/bin"), 10);
     write_file(&root.join("src/main.rs"), 10);
 
     let tree = scan(&ScanOptions::new(&root)).unwrap();
-    let hits = cleanup_candidates(&tree, tree.root);
+    let hits = cleanup_candidates(&tree, tree.root, &root);
     let names: Vec<&str> = hits
         .iter()
-        .map(|&id| tree.nodes[id as usize].name.as_ref())
+        .map(|h| tree.nodes[h.node as usize].name.as_ref())
         .collect();
 
     assert!(names.contains(&"node_modules"));

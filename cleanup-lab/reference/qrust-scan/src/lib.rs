@@ -11,10 +11,11 @@
 //!   size-descending "hotspot" descend used to find disk hogs (§10.1, §10.6).
 //! - [`glob_search`] — in-memory DFS glob seek over an already-scanned tree,
 //!   pruning at each match (§10.2).
-//! - [`cleanup`] — binary-search lookup against the known-regenerable directory
-//!   basenames (`node_modules`, `target`, …) (§10.3).
-//! - [`gitignore`] — repo discovery + `.gitignore` matching for the current view
-//!   (§10.4).
+//! - [`cleanup`] — regenerable build folders in the current view, each proved by
+//!   a marker file in its project (`node_modules` + `package.json`, `target` +
+//!   `Cargo.toml`, `.venv` + `pyvenv.cfg`, a valid `CACHEDIR.TAG`, …) (§10.3).
+//! - [`gitignore`] — repo discovery and git's ignore stack (global excludes,
+//!   `info/exclude`, nested `.gitignore` files) for the current view (§10.4).
 //! - [`platform`] — the only OS-specific part: allocated size, file identity and
 //!   the default thread count.
 //!
@@ -30,8 +31,8 @@ pub mod tree;
 pub mod walk;
 
 pub use cancel::CancelFlag;
-pub use cleanup::{cleanup_candidates, is_cleanup_candidate_name, CLEANUP_DIR_NAMES_SORTED};
-pub use gitignore::{discover_repo_root, gitignored_children};
+pub use cleanup::{classify_dir, cleanup_candidates, Candidate, Signature, SIGNATURES};
+pub use gitignore::{discover_repo_root, gitignored_children, gitignored_children_with};
 pub use glob_search::{glob_search, GlobMatch};
 pub use platform::{default_threads, EntryFacts};
 pub use tree::{Node, NodeId, SortMode, Tree, NO_ID};

@@ -141,14 +141,7 @@ pub fn scan_cancellable(
     let root_dev = root_facts.dev;
 
     let threads = opts.resolved_threads();
-    let pool = Arc::new(
-        ThreadPoolBuilder::new()
-            .num_threads(threads.max(1))
-            .stack_size(128 * 1024)
-            .thread_name(|i| format!("qrust-scan-walk-{i}"))
-            .build()
-            .expect("qrust-scan: failed to build rayon pool"),
-    );
+    let pool = Arc::new(build_pool(threads, WALK_THREAD_STACK)?);
 
     let stay_on_filesystem = opts.stay_on_filesystem;
 
@@ -242,7 +235,15 @@ pub fn scan_cancellable(
             io_errors += 1;
         }
 
-        let node_id = nodes.len() as NodeId;
+        // `NO_ID` (u32::MAX) is the "none" marker, so ids must stay below it.
+        let node_id = NodeId::try_from(nodes.len())
+            .ok()
+            .filter(|&id| id != NO_ID)
+            .ok_or_else(|| {
+                ScanError::Io(std::io::Error::other(
+                    "the tree has more entries than one scan can index",
+                ))
+            })?;
         nodes.push(Node {
             name: entry
                 .file_name
@@ -266,7 +267,7 @@ pub fn scan_cancellable(
         if !facts.is_dir {
             let p = &mut nodes[parent_id as usize];
             p.size += contributed_size;
-            p.entry_count += 1;
+            p.entry_count = p.entry_count.saturating_add(1);
             p.max_mtime = p.max_mtime.max(facts.mtime);
         }
 
@@ -306,6 +307,24 @@ pub fn scan_cancellable(
     })
 }
 
+const WALK_THREAD_STACK: usize = 128 * 1024;
+
+/// The walk's dedicated Rayon pool. Failing to create it (no threads left, no
+/// memory for the stacks) is an ordinary scan error for the caller to report,
+/// never a panic inside an app that is otherwise healthy.
+fn build_pool(threads: usize, stack_size: usize) -> Result<rayon::ThreadPool, ScanError> {
+    ThreadPoolBuilder::new()
+        .num_threads(threads.max(1))
+        .stack_size(stack_size)
+        .thread_name(|i| format!("qrust-scan-walk-{i}"))
+        .build()
+        .map_err(|e| {
+            ScanError::Io(std::io::Error::other(format!(
+                "could not start the scan thread pool: {e}"
+            )))
+        })
+}
+
 /// Roll a finished directory's totals up into its parent — the "depth decreases
 /// → finalize parent node sizes/counts, pop stack" step from dua's
 /// `BackgroundTraversal`.
@@ -320,7 +339,7 @@ fn finalize(nodes: &mut [Node], stack: &mut Vec<NodeId>) {
         };
         let p = &mut nodes[parent_id as usize];
         p.size += size;
-        p.entry_count += count;
+        p.entry_count = p.entry_count.saturating_add(count);
         p.max_mtime = p.max_mtime.max(mtime);
         p.has_error = p.has_error || has_error;
     }
@@ -330,4 +349,32 @@ fn root_name(path: &Path) -> String {
     path.file_name()
         .map(|n| n.to_string_lossy().into_owned())
         .unwrap_or_else(|| path.to_string_lossy().into_owned())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn dir(count: u32) -> Node {
+        let mut n = Node::new_dir("d".into(), 0);
+        n.entry_count = count;
+        n
+    }
+
+    #[test]
+    fn pool_failure_is_an_error_not_a_panic() {
+        // A stack this large cannot be mapped, so the pool cannot start its workers.
+        let err = build_pool(2, usize::MAX / 2).expect_err("pool must not build");
+        assert!(matches!(err, ScanError::Io(_)));
+        assert!(err.to_string().contains("thread pool"));
+    }
+
+    #[test]
+    fn entry_count_saturates_instead_of_wrapping() {
+        let mut nodes = vec![dir(u32::MAX - 1), dir(5)];
+        nodes[1].parent = 0;
+        let mut stack = vec![0, 1];
+        finalize(&mut nodes, &mut stack);
+        assert_eq!(nodes[0].entry_count, u32::MAX);
+    }
 }

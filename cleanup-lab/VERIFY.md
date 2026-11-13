@@ -234,6 +234,39 @@ $ git diff --check
 `npm` checks — no `dashboard/` file changed. Process matching was exercised with
 injected tables on this macOS host; no Windows or Linux host ran the `tasklist` path.
 
+## CLN-22 — harden qrust-scan
+
+Branch `feat/cln-22-qrust-scan-hardening`. Rust only, under `cleanup-lab/reference/qrust-scan/`.
+
+One failing test per gap, written first (`tests/hardening.rs`, `walk::tests`). Before the
+fix the four ignore-stack tests failed and the 20 000-deep glob test aborted with
+`thread ... has overflowed its stack`. After:
+
+```console
+$ cd cleanup-lab/reference/qrust-scan && cargo test
+test result: ok. 6 passed   (unit: platform, walk)
+test result: ok. 9 passed   (tests/hardening.rs)
+test result: ok. 12 passed  (tests/scan.rs)
+$ cargo clippy --all-targets -- -D warnings
+Finished `dev` profile
+$ cargo clippy --target x86_64-pc-windows-msvc --all-targets -- -D warnings
+Finished `dev` profile
+$ cargo fmt --check
+(clean)
+```
+
+Covers: a nested `.gitignore` applying below its own folder only; a deeper file re-including
+what a parent ignored; `.git/info/exclude`; the global excludes file as lowest priority;
+no re-inclusion below an ignored folder; a 12 000-deep glob; pre-order and prune-on-match
+unchanged; `target/` without `Cargo.toml` rejected; Rust, Maven, Node, venv and
+`CACHEDIR.TAG` signatures proved (and a `.venv` without `pyvenv.cfg`, or a tag without the
+signature, rejected); thread-pool failure returned as an error; `entry_count` saturating.
+
+### Not run
+
+The Windows target was type-checked and linted only; no Windows host ran the tests. The
+Rust and Python signature tables are kept in step by hand (same ids), not by a shared file.
+
 ## CLN-03 … CLN-29
 
 Each task appends its own section when it lands.
