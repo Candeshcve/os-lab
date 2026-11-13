@@ -10,11 +10,14 @@ behaviour is ported, not the code or the look.** Qleaner has known bugs (below) 
 its own visual style; Cleanup Lab pages use the os-lab dashboard shell and follow
 [`docs/UX_READINESS.md`](../docs/UX_READINESS.md).
 
-Status: **CLN-01 skeleton in place; the rest is roadmap.** The engine package and the
-readiness probe (`labctl cleanup status|doctor`, `GET /api/cleanup/status`) exist.
-The `/cleanup/` page is **not built yet**: the dashboard layer lands separately, and
-[`STATUS.md`](STATUS.md) carries the endpoint contract, page states and strings it
-must use. Scanning and cleaning are not wired yet. The work
+Status: **Engine skeleton (CLN-01), detector catalog (CLN-02), safety guard
+(CLN-12) and the read-only scan job (CLN-03) are in place; the rest is roadmap.**
+The engine package, the readiness probe (`labctl cleanup status|doctor`,
+`GET /api/cleanup/status`) and the catalog (`GET /api/cleanup/catalog`) exist, and
+`POST /api/cleanup/scan` runs a catalog scan as a console job with progress and
+cancel. The `/cleanup/` page is **not built yet**: the dashboard layer lands
+separately, and [`STATUS.md`](STATUS.md) carries the endpoint contract, page
+states and strings it must use. Cleaning is not wired yet. The work
 is split into tasks `CLN-01` … `CLN-29` on the dashboard **Contribute → Roadmap &
 TODOs** tab (filter: Open Source OS, label "Cleanup Lab"). Reserve a task before you
 start, as with every os-lab task
@@ -56,6 +59,23 @@ hint, impact, default selection, owning processes, privilege flag and per-OS pat
 expands it, and [`PARITY.md`](PARITY.md) records which Qleaner detector each entry
 replaces. `./labctl cleanup catalog` prints the entries for this computer with every
 path it could resolve — and the reason for each it could not.
+
+## Scan job
+
+`cleanup_lab/scan.py` measures the resolved catalog paths and nothing else. Every
+size comes from `lstat`: symlinks are never followed or recursed into, sockets and
+device nodes are not measured, and a hard link is counted once per scan by
+`(device, inode)`. Apparent size and on-disk size are reported separately (on-disk
+is `null` where the OS exposes no block count). A path that cannot be read is listed
+in `unreadable`; it never fails the scan.
+
+`POST /api/cleanup/scan` starts the job with a request naming only catalog
+`entryIds` and an optional `workers` count (1–16) — never a path list. `GET
+/api/cleanup/jobs/<id>` returns its progress and result, `GET /api/cleanup/jobs`
+lists the recent jobs, and `POST /api/cleanup/jobs/<id>/cancel` sets the cancel
+flag. A cancelled scan returns its partial counters with `"cancelled": true` — never
+an error and never invented bytes. Jobs live in the console process, like the other
+lab jobs.
 
 ## Safety guard
 

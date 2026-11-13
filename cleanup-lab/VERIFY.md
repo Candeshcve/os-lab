@@ -267,6 +267,108 @@ signature, rejected); thread-pool failure returned as an error; `entry_count` sa
 The Windows target was type-checked and linted only; no Windows host ran the tests. The
 Rust and Python signature tables are kept in step by hand (same ids), not by a shared file.
 
-## CLN-03 … CLN-29
+## CLN-03 — scan job: bounded-parallel size scan with progress and cancel
+
+Branch `feat/cln-03-scan-jobs`. Engine, console API, tests and the knowledge graph.
+The scan is read-only; no file under `dashboard/` changed (the page is CLN-16, and
+the endpoint contract, states and strings are in the CLN-03 handoff in `STATUS.md`).
+
+### Engine unit tests
+
+```console
+$ cd cleanup-lab/engine && ../../.venv-test/bin/python -m unittest discover -s tests -p 'test_*.py'
+Ran 88 tests in 0.149s
+OK
+```
+
+Covers: apparent and on-disk sizes from a generated tree; a symlink inside the tree
+and a top-level symlink never followed; a symlink loop terminating; hard links
+counted once across parallel paths (thread-safe inode set); a mode-000 file still
+sized because only `lstat` is used; a permission-denied directory reported in
+`unreadable` without failing the scan; missing path and unset-variable reasons; a
+FIFO not measured; cancel mid-walk and before start (partial counters,
+`cancelled: true`, phase `cancelled`); progress keys and totals; one and four
+workers agreeing; the shipped catalog against a fake `HOME`.
+
+### Console tests
+
+```console
+$ cd android-lab/lab && ../../.venv-test/bin/python -m pytest tests/test_cleanup_console.py -q
+5 passed in 0.62s
+```
+
+Covers: a real scan job from `POST /api/cleanup/scan` to
+`GET /api/cleanup/jobs/<id>`; refusal of a path list, unknown keys, duplicate or
+unknown ids, non-string ids and out-of-range workers (`400`); unknown job and
+endpoint (`404`); cancel reaching a running scan and mapping to `cancelled`; the
+browser route (`X-OSLab`) starting, polling and cancelling a job.
+
+### End to end over HTTP (generated temp `HOME`)
+
+```console
+$ curl -sS -X POST -H 'Content-Type: application/json' -H 'X-OSLab: 1' \
+    -d '{"entryIds":["system.user-caches"],"workers":1}' \
+    http://127.0.0.1:5098/api/cleanup/scan
+HTTP/1.0 202 Accepted
+{"id":"2b8cc9ba670f","kind":"scan","state":"running",...}
+
+$ curl -sS http://127.0.0.1:5098/api/cleanup/jobs/2b8cc9ba670f
+{
+  "id": "2b8cc9ba670f",
+  "kind": "scan",
+  "state": "done",
+  "progress": {"phase": "done", "pathsDone": 1, "pathsTotal": 1,
+               "bytesSeen": 40960, "filesSeen": 1, "currentPath": ".../Library/Caches/demo"},
+  "error": null
+}
+totals: {'sizeBytes': 40960, 'sizeOnDiskBytes': 40960, 'files': 1, 'folders': 2,
+         'paths': 1, 'unreadable': 0, 'entries': 1}
+path:   {'path': '.../Library/Caches', 'measured': True, 'sizeBytes': 40960,
+         'files': 1, 'folders': 2, 'unreadable': []}
+
+$ curl -sS -o /dev/null -w '%{http_code}\n' -X POST -H 'X-OSLab: 1' -d '{}' \
+    http://127.0.0.1:5098/api/cleanup/jobs/2b8cc9ba670f/cancel
+200
+$ ... POST /api/cleanup/scan with {"path":"/tmp"}           -> 400
+$ ... GET  /api/cleanup/jobs/nope                           -> 404
+$ ... GET  '/api/cleanup/jobs?x=1'                          -> 400
+```
+
+The server ran with `HOME` pointing at a `mktemp -d` tree; no real user folder was
+scanned.
+
+### Repository checks
+
+A completed `./scripts/run-tests.sh` run reported **8 passed, 2 failed, 0 skipped**:
+
+* `[ok] cleanup-lab/reference/python`, `[ok] cleanup-lab/engine`,
+  `[ok] cleanup-lab/reference/qrust-scan`, `[ok]` sample smoke, `[ok]` `bash -n`
+  (125 scripts), `[ok]` dashboard typecheck, `[ok]` `dashboard/dist matches the
+  sources`.
+* `[fail] android-lab/lab test suite` — **pre-existing**, proved by running the
+  same six failing ids on a clean `master` worktree:
+  `6 failed, 56 passed, 1 skipped` (three `test_app_update` download cases,
+  `test_jadx_decompiler_on_real_dex`, `test_source_console` mutation guards,
+  `test_web_ui` plan preview). The branch's full-suite result was
+  `6 failed, 153 passed, 1 skipped`; no new failure. The new
+  `test_cleanup_console.py` passes.
+* `[fail] lat check` in that run — the CLN-03 section summary exceeded the
+  250-character lead limit. Shortened; re-run:
+
+```console
+$ lat check
+All checks passed in 146ms
+```
+
+The full suite was not re-run after that one-line documentation fix (maintainer
+instruction). No code changed.
+
+### Not run
+
+`npm run test:e2e` and dashboard screenshots — nothing under `dashboard/` changed
+and this PR adds no page. `cargo clippy`/`fmt` — no Rust changed. No Windows host
+ran the POSIX permission and FIFO tests; they are skipped there by design.
+
+## CLN-04 … CLN-29
 
 Each task appends its own section when it lands.

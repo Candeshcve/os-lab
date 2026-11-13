@@ -30,8 +30,8 @@ the finding and the decision are in the session log.
 | ID | Status | PR | Merge commit | Deliverables not done | Deviations | Student reservations / PRs |
 |---|---|---|---|---|---|---|
 | CLN-01 | merged | [#134](https://github.com/keyvanarasteh/os-lab/pull/134) | d04941f6 | `/cleanup/` page, sidebar entry, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred | none |
-| CLN-02 | in progress (this PR) | — | — | — | — | none |
-| CLN-03 | pending | — | — | — | — | none |
+| CLN-02 | merged | [#135](https://github.com/keyvanarasteh/os-lab/pull/135) | 39ea0f1f | — | — | none |
+| CLN-03 | in progress (this PR) | — | — | `/cleanup/` scan page, sidebar/route, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred | none |
 | CLN-04 | pending | — | — | — | — | none |
 | CLN-05 | pending | — | — | — | — | none |
 | CLN-06 | pending | — | — | — | — | none |
@@ -40,7 +40,7 @@ the finding and the decision are in the session log.
 | CLN-09 | pending | — | — | — | — | none |
 | CLN-10 | pending | — | — | — | — | none |
 | CLN-11 | pending | — | — | — | — | none |
-| CLN-12 | in progress (this PR) | — | — | — | — | none |
+| CLN-12 | merged | [#136](https://github.com/keyvanarasteh/os-lab/pull/136) | 3d5ab866 | — | — | none |
 | CLN-13 | pending | — | — | — | — | none |
 | CLN-14 | pending | — | — | — | — | none |
 | CLN-15 | pending | — | — | — | — | none |
@@ -50,7 +50,7 @@ the finding and the decision are in the session log.
 | CLN-19 | pending | — | — | — | — | none |
 | CLN-20 | pending | — | — | — | — | none |
 | CLN-21 | pending | — | — | — | — | none |
-| CLN-22 | in review | this PR | — | — | done ahead of order by Claude Code at the maintainer's request; engine and dashboard untouched | none |
+| CLN-22 | merged | [#137](https://github.com/keyvanarasteh/os-lab/pull/137) | a3133e76 | — | done ahead of order by Claude Code at the maintainer's request; engine and dashboard untouched | none |
 | CLN-23 | pending | — | — | Disk Explorer page | console side only | none |
 | CLN-24 | pending | — | — | — | — | none |
 | CLN-25 | pending | — | — | — | — | none |
@@ -62,6 +62,131 @@ the finding and the decision are in the session log.
 No CLN task has a student reservation or open student PR: `grep -rl CLN-
 reservations/` matches only `README.md` and `_schema.json`, and no open PR title or
 branch names a CLN id.
+
+## Dashboard handoff — CLN-03
+
+### Console endpoints (live on this branch)
+
+`POST /api/cleanup/scan` — header `X-OSLab: 1`, JSON body:
+
+```json
+{ "entryIds": ["system.user-caches"], "workers": 4 }
+```
+
+Both keys are optional; `entryIds` is a list of catalog ids (`GET
+/api/cleanup/catalog`), `workers` is `1`–`16`. A path, a command, any other key, a
+duplicate or unknown id, an empty id list and a bad worker count are `400`. The
+answer is `202` with the same job object as below. The scan is read-only and runs
+on a console thread; there is no command string and no path list from the page.
+
+`GET /api/cleanup/jobs/<id>` → `200` job, `404` unknown id. `GET
+/api/cleanup/jobs` → `{ "jobs": [ … ] }`, newest first, at most the recent 20
+finished jobs plus any running one. `POST /api/cleanup/jobs/<id>/cancel` — header
+`X-OSLab: 1`, empty object body → `200` job; the cancel flag is set immediately and
+the worker finishes with `state: "cancelled"` after its current listing. A
+non-empty body is `400`, an unknown id `404`.
+
+```json
+{
+  "id": "2b8cc9ba670f",
+  "kind": "scan",
+  "state": "running",
+  "request": { "entryIds": ["system.user-caches"], "workers": 4 },
+  "progress": {
+    "phase": "scanning",
+    "pathsDone": 1, "pathsTotal": 3,
+    "bytesSeen": 40960, "filesSeen": 1,
+    "currentPath": "/Users/me/Library/Logs"
+  },
+  "result": null,
+  "error": null,
+  "startedAt": 1794536063.8,
+  "finishedAt": null
+}
+```
+
+`state` is `running`, `done`, `cancelled` or `failed`; `failed` carries a string
+`error` and no result. `progress.phase` is `queued`, `scanning`, `done` or
+`cancelled`; `pathsTotal` is the number of top-level paths that can be measured.
+When finished, `result` is:
+
+```json
+{
+  "startedAt": 0, "finishedAt": 0, "durationMs": 0, "platform": "macos",
+  "cancelled": false,
+  "entries": [
+    {
+      "id": "system.user-caches", "name": "User caches", "family": "system",
+      "category": "system", "risk": "low", "hint": "…", "impact": "…",
+      "defaultSelected": true, "needsPrivilege": false,
+      "owningProcesses": [], "detector": "paths",
+      "paths": [
+        {
+          "template": "~/Library/Caches", "path": "/Users/me/Library/Caches",
+          "reason": "", "missing": false, "symlink": false,
+          "sizeBytes": 40960, "sizeOnDiskBytes": 40960,
+          "files": 1, "folders": 2, "unreadable": [], "error": null,
+          "measured": true
+        }
+      ],
+      "sizeBytes": 40960, "sizeOnDiskBytes": 40960,
+      "files": 1, "folders": 2, "unreadable": [], "missing": false
+    }
+  ],
+  "progress": { "phase": "done", "pathsDone": 3, "pathsTotal": 3, "…": "…" },
+  "totals": {
+    "sizeBytes": 0, "sizeOnDiskBytes": 0, "files": 0, "folders": 0,
+    "paths": 0, "unreadable": 0, "entries": 0
+  }
+}
+```
+
+Honest fields: `sizeOnDiskBytes` is `null` where the OS does not expose a block
+count; a path with `path: null` has a `reason`; `missing`/`symlink` paths carry a
+`reason` and zero bytes; `unreadable` lists paths under this path that could not be
+read; `measured: false` means the walk was cancelled (partial counters are still
+real). Totals exclude unmeasured and unreadable bytes — never invent them. Jobs are
+in-process only, so a console restart loses them; do not persist or promise them.
+
+Errors on the namespace: `400` bad query/key/id/worker, `404` unknown path or job,
+`403` missing `X-OSLab` on POST, `500` malformed catalog, `501` engine missing.
+
+### What the page does with it
+
+CLN-16 owns the page. A scan section offers exactly one action, **Start scan**
+(disabled while a job is running), then **Cancel scan**; no clean/delete action
+until CLN-13. Poll `GET /api/cleanup/jobs/<id>` every ~500–750 ms while `running`;
+stop polling on `done`, `cancelled` or `failed`.
+
+| State | What the page shows |
+|---|---|
+| idle | Start scan, the catalog's entry count, and a sentence that scanning is read-only. Never say space was freed. |
+| running | progress bar from `pathsDone / pathsTotal`, `bytesSeen`/`filesSeen` and `currentPath`; Cancel scan |
+| done | totals plus one row per entry and per path: apparent size, on-disk size when not null, files, folders; risk and `needsPrivilege` from the entry |
+| done with zero bytes | the entry stays visible with its `reason` (`missing`, symlink, nothing to measure) — never hidden |
+| cancelled | a neutral “Scan cancelled” badge and the partial rows; offer Start scan again |
+| failed | `error` next to the action; no results card |
+| request failed | the existing offline sentence; do not poll |
+| public Pages | no polling, no scan action: “The Cleanup Lab runs in the local app.” |
+
+`unreadable` is a list, shown under the path (“N paths could not be read”) with the
+paths in a collapsed detail; it is not an error. A privileged entry
+(`needsPrivilege`) can be scanned but must not offer cleaning.
+
+### Visible strings (English; these are the i18n keys)
+
+`Start scan` · `Cancel scan` · `Scanning…` · `Scan cancelled` · `Scan failed` ·
+`Scan results` · `Reclaimable space` · `Apparent size` · `On disk` · `Files` ·
+`Folders` · `Unreadable paths` · `Missing` · `Symlink not followed` ·
+`Nothing to measure` · `Scanning is read-only. Nothing is removed.` ·
+`Scanning runs on this computer. Cleaning arrives in a later task.` ·
+`The cleanup engine could not start the scan.` ·
+`No answer from the cleanup engine. Start os-lab from a terminal, then try again.` ·
+`The Cleanup Lab runs in the local app.`
+
+Dynamic strings (`name`, `hint`, `impact`, `risk`, `reason`, `error`, `currentPath`)
+come from the engine/API in English, like every other lab payload; they are not
+translated client-side.
 
 ## Dashboard handoff — CLN-12
 
@@ -286,3 +411,21 @@ and a process-table lock matched on whole names from each entry's `owningProcess
 shipped catalog entry points at a protected root. The old `contains("..")` and
 `contains("system")` checks are gone; `a..b` is a valid path and `~/.cache/systemd`
 is not blocked by a substring.
+
+**2026-11-13 — CLN-03.** Scan job. Added `cleanup_lab/scan.py`: a read-only
+`lstat` walk of the catalog's resolved paths, one worker per top-level path (1–16),
+throttled progress, hard-link de-duplication by `(device, inode)` across workers,
+symlinks never followed, sockets/FIFOs/devices not measured, unreadable paths
+reported, and cancel returning the real partial counters. The console exposes
+`POST /api/cleanup/scan`, `GET /api/cleanup/jobs/<id>`, `GET /api/cleanup/jobs`
+and `POST /api/cleanup/jobs/<id>/cancel`, accepting catalog ids and `workers` only;
+a non-empty cancel body and every unknown key/id are refused. Fixed the cancel route
+(`/api/cleanup/jobs/<id>/cancel` was parsed as 4 parts) and a web-layer crash where
+cancel returned a dict but the route assumed a job object. Added engine tests
+(88 total, OK) and `android-lab/lab/tests/test_cleanup_console.py` (5 passed).
+`PARITY.md`, `README.md`, `lat.md/cleanup-lab.md` and `VERIFY.md` updated. No CLN-03
+reservation or open student PR existed. A completed `./scripts/run-tests.sh` run was
+8 passed / 2 failed: the six android failures reproduce on a clean `master`
+worktree (no new failure), and the one `lat check` failure (section summary too
+long) was fixed and re-checked green. The full suite was not re-run after that
+documentation-only fix, per the maintainer's instruction.
