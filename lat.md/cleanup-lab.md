@@ -129,11 +129,25 @@ decide `ready`, `needs-setup` or `unavailable`. The detector catalog, the native
 scan backend and the tools on `PATH` are optional capabilities, so a missing one
 never blocks a scan.
 
-`/cleanup/` will render that probe in the dashboard shell, offering only Re-check and
-saying in words that cleaning is not wired yet; until that page lands,
-`labctl cleanup status` and `GET /api/cleanup/status` are how to read it. Public Pages
-has no engine, so the page will explain that instead of polling, per
+`/cleanup/` renders that probe in the dashboard shell, with scan, plan and clean
+actions only when the engine is ready. Public Pages has no engine, so the page
+explains local installation without polling, per
 [[lat.md/ux-readiness.md]].
+
+## Dashboard pages
+
+[[dashboard/src/views/cleanup/pages.tsx]] renders scan and confirm at `/cleanup/`,
+category results at `/cleanup/results/`, skipped/failed and unreadable items at
+`/cleanup/leftovers/`, and verified audit records at `/cleanup/history/`.
+
+The typed client is in [[dashboard/src/lib/api.ts]]. Each action shows its own
+error; the confirm step names the planned item count, size and mode, and a
+changed selection, expired plan or used plan requires a new preview. Trash is
+the default.
+
+The local app polls only while a job runs. Public Pages renders the routes without
+engine calls or destructive controls. All eight route sets are built, including
+the seven translated locales.
 
 ## Console API
 
