@@ -9,6 +9,7 @@ import subprocess
 import time
 
 from .catalog import expand
+from . import artifacts
 from .clean import fingerprint_path
 from .paths import platform_id
 from .safety import PathPolicyError, is_contained, validate_scan_root
@@ -40,25 +41,6 @@ def roots(root, *, platform=None, env=None):
     return answer
 
 
-def _match(directory, parent):
-    """CLN-07's two project types; CLN-24 expands this to catalog signatures."""
-    name = os.path.basename(directory)
-    if name == "node_modules" and _regular_marker(os.path.join(parent, "package.json")):
-        return "projects.node-modules", "Node.js", "Reinstall dependencies with the project's package manager"
-    if name == "target" and _regular_marker(os.path.join(parent, "Cargo.toml")):
-        return "projects.rust-target", "Rust", "cargo build"
-    if name == "target" and _regular_marker(os.path.join(parent, "pom.xml")):
-        return "projects.maven-target", "Maven", "mvn package"
-    return None
-
-
-def _regular_marker(path):
-    try:
-        return stat.S_ISREG(os.lstat(path).st_mode)
-    except OSError:
-        return False
-
-
 def sweep(root, root_ids, *, min_idle_days=0, platform=None, env=None, cancel=None, clock=time.time):
     """Find proved build outputs; never follow links or descend into a match."""
     if not isinstance(root_ids, list) or not root_ids or any(not isinstance(x, str) for x in root_ids) or len(root_ids) != len(set(root_ids)):
@@ -66,6 +48,7 @@ def sweep(root, root_ids, *, min_idle_days=0, platform=None, env=None, cancel=No
     if not isinstance(min_idle_days, int) or isinstance(min_idle_days, bool) or not 0 <= min_idle_days <= 3650:
         raise DeepError("minIdleDays must be an integer from 0 to 3650")
     configured = {item["id"]: item for item in roots(root, platform=platform, env=env)}
+    signatures = artifacts.load(root)
     if any(item not in configured or not configured[item]["available"] for item in root_ids):
         raise DeepError("Every rootId must name an available configured project root")
     results, unreadable, visited = [], [], 0
@@ -93,19 +76,19 @@ def sweep(root, root_ids, *, min_idle_days=0, platform=None, env=None, cancel=No
                     continue
                 if not stat.S_ISDIR(mode):
                     continue
-                match = _match(child.path, parent)
+                match = artifacts.classify_dir(child.path, signatures)
                 if match:
                     try:
-                        project_stat = os.stat(parent, follow_symlinks=False)
+                        project_mtime = artifacts.project_mtime(parent, match)
                     except OSError:
                         unreadable.append(parent)
                         continue
-                    idle_days = max(0, int((now - project_stat.st_mtime) // 86400))
+                    idle_days = max(0, int((now - project_mtime) // 86400))
                     if idle_days >= min_idle_days:
                         measure = fingerprint_path(child.path, cancel=cancel)
                         if measure and measure["kind"] == "dir":
-                            results.append({"id": match[0], "rootId": root_id, "path": child.path,
-                                            "project": parent, "ecosystem": match[1], "regenerate": match[2],
+                            results.append({"id": match.id, "rootId": root_id, "path": child.path,
+                                            "project": parent, "ecosystem": match.ecosystem, "regenerate": match.regenerate,
                                             "idleDays": idle_days, "sizeBytes": measure["bytes"],
                                             "sizeOnDiskBytes": measure["onDiskBytes"],
                                             "files": measure["files"], "folders": measure["folders"]})

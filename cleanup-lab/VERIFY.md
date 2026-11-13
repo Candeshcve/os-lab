@@ -465,6 +465,15 @@ unavailable devices and measured size. Engine suite: 115 passed; console
 contract suite: 11 passed via `uv run --with pytest`. Native Xcode was not
 available on this host.
 
+## CLN-24 — proved project artifact signatures
+
+The signature catalog in `catalog/signatures/projects.json` defines 18 project
+artifact kinds. The engine validates it and requires regular marker files or a
+valid `CACHEDIR.TAG` before reporting a directory. A false `target`, symlink
+marker, unmarked virtualenv and invalid cache tag are excluded. A fixture checks
+ecosystem, regeneration hint and marker-based idle age. Engine suite: 118
+passed; console contract suite: 11 passed. No dashboard source changed.
+
 ## CLN-04 … CLN-29
 
 Each task appends its own section when it lands.

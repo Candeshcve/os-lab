@@ -52,7 +52,11 @@ links, and reports ecosystem, regeneration hint and project directory age.
 `GET /api/cleanup/simulators` reads Xcode's JSON device list with fixed argv,
 flags unavailable devices and measures each device directory under the configured
 [[cleanup-lab/simulator-roots.json]] root. These are detection results, not
-cleanup targets; CLN-24 expands project signatures.
+cleanup targets. CLN-24 replaces the first three project checks with marker-verified
+signatures from [[cleanup-lab/catalog/signatures/projects.json]].
+[[cleanup-lab/engine/cleanup_lab/artifacts.py]] validates the signature data,
+refuses symlink markers, checks `CACHEDIR.TAG`, and reports the project's newest
+marker age with the ecosystem and regeneration hint.
 
 [[cleanup-lab/engine/cleanup_lab/scan.py]] measures the catalog's resolved paths
 read-only, with progress and cancel.

@@ -52,7 +52,7 @@ the finding and the decision are in the session log.
 | CLN-21 | pending | — | — | — | — | none |
 | CLN-22 | merged | [#137](https://github.com/keyvanarasteh/os-lab/pull/137) | a3133e76 | — | done ahead of order by Claude Code at the maintainer's request; engine and dashboard untouched | none |
 | CLN-23 | pending | — | — | Disk Explorer page | console side only | none |
-| CLN-24 | pending | — | — | — | — | none |
+| CLN-24 | in progress (this PR) | — | — | — | catalog signatures behind CLN-07 sweep | none |
 | CLN-25 | pending | — | — | — | — | none |
 | CLN-26 | pending | — | — | — | — | none |
 | CLN-27 | pending | — | — | — | — | none |

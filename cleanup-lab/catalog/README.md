@@ -8,12 +8,18 @@ current operating system.
 
 One file per family. `family` must match the first segment of every entry id.
 
+Project sweep signatures live in `signatures/projects.json`, a separate
+catalog file validated by `cleanup_lab/artifacts.py`. Each entry names the
+artifact directory names, ecosystem, regeneration hint and one or more sibling
+or inner marker files. `cachedirTag: true` accepts only a valid `CACHEDIR.TAG`.
+This catalog is read-only detection data, not a list of cleanup targets.
+
 | File | Family | Entries |
 |---|---|---|
 | `system.json` | `system` | User caches, user logs, Trash (Qleaner: `user_caches`, `system_logs`, `trash`) |
 
 Later tasks add `browser.json` (CLN-05), `developers.json` (CLN-06),
-`projects.json` (CLN-07/24), `containers.json` and `vms.json` (CLN-08),
+`containers.json` and `vms.json` (CLN-08),
 `leftovers.json` (CLN-09/10), `packages.json` (CLN-11) and `simulators.json`
 (CLN-07/29). [`../PARITY.md`](../PARITY.md) maps every Qleaner detector to its
 catalog id or to the reason it was dropped.
