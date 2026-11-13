@@ -36,7 +36,8 @@ def wait_for(job, state=None, timeout=10):
 
 
 @pytest.fixture(autouse=True)
-def clean_jobs():
+def clean_jobs(tmp_path, monkeypatch):
+    monkeypatch.setenv("OSLAB_CLEANUP_STATE", str(tmp_path / "state"))
     def drain():
         for job in list(cleanup_api.JOBS.jobs.values()):
             job.cancel.set()
@@ -275,6 +276,10 @@ def test_a_plan_is_previewed_then_cleaned_from_the_console(tmp_path, monkeypatch
 
     listed = api.get("/api/cleanup/jobs", {})
     assert [row["kind"] for row in listed["jobs"]] == ["clean", "plan"]
+    history = api.get("/api/cleanup/history", {})
+    assert history["verified"] is True
+    assert history["total"] == 1
+    assert history["entries"][0]["result"]["results"][0]["path"] == target
 
 
 def test_plan_and_clean_requests_are_typed(tmp_path, monkeypatch):
@@ -413,3 +418,26 @@ def test_macos_leftover_job_accepts_no_paths(monkeypatch):
     wait_for(job, "done")
     assert job.result["available"] is False
     assert job.result["items"] == []
+
+def test_deep_sweep_request_uses_configured_root_ids(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    project = tmp_path / "Projects" / "web"
+    project.mkdir(parents=True)
+    (project / "package.json").write_text("{}")
+    cache = project / "node_modules"
+    cache.mkdir()
+    (cache / "file").write_bytes(b"abc")
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    offered = api.get("/api/cleanup/deep-roots", {})["roots"]
+    assert any(x["id"] == "home-projects" and x["available"] for x in offered)
+    for request in ({"rootIds": ["/tmp"]}, {"rootIds": ["home-projects"], "path": "/tmp"},
+                    {"rootIds": ["home-projects"], "minIdleDays": True},
+                    {"rootIds": [["home-projects"]]}):
+        with pytest.raises(cleanup_api.CleanupError) as raised:
+            api.post("/api/cleanup/deep-scan", request)
+        assert raised.value.status == 400
+    job = api.post("/api/cleanup/deep-scan", {"rootIds": ["home-projects"], "minIdleDays": 0})
+    wait_for(job, "done")
+    assert job.result["items"][0]["id"] == "projects.node-modules"
+    assert job.result["items"][0]["sizeBytes"] == 3
