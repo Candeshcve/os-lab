@@ -44,7 +44,7 @@ the finding and the decision are in the session log.
 | CLN-13 | merged | [#139](https://github.com/keyvanarasteh/os-lab/pull/139) | 6656ed55 | — | — | none |
 | CLN-14 | pending | — | — | — | — | none |
 | CLN-15 | in progress | [#140](https://github.com/keyvanarasteh/os-lab/pull/140) | — | history view on `/cleanup/` belongs to CLN-16 | dashboard layer deferred to CLN-16 | none |
-| CLN-16 | in progress (this PR) | — | — | — | — | none |
+| CLN-16 | in progress (this PR) | [#141](https://github.com/keyvanarasteh/os-lab/pull/141) | — | — | — | none |
 | CLN-17 | pending | — | — | — | — | none |
 | CLN-18 | pending | — | — | — | — | none |
 | CLN-19 | pending | — | — | — | — | none |
