@@ -4,10 +4,15 @@
  * into os-lab. Qleaner's UI styling is NOT ported: pages follow
  * docs/UX_READINESS.md and the existing dashboard shell. Qleaner has known bugs
  * that must not be copied; see cleanup-lab/README.md ("Do not port").
+ *
+ * CLN-21 … CLN-29 build on ready reference code in cleanup-lab/reference/
+ * (the qrust-scan crate and the cleanup_ref Python modules).
  */
 import type { TodoTask } from "./contribute-page";
 
-type CleanupTask = Omit<TodoTask, "category" | "categoryLabel" | "reference" | "suggestedBranch">;
+type CleanupTask = Omit<TodoTask, "category" | "categoryLabel" | "reference" | "suggestedBranch"> & {
+  reference?: string;
+};
 
 const tasks: CleanupTask[] = [
   // --- Foundation ---
@@ -235,13 +240,146 @@ const tasks: CleanupTask[] = [
     deliverables: ["Typed privileged plans shown in the preview", "Readiness hides OS-specific items elsewhere", "Tests with fakes"],
     targetPaths: ["cleanup-lab/engine/", "console/"],
   },
+  // --- Built on the reference code in cleanup-lab/reference/ ---
+  {
+    id: "CLN-21",
+    title: "Native scan backend: wire qrust-scan into the desktop app",
+    priority: "High",
+    effort: "Medium",
+    summary:
+      "Add cleanup-lab/reference/qrust-scan to app/src-tauri as a path dependency behind one typed command (validated root id and options, never a free path string from the page), with progress events and cancel. The Python CLN-03 scanner stays the default; the native backend is opt-in and must agree with it.",
+    deliverables: [
+      "Typed Tauri command and cancel; no `unsafe`; root checked by the path policy",
+      "Parity test: Python and native totals match on a generated tree (hard links, symlinks, unreadable folder)",
+      "Throughput of both backends recorded in VERIFY.md",
+    ],
+    targetPaths: ["app/src-tauri/", "cleanup-lab/reference/qrust-scan/", "cleanup-lab/engine/"],
+    reference: "cleanup-lab/reference/README.md",
+  },
+  {
+    id: "CLN-22",
+    title: "Harden qrust-scan: nested .gitignore, iterative glob, verified candidates",
+    priority: "High",
+    effort: "Small–Medium",
+    summary:
+      "Close the known gaps listed in cleanup-lab/reference/README.md: read nested .gitignore files, .git/info/exclude and the global excludes file; make glob_search iterative; replace name-only cleanup candidates with the marker rules from artifacts.py; return an error instead of panicking when the thread pool cannot be built; saturate entry_count.",
+    deliverables: [
+      "A failing test first for every gap (deep tree, nested ignore, `target/` without Cargo.toml)",
+      "cargo clippy -D warnings clean for the host and the Windows target",
+    ],
+    targetPaths: ["cleanup-lab/reference/qrust-scan/"],
+    reference: "cleanup-lab/reference/README.md",
+  },
+  {
+    id: "CLN-23",
+    title: "Disk Explorer page: read-only size tree, hotspots and seek",
+    priority: "Medium",
+    effort: "Medium",
+    summary:
+      "A /cleanup/explore/ page over a scanned tree: drill down with breadcrumbs, sort by size, name, count or newest, jump along the biggest path (hotspot descent), glob seek, and show cleanup candidates and gitignored entries for the current view. Read-only: selected rows only go to the CLN-13 plan builder, which validates them again.",
+    deliverables: [
+      "Scan root chosen from validated roots (validate_scan_root), not free text",
+      "Large folders paginated or virtualised; usable at phone width",
+      "All seven locale catalogs; scripted screenshots",
+    ],
+    targetPaths: ["dashboard/src/pages/cleanup/", "dashboard/src/views/cleanup/", "console/"],
+    reference: "cleanup-lab/reference/README.md",
+  },
+  {
+    id: "CLN-24",
+    title: "Project artifact signatures proved by marker files",
+    priority: "High",
+    effort: "Small–Medium",
+    summary:
+      "Move cleanup_ref/artifacts.py into the engine as the detector behind CLN-07's deep sweep: a folder counts as a regenerable artifact only when its project proves it (node_modules + package.json, target + Cargo.toml or pom.xml, .venv + pyvenv.cfg, a valid CACHEDIR.TAG …). Results show the ecosystem, how to regenerate it and how long the project has been idle.",
+    deliverables: [
+      "Signatures stored as catalog data (CLN-02 format), not code",
+      "Fixture tests, including a `target/` that is not a build folder",
+      "PARITY.md row for every signature",
+    ],
+    targetPaths: ["cleanup-lab/engine/", "cleanup-lab/catalog/", "cleanup-lab/reference/python/"],
+    reference: "cleanup-lab/reference/README.md",
+  },
+  {
+    id: "CLN-25",
+    title: "Tool-reported cache locations: environment, then the tool, then the default",
+    priority: "High",
+    effort: "Small",
+    summary:
+      "Use cleanup_ref/devcache.py so the CLN-06 entries for npm, pnpm, Yarn, Bun, pip, Homebrew, Go, Cargo, Gradle, Playwright, Deno and CocoaPods resolve to where the tool really writes: its environment variable, then a fixed-argv probe without a shell, then the per-OS default. The results page shows which source answered.",
+    deliverables: [
+      "Probe allowlist in the catalog; 5 s timeout; probe output validated",
+      "Toolchains (rustup, Cargo home) are never offered as cache",
+      "Tests with a fake environment and fake probes",
+    ],
+    targetPaths: ["cleanup-lab/engine/", "cleanup-lab/catalog/"],
+    reference: "cleanup-lab/reference/README.md",
+  },
+  {
+    id: "CLN-26",
+    title: "Learning loop: cleaned-items ledger, soft pre-selection, Quick Clean",
+    priority: "Medium",
+    effort: "Medium",
+    summary:
+      "Record every item that was really cleaned (CLN-13 results, bytes actually freed) in a local ledger, rank the patterns the user cleans repeatedly by choice, tick (never default-select) matching rows in the next scan, and offer a Quick Clean that re-measures only learned paths that still exist. The ledger stays in private state and can be cleared from the page.",
+    deliverables: [
+      "Pre-selection never touches high-risk, credential or privacy rows",
+      "A corrupt ledger is moved aside and reported, not overwritten",
+      "\"Why is this selected?\" hint on each learned row; tests",
+    ],
+    targetPaths: ["cleanup-lab/engine/", "console/", "dashboard/src/views/cleanup/"],
+    reference: "cleanup-lab/reference/README.md",
+  },
+  {
+    id: "CLN-27",
+    title: "Relocate caches to another volume behind a symlink",
+    priority: "Medium",
+    effort: "Medium",
+    summary:
+      "Typed move, restore and relink actions for developer caches and toolchains built on cleanup_ref/relocation.py: show the link status (7 states), check free space, then copy → verify → rename aside → symlink → verify → remove aside. Interrupted runs are detected and can be resumed; there is no elevated shell fallback.",
+    deliverables: [
+      "The owning tool must not be running (CLN-12 lock)",
+      "Executor tests: a failure at any step leaves the original or a verified copy",
+      "Destination limited to configured volumes (CLN-28)",
+    ],
+    targetPaths: ["cleanup-lab/engine/", "console/", "dashboard/src/views/cleanup/"],
+    reference: "cleanup-lab/reference/README.md",
+  },
+  {
+    id: "CLN-28",
+    title: "Volumes overview and disk-pressure card",
+    priority: "Medium",
+    effort: "Small",
+    summary:
+      "List local mounted volumes (name, mount point, total, free, root / removable / internal) on macOS, Linux and Windows with the standard library, mark the volume that holds the home folder, and warn above a usage threshold. CLN-27 uses the list to offer a destination.",
+    deliverables: [
+      "GET /api/cleanup/volumes, read-only",
+      "Network and pseudo filesystems filtered out; tests with fakes",
+      "Card on /cleanup/ in the existing shell",
+    ],
+    targetPaths: ["cleanup-lab/engine/", "console/", "dashboard/src/views/cleanup/"],
+  },
+  {
+    id: "CLN-29",
+    title: "Simulator and emulator runtimes: list, size, remove",
+    priority: "Medium",
+    effort: "Small–Medium",
+    summary:
+      "Beyond CLN-07's device list: Xcode simulator runtimes (`xcrun simctl runtime list -j`, `runtime delete <id>`), unavailable simulator devices, and Android AVDs and SDK system images, each with size and in-use state. Fixed argv only; removal goes through plan → confirm with ids from the page, never paths.",
+    deliverables: [
+      "Tool JSON parsed with tests on recorded samples",
+      "A runtime used by a booted device is skipped with a reason",
+      "Readiness hides the section where the tool is missing",
+    ],
+    targetPaths: ["cleanup-lab/engine/", "console/"],
+  },
 ];
 
 export const CLEANUP_LAB_TASKS: TodoTask[] = tasks.map((t) => ({
   ...t,
   category: "os",
   categoryLabel: "Cleanup Lab",
-  reference: "cleanup-lab/README.md",
+  reference: t.reference ?? "cleanup-lab/README.md",
   deliverables: [
     ...t.deliverables,
     "VERIFY.md entry with commands and output; phone/tablet/desktop screenshots taken by script for UI changes",
