@@ -454,6 +454,19 @@ file changed and this worktree has no Node dependencies; the page is CLN-16. Rus
 `fmt`/`clippy` — no Rust changed. No Windows host ran the cross-volume and
 freedesktop-Trash paths; those use injected tests.
 
-## CLN-04 … CLN-29
+## CLN-06 — developer tool and package-manager caches
+
+Branch `codex/cln-06-developer-caches` from master `6656ed55`. Adds 47
+developer entries with per-OS defaults, credential risk and non-cleanable
+toolchain/local-cluster entries. Optional binary presence uses `shutil.which`
+with the supplied `PATH`, never `sh -c`; nvm and virtualenvwrapper use their
+directories because they may be shell functions. CLN-25 adds dynamic cache
+resolution from environment and fixed-argv probes.
+
+Generated-home tests cover XDG/macOS/Windows paths, a fake npm binary, absent
+pnpm, credential defaults and plan refusal for toolchains. The engine suite
+passed 115 tests. Native Windows scanning was not run on this macOS host.
+
+## CLN-04, CLN-05, CLN-07 … CLN-29
 
 Each task appends its own section when it lands.

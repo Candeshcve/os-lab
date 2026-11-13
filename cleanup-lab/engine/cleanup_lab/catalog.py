@@ -30,6 +30,7 @@ from __future__ import annotations
 import json
 import ntpath
 import os
+import shutil
 import posixpath
 import re
 
@@ -68,7 +69,7 @@ REQUIRED_ENTRY_KEYS = (
     "needsPrivilege",
     "paths",
 )
-OPTIONAL_ENTRY_KEYS = ("owningProcesses", "detector", "note")
+OPTIONAL_ENTRY_KEYS = ("owningProcesses", "detector", "note", "toolName", "cleanable")
 
 
 class CatalogError(ValueError):
@@ -212,6 +213,11 @@ def _check_entry(entry, family, name, index):
     note = entry.get("note", "")
     if not isinstance(note, str):
         raise CatalogError("{0}: note must be a string".format(where))
+    tool_name = entry.get("toolName")
+    if tool_name is not None and (not isinstance(tool_name, str) or not tool_name or "/" in tool_name or "\\" in tool_name):
+        raise CatalogError("{0}: toolName must be an executable name, not a path".format(where))
+    if not isinstance(entry.get("cleanable", True), bool):
+        raise CatalogError("{0}: cleanable must be a boolean".format(where))
     paths = entry["paths"]
     if not isinstance(paths, dict) or not paths:
         raise CatalogError("{0}: paths must name at least one operating system".format(where))
@@ -237,6 +243,8 @@ def _check_entry(entry, family, name, index):
         "owningProcesses": list(processes),
         "detector": detector,
         "note": note,
+        "toolName": tool_name,
+        "cleanable": entry.get("cleanable", True),
         "family": family,
         "file": name,
         "paths": {platform: list(templates) for platform, templates in paths.items()},
@@ -308,6 +316,10 @@ def report(root, platform=None, env=None):
                 "owningProcesses": entry["owningProcesses"],
                 "detector": entry["detector"],
                 "note": entry["note"],
+                "toolName": entry["toolName"],
+                "toolPresent": (shutil.which(entry["toolName"], path=env.get("PATH", "")) is not None
+                                if entry["toolName"] else None),
+                "cleanable": entry["cleanable"],
                 "paths": resolve(entry, target, env),
             }
             for entry in entries

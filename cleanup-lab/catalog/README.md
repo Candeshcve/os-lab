@@ -11,6 +11,7 @@ One file per family. `family` must match the first segment of every entry id.
 | File | Family | Entries |
 |---|---|---|
 | `system.json` | `system` | User caches, user logs, Trash (Qleaner: `user_caches`, `system_logs`, `trash`) |
+| `developers.json` | `developers` | Developer caches, credential stores and toolchains with per-OS defaults |
 
 Later tasks add `browser.json` (CLN-05), `developers.json` (CLN-06),
 `projects.json` (CLN-07/24), `containers.json` and `vms.json` (CLN-08),
@@ -31,11 +32,21 @@ catalog id or to the reason it was dropped.
 | `defaultSelected` | Whether the item may be pre-ticked. Must be `false` for `high`, `credentials` and `privacy` — the loader rejects the file otherwise |
 | `needsPrivilege` | Cleaning it needs a privileged plan (CLN-20) |
 | `owningProcesses` | Process names that make the item skip with a reason (CLN-12) |
+| `toolName` | Optional executable name checked on `PATH`, without invoking a shell |
+| `cleanable` | `false` keeps toolchains visible for scans while the plan refuses cleaning |
 | `detector` | `paths` (default), `artifacts`, `signatures` or `tool` |
 | `note` | Free text for a maintenance caveat |
 | `paths` | `macos` / `linux` / `windows` → list of templates. An entry without a path for an OS simply does not appear there |
 
 ## Path templates
+
+Developer entries have per-OS defaults; CLN-25 will add environment and fixed
+argv tool probes before those defaults. `toolName` is an optional executable
+name checked with `shutil.which` and never executed through a shell. Shell
+functions such as `nvm` and `workon` have no `toolName`: their paths identify
+installed data. `cleanable: false` keeps toolchains and local clusters visible
+for measurement while the plan refuses deletion.
+
 
 | Template | Expands to |
 |---|---|

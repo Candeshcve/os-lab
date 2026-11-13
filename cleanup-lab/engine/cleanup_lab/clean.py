@@ -416,6 +416,10 @@ def build_plan(
     for entry_id in entry_ids:
         entry = by_id[entry_id]
         privileged = bool(entry.get("needsPrivilege"))
+        if not entry.get("cleanable", True):
+            items.append(_plan_item(entry, "", None, "skipped", mode=mode,
+                                    code="not-cleanable", reason="This is toolchain or configuration data; cleaning is disabled."))
+            continue
         if not entry["paths"].get(target):
             items.append(
                 _plan_item(
