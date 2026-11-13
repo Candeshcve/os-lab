@@ -41,6 +41,19 @@ why it was dropped, and [[cleanup-lab/catalog/README.md]] documents the format.
 
 ## Scan job
 
+CLN-07 adds a read-only project sweep and an Xcode simulator inventory.
+
+[[cleanup-lab/deep-roots.json]] defines selectable root ids; the console accepts
+only those ids through `POST /api/cleanup/deep-scan`, with an optional
+`minIdleDays` filter, and exposes availability through `GET /api/cleanup/deep-roots`.
+The engine stops descending
+at a proved `node_modules` or Rust/Maven `target`, measures it without following
+links, and reports ecosystem, regeneration hint and project directory age.
+`GET /api/cleanup/simulators` reads Xcode's JSON device list with fixed argv,
+flags unavailable devices and measures each device directory under the configured
+[[cleanup-lab/simulator-roots.json]] root. These are detection results, not
+cleanup targets; CLN-24 expands project signatures.
+
 [[cleanup-lab/engine/cleanup_lab/scan.py]] measures the catalog's resolved paths
 read-only, with progress and cancel.
 

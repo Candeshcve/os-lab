@@ -405,3 +405,27 @@ def test_the_browser_route_plans_and_cleans(tmp_path, monkeypatch):
     finally:
         server.shutdown()
         server.server_close()
+
+
+def test_deep_sweep_request_uses_configured_root_ids(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    project = tmp_path / "Projects" / "web"
+    project.mkdir(parents=True)
+    (project / "package.json").write_text("{}")
+    cache = project / "node_modules"
+    cache.mkdir()
+    (cache / "file").write_bytes(b"abc")
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    offered = api.get("/api/cleanup/deep-roots", {})["roots"]
+    assert any(x["id"] == "home-projects" and x["available"] for x in offered)
+    for request in ({"rootIds": ["/tmp"]}, {"rootIds": ["home-projects"], "path": "/tmp"},
+                    {"rootIds": ["home-projects"], "minIdleDays": True},
+                    {"rootIds": [["home-projects"]]}):
+        with pytest.raises(cleanup_api.CleanupError) as raised:
+            api.post("/api/cleanup/deep-scan", request)
+        assert raised.value.status == 400
+    job = api.post("/api/cleanup/deep-scan", {"rootIds": ["home-projects"], "minIdleDays": 0})
+    wait_for(job, "done")
+    assert job.result["items"][0]["id"] == "projects.node-modules"
+    assert job.result["items"][0]["sizeBytes"] == 3

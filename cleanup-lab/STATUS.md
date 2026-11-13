@@ -35,7 +35,7 @@ the finding and the decision are in the session log.
 | CLN-04 | pending | — | — | — | — | none |
 | CLN-05 | pending | — | — | — | — | none |
 | CLN-06 | pending | — | — | — | — | none |
-| CLN-07 | pending | — | — | — | — | none |
+| CLN-07 | in progress (this PR) | [#147](https://github.com/keyvanarasteh/os-lab/pull/147) | — | project sweep UI and simulator action deferred | read-only detection only | none |
 | CLN-08 | pending | — | — | — | — | none |
 | CLN-09 | pending | — | — | — | — | none |
 | CLN-10 | pending | — | — | — | — | none |
