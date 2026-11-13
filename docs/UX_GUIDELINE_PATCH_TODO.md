@@ -9,6 +9,15 @@
 - [ ] **UX-00 — Route and state ledger.** First read: `dashboard/README.md`, `dashboard/src/shell/app-shell.tsx` (`sectionHref`, `buildGroups`), `dashboard/src/views/source/pages.tsx` (`SOURCE_PAGES`), `dashboard/src/firewall/locale.ts`, `dashboard/e2e/{health-and-content,source,how-to-use}.spec.ts`. Record local/public route rows, active locales, readiness/job states, and which existing tests cover each. Do not re-open completed Source TODO items without a failure.
 - [x] **UX-01 — Guideline text.** First read: `docs/UX_READINESS.md` and plan §“UX contract.” Add measurable job-recovery, evidence-provenance, coarse-pointer, focus/RTL, public async-feedback, and concise-copy rules. Preserve existing host readiness and preview rules. Check relative links and `git diff --check`; update `lat.md/ux-readiness.md` only for changed current contracts and run `lat check`.
 - [x] **UX-02 — Locale count drift.** `docs/UX_READINESS.md` now points to the eight active catalogs in `dashboard/src/firewall/locale.ts` instead of saying seven. Included in the planning PR; this does not certify translation completeness.
+- [x] **UX-03 — Behavior-first feature rule.** Add the owner's implementation order to the guideline, plan, repo working rules, and UX graph: types/state/store/API, then plain usable pages and controls, verified functional flows, and finally a focused visual pass. Preserve existing UX work and one PR per CLN task.
+
+For each upcoming CLN PR, copy these gates into that PR's checklist; do not mark a task complete because only its engine or API is ready:
+
+- [ ] Types and API/store contracts match live capability and include typed errors.
+- [ ] Plain page/components exercise loading, empty, success, failure, retry, confirmation, and cancellation where applicable; local and public modes behave honestly.
+- [ ] Focused engine, console, dashboard, locale, build, and E2E checks relevant to the task pass or have recorded baseline limits.
+- [ ] Visual design pass is done after the functional flows are stable, with narrow width, keyboard, theme, and RTL checks. Existing working design is retained.
+- [ ] The task has its own PR; any deferred page or design gate is visible in that PR and remains open.
 
 ## Immediate focused fixes — one stable PR per item
 

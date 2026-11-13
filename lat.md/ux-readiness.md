@@ -2,6 +2,11 @@
 
 The interface should show a next step that the current host can actually take. The detailed checklist is [[docs/UX_READINESS.md]].
 
+For new features, implement types, state/store and API contracts, then plain
+usable pages and components. Verify real success and failure paths before a
+focused visual design pass. Preserve working UX and track each Cleanup Lab task
+in a separate PR; an engine-only draft still has an open page gate.
+
 ## Lab state and actions
 
 [[console/oslab.py]] produces each lab's requirements, state, provider, and available actions. [[dashboard/src/views/host-page.tsx]] and [[dashboard/src/views/lab-page.tsx]] offer setup only when a required prerequisite is missing.

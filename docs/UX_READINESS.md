@@ -4,6 +4,13 @@ These guidelines apply to the local dashboard's host and lab pages, the Android 
 
 The proposed extension and its tracked acceptance work are in the [UX guideline patch plan](UX_GUIDELINE_PATCH_PLAN.md) and [checklist](UX_GUIDELINE_PATCH_TODO.md).
 
+## Build behavior before visual design
+
+- For a new feature, define its types, state/store, API contract, and error states first. Add plain, accessible pages and controls that exercise the real capability. Verify the scan, preview, confirmation, result, retry, and failure paths that apply before starting a visual design pass.
+- Keep safety and UX truth in the functional pass: show readiness, unavailable reasons, operation errors, destructive consequences, and keyboard-accessible controls from the start. A plain page must still be usable.
+- Once the logic and local/public routes work, apply the visual design in a focused pass. Preserve existing working design; avoid repeated styling changes while debugging API or state behavior.
+- Track each Cleanup Lab task in its own PR, even when tasks are worked sequentially as a batch. Record the functional and visual verification still due in that task's PR rather than treating a backend-only draft as complete.
+
 ## Show actions only when they make sense
 
 - Derive setup actions from the current host report. Show **Install dependencies** only when a required prerequisite is missing and the lab exposes a `setup` action. The backend decides the `ready`, `needs-setup`, and `unavailable` states; do not infer readiness from the mere presence of an action.
