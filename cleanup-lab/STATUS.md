@@ -37,7 +37,7 @@ the finding and the decision are in the session log.
 | CLN-06 | pending | — | — | — | — | none |
 | CLN-07 | in progress (this PR) | [#147](https://github.com/keyvanarasteh/os-lab/pull/147) | — | project sweep UI and simulator action deferred | read-only detection only | none |
 | CLN-08 | pending | — | — | — | — | none |
-| CLN-09 | pending | — | — | — | — | none |
+| CLN-09 | in progress (this PR) | [#150](https://github.com/keyvanarasteh/os-lab/pull/150) | — | frontend client/state awaits CLN-16 merge; UX later | logic and API first | none |
 | CLN-10 | pending | — | — | — | — | none |
 | CLN-11 | pending | — | — | — | — | none |
 | CLN-12 | merged | [#136](https://github.com/keyvanarasteh/os-lab/pull/136) | 3d5ab866 | — | — | none |

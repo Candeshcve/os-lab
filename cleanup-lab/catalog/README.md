@@ -8,6 +8,10 @@ current operating system.
 
 One file per family. `family` must match the first segment of every entry id.
 
+`signatures/macos-leftovers.json` defines read-only macOS app inventory and
+leftover candidate roots. It is separate from cleanable catalog entries:
+findings have confidence and evidence, and cannot be deleted by this API.
+
 | File | Family | Entries |
 |---|---|---|
 | `system.json` | `system` | User caches, user logs, Trash (Qleaner: `user_caches`, `system_logs`, `trash`) |

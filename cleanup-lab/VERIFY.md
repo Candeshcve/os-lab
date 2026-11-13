@@ -454,6 +454,16 @@ file changed and this worktree has no Node dependencies; the page is CLN-16. Rus
 `fmt`/`clippy` — no Rust changed. No Windows host ran the cross-volume and
 freedesktop-Trash paths; those use injected tests.
 
+## CLN-09 — macOS leftover signatures
+
+The scanner reads `Info.plist` with `plistlib` and scans catalog roots without
+following symlinks. Exact bundle ids and dotted children, whole team-id prefix,
+and normalized app name are separate evidence rules. A generated tree verifies
+that `com.acme.editor2` and `Acme Editor Pro` do not match `com.acme.editor` or
+`Acme Editor`. Fixtures also cover hidden apps, large app data, symlink skips,
+and an empty installed inventory returning `unknown`. The console endpoint
+rejects free-form paths and returns a job. All findings are report-only.
+
 ## CLN-07 — deep project sweep and Xcode simulators
 
 The sweep accepts configured root ids, scans read-only, checks project marker

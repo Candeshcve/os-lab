@@ -41,6 +41,17 @@ why it was dropped, and [[cleanup-lab/catalog/README.md]] documents the format.
 
 ## Scan job
 
+CLN-09 adds read-only macOS leftover signatures and a typed scan job.
+
+[[cleanup-lab/engine/cleanup_lab/leftovers_macos.py]] reads installed app bundle
+ids and optional team ids from `Info.plist` with `plistlib`. It checks candidate
+folders under the configured [[cleanup-lab/catalog/signatures/macos-leftovers.json]]
+roots by exact bundle id or dotted child, whole team prefix, or normalized app
+name. It reports confidence and evidence for potential orphans, hidden apps and
+large app data; an empty app inventory produces `unknown` instead of an orphan
+claim. `POST /api/cleanup/leftovers/macos/scan` accepts no paths and returns a
+job. Every finding is report-only; the endpoint cannot clean it.
+
 CLN-07 adds a read-only project sweep and an Xcode simulator inventory.
 
 [[cleanup-lab/deep-roots.json]] defines selectable root ids; the console accepts
