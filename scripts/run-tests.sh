@@ -105,6 +105,18 @@ else
   bad "no python3 for cleanup-lab/reference/python"
 fi
 
+# Cleanup Lab engine: stdlib-only package, plain unittest is enough (CLN-01).
+hdr "Cleanup Lab engine tests (unittest)"
+if [ -n "$PY" ] || pick_python; then
+  if ( cd "$ROOT/cleanup-lab/engine" && "$PY" -m unittest discover -s tests -p 'test_*.py' -q ); then
+    ok "cleanup-lab/engine"
+  else
+    bad "cleanup-lab/engine"
+  fi
+else
+  bad "no python3 for cleanup-lab/engine"
+fi
+
 hdr "Cleanup Lab qrust-scan crate (cargo test)"
 if command -v cargo >/dev/null 2>&1; then
   if ( cd "$ROOT/cleanup-lab/reference/qrust-scan" && cargo test --quiet ); then
