@@ -298,15 +298,19 @@ def entry_roots(entry, *, env=None, platform=None):
     env = os.environ if env is None else env
     target = platform or platform_id()
     roots = []
-    for template in entry.get("paths", {}).get(target, []):
-        path, _reason = expand(template, target, env)
-        if path:
-            if entry.get("detector") == "profile-glob":
-                prefix = path.split("*", 1)[0].split("?", 1)[0].split("[", 1)[0]
-                root = prefix.rstrip(os.sep) if glob.has_magic(path) else os.path.dirname(path)
-                roots.append(os.path.realpath(root))
-            else:
-                roots.append(os.path.realpath(path))
+    if entry.get("detector") == "spotlight":
+        from .catalog import resolve as catalog_resolve
+        roots = [os.path.realpath(item["path"]) for item in catalog_resolve(entry, target, env) if item["path"]]
+    else:
+        for template in entry.get("paths", {}).get(target, []):
+            path, _reason = expand(template, target, env)
+            if path:
+                if entry.get("detector") == "profile-glob":
+                    prefix = path.split("*", 1)[0].split("?", 1)[0].split("[", 1)[0]
+                    root = prefix.rstrip(os.sep) if glob.has_magic(path) else os.path.dirname(path)
+                    roots.append(os.path.realpath(root))
+                else:
+                    roots.append(os.path.realpath(path))
     return roots
 
 
