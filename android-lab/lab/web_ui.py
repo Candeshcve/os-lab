@@ -238,7 +238,7 @@ class LabHttpHandler(BaseHTTPRequestHandler):
             self._json(exc.status, {"error": str(exc)})
 
     def _cleanup_post(self, path: str):
-        """Cleanup Lab: typed actions only (start a scan job, cancel one). CLN-13 adds clean here."""
+        """Cleanup Lab: typed actions only (start a scan, plan or clean job, cancel one)."""
         if cleanup_api is None:
             self._json(501, {"error": "Cleanup Lab console support is not installed"})
             return
@@ -246,8 +246,11 @@ class LabHttpHandler(BaseHTTPRequestHandler):
             data = self._read_json()
             job = cleanup_api.CleanupAPI(REPO_ROOT).post(path, data)
             payload = job.to_dict() if hasattr(job, "to_dict") else job
-            # 202: the scan keeps running after the answer (the jobs endpoints poll it).
-            self._json(202 if path == "/api/cleanup/scan" else 200, payload)
+            # 202: the job keeps running after the answer (the jobs endpoints poll it).
+            self._json(
+                202 if path in ("/api/cleanup/scan", "/api/cleanup/plan", "/api/cleanup/clean") else 200,
+                payload,
+            )
         except cleanup_api.CleanupError as exc:
             self._json(exc.status, {"error": str(exc)})
         except ValueError as e:

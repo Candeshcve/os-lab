@@ -10,8 +10,8 @@ The engine is a standard-library Python package; the console and `labctl` are th
 typed layers over it.
 
 The package lives in [[cleanup-lab/engine/cleanup_lab]]. `readiness`, `paths`, the
-catalog loader (CLN-02), the scan job (CLN-03) and the safety guard (CLN-12) exist
-now; the plan → clean executor (CLN-13) joins them. One module, `safety.py`,
+catalog loader (CLN-02), the scan job (CLN-03), the safety guard (CLN-12) and the
+plan → clean executor (CLN-13) exist now. One module, `safety.py`,
 guards every destructive call, so no other module may delete, move or shred.
 
 Target paths are data, never code: every platform path, risk class, owning process
@@ -51,6 +51,18 @@ is counted once per scan by `(device, inode)`, and an unreadable path is reporte
 callback is throttled, and a cancel returns the partial counters with
 `"cancelled": true`.
 
+## Plan → clean
+
+[[cleanup-lab/engine/cleanup_lab/clean.py]] previews and runs destructive work; only a confirmed, unexpired plan can move a file.
+
+Building is read-only: the guard checks each catalog path, one `lstat` walk records
+its size and a fingerprint, and the plan lists every item as ready or skipped with a
+reason. `POST /api/cleanup/plan` names catalog ids and an optional mode; `POST
+/api/cleanup/clean {planId}` verifies the fingerprints, runs once, and reports
+`trashed` / `deleted` / `skipped` / `failed`. Trash is the default; a failed Trash
+is a failed item, never a silent delete, and bytes are counted only when the
+original is gone.
+
 ## Readiness
 
 `readiness.py` reports what the engine can do on this host without writing anything.
@@ -73,15 +85,17 @@ has no engine, so the page will explain that instead of polling, per
 before the static dashboard fallthrough.
 
 `GET /api/cleanup/status` and `GET /api/cleanup/catalog` are read-only.
-`POST /api/cleanup/scan` starts a scan job whose request may name catalog `entryIds`
-and `workers` only; `GET /api/cleanup/jobs/<id>` returns its progress and result and
-`POST /api/cleanup/jobs/<id>/cancel` cancels it. A request carries no command string
-and no free-form path list: an unknown path is `404`, unexpected or duplicate query
+`POST /api/cleanup/scan`, `POST /api/cleanup/plan` and `POST /api/cleanup/clean
+{planId}` start jobs whose requests carry catalog ids, an optional worker count or
+mode, and a plan id only. `GET /api/cleanup/jobs/<id>` returns progress and result;
+`POST /api/cleanup/jobs/<id>/cancel` cancels. A request carries no command string and
+no free-form path list: an unknown path is `404`, unexpected or duplicate query
 parameters, unknown keys or unknown ids are `400`, and a missing engine is `501`.
-The job lives in the console process, and its worker always ends in `done`, `cancelled`
-or `failed` — never `running`. Later tasks add plan → clean (CLN-13), history
-(CLN-15), ignore rules (CLN-17), volumes (CLN-28) and runtimes (CLN-29) here, each
-typed and validated again by the engine.
+A stale, expired or already-used plan is `409`/`410` with nothing removed. The job
+lives in the console process, and its worker always ends in `done`, `cancelled` or
+`failed` — never `running`. Later tasks add history (CLN-15), ignore rules (CLN-17),
+volumes (CLN-28) and runtimes (CLN-29) here, each typed and validated again by the
+engine.
 
 ## Safety
 
@@ -105,7 +119,8 @@ never real user files.
 The engine tests run under `unittest` from the engine folder.
 
 `cd cleanup-lab/engine && python3 -m unittest discover -s tests -p 'test_*.py'`
-covers the probe, the catalog, the scan, the path rules and the CLI exit codes.
+covers the probe, the catalog, the scan, plan → clean (guard, fingerprints,
+Trash by default, honest failures), the path rules and the CLI exit codes.
 Tests live in [[cleanup-lab/engine/tests]]; the console's typed job contract is
 covered by [[android-lab/lab/tests/test_cleanup_console.py]]. [[scripts/run-tests.sh]]
 runs the same suites next to the reference code tests, the Android suite, `bash -n`,

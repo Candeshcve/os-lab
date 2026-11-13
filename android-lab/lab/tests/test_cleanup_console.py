@@ -1,8 +1,9 @@
-"""CLN-03 console contract: typed scan jobs, polling, progress and cancel.
+"""Console contract: typed scan, plan and clean jobs with polling and cancel.
 
-The scan itself is covered by ``cleanup-lab/engine/tests/test_scan.py``; these
-tests hold the HTTP-shaped layer to the same rules: no free-form paths, catalog
-ids only, a job that always answers, and cancel that reaches the worker.
+The engine behaviour is covered by ``cleanup-lab/engine/tests/test_scan.py`` and
+``test_clean.py``; these tests hold the HTTP-shaped layer to the same rules: no
+free-form paths, catalog ids only, a plan that is single-use and expires when an
+item changes, and a job that always answers.
 """
 import json
 import os
@@ -47,9 +48,11 @@ def clean_jobs():
 
     drain()
     cleanup_api.JOBS.jobs.clear()
+    cleanup_api.PLANS.plans.clear()
     yield
     drain()
     cleanup_api.JOBS.jobs.clear()
+    cleanup_api.PLANS.plans.clear()
 
 
 def catalog_cache_target(tmp_path, monkeypatch):
@@ -230,6 +233,170 @@ def test_the_browser_route_starts_polls_and_cancels(tmp_path, monkeypatch):
         status, cancelled = call("/api/cleanup/jobs/{0}/cancel".format(started["id"]), {})
         assert status == 200
         assert cancelled["id"] == started["id"]
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def wait_done(job, timeout=10):
+    return wait_for(job, "done", timeout)
+
+
+def test_a_plan_is_previewed_then_cleaned_from_the_console(tmp_path, monkeypatch):
+    target = catalog_cache_target(tmp_path, monkeypatch)
+    with open(os.path.join(target, "one.bin"), "wb") as handle:
+        handle.write(b"x" * 120)
+
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    plan_job = wait_done(
+        api.post("/api/cleanup/plan", {"entryIds": ["system.user-caches"], "workers": 1})
+    )
+    assert plan_job.kind == "plan"
+    assert plan_job.error is None
+    payload = plan_job.result
+    assert payload["mode"] == "trash"
+    assert payload["totals"]["ready"] == 1
+    item = payload["items"][0]
+    assert item["status"] == "ready"
+    assert (item["sizeBytes"], item["files"]) == (120, 1)
+    plan_id = payload["planId"]
+    assert plan_id and plan_id == plan_job.result["planId"]
+
+    clean_job = wait_done(api.post("/api/cleanup/clean", {"planId": plan_id}))
+    assert clean_job.kind == "clean"
+    assert clean_job.error is None
+    result = clean_job.result
+    assert result["planId"] == plan_id
+    assert result["results"][0]["status"] == "trashed"
+    assert result["totals"]["trashed"] == 1
+    assert result["totals"]["bytes"] == 120
+    assert not os.path.exists(os.path.join(target, "one.bin"))
+    assert os.path.exists(result["results"][0]["trashPath"])
+
+    listed = api.get("/api/cleanup/jobs", {})
+    assert [row["kind"] for row in listed["jobs"]] == ["clean", "plan"]
+
+
+def test_plan_and_clean_requests_are_typed(tmp_path, monkeypatch):
+    target = catalog_cache_target(tmp_path, monkeypatch)
+    with open(os.path.join(target, "one.bin"), "wb") as handle:
+        handle.write(b"x" * 10)
+
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    for body in (
+        {"path": target},
+        {"entryIds": ["system.user-caches"], "root": target},
+        {"entryIds": ["system.user-caches"], "command": "rm -rf"},
+        {},
+        {"entryIds": []},
+        {"entryIds": "system.user-caches"},
+        {"entryIds": ["nope.entry"]},
+        {"entryIds": ["system.user-caches", "system.user-caches"]},
+        {"entryIds": ["system.user-caches"], "mode": "shred"},
+        {"entryIds": ["system.user-caches"], "workers": 0},
+        {"entryIds": ["system.user-caches"], "workers": True},
+    ):
+        with pytest.raises(cleanup_api.CleanupError) as caught:
+            api.post("/api/cleanup/plan", body)
+        assert caught.value.status == 400, body
+
+    for body in ({}, {"planId": ""}, {"planId": 3}, {"planId": "x", "force": True}):
+        with pytest.raises(cleanup_api.CleanupError) as caught:
+            api.post("/api/cleanup/clean", body)
+        assert caught.value.status == 400, body
+
+    with pytest.raises(cleanup_api.CleanupError) as caught:
+        api.post("/api/cleanup/clean", {"planId": "not-a-plan"})
+    assert caught.value.status == 404
+
+
+def test_a_changed_item_fails_the_clean_and_removes_nothing(tmp_path, monkeypatch):
+    target = catalog_cache_target(tmp_path, monkeypatch)
+    original = os.path.join(target, "one.bin")
+    with open(original, "wb") as handle:
+        handle.write(b"x" * 20)
+
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    plan = wait_done(api.post("/api/cleanup/plan", {"entryIds": ["system.user-caches"]}))
+    with open(os.path.join(target, "added.bin"), "wb") as handle:
+        handle.write(b"new")
+
+    job = wait_for(api.post("/api/cleanup/clean", {"planId": plan.result["planId"]}), "failed")
+    assert "changed since it was confirmed" in job.error
+    assert job.result is None
+    assert os.path.exists(original)
+    assert os.path.exists(os.path.join(target, "added.bin"))
+    assert not os.path.exists(os.path.join(tmp_path, ".Trash"))
+
+
+def test_a_plan_is_single_use_and_expires(tmp_path, monkeypatch):
+    target = catalog_cache_target(tmp_path, monkeypatch)
+    with open(os.path.join(target, "one.bin"), "wb") as handle:
+        handle.write(b"x" * 5)
+
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    plan = wait_done(api.post("/api/cleanup/plan", {"entryIds": ["system.user-caches"]}))
+    plan_id = plan.result["planId"]
+    wait_done(api.post("/api/cleanup/clean", {"planId": plan_id}))
+
+    with pytest.raises(cleanup_api.CleanupError) as caught:
+        api.post("/api/cleanup/clean", {"planId": plan_id})
+    assert caught.value.status == 409
+    assert "already run" in str(caught.value)
+
+    second = wait_done(api.post("/api/cleanup/plan", {"entryIds": ["system.user-caches"]}))
+    record = cleanup_api.PLANS.get(second.result["planId"])
+    assert record is not None
+    record.plan.expires_at = time.time() - 1
+    with pytest.raises(cleanup_api.CleanupError) as caught:
+        api.post("/api/cleanup/clean", {"planId": second.result["planId"]})
+    assert caught.value.status == 410
+    assert "expired" in str(caught.value)
+
+
+def test_the_browser_route_plans_and_cleans(tmp_path, monkeypatch):
+    target = catalog_cache_target(tmp_path, monkeypatch)
+    with open(os.path.join(target, "blob.bin"), "wb") as handle:
+        handle.write(b"z" * 64)
+
+    from web_ui import LabHttpHandler
+
+    server = HTTPServer(("127.0.0.1", 0), LabHttpHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = "http://127.0.0.1:{0}".format(server.server_address[1])
+
+    def call(path, body=None):
+        data = None if body is None else json.dumps(body).encode("utf-8")
+        headers = (
+            {"Content-Type": "application/json", "X-OSLab": "1"} if body is not None else {}
+        )
+        request = urllib.request.Request(base + path, data=data, headers=headers)
+        with urllib.request.urlopen(request, timeout=10) as answer:
+            return answer.status, json.loads(answer.read().decode("utf-8"))
+
+    def wait(identifier):
+        deadline = time.time() + 10
+        while time.time() < deadline:
+            _, job = call("/api/cleanup/jobs/" + identifier)
+            if job["state"] != "running":
+                return job
+            time.sleep(0.01)
+        raise AssertionError("job stayed running")
+
+    try:
+        status, plan = call("/api/cleanup/plan", {"entryIds": ["system.user-caches"]})
+        assert status == 202
+        plan = wait(plan["id"])
+        assert plan["state"] == "done"
+        assert plan["result"]["items"][0]["status"] == "ready"
+
+        status, clean = call("/api/cleanup/clean", {"planId": plan["result"]["planId"]})
+        assert status == 202
+        clean = wait(clean["id"])
+        assert clean["state"] == "done"
+        assert clean["result"]["results"][0]["status"] == "trashed"
+        assert clean["result"]["totals"]["bytes"] == 64
     finally:
         server.shutdown()
         server.server_close()
