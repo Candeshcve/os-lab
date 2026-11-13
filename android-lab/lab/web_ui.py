@@ -228,7 +228,7 @@ class LabHttpHandler(BaseHTTPRequestHandler):
             self._send_bytes(status, body, "application/json; charset=utf-8", cache="no-store")
 
     def _cleanup_get(self, path: str, query: dict):
-        """Cleanup Lab: read-only readiness today; scan and clean endpoints follow their tasks."""
+        """Cleanup Lab: readiness, catalog and the scan jobs' progress and results (CLN-01…03)."""
         if cleanup_api is None:
             self._json(501, {"error": "Cleanup Lab console support is not installed"})
             return
@@ -236,6 +236,22 @@ class LabHttpHandler(BaseHTTPRequestHandler):
             self._json(200, cleanup_api.CleanupAPI(REPO_ROOT).get(path, query))
         except cleanup_api.CleanupError as exc:
             self._json(exc.status, {"error": str(exc)})
+
+    def _cleanup_post(self, path: str):
+        """Cleanup Lab: typed actions only (start a scan job, cancel one). CLN-13 adds clean here."""
+        if cleanup_api is None:
+            self._json(501, {"error": "Cleanup Lab console support is not installed"})
+            return
+        try:
+            data = self._read_json()
+            job = cleanup_api.CleanupAPI(REPO_ROOT).post(path, data)
+            payload = job.to_dict() if hasattr(job, "to_dict") else job
+            # 202: the scan keeps running after the answer (the jobs endpoints poll it).
+            self._json(202 if path == "/api/cleanup/scan" else 200, payload)
+        except cleanup_api.CleanupError as exc:
+            self._json(exc.status, {"error": str(exc)})
+        except ValueError as e:
+            self._json(400, {"error": str(e)})
 
     def _source_get(self, path: str, query: dict):
         if source_artifacts is None or not oslab:
@@ -344,6 +360,9 @@ class LabHttpHandler(BaseHTTPRequestHandler):
             return
         if path.startswith("/api/app/update"):
             self._app_post(path)
+            return
+        if path.startswith("/api/cleanup"):
+            self._cleanup_post(path)
             return
         if path.startswith(("/api/labs", "/api/jobs")):
             if not oslab:

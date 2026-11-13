@@ -27,6 +27,20 @@ Qleaner's known bugs and the "Do not port" tables are in
 | `is_owned_by_user` (uid compare) | `safety.owned_by_user` | kept; Qleaner called it on macOS only |
 | `is_process_running` (two names) | `safety.running_processes` | now fed by the catalog, with injected process lists in tests |
 
+## Scan job translations
+
+| Qleaner function | Cleanup Lab | Notes |
+|---|---|---|
+| `start_scan` | `scan.scan_catalog` + a console job | Scans the catalog's resolved paths for this OS; the request names entry ids, never paths. |
+| `get_scan_results` | `GET /api/cleanup/jobs/<id>` (`result`) | Per-path report plus entry and scan totals. |
+| `cancel_scan` | `POST /api/cleanup/jobs/<id>/cancel` → `threading.Event` | Returns the partial counters with `cancelled: true`; no error and no invented bytes. |
+| `get_directory_size` | `scan.measure_path` | `lstat` only; symlinks never followed; sockets/FIFOs/devices not measured. |
+| (none) | progress callback | Throttled to 120 ms and polled between entries; `GET /api/cleanup/jobs/<id>` returns it. |
+
+Unlike Qleaner's scan, a path the engine cannot read is reported in `unreadable`
+instead of aborting or being silently skipped, and one directory worker never
+follows a symlink out of its top-level path.
+
 ## System
 
 | Qleaner id | Catalog id | Task | Notes |
