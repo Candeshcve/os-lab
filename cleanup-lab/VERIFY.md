@@ -119,6 +119,77 @@ $ echo $?
   browsers are not installed on this machine (no `~/Library/Caches/ms-playwright`).
 * Dashboard screenshots — same reason, and the page is the handoff, not this PR.
 
-## CLN-02 … CLN-29
+## CLN-02 — detector catalog format, loader and Qleaner parity
+
+Branch `feat/cln-02-catalog`. Scope: catalog data + schema, loader, parity table,
+CLI and console endpoint. No dashboard file is touched.
+
+### Engine unit tests
+
+```console
+$ cd cleanup-lab/engine && ../../.venv-test/bin/python -m unittest discover -s tests -p 'test_*.py'
+Ran 47 tests in 0.023s
+OK
+```
+
+18 new cases: template expansion (`~`, `{home}`, `{cache}`, `${VAR}`,
+`${VAR:-fallback}`, `%VAR%`, unavailable context, relative path), per-platform
+filtering, duplicate ids across files, a pre-selected `high`/`credentials`/`privacy`
+entry refused, nine malformed-entry cases, bad file version, and `path: null` with a
+reason instead of a guess. `SchemaTest` asserts the loader's required keys equal
+`schema.json`'s and that every catalog file uses only declared fields.
+
+### CLI
+
+```console
+$ ./labctl cleanup catalog
+Cleanup Lab catalog · macos · 3 entries
+  system.user-caches     User caches                low         pre-selected
+      /Users/Q/Library/Caches
+  system.user-logs       User logs                  low         pre-selected
+      /Users/Q/Library/Logs
+  system.trash           Trash                      medium      not pre-selected
+      /Users/Q/.Trash
+$ echo $?
+0
+```
+
+`--json` prints the same payload as the endpoint.
+
+### Console endpoint
+
+```console
+$ python3 -c '…CleanupAPI(".").get("/api/cleanup/catalog", {})…'
+entries: 3 platform: macos
+query -> 400 Unexpected query parameters
+broken -> 500 The detector catalog is invalid: system.json: entry nope is missing name, category, risk,
+```
+
+The broken-catalog case uses a generated temp catalog, not the repository one.
+
+### Repository checks
+
+```console
+$ ./scripts/run-tests.sh
+8 passed, 1 failed, 1 skipped
+```
+
+The failure is still the android suite, pre-existing on this arm64 Mac (a clean
+`master` worktree: 5 failed + 10 errors; this branch: 5 failed + 10 errors, same ids).
+`cargo` is not on `PATH`, so qrust-scan is skipped; this PR changes no Rust.
+
+```console
+$ lat check
+All checks passed in 538ms
+$ git diff --check
+(clean)
+```
+
+### Not run
+
+`npm run check|test:i18n|build|test:e2e` — no file under `dashboard/` changed, and
+Playwright browsers are not installed here.
+
+## CLN-03 … CLN-29
 
 Each task appends its own section when it lands.

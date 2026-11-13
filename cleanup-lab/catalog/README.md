@@ -1,0 +1,64 @@
+# Detector catalog
+
+Every target the Cleanup Lab can measure lives here as data. The engine never
+hardcodes a path: it loads these files with
+[`cleanup_lab/catalog.py`](../engine/cleanup_lab/catalog.py), which validates them
+against [`schema.json`](schema.json) and expands the path templates for the
+current operating system.
+
+One file per family. `family` must match the first segment of every entry id.
+
+| File | Family | Entries |
+|---|---|---|
+| `system.json` | `system` | User caches, user logs, Trash (Qleaner: `user_caches`, `system_logs`, `trash`) |
+
+Later tasks add `browser.json` (CLN-05), `developers.json` (CLN-06),
+`projects.json` (CLN-07/24), `containers.json` and `vms.json` (CLN-08),
+`leftovers.json` (CLN-09/10), `packages.json` (CLN-11) and `simulators.json`
+(CLN-07/29). [`../PARITY.md`](../PARITY.md) maps every Qleaner detector to its
+catalog id or to the reason it was dropped.
+
+## Entry fields
+
+| Field | Meaning |
+|---|---|
+| `id` | `family.name`, unique across the whole catalog |
+| `name` | Short label shown in the UI |
+| `category` | `system`, `browser`, `developer`, `project`, `container`, `vm`, `leftover`, `package`, `simulator` |
+| `risk` | `low` (regenerable), `medium` (rebuildable, slow or visible), `high` (not a cache), `credentials`, `privacy` |
+| `hint` | Why the item exists |
+| `impact` | What the user loses or waits for if it is cleaned |
+| `defaultSelected` | Whether the item may be pre-ticked. Must be `false` for `high`, `credentials` and `privacy` — the loader rejects the file otherwise |
+| `needsPrivilege` | Cleaning it needs a privileged plan (CLN-20) |
+| `owningProcesses` | Process names that make the item skip with a reason (CLN-12) |
+| `detector` | `paths` (default), `artifacts`, `signatures` or `tool` |
+| `note` | Free text for a maintenance caveat |
+| `paths` | `macos` / `linux` / `windows` → list of templates. An entry without a path for an OS simply does not appear there |
+
+## Path templates
+
+| Template | Expands to |
+|---|---|
+| `~` or `~/...` | The user's home folder |
+| `{home}` | The same, inside a longer path |
+| `{cache}` | `~/Library/Caches` (macOS), `$XDG_CACHE_HOME` or `~/.cache`, `%LOCALAPPDATA%` |
+| `{localappdata}` / `{appdata}` | `%LOCALAPPDATA%` / `%APPDATA%` (Windows) |
+| `{tmp}` | `$TMPDIR` / `%TEMP%`, `/tmp` elsewhere |
+| `${NAME}` | Environment variable. Unresolved (with the name) when unset |
+| `${NAME:-fallback}` | Environment variable, fallback when unset or empty |
+| `%NAME%` | Windows-style environment variable |
+
+A template that cannot be resolved is **not** guessed: the loader returns
+`path: null` plus a `reason`, the scan reports the item as skipped, and the page
+shows why. That is rule 4 and rule 6 of the [lab contract](../README.md).
+
+## Checking a change
+
+```bash
+cd cleanup-lab/engine && python3 -m unittest discover -s tests -p 'test_*.py'
+./labctl cleanup catalog            # this OS, resolved paths and reasons
+./labctl cleanup catalog --json     # what GET /api/cleanup/catalog returns
+```
+
+`test_catalog.py` checks the catalog against `schema.json` (every required key,
+every entry key declared, no strays), so the two cannot drift.
