@@ -28,8 +28,11 @@ Template syntax (see ``cleanup-lab/catalog/README.md``):
 from __future__ import annotations
 
 import json
+import glob
+import stat
 import ntpath
 import os
+import shutil
 import posixpath
 import re
 
@@ -49,7 +52,7 @@ CATEGORIES = (
     "package",
     "simulator",
 )
-DETECTORS = ("paths", "artifacts", "signatures", "tool")
+DETECTORS = ("paths", "profile-glob", "temp", "spotlight", "artifacts", "signatures", "tool")
 NEVER_PRESELECTED = ("high", "credentials", "privacy")
 FAMILY_PATTERN = re.compile(r"^[a-z][a-z0-9-]*$")
 ID_PATTERN = re.compile(r"^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+$")
@@ -68,7 +71,7 @@ REQUIRED_ENTRY_KEYS = (
     "needsPrivilege",
     "paths",
 )
-OPTIONAL_ENTRY_KEYS = ("owningProcesses", "detector", "note")
+OPTIONAL_ENTRY_KEYS = ("owningProcesses", "detector", "note", "toolName", "cleanable")
 
 
 class CatalogError(ValueError):
@@ -212,6 +215,11 @@ def _check_entry(entry, family, name, index):
     note = entry.get("note", "")
     if not isinstance(note, str):
         raise CatalogError("{0}: note must be a string".format(where))
+    tool_name = entry.get("toolName")
+    if tool_name is not None and (not isinstance(tool_name, str) or not tool_name or "/" in tool_name or "\\" in tool_name):
+        raise CatalogError("{0}: toolName must be an executable name, not a path".format(where))
+    if not isinstance(entry.get("cleanable", True), bool):
+        raise CatalogError("{0}: cleanable must be a boolean".format(where))
     paths = entry["paths"]
     if not isinstance(paths, dict) or not paths:
         raise CatalogError("{0}: paths must name at least one operating system".format(where))
@@ -237,6 +245,8 @@ def _check_entry(entry, family, name, index):
         "owningProcesses": list(processes),
         "detector": detector,
         "note": note,
+        "toolName": tool_name,
+        "cleanable": entry.get("cleanable", True),
         "family": family,
         "file": name,
         "paths": {platform: list(templates) for platform, templates in paths.items()},
@@ -276,9 +286,52 @@ def resolve(entry, platform, env=None):
     """The entry's paths for one platform, each resolved or carrying its reason."""
     env = os.environ if env is None else env
     resolved = []
+    detector = entry.get("detector", "paths")
     for template in entry["paths"].get(platform, []):
+        if detector == "spotlight" and template.endswith("/*/.Spotlight-V100"):
+            parent_template = template[:-len("/*/.Spotlight-V100")]
+            parent, reason = expand(parent_template, platform, env)
+            if parent is None:
+                resolved.append({"template": template, "path": None, "reason": reason})
+                continue
+            try:
+                with os.scandir(parent) as listing:
+                    volumes = sorted(item.path for item in listing if item.is_dir())
+            except OSError as exc:
+                resolved.append({"template": template, "path": None, "reason": str(exc)})
+                continue
+            for volume in volumes:
+                index = os.path.join(volume, ".Spotlight-V100")
+                if os.path.lexists(index):
+                    resolved.append({"template": template, "path": index, "reason": ""})
+            continue
         path, reason = expand(template, platform, env)
-        resolved.append({"template": template, "path": path, "reason": reason})
+        if path is not None and detector == "profile-glob":
+            for match in sorted(glob.glob(path)):
+                if os.path.lexists(match):
+                    resolved.append({"template": template, "path": match, "reason": ""})
+            continue
+        if detector != "temp" or path is None:
+            resolved.append({"template": template, "path": path, "reason": reason})
+            continue
+        try:
+            with os.scandir(path) as listing:
+                candidates = sorted(listing, key=lambda item: item.name)
+        except OSError as exc:
+            resolved.append({"template": template, "path": None, "reason": str(exc)})
+            continue
+        for item in candidates:
+            if item.name.lower().endswith((".lock", ".sock", ".pid")):
+                continue
+            try:
+                info = item.stat(follow_symlinks=False)
+            except OSError:
+                continue
+            if stat.S_ISLNK(info.st_mode) or not (
+                stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode) and info.st_size >= 1024
+            ):
+                continue
+            resolved.append({"template": template, "path": item.path, "reason": ""})
     return resolved
 
 
@@ -308,6 +361,10 @@ def report(root, platform=None, env=None):
                 "owningProcesses": entry["owningProcesses"],
                 "detector": entry["detector"],
                 "note": entry["note"],
+                "toolName": entry["toolName"],
+                "toolPresent": (shutil.which(entry["toolName"], path=env.get("PATH", "")) is not None
+                                if entry["toolName"] else None),
+                "cleanable": entry["cleanable"],
                 "paths": resolve(entry, target, env),
             }
             for entry in entries
