@@ -238,12 +238,22 @@ relocation card is the dashboard layer's part.
 
 [[dashboard/src/views/cleanup/pages.tsx]] renders the compact default dashboard at
 `/cleanup/`: one read-only catalog scan, measured suggestions, plan review,
-confirmation, progress and a result summary.
+confirmation, progress and a result summary. Its confirmation opens the shared
+native dialog (focus containment, Escape/backdrop close, focus return) that
+lists ready items with sizes and skipped items with their reasons.
 
 The recommended preset uses default-selected, nonprivileged entries outside
 high/privacy/credentials risk. The extended preset adds other low/medium risk
 entries. Both use the same expiring Trash plan. Detailed catalog selection and
-delete mode remain at `/cleanup/scan/`.
+delete mode remain at `/cleanup/scan/`, where entries are selectable cards
+carrying only decision info — category icon, risk badge, measured size and a
+relative size bar — sorted largest-first once a scan exists or safest-first
+(default-selected, then low to high risk) otherwise. Hints, impacts, resolved
+paths, sources and the privilege requirement live in the hover/focus popover
+from [[dashboard/src/views/cleanup/info-popover.tsx]]; shared formatting and
+ordering live in [[dashboard/src/views/cleanup/format.ts]]. The scan page adds
+a "Measured space" summary with a stacked bar by risk class, and selection or
+mode changes invalidate the plan.
 
 The page renders
 category results at `/cleanup/results/`, skipped/failed and unreadable items at
