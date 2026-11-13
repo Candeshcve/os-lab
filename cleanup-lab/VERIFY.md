@@ -465,6 +465,33 @@ unavailable devices and measured size. Engine suite: 115 passed; console
 contract suite: 11 passed via `uv run --with pytest`. Native Xcode was not
 available on this host.
 
+## CLN-15 — private audit history
+
+Branch `codex/cln-15-audit-history` from master `6656ed55`. A clean request
+checks that a private state folder, 32-byte per-install key and SQLite store are
+usable before claiming the plan. Completed clean results are recorded with their
+paths, mode, counted bytes and outcomes. Rows and the chain head have HMAC-SHA256
+signatures; `labctl cleanup history --verify` and `GET /api/cleanup/history`
+verify the full chain. Changed or removed rows fail verification. Like any local
+integrity scheme, restoring an older complete snapshot of both database and key
+cannot be distinguished without an external trusted anchor.
+
+```console
+$ cd cleanup-lab/engine && ../../.venv-test/bin/python -m unittest discover -s tests -p 'test_*.py'
+Ran 118 tests — OK
+$ cd android-lab/lab && ../../.venv-test/bin/python -m pytest tests/test_cleanup_console.py -q
+10 passed
+$ lat check
+All checks passed
+```
+
+`./scripts/run-tests.sh --no-venv` passed the cleanup engine, reference Python,
+Rust, Source Lab, shell syntax, knowledge graph and dashboard typecheck/build
+stages. Its Android stage had the same six host or baseline failures recorded for
+CLN-13 (three AppImage architecture expectations, invalid `JAVA_HOME` for JADX,
+source console mutation guard, and web UI preview status): 6 failed, 158 passed,
+1 skipped. No dashboard files changed; CLN-16 owns the history view.
+
 ## CLN-04 … CLN-29
 
 Each task appends its own section when it lands.
