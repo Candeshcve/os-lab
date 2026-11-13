@@ -2258,5 +2258,15 @@
   "unreadable paths": "مسارات غير قابلة للقراءة",
   "· expires in": "· تنتهي في",
   "This plan was already run. Build a new plan.": "تم تنفيذ هذه الخطة بالفعل. بناء خطة جديدة.",
-  "No clean results yet.": "لا توجد نتائج نظيفة حتى الآن."
+  "No clean results yet.": "لا توجد نتائج نظيفة حتى الآن.",
+  "Checking latest release…": "جارٍ التحقق من أحدث إصدار…",
+  "Release details unavailable. Open the latest release page.": "تفاصيل الإصدار غير متاحة. افتح صفحة أحدث إصدار.",
+  "Latest published release": "أحدث إصدار منشور",
+  "Clipboard unavailable. Select the text manually.": "الحافظة غير متاحة. حدّد النص يدويًا.",
+  "Could not cancel job:": "تعذّر إلغاء المهمة:",
+  "Could not clear logs:": "تعذّر مسح السجلات:",
+  "Try again.": "حاول مرة أخرى.",
+  "Logs cleared.": "تم مسح السجلات.",
+  "Cancelling…": "جارٍ الإلغاء…",
+  "Clearing…": "جارٍ المسح…"
 }

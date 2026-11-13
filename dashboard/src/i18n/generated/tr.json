@@ -2258,5 +2258,15 @@
   "unreadable paths": "okunamayan yollar",
   "· expires in": "· süresi doluyor",
   "This plan was already run. Build a new plan.": "Bu plan zaten yürütülüyordu. Yeni bir plan oluşturun.",
-  "No clean results yet.": "Henüz temiz sonuç yok."
+  "No clean results yet.": "Henüz temiz sonuç yok.",
+  "Checking latest release…": "Son sürüm kontrol ediliyor…",
+  "Release details unavailable. Open the latest release page.": "Sürüm ayrıntıları kullanılamıyor. En son sürüm sayfasını açın.",
+  "Latest published release": "En son yayımlanan sürüm",
+  "Clipboard unavailable. Select the text manually.": "Panoya erişilemiyor. Metni elle seçin.",
+  "Could not cancel job:": "İş iptal edilemedi:",
+  "Could not clear logs:": "Günlükler temizlenemedi:",
+  "Try again.": "Yeniden deneyin.",
+  "Logs cleared.": "Günlükler temizlendi.",
+  "Cancelling…": "İptal ediliyor…",
+  "Clearing…": "Temizleniyor…"
 }

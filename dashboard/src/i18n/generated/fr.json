@@ -2258,5 +2258,15 @@
   "unreadable paths": "chemins illisibles",
   "· expires in": "· expire dans",
   "This plan was already run. Build a new plan.": "Ce plan était déjà exécuté. Construisez un nouveau plan.",
-  "No clean results yet.": "Pas encore de résultats nets."
+  "No clean results yet.": "Pas encore de résultats nets.",
+  "Checking latest release…": "Vérification de la dernière version…",
+  "Release details unavailable. Open the latest release page.": "Détails de la version indisponibles. Ouvrez la page de la dernière version.",
+  "Latest published release": "Dernière version publiée",
+  "Clipboard unavailable. Select the text manually.": "Presse-papiers indisponible. Sélectionnez le texte manuellement.",
+  "Could not cancel job:": "Impossible d’annuler la tâche :",
+  "Could not clear logs:": "Impossible d’effacer les journaux :",
+  "Try again.": "Réessayez.",
+  "Logs cleared.": "Journaux effacés.",
+  "Cancelling…": "Annulation…",
+  "Clearing…": "Effacement…"
 }

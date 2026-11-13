@@ -2258,5 +2258,15 @@
   "unreadable paths": "percorsi illeggibili",
   "· expires in": "· scade tra",
   "This plan was already run. Build a new plan.": "Questo piano era già stato eseguito. Costruisci un nuovo piano.",
-  "No clean results yet.": "Nessun risultato pulito ancora."
+  "No clean results yet.": "Nessun risultato pulito ancora.",
+  "Checking latest release…": "Controllo dell’ultima versione…",
+  "Release details unavailable. Open the latest release page.": "Dettagli della versione non disponibili. Apri la pagina dell’ultima versione.",
+  "Latest published release": "Ultima versione pubblicata",
+  "Clipboard unavailable. Select the text manually.": "Appunti non disponibili. Seleziona il testo manualmente.",
+  "Could not cancel job:": "Impossibile annullare il lavoro:",
+  "Could not clear logs:": "Impossibile cancellare i registri:",
+  "Try again.": "Riprova.",
+  "Logs cleared.": "Registri cancellati.",
+  "Cancelling…": "Annullamento…",
+  "Clearing…": "Cancellazione…"
 }

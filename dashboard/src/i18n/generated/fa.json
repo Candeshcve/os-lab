@@ -2258,5 +2258,15 @@
   "unreadable paths": "مسیرهای ناخوانا",
   "· expires in": "· منقضی می شود",
   "This plan was already run. Build a new plan.": "این طرح قبلا اجرا شده بود. یک طرح جدید بسازید.",
-  "No clean results yet.": "هنوز هیچ نتیجه تمیزی وجود ندارد."
+  "No clean results yet.": "هنوز هیچ نتیجه تمیزی وجود ندارد.",
+  "Checking latest release…": "در حال بررسی آخرین نسخه…",
+  "Release details unavailable. Open the latest release page.": "جزئیات نسخه در دسترس نیست. صفحهٔ آخرین نسخه را باز کنید.",
+  "Latest published release": "آخرین نسخهٔ منتشرشده",
+  "Clipboard unavailable. Select the text manually.": "کلیپ‌بورد در دسترس نیست. متن را به‌صورت دستی انتخاب کنید.",
+  "Could not cancel job:": "لغو کار ممکن نشد:",
+  "Could not clear logs:": "پاک‌کردن گزارش‌ها ممکن نشد:",
+  "Try again.": "دوباره تلاش کنید.",
+  "Logs cleared.": "گزارش‌ها پاک شدند.",
+  "Cancelling…": "در حال لغو…",
+  "Clearing…": "در حال پاک‌سازی…"
 }

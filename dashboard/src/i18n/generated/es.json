@@ -2258,5 +2258,15 @@
   "unreadable paths": "caminos ilegibles",
   "· expires in": "· vence en",
   "This plan was already run. Build a new plan.": "Este plan ya se ejecutó. Construya un nuevo plan.",
-  "No clean results yet.": "Aún no hay resultados limpios."
+  "No clean results yet.": "Aún no hay resultados limpios.",
+  "Checking latest release…": "Comprobando la última versión…",
+  "Release details unavailable. Open the latest release page.": "Los detalles de la versión no están disponibles. Abre la página de la última versión.",
+  "Latest published release": "Última versión publicada",
+  "Clipboard unavailable. Select the text manually.": "Portapapeles no disponible. Selecciona el texto manualmente.",
+  "Could not cancel job:": "No se pudo cancelar el trabajo:",
+  "Could not clear logs:": "No se pudieron borrar los registros:",
+  "Try again.": "Inténtalo de nuevo.",
+  "Logs cleared.": "Registros borrados.",
+  "Cancelling…": "Cancelando…",
+  "Clearing…": "Borrando…"
 }
