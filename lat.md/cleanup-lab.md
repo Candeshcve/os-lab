@@ -11,7 +11,7 @@ typed layers over it.
 
 The package lives in [[cleanup-lab/engine/cleanup_lab]]. `readiness`, `paths`, the
 catalog loader (CLN-02), the scan job (CLN-03), the safety guard (CLN-12) and the
-plan → clean executor (CLN-13) exist now. One module, `safety.py`,
+plan → clean executor (CLN-13) and audit history (CLN-15) exist now. One module, `safety.py`,
 guards every destructive call, so no other module may delete, move or shred.
 
 Target paths are data, never code: every platform path, risk class, owning process
@@ -23,7 +23,7 @@ and never accepts a command string or a free-form path list from the page.
 [[android-lab/lab/web_ui.py]] routes the namespace before the static dashboard
 fallthrough. Long work becomes a console job with preview, progress and cancel.
 
-`labctl cleanup status|doctor [--json]` runs the same engine through
+`labctl cleanup status|doctor|history [--json]` runs the same engine through
 `cleanup_lab.cli`: exit `0` when ready, `1` when a required check fails, `2` for a
 usage error, matching [[lat.md/labctl.md]].
 
@@ -93,7 +93,12 @@ no free-form path list: an unknown path is `404`, unexpected or duplicate query
 parameters, unknown keys or unknown ids are `400`, and a missing engine is `501`.
 A stale, expired or already-used plan is `409`/`410` with nothing removed. The job
 lives in the console process, and its worker always ends in `done`, `cancelled` or
-`failed` — never `running`. Later tasks add history (CLN-15), ignore rules (CLN-17),
+`failed` — never `running`. `GET /api/cleanup/history` returns the latest 100
+verified runs from the private SQLite store. The store writes each completed
+clean result with path, bytes, mode and outcome, chaining records with
+HMAC-SHA256 and a random per-install key. `labctl cleanup history --verify`
+checks the full chain and exits 1 on tampering. History is durable across console
+restarts. Later tasks add ignore rules (CLN-17),
 volumes (CLN-28) and runtimes (CLN-29) here, each typed and validated again by the
 engine.
 

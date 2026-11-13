@@ -41,9 +41,9 @@ the finding and the decision are in the session log.
 | CLN-10 | pending | — | — | — | — | none |
 | CLN-11 | pending | — | — | — | — | none |
 | CLN-12 | merged | [#136](https://github.com/keyvanarasteh/os-lab/pull/136) | 3d5ab866 | — | — | none |
-| CLN-13 | in progress (this PR) | [#139](https://github.com/keyvanarasteh/os-lab/pull/139) | — | `/cleanup/` plan + confirm UI, mode picker, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred | none |
+| CLN-13 | merged | [#139](https://github.com/keyvanarasteh/os-lab/pull/139) | 6656ed55 | `/cleanup/` plan + confirm UI, mode picker, seven locale catalogs, dashboard screenshots — handed over below | dashboard layer deferred to CLN-16 | none |
 | CLN-14 | pending | — | — | — | — | none |
-| CLN-15 | pending | — | — | — | — | none |
+| CLN-15 | in progress (this PR) | [#140](https://github.com/keyvanarasteh/os-lab/pull/140) | — | history view on `/cleanup/` belongs to CLN-16 | dashboard layer deferred to CLN-16 | none |
 | CLN-16 | pending | — | — | dashboard page is the whole task | console side only | none |
 | CLN-17 | pending | — | — | — | — | none |
 | CLN-18 | pending | — | — | — | — | none |

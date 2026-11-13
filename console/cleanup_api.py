@@ -3,7 +3,7 @@
 The console accepts typed, validated calls only: never a command string and never
 a free-form path list from the page (``cleanup-lab/README.md``). Ready:
 readiness (CLN-01), the detector catalog (CLN-02), the scan job (CLN-03) and the
-plan → clean flow (CLN-13); history (CLN-15) and the remaining endpoints add
+plan → clean flow (CLN-13) and audit history (CLN-15); the remaining endpoints add
 their own actions here, each validated again by the engine's safety guard.
 
 The engine is imported from ``cleanup-lab/engine`` (``cleanup_lab``), which is a
@@ -244,6 +244,10 @@ class CleanupJobStore:
         """
         clean = _module(root, "clean")
         try:
+            _module(root, "history").prepare()
+        except Exception as exc:
+            raise CleanupError(500, "Audit history is unavailable: {0}".format(exc)) from exc
+        try:
             record = PLANS.claim(plan_id)
         except PlanStoreError as exc:
             raise CleanupError(PLAN_STATUS.get(exc.code, 409), str(exc)) from exc
@@ -306,6 +310,7 @@ class CleanupJobStore:
             )
             job.result = result
             job.progress = result["progress"]
+            _module(root, "history").append(result)
             job.state = "cancelled" if result["cancelled"] else "done"
         except clean.PlanError as exc:
             # A stale or expired plan fails the job honestly: nothing was removed.
@@ -410,6 +415,12 @@ class CleanupAPI:
                 return catalog.report(self.root)
             except catalog.CatalogError as exc:
                 raise CleanupError(500, "The detector catalog is invalid: {0}".format(exc)) from exc
+        if path == "/api/cleanup/history":
+            _query(query)
+            try:
+                return _module(self.root, "history").read()
+            except Exception as exc:
+                raise CleanupError(500, "Audit history is unavailable: {0}".format(exc)) from exc
         if path == "/api/cleanup/jobs":
             _query(query)
             return {"jobs": JOBS.list()}
