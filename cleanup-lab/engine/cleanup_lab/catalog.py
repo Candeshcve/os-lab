@@ -28,6 +28,7 @@ Template syntax (see ``cleanup-lab/catalog/README.md``):
 from __future__ import annotations
 
 import json
+import glob
 import stat
 import ntpath
 import os
@@ -51,7 +52,7 @@ CATEGORIES = (
     "package",
     "simulator",
 )
-DETECTORS = ("paths", "temp", "spotlight", "artifacts", "signatures", "tool")
+DETECTORS = ("paths", "profile-glob", "temp", "spotlight", "artifacts", "signatures", "tool")
 NEVER_PRESELECTED = ("high", "credentials", "privacy")
 FAMILY_PATTERN = re.compile(r"^[a-z][a-z0-9-]*$")
 ID_PATTERN = re.compile(r"^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+$")
@@ -305,6 +306,11 @@ def resolve(entry, platform, env=None):
                     resolved.append({"template": template, "path": index, "reason": ""})
             continue
         path, reason = expand(template, platform, env)
+        if path is not None and detector == "profile-glob":
+            for match in sorted(glob.glob(path)):
+                if os.path.lexists(match):
+                    resolved.append({"template": template, "path": match, "reason": ""})
+            continue
         if detector != "temp" or path is None:
             resolved.append({"template": template, "path": path, "reason": reason})
             continue

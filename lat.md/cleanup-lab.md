@@ -29,6 +29,13 @@ usage error, matching [[lat.md/labctl.md]].
 
 ## Catalog
 
+CLN-05 adds [[cleanup-lab/catalog/browser.json]] for Chrome, Edge, Brave,
+Opera, Vivaldi, Firefox and Safari.
+
+The `profile-glob` detector expands every matching profile path from catalog
+data. Chrome history and extension traces carry `privacy` risk and are never
+pre-selected; every browser names its owning process for the running-app guard.
+
 CLN-06 adds [[cleanup-lab/catalog/developers.json]] with per-OS developer cache
 defaults, credentials and toolchains.
 
