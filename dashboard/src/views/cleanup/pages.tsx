@@ -8,8 +8,8 @@ import { localeFromPath, localePath } from "../../i18n/paths";
 import { CleanupExtraTools } from "./extra-tools";
 import { CrossPlatformLeftovers } from "./cross-leftovers";
 
-export type CleanupPageId = "" | "results" | "leftovers" | "history";
-export const CLEANUP_PAGES: CleanupPageId[] = ["", "results", "leftovers", "history"];
+export type CleanupPageId = "" | "scan" | "results" | "leftovers" | "history";
+export const CLEANUP_PAGES: CleanupPageId[] = ["", "scan", "results", "leftovers", "history"];
 const PUBLIC = import.meta.env.PUBLIC_SITE_MODE === "pages";
 const bytes = (value: number) => value < 1024 ? `${value} B` : `${(value / 1024 ** (value < 1024 ** 2 ? 1 : value < 1024 ** 3 ? 2 : 3)).toFixed(1)} ${value < 1024 ** 2 ? "KiB" : value < 1024 ** 3 ? "MiB" : "GiB"}`;
 const errorText = (error: unknown) => error instanceof Error ? error.message : String(error);
@@ -30,6 +30,7 @@ export default function CleanupPage({ page = "" }: { page?: CleanupPageId }) {
   const [actionError, setActionError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [mode, setMode] = useState<"trash" | "delete">("trash");
+  const [preset, setPreset] = useState<"recommended" | "extended">("recommended");
   const [confirm, setConfirm] = useState(false);
   const [now, setNow] = useState(Date.now() / 1000);
   const locale = typeof window === "undefined" ? "en" : localeFromPath(window.location.pathname);
@@ -80,6 +81,14 @@ export default function CleanupPage({ page = "" }: { page?: CleanupPageId }) {
   const planUsed = !!latestPlan && jobs.some((job) => isClean(job) && job.request.planId === latestPlan.planId);
   const busy = submitting || active?.state === "running";
   const canWork = status?.state === "ready" && !busy;
+  const measured = new Map(latestScan?.entries.map((item) => [item.id, item]) ?? []);
+  const safeEntries = entries.filter((item) => measured.get(item.id)?.sizeBytes && !["high", "privacy", "credentials"].includes(item.risk) && !item.needsPrivilege);
+  const suggested = safeEntries.filter((item) => preset === "extended" || item.defaultSelected);
+  const suggestedIds = suggested.map((item) => item.id);
+  const suggestedBytes = suggested.reduce((sum, item) => sum + (measured.get(item.id)?.sizeBytes ?? 0), 0);
+  const planFollowsScan = !!planJob && jobs.findIndex((job) => job.id === planJob.id) <= jobs.findIndex(isScan);
+  const planMatches = !!latestPlan && planFollowsScan && latestPlan.mode === "trash" && JSON.stringify([...(planJob?.request.entryIds ?? [])].sort()) === JSON.stringify([...suggestedIds].sort());
+  const canConfirmSuggested = canWork && !!latestPlan && planMatches && !planUsed && latestPlan.expiresAt > now && latestPlan.totals.ready > 0;
 
   async function start(action: () => Promise<CleanupJob>) {
     setActionError(""); setSubmitting(true); setConfirm(false);
@@ -94,7 +103,7 @@ export default function CleanupPage({ page = "" }: { page?: CleanupPageId }) {
     catch (error) { setActionError(errorText(error)); }
   }
   const tabs: { id: CleanupPageId; label: string; path: string }[] = [
-    { id: "", label: "Scan & clean", path: "" }, { id: "results", label: "Results", path: "results/" },
+    { id: "", label: "Dashboard", path: "" }, { id: "scan", label: "Advanced scan", path: "scan/" }, { id: "results", label: "Results", path: "results/" },
     { id: "leftovers", label: "Leftovers", path: "leftovers/" }, { id: "history", label: "History", path: "history/" }
   ];
   return <AppShell activeId={`cleanup-${page || "scan"}`}>
@@ -105,12 +114,28 @@ export default function CleanupPage({ page = "" }: { page?: CleanupPageId }) {
         <a key={tab.id} href={link(tab.path)} aria-current={page === tab.id ? "page" : undefined} className="iux-btn" data-variant={page === tab.id ? "primary" : "outline"}>{tab.label}</a>)}</nav>
       {PUBLIC ? <Section title="Local app required"><p>The Cleanup Lab runs in the local app. Install and open os-lab on your computer to scan and clean.</p></Section> :
         loading ? <p role="status">Loading cleanup readiness…</p> : loadError ? <Status value={{ ok: false, text: loadError }} /> : <>
-          <Section title="Readiness" description={status?.state === "ready" ? "Ready to scan" : status?.state === "needs-setup" ? "Setup needed before scanning" : "Unavailable on this system"}>
+          {status?.state !== "ready" && <Section title="Readiness" description={status?.state === "needs-setup" ? "Setup needed before scanning" : "Unavailable on this system"}>
             {status?.reasons.map((reason) => <p key={reason}>{reason}</p>)}
             {status?.requirements.filter((item) => !item.found).map((item) => <p key={item.id}>{item.label}: {item.hint}</p>)}
             <button type="button" className="iux-btn mt-3" onClick={() => { setLoading(true); void api.cleanupStatus().then(setStatus).catch((error) => setLoadError(errorText(error))).finally(() => setLoading(false)); }}>Re-check</button>
-          </Section>
+          </Section>}
           {page === "" && <>
+            <Section title="Quick cleanup" description="Scan all available categories. Nothing is removed during a scan.">
+              <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-(--iux-muted-foreground)">{status?.state === "ready" ? "Ready to scan" : "Scan unavailable until setup is complete"} · {entries.length} categories available</p><button type="button" className="iux-btn" data-variant="primary" disabled={!canWork || !entries.length} onClick={() => void start(() => api.cleanupScan(entries.map((item) => item.id)))}>{latestScan ? "Scan again" : "Scan now"}</button></div>
+              {active?.state === "running" && <div className="mt-4" role="status"><p>{active.kind} in progress · {String(active.progress?.pathsDone ?? active.progress?.itemsDone ?? 0)} / {String(active.progress?.pathsTotal ?? active.progress?.itemsTotal ?? "…")}</p><progress className="mt-2 w-full" max={Number(active.progress?.pathsTotal ?? active.progress?.itemsTotal ?? 1)} value={Number(active.progress?.pathsDone ?? active.progress?.itemsDone ?? 0)} /><p className="break-all text-xs text-(--iux-muted-foreground)" translate="no">{active.progress?.currentPath}</p><button type="button" className="iux-btn mt-2" onClick={() => void cancel()}>Cancel</button></div>}
+              {active?.state === "failed" && <Status value={{ ok: false, text: active.error || "The cleanup job failed." }} />}{actionError && <Status value={{ ok: false, text: actionError }} />}
+            </Section>
+            {latestScan && <Section title="Suggested cleanup" description={latestScan.cancelled ? "Scan cancelled. Results are partial; scan again for suggestions." : `${bytes(latestScan.totals.sizeBytes)} measured across ${latestScan.entries.length} categories. Review the plan before cleaning.`}>
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Cleanup preset"><button type="button" className="iux-btn" data-variant={preset === "recommended" ? "primary" : "outline"} aria-pressed={preset === "recommended"} disabled={busy} onClick={() => { setPreset("recommended"); setConfirm(false); }}>Recommended</button><button type="button" className="iux-btn" data-variant={preset === "extended" ? "primary" : "outline"} aria-pressed={preset === "extended"} disabled={busy} onClick={() => { setPreset("extended"); setConfirm(false); }}>More safe options</button></div>
+              <p className="mt-3 text-sm">{suggested.length} categories · {bytes(suggestedBytes)} measured · Move to Trash</p><p className="text-sm text-(--iux-muted-foreground)">High risk, privacy, credentials and privileged items require separate review.</p>
+              {suggested.length ? <details className="mt-3 text-sm"><summary className="cursor-pointer">Included categories</summary><ul className="mt-2 space-y-1">{suggested.map((item) => <li key={item.id}>{item.name} · {bytes(measured.get(item.id)?.sizeBytes ?? 0)}</li>)}</ul></details> : <Empty>No safe cleanup suggestions in this scan.</Empty>}
+              <div className="mt-4 flex flex-wrap gap-2"><button type="button" className="iux-btn" disabled={!canWork || latestScan.cancelled || !suggested.length} onClick={() => void start(() => api.cleanupPlan(suggestedIds, "trash"))}>Review plan</button><a className="iux-btn" href={link("results/")}>Full scan report</a><a className="iux-btn" href={link("scan/")}>Choose individual items</a></div>
+              {latestPlan && planMatches && <div className="mt-4 rounded-md border border-(--iux-border) p-3 text-sm"><p>{latestPlan.totals.ready} items ready · {bytes(latestPlan.totals.bytes)} · {latestPlan.totals.skipped} skipped</p><p>Plan expires in {Math.max(0, Math.ceil(latestPlan.expiresAt - now))} seconds. Cleaning moves items to Trash; it does not free disk space until Trash is emptied.</p><details className="mt-2"><summary className="cursor-pointer">Plan details</summary>{latestPlan.items.map((item, index) => <p key={`${item.entryId}-${index}`} className="mt-2 break-all">{item.entryName} · {item.status} · {bytes(item.sizeBytes)} · <span translate="no">{item.path}</span>{item.reason && ` · ${item.reason}`}</p>)}</details>{planUsed && <p>This plan was already run. Review a new plan.</p>}<button type="button" className="iux-btn mt-3" data-variant="primary" disabled={!canConfirmSuggested} onClick={() => setConfirm(true)}>Confirm clean</button></div>}
+              {confirm && latestPlan && planMatches && <div role="dialog" aria-modal="true" aria-label="Confirm cleanup" className="mt-3 rounded-md border border-(--iux-border) p-4"><p>Move {latestPlan.totals.ready} items ({bytes(latestPlan.totals.bytes)}) to Trash?</p><div className="mt-3 flex gap-2"><button type="button" className="iux-btn" data-variant="primary" disabled={!canConfirmSuggested} onClick={() => void start(() => api.cleanupClean(latestPlan.planId))}>Run clean</button><button type="button" className="iux-btn" onClick={() => setConfirm(false)}>Back</button></div></div>}
+            </Section>}
+            {latestClean && <Section title="Latest clean report" description={`${latestClean.totals.trashed} moved to Trash · ${latestClean.totals.skipped} skipped · ${latestClean.totals.failed} failed`}><p className="text-sm">{bytes(latestClean.totals.bytes)} moved to Trash, not yet freed.</p><div className="mt-3 flex gap-2"><a className="iux-btn" href={link("results/")}>View report</a><a className="iux-btn" href={link("leftovers/")}>View leftovers</a><a className="iux-btn" href={link("history/")}>History</a></div></Section>}
+          </>}
+          {page === "scan" && <>
             <Section title="Scan" description="Choose catalog entries. Scanning only measures files; it does not remove them.">
               {!entries.length ? <Empty>No cleanup entries are available on this system.</Empty> :
                 <div className="grid gap-2 sm:grid-cols-2">{entries.map((item) => <label key={item.id} className="rounded-md border border-(--iux-border) p-3 text-sm">

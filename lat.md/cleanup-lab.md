@@ -182,7 +182,16 @@ explains local installation without polling, per
 
 ## Dashboard pages
 
-[[dashboard/src/views/cleanup/pages.tsx]] renders scan and confirm at `/cleanup/`,
+[[dashboard/src/views/cleanup/pages.tsx]] renders the compact default dashboard at
+`/cleanup/`: one read-only catalog scan, measured suggestions, plan review,
+confirmation, progress and a result summary.
+
+The recommended preset uses default-selected, nonprivileged entries outside
+high/privacy/credentials risk. The extended preset adds other low/medium risk
+entries. Both use the same expiring Trash plan. Detailed catalog selection and
+delete mode remain at `/cleanup/scan/`.
+
+The page renders
 category results at `/cleanup/results/`, skipped/failed and unreadable items at
 `/cleanup/leftovers/`, and verified audit records at `/cleanup/history/`.
 
