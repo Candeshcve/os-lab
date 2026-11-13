@@ -3,8 +3,9 @@
 The console accepts typed, validated calls only: never a command string and never
 a free-form path list from the page (``cleanup-lab/README.md``). Ready:
 readiness (CLN-01), the detector catalog (CLN-02), the scan job (CLN-03) and the
-plan → clean flow (CLN-13) and audit history (CLN-15); the remaining endpoints add
-their own actions here, each validated again by the engine's safety guard.
+plan → clean flow (CLN-13), audit history (CLN-15) and the volume inventory
+(CLN-28); the remaining endpoints add their own actions here, each validated
+again by the engine's safety guard.
 
 The engine is imported from ``cleanup-lab/engine`` (``cleanup_lab``), which is a
 plain standard-library package: the console does not install it.
@@ -576,6 +577,9 @@ class CleanupAPI:
         if path == "/api/cleanup/deep-roots":
             _query(query)
             return {"roots": _module(self.root, "deep").roots(self.root)}
+        if path == "/api/cleanup/volumes":
+            _query(query)
+            return _module(self.root, "volumes").inventory()
         if path == "/api/cleanup/simulators":
             _query(query)
             return _module(self.root, "deep").simulators(self.root)

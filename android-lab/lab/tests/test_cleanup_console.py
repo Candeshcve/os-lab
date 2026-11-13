@@ -515,3 +515,28 @@ def test_deep_sweep_request_uses_configured_root_ids(tmp_path, monkeypatch):
     wait_for(job, "done")
     assert job.result["items"][0]["id"] == "projects.node-modules"
     assert job.result["items"][0]["sizeBytes"] == 3
+
+
+def test_the_volumes_endpoint_reports_this_computers_volumes():
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    report = api.get("/api/cleanup/volumes", {})
+    assert report["platform"] == paths_module.platform_id()
+    assert report["threshold"] == pytest.approx(0.9)
+    assert isinstance(report["volumes"], list)
+    assert report["volumes"], "a host with no local volume is a bug"
+    for volume in report["volumes"]:
+        assert set(volume) >= {
+            "mountPoint", "name", "device", "filesystem", "kind",
+            "totalBytes", "freeBytes", "usedBytes", "usage", "isHome", "pressure", "error",
+        }
+        assert volume["kind"] in ("root", "internal", "removable", "unknown")
+        assert volume["pressure"] in ("ok", "warning")
+    if report["homeVolume"] is not None:
+        assert any(volume["isHome"] for volume in report["volumes"])
+
+
+def test_the_volumes_endpoint_takes_no_query_parameters():
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    with pytest.raises(cleanup_api.CleanupError) as caught:
+        api.get("/api/cleanup/volumes", {"x": "1"})
+    assert caught.value.status == 400

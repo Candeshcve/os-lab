@@ -11,8 +11,8 @@ its own visual style; Cleanup Lab pages use the os-lab dashboard shell and follo
 [`docs/UX_READINESS.md`](../docs/UX_READINESS.md).
 
 Status: **Engine skeleton (CLN-01), detector catalog (CLN-02), safety guard
-(CLN-12), the read-only scan job (CLN-03) and the plan → clean flow (CLN-13) are
-in place; the rest is roadmap.** The engine package, the readiness probe (`labctl
+(CLN-12), the read-only scan job (CLN-03), the plan → clean flow (CLN-13) and
+the volume inventory (CLN-28) are in place; the rest is roadmap.** The engine package, the readiness probe (`labctl
 cleanup status|doctor`, `GET /api/cleanup/status`) and the catalog (`GET
 /api/cleanup/catalog`) exist; `POST /api/cleanup/scan` runs a catalog scan as a
 console job with progress and cancel, `POST /api/cleanup/plan` previews a clean,
@@ -42,6 +42,7 @@ console imports it from `console/cleanup_api.py`; `labctl` runs its CLI.
 ./labctl cleanup status          # readiness of this computer, exit 0 ready / 1 problem
 ./labctl cleanup doctor          # every check, path and hint
 ./labctl cleanup catalog         # detector catalog for this OS, with resolved paths
+./labctl cleanup volumes         # local volumes, capacity and disk-pressure warnings (read-only)
 ./labctl cleanup status --json   # the same probe as JSON (what /api/cleanup/status returns)
 cd cleanup-lab/engine && python3 -m unittest discover -s tests -p 'test_*.py'
 ```
@@ -99,6 +100,20 @@ reports `trashed`, `deleted`, `skipped` (code + reason) or `failed` (error). Byt
 are credited only after the item is really gone from its original path, using this
 run's measurement — never the plan estimate. Privileged items and items whose app
 is running stay skipped.
+
+## Volumes (CLN-28)
+
+`cleanup_lab/volumes.py` inventories the local mounted volumes read-only:
+`labctl cleanup volumes` and `GET /api/cleanup/volumes` report every volume's
+mount point, filesystem, capacity and kind (`root` / `internal` / `removable` /
+`unknown`), mark the volume that holds the home folder, and warn above 90%
+usage. Network and pseudo filesystems are filtered before any capacity call, an
+unreadable volume carries an `error` instead of failing the probe, and unknown
+drive types are hidden rather than guessed. Windows enumerates drives through
+`kernel32`, Linux reads `/proc/self/mountinfo`, and macOS parses the fixed
+`mount` probe plus an optional fixed `diskutil info -plist` probe. The
+`/cleanup/` volumes card is the dashboard layer's part (handoff in
+[`STATUS.md`](STATUS.md)).
 
 ## Safety guard
 
