@@ -12,7 +12,7 @@
       "impact": "The tool may redownload or rebuild data, or lose local configuration.",
       "defaultSelected": false,
       "needsPrivilege": false,
-      "detector": "paths",
+      "detector": "tool",
       "paths": {
         "macos": [
           "~/.gradle/caches"
@@ -24,7 +24,11 @@
           "~/.gradle/caches"
         ]
       },
-      "toolName": "gradle"
+      "toolName": "gradle",
+      "cacheEnv": [
+        "GRADLE_USER_HOME"
+      ],
+      "envSuffix": "caches"
     },
     {
       "id": "developers.maven",
@@ -125,7 +129,7 @@
       "impact": "The tool may redownload or rebuild data, or lose local configuration.",
       "defaultSelected": false,
       "needsPrivilege": false,
-      "detector": "paths",
+      "detector": "tool",
       "paths": {
         "macos": [
           "~/Library/Caches/pip"
@@ -137,7 +141,15 @@
           "%LOCALAPPDATA%\\pip\\Cache"
         ]
       },
-      "toolName": "pip3"
+      "toolName": "pip3",
+      "cacheEnv": [
+        "PIP_CACHE_DIR"
+      ],
+      "probeArgv": [
+        "pip3",
+        "cache",
+        "dir"
+      ]
     },
     {
       "id": "developers.composer",
@@ -171,7 +183,7 @@
       "impact": "The tool may redownload or rebuild data, or lose local configuration.",
       "defaultSelected": false,
       "needsPrivilege": false,
-      "detector": "paths",
+      "detector": "tool",
       "paths": {
         "macos": [
           "~/go/pkg/mod"
@@ -183,7 +195,15 @@
           "~/go/pkg/mod"
         ]
       },
-      "toolName": "go"
+      "toolName": "go",
+      "cacheEnv": [
+        "GOMODCACHE"
+      ],
+      "probeArgv": [
+        "go",
+        "env",
+        "GOMODCACHE"
+      ]
     },
     {
       "id": "developers.go-build",
@@ -194,7 +214,7 @@
       "impact": "The tool may redownload or rebuild data, or lose local configuration.",
       "defaultSelected": false,
       "needsPrivilege": false,
-      "detector": "paths",
+      "detector": "tool",
       "paths": {
         "macos": [
           "~/Library/Caches/go-build"
@@ -206,7 +226,15 @@
           "%LOCALAPPDATA%\\go-build"
         ]
       },
-      "toolName": "go"
+      "toolName": "go",
+      "cacheEnv": [
+        "GOCACHE"
+      ],
+      "probeArgv": [
+        "go",
+        "env",
+        "GOCACHE"
+      ]
     },
     {
       "id": "developers.rubygems-cache",
@@ -629,7 +657,7 @@
       "impact": "The tool may redownload or rebuild data, or lose local configuration.",
       "defaultSelected": false,
       "needsPrivilege": false,
-      "detector": "paths",
+      "detector": "tool",
       "paths": {
         "macos": [
           "~/.bun/install/cache"
@@ -641,7 +669,10 @@
           "%USERPROFILE%\\.bun\\install\\cache"
         ]
       },
-      "toolName": "bun"
+      "toolName": "bun",
+      "cacheEnv": [
+        "BUN_INSTALL_CACHE_DIR"
+      ]
     },
     {
       "id": "developers.deno",
@@ -652,7 +683,7 @@
       "impact": "The tool may redownload or rebuild data, or lose local configuration.",
       "defaultSelected": false,
       "needsPrivilege": false,
-      "detector": "paths",
+      "detector": "tool",
       "paths": {
         "macos": [
           "~/Library/Caches/deno"
@@ -664,7 +695,10 @@
           "%LOCALAPPDATA%\\deno"
         ]
       },
-      "toolName": "deno"
+      "toolName": "deno",
+      "cacheEnv": [
+        "DENO_DIR"
+      ]
     },
     {
       "id": "developers.wasm-pack",
@@ -856,7 +890,7 @@
       "impact": "The tool may redownload or rebuild data, or lose local configuration.",
       "defaultSelected": false,
       "needsPrivilege": false,
-      "detector": "paths",
+      "detector": "tool",
       "paths": {
         "macos": [
           "~/.npm"
@@ -868,7 +902,17 @@
           "%LOCALAPPDATA%\\npm-cache"
         ]
       },
-      "toolName": "npm"
+      "toolName": "npm",
+      "cacheEnv": [
+        "npm_config_cache",
+        "NPM_CONFIG_CACHE"
+      ],
+      "probeArgv": [
+        "npm",
+        "config",
+        "get",
+        "cache"
+      ]
     },
     {
       "id": "developers.pnpm",
@@ -879,7 +923,7 @@
       "impact": "The tool may redownload or rebuild data, or lose local configuration.",
       "defaultSelected": false,
       "needsPrivilege": false,
-      "detector": "paths",
+      "detector": "tool",
       "paths": {
         "macos": [
           "~/Library/pnpm/store"
@@ -891,7 +935,15 @@
           "%LOCALAPPDATA%\\pnpm\\store"
         ]
       },
-      "toolName": "pnpm"
+      "toolName": "pnpm",
+      "cacheEnv": [
+        "PNPM_STORE_DIR"
+      ],
+      "probeArgv": [
+        "pnpm",
+        "store",
+        "path"
+      ]
     },
     {
       "id": "developers.yarn",
@@ -902,7 +954,7 @@
       "impact": "The tool may redownload or rebuild data, or lose local configuration.",
       "defaultSelected": false,
       "needsPrivilege": false,
-      "detector": "paths",
+      "detector": "tool",
       "paths": {
         "macos": [
           "~/Library/Caches/Yarn"
@@ -914,7 +966,15 @@
           "%LOCALAPPDATA%\\Yarn\\Cache"
         ]
       },
-      "toolName": "yarn"
+      "toolName": "yarn",
+      "cacheEnv": [
+        "YARN_CACHE_FOLDER"
+      ],
+      "probeArgv": [
+        "yarn",
+        "cache",
+        "dir"
+      ]
     },
     {
       "id": "developers.cargo-registry",
@@ -925,7 +985,7 @@
       "impact": "The tool may redownload or rebuild data, or lose local configuration.",
       "defaultSelected": false,
       "needsPrivilege": false,
-      "detector": "paths",
+      "detector": "tool",
       "paths": {
         "macos": [
           "${CARGO_HOME:-~/.cargo}/registry"
@@ -937,7 +997,11 @@
           "%USERPROFILE%\\.cargo\\registry"
         ]
       },
-      "toolName": "cargo"
+      "toolName": "cargo",
+      "cacheEnv": [
+        "CARGO_HOME"
+      ],
+      "envSuffix": "registry"
     },
     {
       "id": "developers.cargo-git",
@@ -948,7 +1012,7 @@
       "impact": "The tool may redownload or rebuild data, or lose local configuration.",
       "defaultSelected": false,
       "needsPrivilege": false,
-      "detector": "paths",
+      "detector": "tool",
       "paths": {
         "macos": [
           "${CARGO_HOME:-~/.cargo}/git"
@@ -960,7 +1024,11 @@
           "%USERPROFILE%\\.cargo\\git"
         ]
       },
-      "toolName": "cargo"
+      "toolName": "cargo",
+      "cacheEnv": [
+        "CARGO_HOME"
+      ],
+      "envSuffix": "git"
     },
     {
       "id": "developers.playwright",
@@ -971,7 +1039,7 @@
       "impact": "The tool may redownload or rebuild data, or lose local configuration.",
       "defaultSelected": false,
       "needsPrivilege": false,
-      "detector": "paths",
+      "detector": "tool",
       "paths": {
         "macos": [
           "~/Library/Caches/ms-playwright"
@@ -982,7 +1050,10 @@
         "windows": [
           "%LOCALAPPDATA%\\ms-playwright"
         ]
-      }
+      },
+      "cacheEnv": [
+        "PLAYWRIGHT_BROWSERS_PATH"
+      ]
     },
     {
       "id": "developers.homebrew",
@@ -993,7 +1064,7 @@
       "impact": "The tool may redownload or rebuild data, or lose local configuration.",
       "defaultSelected": false,
       "needsPrivilege": false,
-      "detector": "paths",
+      "detector": "tool",
       "paths": {
         "macos": [
           "~/Library/Caches/Homebrew"
@@ -1002,7 +1073,14 @@
           "{cache}/Homebrew"
         ]
       },
-      "toolName": "brew"
+      "toolName": "brew",
+      "cacheEnv": [
+        "HOMEBREW_CACHE"
+      ],
+      "probeArgv": [
+        "brew",
+        "--cache"
+      ]
     },
     {
       "id": "developers.cocoapods",
@@ -1013,13 +1091,16 @@
       "impact": "The tool may redownload or rebuild data, or lose local configuration.",
       "defaultSelected": false,
       "needsPrivilege": false,
-      "detector": "paths",
+      "detector": "tool",
       "paths": {
         "macos": [
           "~/Library/Caches/CocoaPods"
         ]
       },
-      "toolName": "pod"
+      "toolName": "pod",
+      "cacheEnv": [
+        "CP_CACHE_DIR"
+      ]
     },
     {
       "id": "developers.discord",

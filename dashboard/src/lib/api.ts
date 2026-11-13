@@ -154,21 +154,21 @@ export interface CleanupStatus {
 export interface CleanupEntry {
   id: string; name: string; category: string; risk: string; hint: string; impact: string;
   defaultSelected: boolean; needsPrivilege: boolean;
-  paths: { template: string; path: string | null; reason: string }[];
+  paths: { template: string; path: string | null; reason: string; source?: string }[];
 }
 export interface CleanupScan {
   cancelled: boolean;
-  entries: { id: string; name: string; category: string; risk: string; sizeBytes: number; files: number; folders: number; unreadable: string[]; paths: { path: string | null; reason: string; sizeBytes: number; error: string | null }[] }[];
+  entries: { id: string; name: string; category: string; risk: string; sizeBytes: number; files: number; folders: number; unreadable: string[]; paths: { path: string | null; reason: string; source?: string; sizeBytes: number; error: string | null }[] }[];
   totals: { sizeBytes: number; files: number; folders: number; unreadable: number };
 }
 export interface CleanupPlan {
   planId: string; mode: "trash" | "delete"; expiresAt: number;
-  items: { entryId: string; entryName: string; path: string | null; status: string; code: string; reason: string; sizeBytes: number; files: number; folders: number }[];
+  items: { entryId: string; entryName: string; path: string | null; status: string; code: string; reason: string; source?: string; sizeBytes: number; files: number; folders: number }[];
   totals: { ready: number; skipped: number; bytes: number };
 }
 export interface CleanupResult {
   planId: string; mode: "trash" | "delete"; cancelled: boolean;
-  results: { entryId: string; entryName: string; path: string | null; status: string; code: string; reason: string; error: string | null; bytes: number; trashPath: string | null }[];
+  results: { entryId: string; entryName: string; path: string | null; status: string; code: string; reason: string; source?: string; error: string | null; bytes: number; trashPath: string | null }[];
   totals: { items: number; trashed: number; deleted: number; skipped: number; failed: number; bytes: number };
 }
 export interface CleanupJob {

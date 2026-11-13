@@ -14,6 +14,7 @@ const errorText = (error: unknown) => error instanceof Error ? error.message : S
 const isScan = (job: CleanupJob): job is CleanupJob & { result: CleanupScan } => job.kind === "scan" && !!job.result;
 const isPlan = (job: CleanupJob): job is CleanupJob & { result: CleanupPlan } => job.kind === "plan" && !!job.result;
 const isClean = (job: CleanupJob): job is CleanupJob & { result: CleanupResult } => job.kind === "clean" && !!job.result;
+const PathSource = ({ source }: { source?: string }) => <span className="text-(--iux-muted-foreground)">Source: <code translate="no">{source || "catalog"}</code></span>;
 
 export default function CleanupPage({ page = "" }: { page?: CleanupPageId }) {
   const [status, setStatus] = useState<CleanupStatus | null>(null);
@@ -130,7 +131,7 @@ export default function CleanupPage({ page = "" }: { page?: CleanupPageId }) {
               {mode === "delete" && <p className="mt-2 text-sm">Deleting permanently cannot be undone.</p>}
               <div className="mt-3"><button type="button" className="iux-btn" disabled={!canWork || !selected.length} onClick={() => void start(() => api.cleanupPlan(selected, mode))}>Build plan</button></div>
               {latestPlan && <div className="mt-4"><p>{latestPlan.totals.ready} items ready · {bytes(latestPlan.totals.bytes)} · expires in {Math.max(0, Math.ceil(latestPlan.expiresAt - now))} seconds</p>
-                {latestPlan.items.map((item, index) => <div key={`${item.entryId}-${index}`} className="border-b border-(--iux-border) py-2 text-sm"><strong>{item.entryName}</strong> · {item.status} · {bytes(item.sizeBytes)}<p translate="no" className="break-all">{item.path}</p>{item.reason && <p>{item.reason}</p>}</div>)}
+                {latestPlan.items.map((item, index) => <div key={`${item.entryId}-${index}`} className="border-b border-(--iux-border) py-2 text-sm"><strong>{item.entryName}</strong> · {item.status} · {bytes(item.sizeBytes)}<p translate="no" className="break-all">{item.path}</p><PathSource source={item.source} />{item.reason && <p>{item.reason}</p>}</div>)}
                 {latestPlan.expiresAt <= now && <p>This plan expired. Build a new plan.</p>}
                 {planUsed && <p>This plan was already run. Build a new plan.</p>}
                 <button type="button" className="iux-btn mt-3" data-variant="primary" disabled={!canWork || !latestPlan.totals.ready || latestPlan.expiresAt <= now || planUsed || latestPlan.mode !== mode || JSON.stringify([...(planJob?.request.entryIds ?? [])].sort()) !== JSON.stringify([...selected].sort())} onClick={() => setConfirm(true)}>Confirm clean</button>
@@ -141,10 +142,10 @@ export default function CleanupPage({ page = "" }: { page?: CleanupPageId }) {
           </>}
           {page === "results" && <>
             <Section title="Results by category" description="Measurements from the latest scan in this console session.">
-              {!latestScan ? <Empty>No scan results yet. Run a scan first.</Empty> : latestScan.entries.map((item) => <div key={item.id} className="border-b border-(--iux-border) py-3"><strong>{item.category} · {item.name}</strong><p>{bytes(item.sizeBytes)} · {item.files} files · {item.folders} folders</p>{item.paths.map((path, index) => <p key={index} className="break-all text-sm" translate="no">{path.path || path.reason} · {bytes(path.sizeBytes)}</p>)}</div>)}
+              {!latestScan ? <Empty>No scan results yet. Run a scan first.</Empty> : latestScan.entries.map((item) => <div key={item.id} className="border-b border-(--iux-border) py-3"><strong>{item.category} · {item.name}</strong><p>{bytes(item.sizeBytes)} · {item.files} files · {item.folders} folders</p>{item.paths.map((path, index) => <p key={index} className="break-all text-sm"><span translate="no">{path.path || path.reason}</span> · {bytes(path.sizeBytes)} · <PathSource source={path.source} /></p>)}</div>)}
             </Section>
             <Section title="Clean result" description={latestClean ? `${bytes(latestClean.totals.bytes)} ${latestClean.mode === "trash" ? "moved to Trash, not freed" : "deleted permanently"}` : undefined}>
-              {!latestClean ? <Empty>No clean results yet.</Empty> : latestClean.results.map((item, index) => <div key={index} className="border-b border-(--iux-border) py-3"><strong>{item.entryName} · {item.status}</strong><p translate="no" className="break-all">{item.path}</p><p>{item.reason || item.error}</p>{item.trashPath && <p translate="no" className="break-all">{item.trashPath}</p>}</div>)}
+              {!latestClean ? <Empty>No clean results yet.</Empty> : latestClean.results.map((item, index) => <div key={index} className="border-b border-(--iux-border) py-3"><strong>{item.entryName} · {item.status}</strong><p translate="no" className="break-all">{item.path}</p><PathSource source={item.source} /><p>{item.reason || item.error}</p>{item.trashPath && <p translate="no" className="break-all">{item.trashPath}</p>}</div>)}
             </Section>
           </>}
           {page === "leftovers" && <Section title="Leftovers" description="Items that were skipped, failed, or could not be read.">

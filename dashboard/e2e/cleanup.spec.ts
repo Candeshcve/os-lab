@@ -2,9 +2,9 @@ import { expect, test } from "@playwright/test";
 
 test("scan, confirm, clean, leftovers and history use typed cleanup jobs", async ({ page }) => {
   const calls: { path: string; body: Record<string, unknown> }[] = [];
-  const scan = { cancelled: false, entries: [{ id: "system.caches", name: "Caches", category: "system", risk: "low", sizeBytes: 42, files: 1, folders: 1, unreadable: [], paths: [{ path: "/tmp/caches", reason: "", sizeBytes: 42, error: null }] }], totals: { sizeBytes: 42, files: 1, folders: 1, unreadable: 0 } };
-  const plan = { planId: "plan-1", mode: "trash", expiresAt: Date.now() / 1000 + 600, items: [{ entryId: "system.caches", entryName: "Caches", path: "/tmp/caches", status: "ready", code: "", reason: "", sizeBytes: 42, files: 1, folders: 1 }], totals: { ready: 1, skipped: 0, bytes: 42 } };
-  const result = { planId: "plan-1", mode: "trash", cancelled: false, results: [{ entryId: "system.caches", entryName: "Caches", path: "/tmp/caches", status: "trashed", code: "", reason: "", error: null, bytes: 42, trashPath: "/tmp/Trash/caches" }], totals: { items: 1, trashed: 1, deleted: 0, skipped: 0, failed: 0, bytes: 42 } };
+  const scan = { cancelled: false, entries: [{ id: "system.caches", name: "Caches", category: "system", risk: "low", sizeBytes: 42, files: 1, folders: 1, unreadable: [], paths: [{ path: "/tmp/caches", reason: "", source: "env:XDG_CACHE_HOME", sizeBytes: 42, error: null }] }], totals: { sizeBytes: 42, files: 1, folders: 1, unreadable: 0 } };
+  const plan = { planId: "plan-1", mode: "trash", expiresAt: Date.now() / 1000 + 600, items: [{ entryId: "system.caches", entryName: "Caches", path: "/tmp/caches", status: "ready", code: "", reason: "", source: "env:XDG_CACHE_HOME", sizeBytes: 42, files: 1, folders: 1 }], totals: { ready: 1, skipped: 0, bytes: 42 } };
+  const result = { planId: "plan-1", mode: "trash", cancelled: false, results: [{ entryId: "system.caches", entryName: "Caches", path: "/tmp/caches", status: "trashed", code: "", reason: "", source: "env:XDG_CACHE_HOME", error: null, bytes: 42, trashPath: "/tmp/Trash/caches" }], totals: { items: 1, trashed: 1, deleted: 0, skipped: 0, failed: 0, bytes: 42 } };
   const jobs: Record<string, unknown>[] = [];
   await page.route("**/api/**", async (route) => {
     const path = new URL(route.request().url()).pathname;
@@ -43,6 +43,7 @@ test("scan, confirm, clean, leftovers and history use typed cleanup jobs", async
   expect(calls.filter((call) => call.path === "/api/cleanup/clean")[0].body).toEqual({ planId: "plan-1" });
   await page.goto("/cleanup/results/");
   await expect(page.getByText("system · Caches")).toBeVisible();
+  await expect(page.getByText("env:XDG_CACHE_HOME").first()).toBeVisible();
   await page.goto("/cleanup/leftovers/");
   await expect(page.getByText("No leftovers were reported.")).toBeVisible();
   await page.goto("/cleanup/history/");

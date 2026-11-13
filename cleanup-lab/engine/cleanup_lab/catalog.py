@@ -37,6 +37,7 @@ import posixpath
 import re
 
 from .paths import home_dir, platform_id
+from . import devcache
 
 CATALOG_VERSION = 1
 PLATFORMS = ("macos", "linux", "windows")
@@ -71,7 +72,7 @@ REQUIRED_ENTRY_KEYS = (
     "needsPrivilege",
     "paths",
 )
-OPTIONAL_ENTRY_KEYS = ("owningProcesses", "detector", "note", "toolName", "cleanable")
+OPTIONAL_ENTRY_KEYS = ("owningProcesses", "detector", "note", "toolName", "cleanable", "cacheEnv", "envSuffix", "probeArgv")
 
 
 class CatalogError(ValueError):
@@ -220,6 +221,24 @@ def _check_entry(entry, family, name, index):
         raise CatalogError("{0}: toolName must be an executable name, not a path".format(where))
     if not isinstance(entry.get("cleanable", True), bool):
         raise CatalogError("{0}: cleanable must be a boolean".format(where))
+    cache_env = entry.get("cacheEnv", [])
+    if "cacheEnv" in entry and (not isinstance(cache_env, list) or not cache_env or any(
+        not isinstance(name, str) or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name)
+        for name in cache_env
+    ) or len(set(cache_env)) != len(cache_env)):
+        raise CatalogError("{0}: cacheEnv must list distinct environment variable names".format(where))
+    suffix = entry.get("envSuffix", "")
+    if not isinstance(suffix, str) or suffix and not re.fullmatch(r"[A-Za-z0-9_-]+", suffix):
+        raise CatalogError("{0}: envSuffix must be a single relative component".format(where))
+    if suffix and not cache_env:
+        raise CatalogError("{0}: envSuffix requires cacheEnv".format(where))
+    probe = entry.get("probeArgv")
+    if probe is not None and (
+        not isinstance(probe, list) or tuple(probe) != devcache.PROBE_ALLOWLIST.get(entry_id)
+    ):
+        raise CatalogError("{0}: probeArgv is not on the fixed probe allowlist".format(where))
+    if (cache_env or suffix or probe) and entry.get("detector") != "tool":
+        raise CatalogError("{0}: dynamic cache metadata requires detector 'tool'".format(where))
     paths = entry["paths"]
     if not isinstance(paths, dict) or not paths:
         raise CatalogError("{0}: paths must name at least one operating system".format(where))
@@ -247,6 +266,9 @@ def _check_entry(entry, family, name, index):
         "note": note,
         "toolName": tool_name,
         "cleanable": entry.get("cleanable", True),
+        "cacheEnv": list(cache_env),
+        "envSuffix": suffix,
+        "probeArgv": list(probe) if probe else None,
         "family": family,
         "file": name,
         "paths": {platform: list(templates) for platform, templates in paths.items()},
@@ -292,33 +314,39 @@ def resolve(entry, platform, env=None):
             parent_template = template[:-len("/*/.Spotlight-V100")]
             parent, reason = expand(parent_template, platform, env)
             if parent is None:
-                resolved.append({"template": template, "path": None, "reason": reason})
+                resolved.append({"template": template, "path": None, "reason": reason, "source": "catalog"})
                 continue
             try:
                 with os.scandir(parent) as listing:
                     volumes = sorted(item.path for item in listing if item.is_dir())
             except OSError as exc:
-                resolved.append({"template": template, "path": None, "reason": str(exc)})
+                resolved.append({"template": template, "path": None, "reason": str(exc), "source": "catalog"})
                 continue
             for volume in volumes:
                 index = os.path.join(volume, ".Spotlight-V100")
                 if os.path.lexists(index):
-                    resolved.append({"template": template, "path": index, "reason": ""})
+                    resolved.append({"template": template, "path": index, "reason": "", "source": "catalog"})
             continue
         path, reason = expand(template, platform, env)
+        if detector == "tool" and entry.get("cacheEnv"):
+            location = devcache.resolve(entry, platform, env, home_dir(env), path)
+            resolved.append({"template": template, "path": location.path,
+                             "reason": "" if location.path else reason,
+                             "source": location.source})
+            continue
         if path is not None and detector == "profile-glob":
             for match in sorted(glob.glob(path)):
                 if os.path.lexists(match):
-                    resolved.append({"template": template, "path": match, "reason": ""})
+                    resolved.append({"template": template, "path": match, "reason": "", "source": "catalog"})
             continue
         if detector != "temp" or path is None:
-            resolved.append({"template": template, "path": path, "reason": reason})
+            resolved.append({"template": template, "path": path, "reason": reason, "source": "catalog"})
             continue
         try:
             with os.scandir(path) as listing:
                 candidates = sorted(listing, key=lambda item: item.name)
         except OSError as exc:
-            resolved.append({"template": template, "path": None, "reason": str(exc)})
+            resolved.append({"template": template, "path": None, "reason": str(exc), "source": "catalog"})
             continue
         for item in candidates:
             if item.name.lower().endswith((".lock", ".sock", ".pid")):
@@ -331,7 +359,7 @@ def resolve(entry, platform, env=None):
                 stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode) and info.st_size >= 1024
             ):
                 continue
-            resolved.append({"template": template, "path": item.path, "reason": ""})
+            resolved.append({"template": template, "path": item.path, "reason": "", "source": "catalog"})
     return resolved
 
 

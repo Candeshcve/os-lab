@@ -109,6 +109,17 @@
           "minLength": 1,
           "description": "Optional executable to look up on PATH without a shell. Shell functions are omitted."
         },
+        "cacheEnv": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+          "minItems": 1
+        },
+        "envSuffix": {"type": "string", "pattern": "^[A-Za-z0-9_-]+$"},
+        "probeArgv": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "minItems": 1
+        },
         "cleanable": {
           "type": "boolean",
           "description": "False for toolchains and other data that may be inspected but never cleaned."

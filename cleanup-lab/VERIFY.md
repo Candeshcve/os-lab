@@ -518,6 +518,17 @@ Generated-home tests cover XDG/macOS/Windows paths, a fake npm binary, absent
 pnpm, credential defaults and plan refusal for toolchains. The engine suite
 passed 115 tests. Native Windows scanning was not run on this macOS host.
 
+## CLN-25 — dynamic developer cache locations
+
+Branch `codex/cln-25-dynamic-cache-paths` builds on CLN-06. Catalog metadata
+allows an environment cache root or a fixed, allowlisted tool probe before the
+per-OS default. Probes use no shell, have a five-second timeout and accept only
+one absolute, non-root, non-home path. The path source is carried through
+catalog, scan, plan and result records. Fake environment/probe tests cover
+precedence, fallback, path rejection, toolchain exclusion and the probe runner.
+The CLN-16 results and plan pages show the resolved path source; the dashboard
+browser test exercises the source label with a typed scan, plan and clean job.
+
 ## CLN-04, CLN-05, CLN-07 … CLN-29
 
 ## CLN-11 — package review suggestions

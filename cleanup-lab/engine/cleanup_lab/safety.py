@@ -298,7 +298,8 @@ def entry_roots(entry, *, env=None, platform=None):
     env = os.environ if env is None else env
     target = platform or platform_id()
     roots = []
-    if entry.get("detector") == "spotlight":
+    detector = entry.get("detector")
+    if detector == "spotlight" or detector == "tool" and entry.get("cacheEnv"):
         from .catalog import resolve as catalog_resolve
         roots = [os.path.realpath(item["path"]) for item in catalog_resolve(entry, target, env) if item["path"]]
     else:

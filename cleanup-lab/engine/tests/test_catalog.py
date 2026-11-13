@@ -175,7 +175,7 @@ class LoadTest(unittest.TestCase):
             report = catalog.report(base, "linux", env)
             paths = report["entries"][0]["paths"]
             self.assertEqual(paths[0], {"template": "${XDG_CACHE_HOME}/x", "path": None,
-                                        "reason": "${XDG_CACHE_HOME} is not set"})
+                                        "reason": "${XDG_CACHE_HOME} is not set", "source": "catalog"})
             self.assertEqual(paths[1]["path"], os.path.join(env["HOME"], "y"))
 
 
