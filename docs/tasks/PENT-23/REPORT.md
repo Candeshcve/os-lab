@@ -134,7 +134,7 @@ Overall: OK
   `cleanup-lab/engine` içindeki `test_refusal_codes_are_stable` ve `test_unusable_trash_needs_setup`)
   **temiz master'da da aynı şekilde düşüyor**. Bunlar PENT-23 kapsamı dışında, bu yüzden bu PR'da
   düzeltilmedi (AGENTS.md: her PR tek bir mantıksal değişiklik). Bu PR yeni bir hataya yol açmıyor;
-  45 yeni test geçiyor (yalnızca Windows.ta çalışan 2 test Linux.ta skip ediliyor).
+  45 yeni test geçiyor (yalnızca Windows'ta çalışan 2 test Linux'ta skip ediliyor).
 
 ## 6. Kod incelemesi (Sourcery) sonrası düzeltmeler
 
