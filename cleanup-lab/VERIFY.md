@@ -737,6 +737,59 @@ All checks passed
   any of them.
 * Dashboard checks — no dashboard file changed; the card is the handoff.
 
+## CLN-27 — relocate caches to another volume behind a symlink
+
+Branch `feat/cln-27`, stacked on `feat/cln-28` (destinations come from the
+CLN-28 volume inventory). Scope: the relocation engine module, the console
+endpoints, tests and docs. The `/cleanup/` relocation card is the dashboard
+layer's part (handoff in `STATUS.md`).
+
+### Engine unit tests
+
+```console
+$ cd cleanup-lab/engine && python -m unittest discover -s tests -p 'test_*.py'
+Ran 202 tests in 1.634s
+FAILED (failures=49, errors=37, skipped=11)
+```
+
+The 11 skips are the 4 pre-existing ones plus 7 honest symlinks skips: this
+Windows host cannot create symlinks without Developer Mode or a privilege
+(WinError 1314), so the executor tests that need a real link skip with that
+reason and pass on macOS/Linux hosts. The symlink-failure refusal itself is
+tested everywhere by simulating the error. Baseline discipline: a clean
+`origin/master` worktree on this host fails the same suite before any change
+(154 tests, failures=49, errors=37, skipped=4 — pre-existing,
+platform-specific). Failing test ids captured on both runs: **86 before, 86
+after, diff 0 — no new failure**. The 24 new `test_relocation.py` tests pass
+(including the fake-catalog integration through `build_plan`/`execute`).
+
+### Console contract
+
+```console
+$ python -m pytest android-lab/lab/tests/test_cleanup_console.py -q
+1 failed, 12 passed, 7 skipped in 0.98s
+```
+
+The failure is the same single pre-existing Windows one recorded at the
+baseline; the two new relocation-endpoint tests pass.
+
+### Knowledge graph
+
+```console
+$ lat check
+All checks passed
+```
+
+### Not run
+
+* `./scripts/run-tests.sh` — no usable bash on this host (WSL launcher without
+  distributions), as recorded for CLN-28/CLN-20.
+* Live relocation of a real cache — rule 8: the executor is covered by
+  generated-tree tests; a real move belongs to the user, on a host where
+  symlinks are available.
+* Dashboard checks — no dashboard file changed; the relocation card is the
+  handoff.
+
 ## CLN-04 … CLN-29
 
 Each task appends its own section when it lands.

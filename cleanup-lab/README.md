@@ -11,8 +11,9 @@ its own visual style; Cleanup Lab pages use the os-lab dashboard shell and follo
 [`docs/UX_READINESS.md`](../docs/UX_READINESS.md).
 
 Status: **Engine skeleton (CLN-01), detector catalog (CLN-02), safety guard
-(CLN-12), the read-only scan job (CLN-03), the plan → clean flow (CLN-13) and
-the volume inventory (CLN-28) and the typed privileged actions (CLN-20) are in place; the rest is roadmap.** The engine package, the readiness probe (`labctl
+(CLN-12), the read-only scan job (CLN-03), the plan → clean flow (CLN-13), the
+volume inventory (CLN-28), the typed privileged actions (CLN-20) and cache
+relocation (CLN-27) are in place; the rest is roadmap.** The engine package, the readiness probe (`labctl
 cleanup status|doctor`, `GET /api/cleanup/status`) and the catalog (`GET
 /api/cleanup/catalog`) exist; `POST /api/cleanup/scan` runs a catalog scan as a
 console job with progress and cancel, `POST /api/cleanup/plan` previews a clean,
@@ -115,21 +116,21 @@ drive types are hidden rather than guessed. Windows enumerates drives through
 `/cleanup/` volumes card is the dashboard layer's part (handoff in
 [`STATUS.md`](STATUS.md)).
 
-## Privileged actions (CLN-20)
-
-System maintenance that needs root or admin is a typed action, not a path
-item: `GET /api/cleanup/privileged` lists what this computer offers (APT
-package cache, a journald vacuum, `apt-get autoremove --purge`, the Spotlight
-index rebuild, DISM's component store cleanup), `POST
-/api/cleanup/privileged/preview` fingerprints the candidates or the tool's
-own usage report, and `POST /api/cleanup/privileged/run` executes the fixed
-argv once through the desktop's own elevation — polkit `pkexec` on Linux
-(`sudo -n` as fallback), the `osascript` administrator dialog on macOS, and
-the UAC prompt on Windows. No password is stored, no shell string is
-accepted, changed candidates refuse the run, and every run is audited. macOS
-gains the read-only Full Disk Access probe with guidance; elsewhere the
-engine reports `applicable: False` so the page can hide it. An elevated `rm`
 is refused by design: the Trash rule has no privileged exception.
+
+## Relocation (CLN-27)
+
+`cleanup_lab/relocation.py` moves a catalog entry's folder to another volume
+behind a symlink and back: seven link states, and the fixed order copy →
+verify (file count + bytes) → rename the original aside → symlink → verify the
+link → remove the set-aside original, so every step leaves either the original
+or a verified copy. The page sends a catalog entry id and a destination volume
+from CLN-28's inventory; the store is `<volume>/oslab-caches/<entry id>`, the
+source/destination pair passes `safety.validate_copy`, the entry's owning
+application must not be running, and there is no elevated fallback — on Windows
+a symlink needs Developer Mode or a privilege and fails with a reason. An
+interrupted move leaves `<home>.oslab-moving` behind: a new move refuses to
+start, and a typed resume continues it after re-verifying the store copy.
 
 ## Safety guard
 
@@ -208,7 +209,7 @@ every Qleaner detector id to a catalog id, or to a written reason for dropping i
 | Build artifacts proved by marker files and `CACHEDIR.TAG` | `cleanup_ref.artifacts` | CLN-24 |
 | Cache paths from env var → tool probe (fixed argv) → per-OS default | `cleanup_ref.devcache` | CLN-25 |
 | Cleaned-items ledger, learned score, soft pre-selection, Quick Clean | `cleanup_ref.learning` | CLN-26 |
-| Move / restore / relink a cache behind a symlink, 7 link states | `cleanup_ref.relocation` | CLN-27 |
+| Move / restore / relink a cache behind a symlink, 7 link states | `cleanup_ref.relocation` → `cleanup_lab.relocation` | — (CLN-27 landed) |
 | Volumes and disk pressure | — (spec only) | CLN-28 |
 | Simulator runtimes, unavailable devices, Android AVDs and system images | — (spec only) | CLN-29 |
 
