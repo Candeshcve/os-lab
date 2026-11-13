@@ -297,6 +297,9 @@ def entry_roots(entry, *, env=None, platform=None):
     env = os.environ if env is None else env
     target = platform or platform_id()
     roots = []
+    if entry.get("detector") == "tool" and entry.get("cacheEnv"):
+        from .catalog import resolve as catalog_resolve
+        return [os.path.realpath(item["path"]) for item in catalog_resolve(entry, target, env) if item["path"]]
     for template in entry.get("paths", {}).get(target, []):
         path, _reason = expand(template, target, env)
         if path:

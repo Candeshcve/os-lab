@@ -320,13 +320,14 @@ class _PlanProgress:
 # ── Planning ─────────────────────────────────────────────────────────────────
 
 
-def _plan_item(entry, template, path, status, *, mode, code="", reason=""):
+def _plan_item(entry, template, path, status, *, mode, code="", reason="", source="catalog"):
     return {
         "entryId": entry["id"],
         "entryName": entry["name"],
         "risk": entry["risk"],
         "template": template,
         "path": path,
+        "source": source,
         "status": status,
         "code": code,
         "reason": reason,
@@ -432,14 +433,15 @@ def build_plan(
             template, path, reason = resolved["template"], resolved["path"], resolved["reason"]
             if path is None:
                 items.append(
-                    _plan_item(entry, template, None, "skipped", mode=mode, code="no-path", reason=reason)
+                    _plan_item(entry, template, None, "skipped", mode=mode, code="no-path", reason=reason,
+                               source=resolved["source"])
                 )
                 continue
             if privileged:
                 items.append(
                     _plan_item(
                         entry, template, path, "skipped", mode=mode,
-                        code="privileged",
+                        code="privileged", source=resolved["source"],
                         reason="This entry needs administrator rights; a privileged plan arrives in a later task.",
                     )
                 )
@@ -451,7 +453,7 @@ def build_plan(
                 items.append(
                     _plan_item(
                         entry, template, verdict.path or path, "skipped", mode=mode,
-                        code=verdict.code, reason=verdict.reason,
+                        code=verdict.code, reason=verdict.reason, source=resolved["source"],
                     )
                 )
                 continue
@@ -459,12 +461,13 @@ def build_plan(
                 items.append(
                     _plan_item(
                         entry, template, verdict.path, "skipped", mode=mode,
-                        code="duplicate", reason="This path is already in the plan.",
+                        code="duplicate", reason="This path is already in the plan.", source=resolved["source"],
                     )
                 )
                 continue
             seen_paths.add(verdict.path)
-            item = _plan_item(entry, template, verdict.path, "ready", mode=mode)
+            item = _plan_item(entry, template, verdict.path, "ready", mode=mode,
+                              source=resolved["source"])
             items.append(item)
             pending.append(item)
 
@@ -851,6 +854,7 @@ def _result_item(item, status, *, code="", reason="", error=None, measure=None, 
         "entryName": item["entryName"],
         "template": item["template"],
         "path": item["path"],
+        "source": item.get("source", "catalog"),
         "mode": item["mode"],
         "status": status,
         "code": code,

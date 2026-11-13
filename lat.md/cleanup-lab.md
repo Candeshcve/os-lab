@@ -35,7 +35,10 @@ defaults, credentials and toolchains.
 The catalog reports binary presence through `shutil.which` without a shell.
 Shell functions are tracked by their directories. Credential entries are never
 pre-selected; toolchains and local clusters have `cleanable: false` and the
-plan skips them. CLN-25 adds environment and fixed-argv path resolution.
+plan skips them. CLN-25 resolves developer caches from an environment variable,
+an allowlisted fixed-argument tool probe (five-second timeout), or the catalog
+default. Invalid probe output falls back safely. The catalog, scan, plan and
+result records identify the chosen source for each path.
 
 
 Target paths are data. One JSON file per family under `cleanup-lab/catalog`, validated

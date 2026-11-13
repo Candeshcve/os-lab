@@ -53,7 +53,7 @@ the finding and the decision are in the session log.
 | CLN-22 | merged | [#137](https://github.com/keyvanarasteh/os-lab/pull/137) | a3133e76 | — | done ahead of order by Claude Code at the maintainer's request; engine and dashboard untouched | none |
 | CLN-23 | pending | — | — | Disk Explorer page | console side only | none |
 | CLN-24 | pending | — | — | — | — | none |
-| CLN-25 | pending | — | — | — | — | none |
+| CLN-25 | in progress (this PR) | — | — | dashboard source label awaits CLN-16 merge | engine payloads ready | none |
 | CLN-26 | pending | — | — | — | — | none |
 | CLN-27 | pending | — | — | — | — | none |
 | CLN-28 | pending | — | — | `/cleanup/` volumes card | console side only | none |

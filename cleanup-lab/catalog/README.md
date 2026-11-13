@@ -13,7 +13,7 @@ One file per family. `family` must match the first segment of every entry id.
 | `system.json` | `system` | User caches, user logs, Trash (Qleaner: `user_caches`, `system_logs`, `trash`) |
 | `developers.json` | `developers` | Developer caches, credential stores and toolchains with per-OS defaults |
 
-Later tasks add `browser.json` (CLN-05), `developers.json` (CLN-06),
+Later tasks add `browser.json` (CLN-05),
 `projects.json` (CLN-07/24), `containers.json` and `vms.json` (CLN-08),
 `leftovers.json` (CLN-09/10), `packages.json` (CLN-11) and `simulators.json`
 (CLN-07/29). [`../PARITY.md`](../PARITY.md) maps every Qleaner detector to its
@@ -35,13 +35,20 @@ catalog id or to the reason it was dropped.
 | `toolName` | Optional executable name checked on `PATH`, without invoking a shell |
 | `cleanable` | `false` keeps toolchains visible for scans while the plan refuses cleaning |
 | `detector` | `paths` (default), `artifacts`, `signatures` or `tool` |
+| `cacheEnv` | For `tool` entries, ordered environment variables that may name the cache root |
+| `envSuffix` | One directory component appended to an environment cache root, such as `registry` under `CARGO_HOME` |
+| `probeArgv` | Fixed arguments permitted only for an entry on the engine's probe allowlist; no shell |
 | `note` | Free text for a maintenance caveat |
 | `paths` | `macos` / `linux` / `windows` → list of templates. An entry without a path for an OS simply does not appear there |
 
 ## Path templates
 
-Developer entries have per-OS defaults; CLN-25 will add environment and fixed
-argv tool probes before those defaults. `toolName` is an optional executable
+Developer entries resolve a cache in order: the first valid `cacheEnv` value,
+the allowlisted `probeArgv` result (five-second timeout), then the per-OS catalog
+default. Empty, relative, multiline, root, home and diagnostic outputs are
+rejected. Catalog, scan, plan and result payloads carry `source` (`env:NAME`,
+`probe:COMMAND`, `default` or `catalog`) so the chosen location is visible.
+`toolName` is an optional executable
 name checked with `shutil.which` and never executed through a shell. Shell
 functions such as `nvm` and `workon` have no `toolName`: their paths identify
 installed data. `cleanable: false` keeps toolchains and local clusters visible
