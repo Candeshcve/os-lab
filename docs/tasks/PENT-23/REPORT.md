@@ -5,7 +5,7 @@
 | Öğrenci | Deniz Pekova · 2520191029 (`denizpekova`) |
 | Ders | MYO062 — vize projesi |
 | Görev | [PENT-23](../../../CONTRIBUTING.md) · Rezervasyon: [`reservations/PENT-23.json`](../../../reservations/PENT-23.json) |
-| Kanıt videosu | _<video linki buraya>_ (2 dk 19 sn: canlı kontrol, JSON, 3 senaryo, pytest, Linux run-tests karşılaştırması) |
+| Kanıt videosu | https://youtu.be/O3jTPOKgfsY (2 dk 19 sn: canlı kontrol, JSON, 3 senaryo, pytest, Linux run-tests karşılaştırması) |
 
 ## 1. Amaç
 
