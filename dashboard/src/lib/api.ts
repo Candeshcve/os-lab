@@ -180,6 +180,28 @@ export interface CleanupJob {
 }
 export interface CleanupHistory { entries: { id: number; result: CleanupResult; hmac: string }[]; total: number; verified: boolean }
 
+export interface CleanupContainerCapabilities {
+  available: boolean; engine: "docker" | "podman" | null; reason: string;
+  actions: { id: string; risk: string; defaultSelected: false; pruneArgv: string[] }[];
+}
+export interface CleanupContainerPreview {
+  previewId: string; actionId: string; engine: "docker" | "podman"; risk: string;
+  candidateCount: number; candidates: Record<string, unknown>[]; command: string[]; expiresAt: number;
+}
+export interface CleanupContainerResult {
+  actionId: string; engine: string; status: "completed" | "failed"; error?: string;
+  candidateCount?: number; command?: string[]; output?: string; bytesRemoved: number | null;
+}
+export interface CleanupVMInventory {
+  cancelled: boolean;
+  items: { id: string; name: string; path: string; sizeBytes: number; sizeOnDiskBytes: number | null; files: number; reportOnly: true }[];
+  unavailable: { id: string; root: string | null; reason: string }[];
+}
+export interface CleanupAuxJob<T> {
+  id: string; kind: "container-prune" | "vm-scan"; state: "running" | "done" | "cancelled" | "failed";
+  result: T | null; error: string | null;
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -246,6 +268,11 @@ export const api = {
   cleanupClean: (planId: string) => post<CleanupJob>("/api/cleanup/clean", { planId }),
   cleanupJob: (id: string) => call<CleanupJob>(`/api/cleanup/jobs/${encodeURIComponent(id)}`),
   cleanupCancel: (id: string) => post<CleanupJob>(`/api/cleanup/jobs/${encodeURIComponent(id)}/cancel`),
+  cleanupContainers: () => call<CleanupContainerCapabilities>("/api/cleanup/containers"),
+  cleanupContainerPreview: (actionId: string) => post<CleanupContainerPreview>("/api/cleanup/containers/preview", { actionId }),
+  cleanupContainerPrune: (previewId: string) => post<CleanupAuxJob<CleanupContainerResult>>("/api/cleanup/containers/prune", { previewId }),
+  cleanupVMScan: () => post<CleanupAuxJob<CleanupVMInventory>>("/api/cleanup/vms/scan"),
+  cleanupAuxJob: <T>(id: string) => call<CleanupAuxJob<T>>(`/api/cleanup/jobs/${encodeURIComponent(id)}`),
   health: () => call<{ status: string; version: string; console: boolean }>("/api/health"),
   host: () => call<{ host: HostInfo; labs: LabStatus[] }>("/api/host"),
   capabilities: () => call<CapabilityCatalog>("/api/capabilities"),

@@ -5,6 +5,7 @@ import { TopBar } from "../../shell/top-bar";
 import { Empty, PageHead, Section, Status } from "../../components/ui";
 import { api, type CleanupEntry, type CleanupHistory, type CleanupJob, type CleanupPlan, type CleanupResult, type CleanupScan, type CleanupStatus } from "../../lib/api";
 import { localeFromPath, localePath } from "../../i18n/paths";
+import { CleanupExtraTools } from "./extra-tools";
 
 export type CleanupPageId = "" | "results" | "leftovers" | "history";
 export const CLEANUP_PAGES: CleanupPageId[] = ["", "results", "leftovers", "history"];
@@ -139,6 +140,7 @@ export default function CleanupPage({ page = "" }: { page?: CleanupPageId }) {
               {confirm && latestPlan && <div role="dialog" aria-modal="true" aria-label="Confirm cleanup" className="mt-4 rounded-md border border-(--iux-border) p-4"><p>Clean {latestPlan.totals.ready} items · {bytes(latestPlan.totals.bytes)} · {latestPlan.mode === "trash" ? "Move to Trash" : "Delete permanently"}?</p><div className="mt-3 flex gap-2"><button type="button" className="iux-btn" data-variant="primary" onClick={() => void start(() => api.cleanupClean(latestPlan.planId))}>Run clean</button><button type="button" className="iux-btn" onClick={() => setConfirm(false)}>Back</button></div></div>}
             </Section>
             {latestClean && <Section title="Clean result" description={`${bytes(latestClean.totals.bytes)} ${latestClean.mode === "trash" ? "moved to Trash, not freed" : "deleted permanently"}`}><a className="iux-btn" href={link("leftovers/")}>View leftovers</a></Section>}
+            <CleanupExtraTools now={now} />
           </>}
           {page === "results" && <>
             <Section title="Results by category" description="Measurements from the latest scan in this console session.">

@@ -407,6 +407,56 @@ def test_the_browser_route_plans_and_cleans(tmp_path, monkeypatch):
         server.server_close()
 
 
+def test_container_prune_requires_single_use_preview_and_audits(tmp_path, monkeypatch):
+    fake = tmp_path / "docker"
+    fake.write_text("#!" + sys.executable + "\n"
+                    "import json,os,sys\n"
+                    "a=sys.argv[1:]\n"
+                    "if a==['info']: print('ready'); sys.exit(0)\n"
+                    "if a[:2]==['image','ls']: print(json.dumps({'ID':'one'})); sys.exit(0)\n"
+                    "if a==['image','prune','--force']:\n"
+                    " open(os.environ['FAKE_PRUNE_LOG'],'a').write('pruned\\n'); print('3B'); sys.exit(0)\n"
+                    "sys.exit(2)\n")
+    fake.chmod(0o700)
+    monkeypatch.setenv("PATH", str(tmp_path))
+    monkeypatch.setenv("FAKE_PRUNE_LOG", str(tmp_path / "pruned"))
+    monkeypatch.setenv("OSLAB_CLEANUP_STATE", str(tmp_path / "private-state"))
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    assert api.get("/api/cleanup/containers", {})["engine"] == "docker"
+    for body in ({"actionId": "/bin/sh"}, {"actionId": "containers.docker.dangling-images", "argv": ["sh"]}):
+        with pytest.raises(cleanup_api.CleanupError) as refused:
+            api.post("/api/cleanup/containers/preview", body)
+        assert refused.value.status == 400
+    preview = api.post("/api/cleanup/containers/preview", {"actionId": "containers.docker.dangling-images"})
+    assert preview["candidateCount"] == 1
+    assert preview["command"] == ["docker", "image", "prune", "--force"]
+    job = api.post("/api/cleanup/containers/prune", {"previewId": preview["previewId"]})
+    wait_for(job, "done")
+    assert (tmp_path / "pruned").read_text() == "pruned\n"
+    history = api.get("/api/cleanup/history", {})
+    assert history["verified"] is True
+    assert history["entries"][0]["result"]["actionId"] == "containers.docker.dangling-images"
+    with pytest.raises(cleanup_api.CleanupError) as reused:
+        api.post("/api/cleanup/containers/prune", {"previewId": preview["previewId"]})
+    assert reused.value.status == 409
+
+
+def test_vm_inventory_job_is_report_only(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    bundle = tmp_path / "VirtualBox VMs" / "fixture"
+    bundle.mkdir(parents=True)
+    (bundle / "fixture.vbox").write_bytes(b"config")
+    (bundle / "disk.vdi").write_bytes(b"disk")
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    with pytest.raises(cleanup_api.CleanupError) as refused:
+        api.post("/api/cleanup/vms/scan", {"path": str(tmp_path)})
+    assert refused.value.status == 400
+    job = api.post("/api/cleanup/vms/scan", {})
+    wait_for(job, "done")
+    assert job.result["items"][0]["id"] == "vms.virtualbox"
+    assert job.result["items"][0]["reportOnly"] is True
+
 def test_package_inventory_job_is_read_only_and_typed(monkeypatch):
     from cleanup_lab import packages
     monkeypatch.setattr(packages, "inventory", lambda: {"available": False, "items": [], "sources": [], "errors": []})

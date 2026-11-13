@@ -50,6 +50,43 @@ test("scan, confirm, clean, leftovers and history use typed cleanup jobs", async
   await expect(page.getByText("Run #1 · trash")).toBeVisible();
 });
 
+test("container pruning needs a preview and VM inventory stays report only", async ({ page }) => {
+  const posts: { path: string; body: Record<string, unknown> }[] = [];
+  await page.route("**/api/**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    const body = route.request().postDataJSON?.() ?? {};
+    if (route.request().method() === "POST") posts.push({ path, body });
+    let data: unknown = {};
+    if (path === "/api/cleanup/status") data = { state: "ready", reasons: [], requirements: [], capabilities: [] };
+    else if (path === "/api/cleanup/catalog") data = { platform: "linux", entries: [] };
+    else if (path === "/api/cleanup/jobs") data = { jobs: [] };
+    else if (path === "/api/cleanup/containers") data = { available: true, engine: "docker", reason: "", actions: [{ id: "containers.docker.dangling-volumes", risk: "high", defaultSelected: false, pruneArgv: ["docker", "volume", "prune", "--all", "--force"] }] };
+    else if (path === "/api/cleanup/containers/preview") data = { previewId: "preview-1", actionId: body.actionId, engine: "docker", risk: "high", candidateCount: 1, candidates: [{ Name: "cache-volume" }], command: ["docker", "volume", "prune", "--all", "--force"], expiresAt: Date.now() / 1000 + 600 };
+    else if (path === "/api/cleanup/containers/prune") data = { id: "job-prune", kind: "container-prune", state: "running", result: null, error: null };
+    else if (path === "/api/cleanup/vms/scan") data = { id: "job-vms", kind: "vm-scan", state: "running", result: null, error: null };
+    else if (path === "/api/cleanup/jobs/job-prune") data = { id: "job-prune", kind: "container-prune", state: "done", result: { actionId: "containers.docker.dangling-volumes", engine: "docker", status: "completed", output: "pruned", bytesRemoved: null }, error: null };
+    else if (path === "/api/cleanup/jobs/job-vms") data = { id: "job-vms", kind: "vm-scan", state: "done", result: { cancelled: false, items: [{ id: "vms.virtualbox", name: "fixture", path: "/tmp/fixture.vbox", sizeBytes: 42, sizeOnDiskBytes: 42, files: 1, reportOnly: true }], unavailable: [] }, error: null };
+    else if (path === "/api/host") data = { host: { os: "linux", osPretty: "Linux", arch: "amd64", hostname: "test", cpus: 8, memory: 0, disk: null, kvm: { present: false, usable: false }, wsl: { guest: false, distributions: [] }, runtime: null, xcode: null, python: "3.12", root: "/tmp", tools: [], providers: [] }, labs: [] };
+    else if (path === "/api/health") data = { status: "ok", version: "test", console: true };
+    else if (path === "/api/jobs") data = { jobs: [] };
+    else if (path === "/api/logs") data = { logs: [] };
+    await route.fulfill({ json: data });
+  });
+  await page.goto("/cleanup/");
+  await expect(page.getByText("Container engine:")).toBeVisible();
+  expect(posts.filter((call) => call.path === "/api/cleanup/containers/prune")).toHaveLength(0);
+  await page.getByRole("button", { name: "Preview containers.docker.dangling-volumes" }).click();
+  await page.getByText("Candidates", { exact: true }).click();
+  await expect(page.getByText("cache-volume")).toBeVisible();
+  await expect(page.getByText("high", { exact: false }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Confirm prune" }).click();
+  await expect(page.getByText("Prune completed.", { exact: false })).toBeVisible();
+  expect(posts.find((call) => call.path === "/api/cleanup/containers/prune")?.body).toEqual({ previewId: "preview-1" });
+  await page.getByRole("button", { name: "Scan virtual machines" }).click();
+  await expect(page.getByText("/tmp/fixture.vbox")).toBeVisible();
+  expect(posts.find((call) => call.path === "/api/cleanup/vms/scan")?.body).toEqual({});
+});
+
 test("public cleanup route has no engine controls", async ({ page }) => {
   test.skip(!process.env.OSLAB_PAGES_TEST, "run against a Pages build");
   let apiCalls = 0;
