@@ -29,6 +29,14 @@ The script reads assets from `app/out/<version>` when present, otherwise downloa
 release with `gh`, verifies every SHA-256 through `app/scripts/build-update-manifest.mjs`, and
 uploads `latest.json` to the `app-updates` prerelease.
 
+## 0.3.1
+
+- Bundle the Cleanup Lab engine and catalog in the desktop app so the merged
+  scan, plan, clean, results, leftovers and audit history pages work in an
+  installed build. The dashboard includes the merged system, browser, developer,
+  deep sweep, container/VM and leftover detectors.
+- This release is for installed-app testing. Later Cleanup Lab tasks remain open.
+
 ## 0.3.0
 
 - Add Source Lab: portable five-platform static analysis, signed evidence,

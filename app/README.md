@@ -47,9 +47,10 @@ npm run test:stage
 (cd src-tauri && cargo test)
 ```
 
-`npm run stage` bundles **git-tracked** files from `labctl`, the console, all five lab folders,
+`npm run stage` bundles **git-tracked** files from `labctl`, the console, the lab folders,
 `docs/legal`, and a fresh dashboard build. It excludes credentials and guest data, so an
 untracked `.env` or VM disk cannot ship. Staging fails if a required lab entry point is missing.
+The staged runtime includes the Cleanup Lab engine and catalog used by the local dashboard.
 `--no-build` stages the committed `dashboard/dist`.
 
 The installer contains the lab scripts and Compose definitions, not the host tools or guest
