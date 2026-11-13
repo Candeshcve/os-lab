@@ -1,4 +1,4 @@
-"""`labctl cleanup status|doctor|catalog [--json]`.
+"""`labctl cleanup status|doctor|catalog|history [--json]`.
 
 All three read: they print the readiness probe or the detector catalog and change
 nothing. The exit code follows the lab CLI contract — ``0`` when the engine is
@@ -13,6 +13,7 @@ import sys
 
 from .catalog import CatalogError, report as catalog_report
 from .readiness import probe, repo_root
+from . import history
 
 USAGE_EXIT = 2
 
@@ -111,14 +112,17 @@ def build_parser():
         prog="labctl cleanup",
         description="Cleanup Lab: inspect readiness (read-only) and, from CLN-19, scan/plan/clean.",
     )
-    sub = parser.add_subparsers(dest="command", metavar="status|doctor|catalog")
+    sub = parser.add_subparsers(dest="command", metavar="status|doctor|catalog|history")
     for name, text in (
         ("status", "one-screen readiness summary"),
         ("doctor", "every check, path and hint"),
         ("catalog", "detector catalog for this computer, with resolved paths"),
+        ("history", "recent cleanup runs from the private audit store"),
     ):
         command = sub.add_parser(name, help=text, description=text)
         command.add_argument("--json", action="store_true", help="print the probe as JSON")
+        if name == "history":
+            command.add_argument("--verify", action="store_true", help="verify the full HMAC chain")
     return parser
 
 
@@ -130,9 +134,13 @@ def main(argv=None, stream=None):
         parser.print_help(stream)
         return USAGE_EXIT
     try:
-        report = probe() if args.command != "catalog" else catalog_report(repo_root())
+        report = (catalog_report(repo_root()) if args.command == "catalog" else
+                  history.read(verify=args.verify) if args.command == "history" else probe())
     except CatalogError as exc:
         sys.stderr.write("cleanup catalog: {0}\n".format(exc))
+        return 1
+    except (history.HistoryError, OSError, ValueError) as exc:
+        sys.stderr.write("cleanup history: {0}\n".format(exc))
         return 1
     if args.json:
         stream.write(json.dumps(report, indent=2) + "\n")
@@ -141,9 +149,19 @@ def main(argv=None, stream=None):
             "status": _status_lines,
             "doctor": _doctor_lines,
             "catalog": _catalog_lines,
+            "history": lambda value, _: [
+                "Cleanup history · {0} run(s) · integrity verified".format(value["total"])
+            ] + [
+                "  #{0} {1} {2} · {3} bytes · {4} item(s)".format(
+                    entry["id"], entry["result"]["mode"],
+                    "cancelled" if entry["result"]["cancelled"] else "finished",
+                    entry["result"]["totals"]["bytes"],
+                    entry["result"]["totals"]["items"],
+                ) for entry in value["entries"]
+            ],
         }[args.command](report, stream)
         stream.write("\n".join(lines) + "\n")
-    if args.command == "catalog":
+    if args.command in ("catalog", "history"):
         return 0
     return 0 if report["state"] == "ready" else 1
 

@@ -36,7 +36,8 @@ def wait_for(job, state=None, timeout=10):
 
 
 @pytest.fixture(autouse=True)
-def clean_jobs():
+def clean_jobs(tmp_path, monkeypatch):
+    monkeypatch.setenv("OSLAB_CLEANUP_STATE", str(tmp_path / "state"))
     def drain():
         for job in list(cleanup_api.JOBS.jobs.values()):
             job.cancel.set()
@@ -275,6 +276,10 @@ def test_a_plan_is_previewed_then_cleaned_from_the_console(tmp_path, monkeypatch
 
     listed = api.get("/api/cleanup/jobs", {})
     assert [row["kind"] for row in listed["jobs"]] == ["clean", "plan"]
+    history = api.get("/api/cleanup/history", {})
+    assert history["verified"] is True
+    assert history["total"] == 1
+    assert history["entries"][0]["result"]["results"][0]["path"] == target
 
 
 def test_plan_and_clean_requests_are_typed(tmp_path, monkeypatch):
