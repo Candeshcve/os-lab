@@ -29,6 +29,14 @@ The script reads assets from `app/out/<version>` when present, otherwise downloa
 release with `gh`, verifies every SHA-256 through `app/scripts/build-update-manifest.mjs`, and
 uploads `latest.json` to the `app-updates` prerelease.
 
+## 0.3.2
+
+- Require Python 3.11 or newer in the desktop launcher, matching Cleanup Lab's
+  runtime requirement. If the host only has an older Python, **Get Python**
+  installs the app-managed Python 3.12 before the console starts.
+- Replace the checkout-specific Cleanup Lab readiness hint with instructions
+  that also apply to installed desktop builds.
+
 ## 0.3.1
 
 - Bundle the Cleanup Lab engine and catalog in the desktop app so the merged

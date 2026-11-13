@@ -171,6 +171,10 @@ decide `ready`, `needs-setup` or `unavailable`. The detector catalog, the native
 scan backend and the tools on `PATH` are optional capabilities, so a missing one
 never blocks a scan.
 
+The desktop launcher selects Python 3.11 or newer to satisfy Cleanup Lab. If the
+host has only an older interpreter, its Get Python action installs an app-managed
+Python 3.12 before the local console starts.
+
 `/cleanup/` renders that probe in the dashboard shell, with scan, plan and clean
 actions only when the engine is ready. Public Pages has no engine, so the page
 explains local installation without polling, per
