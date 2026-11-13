@@ -36,9 +36,9 @@ the finding and the decision are in the session log.
 | CLN-05 | merged | [#144](https://github.com/keyvanarasteh/os-lab/pull/144) | e02bc47d | — | — | none |
 | CLN-06 | merged | [#145](https://github.com/keyvanarasteh/os-lab/pull/145) | 01a08055 | — | — | none |
 | CLN-07 | merged | [#147](https://github.com/keyvanarasteh/os-lab/pull/147) | fcf2929a | project sweep UI and simulator action | read-only detection only | none |
-| CLN-08 | in review (this PR) | [#149](https://github.com/keyvanarasteh/os-lab/pull/149) | — | — | typed controls added after CLN-16 | none |
+| CLN-08 | merged | [#149](https://github.com/keyvanarasteh/os-lab/pull/149) | 72e2b635 | — | typed controls added after CLN-16 | none |
 | CLN-09 | merged | [#150](https://github.com/keyvanarasteh/os-lab/pull/150) | 8503ef58 | frontend client/state still due | logic and API first | none |
-| CLN-10 | pending | — | — | — | — | none |
+| CLN-10 | in review (this PR) | [#151](https://github.com/keyvanarasteh/os-lab/pull/151) | — | — | typed Linux/Windows results view added after CLN-16 | none |
 | CLN-11 | merged | [#152](https://github.com/keyvanarasteh/os-lab/pull/152) | ef1d2f1a | frontend client/state still due | report-and-suggest only | none |
 | CLN-12 | merged | [#136](https://github.com/keyvanarasteh/os-lab/pull/136) | 3d5ab866 | — | — | none |
 | CLN-13 | merged | [#139](https://github.com/keyvanarasteh/os-lab/pull/139) | 6656ed55 | — | dashboard layer landed in CLN-16 | none |

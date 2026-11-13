@@ -210,6 +210,11 @@ Linux and Windows have no Qleaner equivalent (its scan returns immediately there
 CLN-10 adds `leftovers.linux.*` and `leftovers.windows.*` with the same
 confidence model.
 
+| Platform | Catalog ids | Inventory evidence |
+|---|---|---|
+| Linux | `leftovers.linux.config`, `.share`, `.cache` | dpkg, rpm, Flatpak and Snap package/application names |
+| Windows | `leftovers.windows.appdata`, `.localappdata` | Read-only uninstall registry display names and keys |
+
 ## Packages
 
 | Qleaner id | Catalog id | Task | Notes |

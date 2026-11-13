@@ -2287,5 +2287,9 @@
   "Virtual machines": "ماشین‌های مجازی",
   "· Candidates:": "· موارد پیشنهادی:",
   "· Report only": "· فقط گزارش",
-  "· Risk:": "· خطر:"
+  "· Risk:": "· خطر:",
+  "Report only. No files are deleted here.": "فقط گزارش. هیچ فایلی در اینجا حذف نمی‌شود.",
+  "Scanning app leftovers…": "در حال اسکن بقایای برنامه‌ها…",
+  "unreadable paths:": "مسیرهای خوانده‌نشده:",
+  "· Confidence:": "· میزان اطمینان:"
 }

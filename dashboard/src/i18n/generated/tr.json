@@ -2287,5 +2287,9 @@
   "Virtual machines": "Sanal makineler",
   "· Candidates:": "· Adaylar:",
   "· Report only": "· Yalnızca rapor",
-  "· Risk:": "· Risk:"
+  "· Risk:": "· Risk:",
+  "Report only. No files are deleted here.": "Yalnızca rapor. Burada hiçbir dosya silinmez.",
+  "Scanning app leftovers…": "Uygulama kalıntıları taranıyor…",
+  "unreadable paths:": "okunamayan yollar:",
+  "· Confidence:": "· Güven düzeyi:"
 }

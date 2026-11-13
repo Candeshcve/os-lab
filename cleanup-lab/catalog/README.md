@@ -17,6 +17,8 @@ This catalog is read-only detection data, not a list of cleanup targets.
 `signatures/macos-leftovers.json` defines read-only macOS app inventory and
 leftover candidate roots. It is separate from cleanable catalog entries:
 findings have confidence and evidence, and cannot be deleted by this API.
+`signatures/cross-platform-leftovers.json` defines Linux XDG and Windows
+AppData roots for the same report-only confidence model.
 
 | File | Family | Entries |
 |---|---|---|

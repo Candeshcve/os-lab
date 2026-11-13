@@ -6,6 +6,7 @@ import { Empty, PageHead, Section, Status } from "../../components/ui";
 import { api, type CleanupEntry, type CleanupHistory, type CleanupJob, type CleanupPlan, type CleanupResult, type CleanupScan, type CleanupStatus } from "../../lib/api";
 import { localeFromPath, localePath } from "../../i18n/paths";
 import { CleanupExtraTools } from "./extra-tools";
+import { CrossPlatformLeftovers } from "./cross-leftovers";
 
 export type CleanupPageId = "" | "results" | "leftovers" | "history";
 export const CLEANUP_PAGES: CleanupPageId[] = ["", "results", "leftovers", "history"];
@@ -150,13 +151,15 @@ export default function CleanupPage({ page = "" }: { page?: CleanupPageId }) {
               {!latestClean ? <Empty>No clean results yet.</Empty> : latestClean.results.map((item, index) => <div key={index} className="border-b border-(--iux-border) py-3"><strong>{item.entryName} · {item.status}</strong><p translate="no" className="break-all">{item.path}</p><PathSource source={item.source} /><p>{item.reason || item.error}</p>{item.trashPath && <p translate="no" className="break-all">{item.trashPath}</p>}</div>)}
             </Section>
           </>}
-          {page === "leftovers" && <Section title="Leftovers" description="Items that were skipped, failed, or could not be read.">
+          {page === "leftovers" && <><Section title="Leftovers" description="Items that were skipped, failed, or could not be read.">
             {!latestClean && !latestScan ? <Empty>No results yet. Run a scan first.</Empty> : <>
               {latestClean?.results.filter((item) => item.status === "skipped" || item.status === "failed").map((item, index) => <div key={index} className="border-b border-(--iux-border) py-3"><strong>{item.entryName} · {item.status}</strong><p translate="no" className="break-all">{item.path}</p><p>{item.reason || item.error}</p></div>)}
               {latestScan?.entries.filter((item) => item.unreadable.length).map((item) => <div key={item.id} className="py-2"><strong>{item.name}</strong><p>{item.unreadable.length} unreadable paths</p></div>)}
               {!latestClean?.results.some((item) => item.status === "skipped" || item.status === "failed") && !latestScan?.entries.some((item) => item.unreadable.length) && <Empty>No leftovers were reported.</Empty>}
             </>}
-          </Section>}
+          </Section>
+          {(status?.platform?.id === "linux" || status?.platform?.id === "windows") && <CrossPlatformLeftovers />}
+          </>}
           {page === "history" && <Section title="Audit history" description="Verified cleanup runs stored on this computer.">
             {!history?.entries.length ? <Empty>No cleanup runs recorded yet.</Empty> : history.entries.map((entry) => <div key={entry.id} className="border-b border-(--iux-border) py-3"><strong>Run #{entry.id} · {entry.result.mode}</strong><p>{bytes(entry.result.totals.bytes)} · {entry.result.totals.items} items · {entry.result.cancelled ? "cancelled" : "finished"}</p>{entry.result.results.map((item, index) => <p key={index} className="break-all text-sm"><span translate="no">{item.path}</span> · {item.status} · {bytes(item.bytes)}</p>)}</div>)}
           </Section>}

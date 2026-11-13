@@ -147,6 +147,7 @@ export interface Hook {
 
 export interface CleanupStatus {
   state: LabState;
+  platform?: { id: string; label: string; supported: boolean };
   reasons: string[];
   requirements: { id: string; label: string; found: boolean; hint: string; detail: string }[];
   capabilities: { id: string; label: string; found: boolean; detail: string }[];
@@ -198,8 +199,13 @@ export interface CleanupVMInventory {
   unavailable: { id: string; root: string | null; reason: string }[];
 }
 export interface CleanupAuxJob<T> {
-  id: string; kind: "container-prune" | "vm-scan"; state: "running" | "done" | "cancelled" | "failed";
+  id: string; kind: "container-prune" | "vm-scan" | "leftovers"; state: "running" | "done" | "cancelled" | "failed";
   result: T | null; error: string | null;
+}
+export interface CleanupCrossLeftovers {
+  available: boolean; reason?: string; cancelled: boolean;
+  items: { id: string; name: string; path: string; status: string; confidence: number; rule: string; sizeBytes: number; sizeOnDiskBytes: number | null; reportOnly: true }[];
+  inventorySources?: string[]; inventoryErrors?: string[]; unreadable?: string[];
 }
 
 export class ApiError extends Error {
@@ -272,6 +278,7 @@ export const api = {
   cleanupContainerPreview: (actionId: string) => post<CleanupContainerPreview>("/api/cleanup/containers/preview", { actionId }),
   cleanupContainerPrune: (previewId: string) => post<CleanupAuxJob<CleanupContainerResult>>("/api/cleanup/containers/prune", { previewId }),
   cleanupVMScan: () => post<CleanupAuxJob<CleanupVMInventory>>("/api/cleanup/vms/scan"),
+  cleanupCrossLeftovers: () => post<CleanupAuxJob<CleanupCrossLeftovers>>("/api/cleanup/leftovers/scan"),
   cleanupAuxJob: <T>(id: string) => call<CleanupAuxJob<T>>(`/api/cleanup/jobs/${encodeURIComponent(id)}`),
   health: () => call<{ status: string; version: string; console: boolean }>("/api/health"),
   host: () => call<{ host: HostInfo; labs: LabStatus[] }>("/api/host"),

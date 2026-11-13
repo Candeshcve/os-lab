@@ -2287,5 +2287,9 @@
   "Virtual machines": "Máquinas virtuales",
   "· Candidates:": "· Candidatos:",
   "· Report only": "· Solo informe",
-  "· Risk:": "· Riesgo:"
+  "· Risk:": "· Riesgo:",
+  "Report only. No files are deleted here.": "Solo informe. Aquí no se elimina ningún archivo.",
+  "Scanning app leftovers…": "Analizando restos de aplicaciones…",
+  "unreadable paths:": "rutas ilegibles:",
+  "· Confidence:": "· Confianza:"
 }

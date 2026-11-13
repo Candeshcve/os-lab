@@ -2287,5 +2287,9 @@
   "Virtual machines": "الآلات الافتراضية",
   "· Candidates:": "· العناصر المرشحة:",
   "· Report only": "· للعرض فقط",
-  "· Risk:": "· المخاطر:"
+  "· Risk:": "· المخاطر:",
+  "Report only. No files are deleted here.": "للعرض فقط. لا تُحذف أي ملفات هنا.",
+  "Scanning app leftovers…": "جارٍ فحص بقايا التطبيقات…",
+  "unreadable paths:": "مسارات غير قابلة للقراءة:",
+  "· Confidence:": "· مستوى الثقة:"
 }

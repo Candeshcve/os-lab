@@ -51,7 +51,8 @@ PLAN_STATUS = {
 }
 BODY_KEYS = {"scan": SCAN_KEYS, "deep-scan": DEEP_KEYS, "plan": PLAN_KEYS, "clean": CLEAN_KEYS,
              "macos-leftovers": (), "packages": (), "vm-scan": (),
-             "container-preview": CONTAINER_PREVIEW_KEYS, "container-prune": CONTAINER_PRUNE_KEYS}
+              "container-preview": CONTAINER_PREVIEW_KEYS, "container-prune": CONTAINER_PRUNE_KEYS,
+              "leftovers": ()}
 
 
 class CleanupError(ValueError):
@@ -240,6 +241,24 @@ class CleanupJobStore:
         job = CleanupJob("macos-leftovers", {})
         self._register(job)
         return self._spawn(job, self._run_macos_leftovers, (root, job))
+
+    def start_leftovers(self, root):
+        job = CleanupJob("leftovers", {})
+        self._register(job)
+        return self._spawn(job, self._run_leftovers, (root, job))
+
+    def _run_leftovers(self, root, job):
+        try:
+            platform = _module(root, "paths").platform_id()
+            module = "leftovers_macos" if platform == "macos" else "leftovers_cross"
+            result = _module(root, module).scan(root, platform=platform, cancel=job.cancel)
+            job.result = result
+            job.state = "cancelled" if result["cancelled"] else "done"
+        except Exception as exc:
+            job.state = "failed"
+            job.error = "{0}: {1}".format(type(exc).__name__, exc)
+        finally:
+            job.finishedAt = time.time()
 
     def _run_macos_leftovers(self, root, job):
         try:
@@ -613,6 +632,9 @@ class CleanupAPI:
         if path == "/api/cleanup/leftovers/macos/scan":
             _object_body(body, "macos-leftovers")
             return JOBS.start_macos_leftovers(self.root)
+        if path == "/api/cleanup/leftovers/scan":
+            _object_body(body, "leftovers")
+            return JOBS.start_leftovers(self.root)
         if path == "/api/cleanup/deep-scan":
             _object_body(body, "deep-scan")
             return JOBS.start_deep_scan(self.root, body)

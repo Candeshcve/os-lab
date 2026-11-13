@@ -551,6 +551,21 @@ that `com.acme.editor2` and `Acme Editor Pro` do not match `com.acme.editor` or
 and an empty installed inventory returning `unknown`. The console endpoint
 rejects free-form paths and returns a job. All findings are report-only.
 
+## CLN-10 — Linux and Windows leftover signatures
+
+Linux inventory uses fixed argv for dpkg, rpm, Flatpak and Snap and scans
+configured XDG config, share and cache roots. Windows inventory reads uninstall
+registry keys and scans configured AppData roots. Both use CLN-09's confidence
+rules and return report-only findings. Generated fixtures prove exact `firefox`
+and Flatpak id matches, a `firefox-old` near miss, an inventory failure yielding
+`unknown`, and Windows `Acme Editor` versus `Acme Editor Pro`. Console tests
+reject free-form paths on the general typed scan endpoint.
+After merging master, the engine suite passed 154 tests and the console
+contract passed 16. The Linux/Windows dashboard panel shows report-only
+findings and inventory uncertainty; its browser test checks the typed request,
+unknown status and absence of a delete action. Dashboard type, translation,
+build and browser checks pass with all seven translated catalogs updated.
+
 ## CLN-07 — deep project sweep and Xcode simulators
 
 The sweep accepts configured root ids, scans read-only, checks project marker

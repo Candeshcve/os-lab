@@ -87,6 +87,33 @@ test("container pruning needs a preview and VM inventory stays report only", asy
   expect(posts.find((call) => call.path === "/api/cleanup/vms/scan")?.body).toEqual({});
 });
 
+test("Linux app leftovers show inventory uncertainty without a delete action", async ({ page }) => {
+  const posts: { path: string; body: Record<string, unknown> }[] = [];
+  await page.route("**/api/**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    const body = route.request().postDataJSON?.() ?? {};
+    if (route.request().method() === "POST") posts.push({ path, body });
+    let data: unknown = {};
+    if (path === "/api/cleanup/status") data = { state: "ready", platform: { id: "linux", label: "Linux", supported: true }, reasons: [], requirements: [], capabilities: [] };
+    else if (path === "/api/cleanup/catalog") data = { platform: "linux", entries: [] };
+    else if (path === "/api/cleanup/jobs") data = { jobs: [] };
+    else if (path === "/api/cleanup/leftovers/scan") data = { id: "job-leftovers", kind: "leftovers", state: "running", result: null, error: null };
+    else if (path === "/api/cleanup/jobs/job-leftovers") data = { id: "job-leftovers", kind: "leftovers", state: "done", result: { available: true, cancelled: false, inventorySources: ["dpkg"], inventoryErrors: ["flatpak: inventory command failed"], unreadable: [], items: [{ id: "leftovers.linux.cache", name: "Acme", path: "/tmp/acme", status: "unknown", confidence: 0, rule: "inventory-incomplete", sizeBytes: 42, sizeOnDiskBytes: 42, reportOnly: true }] }, error: null };
+    else if (path === "/api/host") data = { host: { os: "linux", osPretty: "Linux", arch: "amd64", hostname: "test", cpus: 8, memory: 0, disk: null, kvm: { present: false, usable: false }, wsl: { guest: false, distributions: [] }, runtime: null, xcode: null, python: "3.12", root: "/tmp", tools: [], providers: [] }, labs: [] };
+    else if (path === "/api/health") data = { status: "ok", version: "test", console: true };
+    else if (path === "/api/jobs") data = { jobs: [] };
+    else if (path === "/api/logs") data = { logs: [] };
+    await route.fulfill({ json: data });
+  });
+  await page.goto("/cleanup/leftovers/");
+  await page.getByRole("button", { name: "Scan", exact: true }).click();
+  await expect(page.getByText("flatpak: inventory command failed")).toBeVisible();
+  await expect(page.getByText("/tmp/acme")).toBeVisible();
+  await expect(page.getByText("unknown", { exact: true })).toBeVisible();
+  expect(posts.find((call) => call.path === "/api/cleanup/leftovers/scan")?.body).toEqual({});
+  await expect(page.locator("section").filter({ hasText: "Report only. No files are deleted here." }).getByRole("button", { name: /delete|clean/i })).toHaveCount(0);
+});
+
 test("public cleanup route has no engine controls", async ({ page }) => {
   test.skip(!process.env.OSLAB_PAGES_TEST, "run against a Pages build");
   let apiCalls = 0;

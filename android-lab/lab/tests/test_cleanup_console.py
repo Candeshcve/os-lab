@@ -481,6 +481,18 @@ def test_macos_leftover_job_accepts_no_paths(monkeypatch):
     assert job.result["available"] is False
     assert job.result["items"] == []
 
+
+def test_cross_platform_leftover_job_rejects_paths(monkeypatch):
+    from cleanup_lab import paths
+    monkeypatch.setattr(paths, "platform_id", lambda: "unsupported")
+    api = cleanup_api.CleanupAPI(REPO_ROOT)
+    with pytest.raises(cleanup_api.CleanupError) as refused:
+        api.post("/api/cleanup/leftovers/scan", {"path": "/tmp"})
+    assert refused.value.status == 400
+    job = api.post("/api/cleanup/leftovers/scan", {})
+    wait_for(job, "done")
+    assert job.result["available"] is False
+
 def test_deep_sweep_request_uses_configured_root_ids(tmp_path, monkeypatch):
     monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.setenv("USERPROFILE", str(tmp_path))
