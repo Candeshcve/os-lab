@@ -215,6 +215,25 @@ the catalog as a scanned, privilege-flagged Linux path.
 with guidance and reports `applicable: False` elsewhere. The `/cleanup/`
 privileged card is the dashboard layer's part.
 
+## Relocation
+
+CLN-27 relocates a catalog entry to another volume behind a symlink:
+[[cleanup-lab/engine/cleanup_lab/relocation.py]] classifies seven link states
+and plans move, restore, relink and resume.
+
+The fixed order — copy → verify (file count + bytes) → rename the original
+aside → symlink → verify the link → remove the set-aside original — leaves
+either the original or a verified copy at every step. The page sends a catalog
+entry id and a destination volume from CLN-28's inventory (`GET
+/api/cleanup/relocation` lists both); the store is
+`<volume>/oslab-caches/<entry id>`, the pair passes `safety.validate_copy`, the
+owning application must not be running, and there is no elevated fallback. An
+interrupted move is flagged in the status and continued by a typed resume that
+re-verifies the store copy before touching the aside. `POST
+/api/cleanup/relocation/plan` and `POST /api/cleanup/relocation/run` follow the
+typed preview → single-use job pattern and are audited. The `/cleanup/`
+relocation card is the dashboard layer's part.
+
 ## Dashboard pages
 
 [[dashboard/src/views/cleanup/pages.tsx]] renders the compact default dashboard at
@@ -286,7 +305,7 @@ The engine tests run under `unittest` from the engine folder.
 `cd cleanup-lab/engine && python3 -m unittest discover -s tests -p 'test_*.py'`
 covers the probe, the catalog, the scan, plan → clean (guard, fingerprints,
 Trash by default, honest failures), the path rules, the CLI exit codes, the
-volume inventory and the privileged actions.
+volume inventory, the privileged actions and the relocation executor.
 Tests live in [[cleanup-lab/engine/tests]]; the console's typed job contract is
 covered by [[android-lab/lab/tests/test_cleanup_console.py]]. [[scripts/run-tests.sh]]
 runs the same suites next to the reference code tests, the Android suite, `bash -n`,
