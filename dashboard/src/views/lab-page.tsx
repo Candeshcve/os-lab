@@ -23,6 +23,7 @@ import { AppShell, LAB_ICON } from "../shell/app-shell";
 import { TopBar } from "../shell/top-bar";
 import { ShellSnippet } from "../apk-lab/components";
 import { Badge, Empty, EndpointList, Field, PageHead, Section, Skeleton, Status } from "../components/ui";
+import { SimulatorPanel } from "./ios-simulator";
 import { stateBadge } from "./host-page";
 import {
   ago,
@@ -457,6 +458,8 @@ function LiveLabPage({ lab: labId }: { lab: LabId }) {
   const label = lab?.label ?? labId;
   const actions = new Map((lab?.actions ?? []).map((a) => [a.id, a]));
   const ref = REFERENCE[labId];
+  // The ready iOS Simulator gets a device frame panel instead of plain start/stop buttons.
+  const simulator = labId === "ios" && lab?.provider === "native-macos" && lab.state === "ready";
 
   return (
     <AppShell activeId={`lab-${labId}`}>
@@ -509,6 +512,8 @@ function LiveLabPage({ lab: labId }: { lab: LabId }) {
                 />
               ) : null}
 
+              {simulator ? <SimulatorPanel onPreview={(action, extra) => void preview(action, extra)} /> : null}
+
               {lab.state === "unavailable" ? (
                 <Section title="Run it elsewhere" description={`On a supported host, these commands run from the os-lab checkout (${ref.where}).`}>
                   <div className="flex flex-col gap-3">
@@ -555,7 +560,10 @@ function LiveLabPage({ lab: labId }: { lab: LabId }) {
                           </Field>
                         ) : null}
                         {ACTION_GROUPS.map((group) => {
-                          const items = group.ids.map((id) => actions.get(id)).filter(Boolean);
+                          const items = group.ids
+                            .filter((id) => !(simulator && (id === "start" || id === "stop")))
+                            .map((id) => actions.get(id))
+                            .filter(Boolean);
                           if (!items.length) return null;
                           return (
                             <div key={group.title}>

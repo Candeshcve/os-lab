@@ -28,6 +28,13 @@ and [[ios-lab/mac/stop-simulator.sh]], and Appium [[ios-lab/mac/appium.sh]];
 device presets in [[ios-lab/mac/profiles]]. `labctl` refuses the Ubuntu path on
 macOS — see [[labctl#Lab dispatch]].
 
+The dashboard's simulator panel (see [[dashboard]]) drives the same scripts:
+`start` accepts a `device` (a UDID or unique name, validated against
+`xcrun simctl` by the console) so the panel can boot the device picked in its
+frame, and read-only `/api/labs/ios/simulator` and
+`/api/labs/ios/screenshot` endpoints feed the panel's device list and live
+screen.
+
 ## Research
 
 The top iOS-in-Docker options, networking and operational limits.

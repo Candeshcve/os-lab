@@ -28,6 +28,7 @@ import shutil
 import signal
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import uuid
@@ -141,8 +142,8 @@ ACTION_INFO = {
 
 # On the native Mac path "start" and "stop" drive the iOS Simulator, not a container stack.
 NATIVE_SIMULATOR_INFO = {
-    "start": ("Start iOS Simulator", "Boot the configured iOS Simulator device on this Mac."),
-    "stop": ("Stop iOS Simulator", "Shut the iOS Simulator down."),
+    "start": ("Start iOS Simulator", "Boot an installed iOS Simulator device on this Mac."),
+    "stop": ("Stop iOS Simulator", "Shut every booted iOS Simulator down."),
 }
 
 # Offered while a required dependency is missing: install it, install Appium, or run the preflight.
@@ -279,6 +280,86 @@ def xcode_status() -> dict:
     code, output = _capture(["xcrun", "simctl", "list", "runtimes"], timeout=10)
     ios_runtime = code == 0 and any(line.startswith("iOS ") for line in output.splitlines())
     return {"installed": installed, "iosRuntime": ios_runtime, "iosDevice": ios_device}
+
+
+# ── iOS Simulator panel (native macOS) ───────────────────────────────────────
+
+UDID = re.compile(r"^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$")
+
+
+def _simctl_json(args: list[str]) -> dict:
+    """`xcrun simctl list -j …` as a dict, or {} when simctl is missing, slow or fails."""
+    if host_os() != "macos" or not _which("xcrun"):
+        return {}
+    code, output = _capture(["xcrun", "simctl"] + args, timeout=15)
+    try:
+        return json.loads(output) if code == 0 else {}
+    except ValueError:
+        return {}
+
+
+def ios_simulator(root: str) -> dict:
+    """Simulator panel data for the iOS Lab: installed devices, runtimes and what is booted."""
+    devices_json = _simctl_json(["list", "-j", "devices"])
+    if not devices_json:
+        return {"available": False, "reason": "Xcode and its simulator tooling are not usable on this Mac",
+                "devices": [], "runtimes": [], "booted": [], "configuredDevice": None}
+    runtimes_json = _simctl_json(["list", "-j", "runtimes"])
+    runtimes = {r.get("identifier", ""): r.get("name") or f"iOS {r.get('version', '')}"
+                for r in runtimes_json.get("runtimes", []) if "iOS" in r.get("name", "")}
+    devices = []
+    for runtime, entries in devices_json.get("devices", {}).items():
+        if "iOS" not in runtime:
+            continue
+        for d in entries:
+            if not d.get("isAvailable", True):
+                continue
+            devices.append({"udid": d.get("udid", ""), "name": d.get("name", ""),
+                            "runtime": runtimes.get(runtime, runtime), "state": d.get("state", "")})
+    devices.sort(key=lambda d: (d["name"], d["runtime"]))
+    config = env_entries(_read(os.path.join(root, "ios-lab", "mac", "config.env")))
+    return {"available": True, "reason": None, "devices": devices,
+            "runtimes": sorted(set(runtimes.values())),
+            "booted": [d for d in devices if d["state"] == "Booted"],
+            "configuredDevice": config.get("SIM_DEVICE") or None}
+
+
+def ios_screenshot() -> bytes:
+    """A PNG of the booted simulator's screen. Raises PlanError when nothing is booted."""
+    code, output = _capture(["xcrun", "simctl", "list", "devices"], timeout=15)
+    if code != 0 or not any("Booted" in line for line in output.splitlines()):
+        raise PlanError("No iOS Simulator is booted; attach one first")
+    fd, path = tempfile.mkstemp(suffix=".png")
+    try:
+        os.close(fd)
+        code, output = _capture(["xcrun", "simctl", "io", "booted", "screenshot", "--type=png", path], timeout=30)
+        if code != 0:
+            raise PlanError("Could not take a simulator screenshot: " + output.strip()[:200])
+        with open(path, "rb") as f:
+            png = f.read()
+        if not png.startswith(b"\x89PNG"):
+            raise PlanError("The simulator screenshot was not a readable PNG")
+        return png
+    finally:
+        try:
+            os.unlink(path)
+        except OSError:
+            pass
+
+
+def _validated_ios_device(root: str, device: str) -> dict:
+    """A device record from the simulator panel: exact UDID, or a name that names exactly one device."""
+    info = ios_simulator(root)
+    if not info["available"]:
+        raise PlanError(info["reason"] or "The simulator tooling is not usable on this Mac")
+    if any(d["udid"] == device for d in info["devices"]):
+        return next(d for d in info["devices"] if d["udid"] == device)
+    by_name = [d for d in info["devices"] if d["name"] == device]
+    if len(by_name) == 1:
+        return by_name[0]
+    if len(by_name) > 1:
+        raise PlanError("Several installed devices share that name; pick one in the simulator panel")
+    raise PlanError("That simulator device is not installed on this Mac")
 
 
 def host_info(root: str) -> dict:
@@ -664,7 +745,15 @@ def plan(root: str, request: dict, host: dict | None = None) -> dict:
     if distro is not None and (not isinstance(distro, str) or len(distro) > 128 or distro.startswith("-")
                                or any(c in distro for c in "\r\n\0")):
         raise PlanError("Invalid WSL distribution")
-    for key in ("cpus", "ram", "disk", "device"):
+    device = request.get("device")
+    ios_attach = lab == "ios" and action == "start" and provider == "native-macos"
+    if device not in (None, ""):
+        # A device picks the simulator the start action boots; resize uses one for Android's emulator.
+        if not ios_attach and action != "resize":
+            raise PlanError("Resource parameters are only accepted by resize")
+        if not isinstance(device, str) or len(device) > 128 or any(c in device for c in "\r\n\0"):
+            raise PlanError("Invalid simulator device")
+    for key in ("cpus", "ram", "disk"):
         if request.get(key) not in (None, "") and action != "resize":
             raise PlanError("Resource parameters are only accepted by resize")
     if request.get("backup"):
@@ -685,10 +774,15 @@ def plan(root: str, request: dict, host: dict | None = None) -> dict:
             "stop": ("stop-simulator.sh", None), "appium-install": ("appium.sh", "install"), "appium-start": ("appium.sh", "start"),
             "appium-stop": ("appium.sh", "stop"),
         }[action]
+        selected = []
+        if action == "start" and device not in (None, ""):
+            picked = _validated_ios_device(root, device)
+            selected = ["--device", picked["udid"]]
+            effects.append(f"Boots the iOS Simulator device {picked['name']} ({picked['runtime']}) on this Mac.")
         path = _scoped(root, "ios-lab", "mac", script)
         if not os.path.isfile(path):
             raise PlanError("Provider script is missing: ios-lab/mac/" + script)
-        program, args = "bash", [path] + ([extra] if extra else [])
+        program, args = "bash", [path] + ([extra] if extra else []) + selected
         privileged = False
         timeout = 3600 if action == "setup" else 1800 if action == "appium-install" else 300
     else:
