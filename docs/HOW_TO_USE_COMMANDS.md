@@ -530,7 +530,7 @@ From android-lab/lab: `.\lab.ps1 COMMAND [parameters]`.
 
 Accepted commands (from the actual ValidateSet):
 
-"help", "preflight", "setup", "vbox-create", "vbox-download-iso", "vbox-start", "vbox-autoinstall", "vbox-deploy-android", "vbox-stop", "vbox-status", "podman-status", "mobsf-status", "mobsf-start", "mobsf-scan", "wf1", "wf2", "hook", "report", "clean", "monitor", "telemetry", "dump-sandbox", "scan-secrets", "trace-crypto", "parse-flows", "analyze-app", "generate-report", "fuzz-ipc", "patch-apk", "agentic-plan", "ui"
+"help", "preflight", "win-preflight", "setup", "vbox-create", "vbox-download-iso", "vbox-start", "vbox-autoinstall", "vbox-deploy-android", "vbox-stop", "vbox-status", "podman-status", "mobsf-status", "mobsf-start", "mobsf-scan", "wf1", "wf2", "hook", "report", "clean", "monitor", "telemetry", "dump-sandbox", "scan-secrets", "trace-crypto", "parse-flows", "analyze-app", "generate-report", "fuzz-ipc", "patch-apk", "agentic-plan", "ui"
 
 Parameters (names/types only; values are supplied by the operator):
 
@@ -548,6 +548,7 @@ Parameters (names/types only; values are supplied by the operator):
 - `string $Iso`
 - `switch $Gui`
 - `string $Distro`
+- `switch $Json`
 
 ## Configuration keys: `win-lab/.env.example`
 
