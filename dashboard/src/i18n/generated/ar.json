@@ -2366,5 +2366,7 @@
   "Frame": "إطار",
   "Screenshot": "لقطة شاشة",
   "Simulator screen": "شاشة المحاكي",
-  "The simulator tooling is not usable on this Mac.": "أدوات المحاكي غير قابلة للاستخدام على هذا الـ Mac."
+  "The simulator tooling is not usable on this Mac.": "أدوات المحاكي غير قابلة للاستخدام على هذا الـ Mac.",
+  "Automation": "الأتمتة",
+  "Install idb": "تثبيت idb"
 }

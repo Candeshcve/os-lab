@@ -2366,5 +2366,7 @@
   "Frame": "قاب",
   "Screenshot": "تصویر صفحه",
   "Simulator screen": "صفحه شبیه‌ساز",
-  "The simulator tooling is not usable on this Mac.": "ابزارهای شبیه‌ساز روی این مک قابل استفاده نیستند."
+  "The simulator tooling is not usable on this Mac.": "ابزارهای شبیه‌ساز روی این مک قابل استفاده نیستند.",
+  "Automation": "اتوماسیون",
+  "Install idb": "نصب idb"
 }

@@ -2366,5 +2366,7 @@
   "Frame": "Rahmen",
   "Screenshot": "Screenshot",
   "Simulator screen": "Simulator-Bildschirm",
-  "The simulator tooling is not usable on this Mac.": "Die Simulator-Werkzeuge sind auf diesem Mac nicht nutzbar."
+  "The simulator tooling is not usable on this Mac.": "Die Simulator-Werkzeuge sind auf diesem Mac nicht nutzbar.",
+  "Automation": "Automatisierung",
+  "Install idb": "idb installieren"
 }
