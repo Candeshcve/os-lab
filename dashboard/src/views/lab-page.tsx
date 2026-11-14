@@ -50,10 +50,17 @@ const REFERENCE: Record<LabId, { check: string; setup: string; where: string }> 
 };
 
 const ACTION_GROUPS: { title: string; ids: string[] }[] = [
-  { title: "Lifecycle", ids: ["start", "stop", "restart", "appium-install", "appium-start", "appium-stop"] },
+  { title: "Lifecycle", ids: ["start", "stop", "restart"] },
+  { title: "Automation", ids: ["appium-install", "appium-start", "appium-stop", "idb-install", "idb-start", "idb-stop", "xcuitest-smoke"] },
   { title: "Inspect", ids: ["status", "doctor", "urls", "logs", "monitor"] },
   { title: "Maintenance", ids: ["backup", "service-install", "service-uninstall"] }
 ];
+
+/** Optional dependencies that have a one-click install action, keyed by requirement id. */
+const OPTIONAL_INSTALLS: Record<string, { action: string; label: string }> = {
+  appium: { action: "appium-install", label: "Install Appium" },
+  idb: { action: "idb-install", label: "Install idb" }
+};
 
 /** Scripts print `##PROGRESS n/total label` per step; the last one drives the bar and the lines stay out of the output. */
 const PROGRESS = /^##PROGRESS (\d+)\/(\d+) (.*)$/;
@@ -82,9 +89,9 @@ function Requirements({ lab, onInstall }: { lab: LabStatus; onInstall?: (action:
             {r.label}
             {!r.found && r.hint ? <span className="block text-xs text-(--iux-muted-foreground)">{r.hint}</span> : null}
           </span>
-          {!r.found && r.id === "appium" && onInstall && lab.actions.some((a) => a.id === "appium-install") ? (
-            <button type="button" className="iux-btn" onClick={() => onInstall("appium-install")}>
-              Install Appium
+          {!r.found && OPTIONAL_INSTALLS[r.id] && onInstall && lab.actions.some((a) => a.id === OPTIONAL_INSTALLS[r.id]!.action) ? (
+            <button type="button" className="iux-btn" onClick={() => onInstall(OPTIONAL_INSTALLS[r.id]!.action)}>
+              {OPTIONAL_INSTALLS[r.id]!.label}
             </button>
           ) : null}
           <Badge tone={r.found ? "success" : r.required ? "danger" : undefined}>
