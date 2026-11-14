@@ -4,9 +4,10 @@
 |---|---|
 | Task | PENT-17 (MYO062) |
 | Author | Hamza Arda Karabacak (`frudotz`) |
-| Branch | `feat/extension-exfil-analyzer` (base `90f571f6`) |
-| Deliverables | `scripts/analysis/ext_exfil.py` (v1.1.0), `scripts/analysis/tests/test_ext_exfil.py`, this `REPORT.md` |
-| Demo video | [`PENT-17-demo.mp4`](PENT-17-demo.mp4): 2:47 live recording of the current v1.1.0 (149 tests passing, clean fixture exit 0, flagged fixture exit 1, robustness fixture exit 0). No personal paths on screen. See §7. |
+| Branch | `feat/extension-exfil-analyzer` (developed and verified on base `90f571f6`; rebased onto `c4a2592a`) |
+| Deliverables | [`scripts/analysis/ext_exfil.py`](../../../scripts/analysis/ext_exfil.py) (v1.1.0), [`scripts/analysis/tests/test_ext_exfil.py`](../../../scripts/analysis/tests/test_ext_exfil.py), this report (`docs/tasks/PENT-17/REPORT.md`) |
+| Reservation | [`reservations/PENT-17.json`](../../../reservations/PENT-17.json) |
+| Demo video | [`PENT-17-demo.mp4`](../../../PENT-17-demo.mp4): 2:47 live recording of the current v1.1.0 (149 tests passing, clean fixture exit 0, flagged fixture exit 1, robustness fixture exit 0). No personal paths on screen. See §7. |
 
 ## 1. Scope
 
@@ -274,10 +275,11 @@ The runner was left unchanged to keep the change within PENT-17.
 |---|---|
 | `scripts/analysis/ext_exfil.py` | new (1717 lines, v1.1.0) |
 | `scripts/analysis/tests/test_ext_exfil.py` | new (1381 lines, 90 test functions → 149 collected cases) |
-| `REPORT.md` | new |
+| `docs/tasks/PENT-17/REPORT.md` | new |
 | `PENT-17-demo.mp4` | new; replaced in the privacy pass with a redacted v1.1.0 recording (SHA-256 `88c0884e…498a`, 4,383,865 bytes) |
 
-No tracked file is modified. `reservations/PENT-17.json` is unchanged.
+No other tracked file is modified, except `reservations/PENT-17.json`, whose `pr` field
+links the delivery PR (#174).
 
 ## 6. Review findings and their resolution
 
