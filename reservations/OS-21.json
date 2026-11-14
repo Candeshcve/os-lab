@@ -1,7 +1,9 @@
 {
   "task": "OS-21",
-  "status": "reserved",
-  "pr": "",
-  "course": "BGT208",
+  "name": "Bekircan Demirkıran",
+  "github": "Candeshcve",
+  "status": "completed",
+  "pr": "#182",
+  "course": "MYO203",
   "note": "Vize Projesi - OS-21"
 }
