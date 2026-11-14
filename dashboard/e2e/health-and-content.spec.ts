@@ -139,7 +139,9 @@ test("setup is offered only when a required dependency is missing", async ({ pag
   await mockApi(page, "macos", { ios: { actions: [setup], requirements: [found] } });
   await page.goto("/labs/ios/");
   await expect(page.getByRole("button", { name: "Install dependencies" })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Dependencies" })).toBeVisible();
+  // Every requirement is found: the card would only repeat success badges, so it stays hidden.
+  await expect(page.getByRole("heading", { name: "Dependencies" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Actions" })).toBeVisible();
 });
 
 test("a missing required dependency offers setup", async ({ page }) => {

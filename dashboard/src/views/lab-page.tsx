@@ -467,6 +467,10 @@ function LiveLabPage({ lab: labId }: { lab: LabId }) {
   const ref = REFERENCE[labId];
   // The ready iOS Simulator gets a device frame panel instead of plain start/stop buttons.
   const simulator = labId === "ios" && lab?.provider === "native-macos" && lab.state === "ready";
+  // Every tracked prerequisite is found: the card would only repeat success badges, so it yields
+  // its half of the row to the actions. Anything missing keeps the full status list visible.
+  const requirements = lab?.requirements ?? [];
+  const depsInstalled = requirements.length > 0 && requirements.every((r) => r.found);
 
   return (
     <AppShell activeId={`lab-${labId}`}>
@@ -530,27 +534,34 @@ function LiveLabPage({ lab: labId }: { lab: LabId }) {
               ) : (
                 <>
                   <div className="grid gap-6 lg:grid-cols-2">
-                    <Section
-                      icon={<WrenchIcon size={16} />}
-                      title="Dependencies"
-                      description="What this lab needs on this computer."
-                      action={
-                        lab.requirements.some((r) => r.required && !r.found) && actions.has("setup") ? (
-                          <button
-                            type="button"
-                            className={lab.state === "needs-setup" ? "iux-btn bg-[#f36c21] text-white hover:bg-[#fa7b32]" : "iux-btn"}
-                            data-variant={lab.state === "needs-setup" ? undefined : "outline"}
-                            onClick={() => void preview("setup")}
-                          >
-                            Install dependencies
-                          </button>
-                        ) : null
-                      }
-                    >
-                      <Requirements lab={lab} onInstall={(action) => void preview(action)} />
-                    </Section>
+                    {depsInstalled ? null : (
+                      <Section
+                        icon={<WrenchIcon size={16} />}
+                        title="Dependencies"
+                        description="What this lab needs on this computer."
+                        action={
+                          lab.requirements.some((r) => r.required && !r.found) && actions.has("setup") ? (
+                            <button
+                              type="button"
+                              className={lab.state === "needs-setup" ? "iux-btn bg-[#f36c21] text-white hover:bg-[#fa7b32]" : "iux-btn"}
+                              data-variant={lab.state === "needs-setup" ? undefined : "outline"}
+                              onClick={() => void preview("setup")}
+                            >
+                              Install dependencies
+                            </button>
+                          ) : null
+                        }
+                      >
+                        <Requirements lab={lab} onInstall={(action) => void preview(action)} />
+                      </Section>
+                    )}
 
-                    <Section icon={<PlayIcon size={16} />} title="Actions" description="Each action is previewed before it runs.">
+                    <Section
+                      className={depsInstalled ? "lg:col-span-2" : undefined}
+                      icon={<PlayIcon size={16} />}
+                      title="Actions"
+                      description="Each action is previewed before it runs."
+                    >
                       <div className="flex flex-col gap-4">
                         {lab.state === "needs-setup" ? (
                           <p className="text-xs text-(--iux-muted-foreground)">
