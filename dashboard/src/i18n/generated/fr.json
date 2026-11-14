@@ -2368,5 +2368,7 @@
   "Simulator screen": "Écran du simulateur",
   "The simulator tooling is not usable on this Mac.": "Les outils du simulateur ne sont pas utilisables sur ce Mac.",
   "Automation": "Automatisation",
-  "Install idb": "Installer idb"
+  "Install idb": "Installer idb",
+  "Stack": "Stack",
+  "idb": "idb"
 }
