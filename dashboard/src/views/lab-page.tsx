@@ -4,7 +4,7 @@
  * os-lab/lab-page.tsx (PR #174): every action is previewed (exact command, effects, setup
  * prerequisites, privileges) before it runs, and runs as a background job with retained output.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   ArrowClockwiseIcon,
   CheckCircleIcon,
@@ -50,11 +50,28 @@ const REFERENCE: Record<LabId, { check: string; setup: string; where: string }> 
 };
 
 const ACTION_GROUPS: { title: string; ids: string[] }[] = [
-  { title: "Lifecycle", ids: ["start", "stop", "restart"] },
-  { title: "Automation", ids: ["appium-install", "appium-start", "appium-stop", "idb-install", "idb-start", "idb-stop", "xcuitest-smoke"] },
+  { title: "Automation", ids: ["appium-install", "idb-install", "xcuitest-smoke"] },
   { title: "Inspect", ids: ["status", "doctor", "urls", "logs", "monitor"] },
   { title: "Maintenance", ids: ["backup", "service-install", "service-uninstall"] }
 ];
+
+/** Start/stop clusters render as one segmented icon control per tool, titled by what it drives. */
+const SEGMENT_GROUPS: { title: string; ids: string[] }[] = [
+  { title: "Stack", ids: ["start", "stop", "restart"] },
+  { title: "Appium", ids: ["appium-start", "appium-stop"] },
+  { title: "idb", ids: ["idb-start", "idb-stop"] }
+];
+
+/** One icon per segment; start segments keep the primary (orange) affordance. */
+const SEGMENT_ICON: Record<string, ReactNode> = {
+  start: <PlayIcon size={14} weight="fill" />,
+  stop: <StopIcon size={14} />,
+  restart: <ArrowClockwiseIcon size={14} />,
+  "appium-start": <PlayIcon size={14} weight="fill" />,
+  "appium-stop": <StopIcon size={14} />,
+  "idb-start": <PlayIcon size={14} weight="fill" />,
+  "idb-stop": <StopIcon size={14} />
+};
 
 /** Optional dependencies that have a one-click install action, keyed by requirement id. */
 const OPTIONAL_INSTALLS: Record<string, { action: string; label: string }> = {
@@ -577,11 +594,48 @@ function LiveLabPage({ lab: labId }: { lab: LabId }) {
                             </select>
                           </Field>
                         ) : null}
-                        {ACTION_GROUPS.map((group) => {
+                        {SEGMENT_GROUPS.map((group) => {
                           const items = group.ids
                             .filter((id) => !(simulator && (id === "start" || id === "stop")))
                             .map((id) => actions.get(id))
                             .filter(Boolean);
+                          if (!items.length) return null;
+                          return (
+                            <div key={group.title}>
+                              <p className="mb-2 text-xs font-medium text-(--iux-muted-foreground)">{group.title}</p>
+                              {items.length === 1 ? (
+                                // A lone segment (e.g. restart while the simulator panel owns start/stop) keeps a labelled button.
+                                <button
+                                  type="button"
+                                  className="iux-btn"
+                                  data-variant="outline"
+                                  title={items[0]!.description}
+                                  onClick={() => void preview(items[0]!.id)}
+                                >
+                                  {SEGMENT_ICON[items[0]!.id] ?? null} {items[0]!.label}
+                                </button>
+                              ) : (
+                                <div role="group" aria-label={group.title} className="iux-seg">
+                                  {items.map((a) => (
+                                    <button
+                                      key={a!.id}
+                                      type="button"
+                                      title={a!.description}
+                                      aria-label={a!.label}
+                                      data-primary={a!.id.endsWith("start") ? "true" : undefined}
+                                      onClick={() => void preview(a!.id)}
+                                    >
+                                      {SEGMENT_ICON[a!.id] ?? <PlayIcon size={14} weight="fill" />}
+                                      {a!.privileged ? <ShieldWarningIcon size={13} className="text-(--iux-warning)" /> : null}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {ACTION_GROUPS.map((group) => {
+                          const items = group.ids.map((id) => actions.get(id)).filter(Boolean);
                           if (!items.length) return null;
                           return (
                             <div key={group.title}>
@@ -591,8 +645,8 @@ function LiveLabPage({ lab: labId }: { lab: LabId }) {
                                   <button
                                     key={a!.id}
                                     type="button"
-                                    className={a!.id === "start" ? "iux-btn bg-[#f36c21] text-white hover:bg-[#fa7b32]" : "iux-btn"}
-                                    data-variant={a!.id === "start" ? undefined : "outline"}
+                                    className="iux-btn"
+                                    data-variant="outline"
                                     title={a!.description}
                                     onClick={() => void preview(a!.id)}
                                   >

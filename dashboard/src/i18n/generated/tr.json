@@ -2368,5 +2368,7 @@
   "Simulator screen": "Simülatör ekranı",
   "The simulator tooling is not usable on this Mac.": "Simülatör araçları bu Mac'te kullanılamıyor.",
   "Automation": "Otomasyon",
-  "Install idb": "idb kur"
+  "Install idb": "idb kur",
+  "Stack": "Yığın",
+  "idb": "idb"
 }

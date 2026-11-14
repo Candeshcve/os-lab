@@ -152,6 +152,28 @@ test("a missing required dependency offers setup", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Install dependencies" })).toBeVisible();
 });
 
+test("start and stop actions render as segmented icon controls under one title", async ({ page }) => {
+  const action = (id: string, label: string) => ({ id, label, description: `Preview ${id}`, privileged: false });
+  await mockApi(page, "linux", {
+    android: {
+      state: "ready", provider: "linux-containers",
+      actions: [action("start", "Start"), action("stop", "Stop"), action("restart", "Restart"),
+                action("appium-start", "Start Appium"), action("appium-stop", "Stop Appium")]
+    }
+  });
+  await page.goto("/labs/android/");
+  const stack = page.getByRole("group", { name: "Stack" });
+  await expect(stack).toBeVisible();
+  await expect(stack.getByRole("button")).toHaveCount(3);
+  await expect(stack.getByRole("button", { name: "Start", exact: true })).toBeVisible();
+  await expect(stack.getByRole("button", { name: "Stop" })).toBeVisible();
+  await expect(stack.getByRole("button", { name: "Restart" })).toBeVisible();
+  const appium = page.getByRole("group", { name: "Appium" });
+  await expect(appium).toBeVisible();
+  await expect(appium.getByRole("button", { name: "Start Appium" })).toBeVisible();
+  await expect(appium.getByRole("button", { name: "Stop Appium" })).toBeVisible();
+});
+
 test("Android run failures are shown next to the action", async ({ page }) => {
   await mockApi(page);
   await page.route("**/api/run", (route) => route.fulfill({ status: 400, json: { error: "Target APK is missing" } }));
