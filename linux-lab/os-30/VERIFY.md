@@ -1,5 +1,28 @@
 # OS-30 verification
 
+## Live UTM verification
+
+On 2026-11-14, İrem Yasav recorded the text audit and SSH permission repair
+on Ubuntu 24.04 ARM64 in UTM using commit `4895a196`.
+
+- `audit` printed the baseline findings. `plan --fix ssh-permissions` previewed
+  changing `/etc/ssh/sshd_config` from mode `0644` to `0600`.
+- `apply --fix ssh-permissions` succeeded after confirmation. `stat` showed
+  mode `0600`.
+- `rollback` of the same run succeeded after its own confirmation. `stat`
+  showed that the file returned to mode `0644`.
+
+[OS-30 live Ubuntu demo (3 min 31 s)](https://drive.google.com/file/d/1j8hTwpRE-_AtCuFvwFiYpqsqCoV64YhK/view?usp=sharing)
+
+## Checks after rebasing onto master
+
+On 2026-11-14, with upstream master at `f04d8707`,
+`python3 -m unittest discover -s linux-lab/tests -v` passed **116/116 tests**
+(exit 0, 22.620 s) on Linux x86_64 with Python 3.12.14. Bash syntax and
+`git diff --check` also passed. The OS-30 implementation and tests match the
+submitted branch before the rebase. `lat check` reported the existing
+paragraph-length error at `lat.md/cleanup-lab.md:237` (exit 1).
+
 ## UFW failure/interruption policy verification (2026-11-14)
 
 Tested tree at execution time: `d5ba261d27a8e50f862a22a3b8602c3fbef18354`
@@ -230,11 +253,6 @@ These results are historical operator-reported evidence, not new executions
 by this agent. Raw audit findings, real account names, addresses/hostnames and
 identifying local paths are not retained in the shared record.
 
-The current version has not been live-verified for text audit, JSON audit or
-read-only planning during this preparation. Live apply and rollback remain
-unverified. The historical JSON success does not verify today's code, and local
-fake-command/PTY tests must not be presented as live Ubuntu verification.
-
 ## Rollback usage and evidence boundary
 
 ```text
@@ -245,14 +263,12 @@ The command requires a valid private schema-2 backup, root, input/output TTYs an
 exact `ROLLBACK OS-30 <run-id>` confirmation. Legacy or incomplete evidence and
 file/timer drift refuse restoration. Unproven UFW state results in partial
 rollback without deleting rules. See
-[the recovery guide](linux-lab/knowledge/hardening.md#explicit-rollback-of-a-completed-run).
+[the recovery guide](../knowledge/hardening.md#explicit-rollback-of-a-completed-run).
 
 The command above is usage documentation, not a live execution result.
 Live apply/rollback require separately reviewed changes and a recoverable lab.
 Do not install pending upgrades or refresh APT metadata as part of audit.
-Video evidence has not been supplied. Any recorded demonstration should clearly
-use synthetic fixtures or sanitized summaries and distinguish reported lab
-checks from mocked apply/rollback evidence. Do not copy raw server audit output
+Use synthetic fixtures or sanitized summaries in recorded demos. Do not copy raw server audit output
 or identifying account, address, hostname, local-path or key material.
 
 ## Pre-commit integration checks (historical, before `bdcc521`)
@@ -289,9 +305,4 @@ Latest pre-delivery checks (after the test-runner cd guard was restored):
 - The full repository runner was not rerun because its existing preparation can
   install dependencies. Historical results above are not new integration results.
 
-No live audit was run during this integration or the local pre-delivery checks.
-An operator reported UTM text/JSON audits and read-only plan execution on
-`bdcc521` on 2026-11-13, as described above; those are separate from local mock tests.
-Current-version live JSON audit, apply and rollback remain unverified. No package installation,
-commit or push was performed. The npx package-access attempt above failed before
-the graph checker could run; it is not a passing graph validation.
+The pre-commit integration checks used fake commands and temporary fixtures.

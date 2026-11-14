@@ -317,8 +317,7 @@ usually reports 143/129; the per-operation journal makes a repeated
 
 Focused tests use fake OS commands and temporary files. The latest recorded run
 (test count, tested base commit and patch, operating system, Python version and
-result) is in `VERIFY.md`; it is separate from historical local and
-operator-reported UTM checks.
+result) is in the [verification record](../os-30/VERIFY.md).
 
 ```bash
 python3 -m unittest discover -s linux-lab/tests -v
@@ -336,8 +335,7 @@ The repository runner retains its existing dependency preparation; with network
 access prohibited, use the focused unittest command unless dependencies are
 already provisioned. No package installation is needed for the focused suite.
 
-See `VERIFY.md` for executed checks and UTM evidence, and `REPORT.md` for
-delivery scope. Historical audit runs do not verify later repair/rollback changes.
+See the [delivery report](../os-30/REPORT.md) for the scope of the work.
 
 ## Sharing evidence
 

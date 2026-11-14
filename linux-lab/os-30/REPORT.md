@@ -1,6 +1,12 @@
 # OS-30 delivery report
 
-## Local submission review (2026-11-14)
+## Submission
+
+The MYO203 submission is [PR #194](https://github.com/keyvanarasteh/os-lab/pull/194).
+The [verification record](VERIFY.md#live-utm-verification) links to the live
+Ubuntu recording and documents the SSH permission repair and rollback.
+
+## Historical local submission review (2026-11-14)
 
 Prepared for owner review on `feat/os-30-delivery`; intended PR target:
 `keyvanarasteh/os-lab:master`. No commit, push, PR, live demo or new video was
@@ -11,16 +17,13 @@ The target fetched on this date is
 `5924675c2edce5f88dbf68b46f3504d8dba2a051`: HEAD is three commits ahead,
 zero behind, with no merge conflict against that target. Before preparation,
 the 12 changed files covered OS-30 code, mock tests, documentation/image and test-runner integration.
-The local reservation now records MYO203 (the repository's Open Source OS
-course mapping) and `in-progress`; no PR URL or completed status is claimed.
+The local reservation recorded MYO203 (the repository's Open Source OS
+course mapping) and `in-progress` at that stage.
 
 The full course `vize/vize-projesi.md` is not present in this checkout and was
 not located through accessible searches. The available
-[student reservation instructions](reservations/README.md#students-midterm)
-require verification and a proof video. No video link has been supplied; course
-acceptance therefore remains pending, as does checking the full course rubric.
-Existing UTM reports and the summary image do not prove live apply/rollback.
-No new live evidence was produced. See [VERIFY.md](VERIFY.md) for current tests.
+[student reservation instructions](../../reservations/README.md#students-midterm)
+require verification and a proof video.
 
 AI assistance: Codex inspected repository history, code and documentation, ran
 local mock/static checks and the repository runner, fixed quoted Ubuntu ID
@@ -37,7 +40,7 @@ metadata. The student must review the changes and understand the implementation 
   records, and documented pending rubric/video evidence.
 - Updated reservation course/status and knowledge-graph runner coverage.
 
-Latest recorded OS-30 result: **116/116, exit code 0** in 53.395s, from
+The recorded macOS OS-30 result was **116/116, exit code 0** in 53.395s, from
 `python3 -m unittest discover -s linux-lab/tests -v`, on `d5ba261d` plus the
 then-uncommitted OS-30 fixes (including the UFW failure/interruption policy).
 This identifies the tested tree at execution time, not the current branch tip.
@@ -158,12 +161,9 @@ Operator-reported Ubuntu 24.04 ARM64 UTM results for `bdcc521`:
   optional stricter mode, not proof of an existing permission FAIL.
 
 These are historical operator-reported checks, supplied for the record and not
-re-executed during this preparation. Raw identifying server output is excluded.
-The current version has no new live text/JSON audit or plan verification; live
-apply and rollback remain unverified. Mock/PTY tests do not establish live
-system behavior. Video evidence has not been supplied.
+re-executed during that preparation. Raw identifying server output is excluded.
 
-Current focused test commands/results are recorded in `VERIFY.md`. Historical
+Focused test commands and results are recorded in `VERIFY.md`. Historical
 local runs are labeled separately and are not presented as new executions.
 
 ## Historical WSL2 focused verification (2026-11-13)

@@ -71,14 +71,15 @@ the backup path reported.
 
 The allowlist and limitations are explained in [[linux-lab/knowledge/hardening.md]].
 [[linux-lab/tests/test_hardening.py]] and [[linux-lab/tests/test_harden_check.py]]
-use command fakes and temporary files, not real host security changes. Actual
-verification and sanitized operator-reported lab summaries are separated in [[VERIFY.md]];
-[[REPORT.md]] records scope and remaining acceptance evidence.
+use command fakes and temporary files.
+
+See [[linux-lab/os-30/VERIFY.md]] for test results and UTM verification.
+[[linux-lab/os-30/REPORT.md]] records the scope of the work.
 
 Completed schema-2 repair manifests record verified post-state for explicit
 `rollback ID`. The same lock and exact consent protect rollback; snapshot and
 post-state drift refuse permission/timer restoration. Only a uniquely tagged,
 proven run-owned UFW addition may be removed, with ambiguous firewall state
 reported as partial recovery. Legacy/incomplete evidence is not trusted.
-Rollback tests are in [[linux-lab/tests/test_rollback.py]] and use only temporary
-files/fake commands; no live Ubuntu rollback is claimed.
+Rollback tests in [[linux-lab/tests/test_rollback.py]] use temporary files
+and fake commands.

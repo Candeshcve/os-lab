@@ -189,7 +189,7 @@ with `plan`; `apply` requires root, TTYs and exact `APPLY OS-30` consent. It nev
 installs pending upgrades, disables SSH authentication or automatically enables UFW.
 The existing `hardening.sh` remains an audit-only entry point. See
 [hardening guidance](knowledge/hardening.md) for preconditions, backup/recovery,
-coverage limits and isolated tests; `VERIFY.md` records actual verification.
+coverage limits and isolated tests.
 
 Completed schema-2 repair runs can be reverted with
 `sudo python3 linux-lab/scripts/harden_check.py rollback <run-id>` inside the
@@ -197,17 +197,17 @@ authorized guest. It previews the changes and requires exact
 `ROLLBACK OS-30 <run-id>` consent. Modified targets and legacy/incomplete backups
 are refused; UFW deletion requires unique run-rule and exact state evidence.
 See the [rollback safety and recovery instructions](knowledge/hardening.md#explicit-rollback-of-a-completed-run).
-Rollback has only mock/temporary-file verification, not live UTM verification.
+The [live UTM demo](os-30/VERIFY.md#live-utm-verification) shows the SSH
+permission repair and rollback.
 
 Run focused offline tests with
-`python3 -m unittest discover -s linux-lab/tests -v`; executed results are in
-`VERIFY.md`. Permission changes such as 0644 -> 0600 are an optional stricter
+`python3 -m unittest discover -s linux-lab/tests -v`. Permission changes such as
+0644 -> 0600 are an optional stricter
 profile: an existing root-owned 0644 config can already pass audit.
 Share only synthetic fixtures or sanitized summaries, not raw server audit output.
 
-Current focused verification: **114 tests passed** using fake system commands
-and temporary files (uncommitted fixes on `bdcc521`, Ubuntu 24.04.3 on WSL2,
-Python 3.12.3); see `VERIFY.md` for commands and evidence limits.
+The [verification record](os-30/VERIFY.md) documents **116 passing tests**
+using fake system commands and temporary files.
 
 ### Salt okunur audit özeti
 
@@ -229,4 +229,4 @@ izin profilidir, mevcut bir FAIL değildir.
 Bu görsel önceki audit çalıştırmalarıyla birleştirilmemelidir; sürüm ve çalışma
 bağlamına göre toplamlar değişebilir. Görsel tek başına JSON çıktısının, canlı
 `apply` veya canlı `rollback` işlemlerinin doğrulandığını göstermez. Mock test
-sonuçları ve doğrulama sınırları için [VERIFY.md](../VERIFY.md) dosyasına bakın.
+sonuçları ve doğrulama sınırları için [VERIFY.md](os-30/VERIFY.md) dosyasına bakın.
